@@ -27,7 +27,7 @@ namespace vre
 		vkDestroyPipelineLayout(mVreDevice.device(), mPipelineLayout, nullptr);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<VreGameObject>& gameObjects)
+	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo)
 	{
 		mVrePipeline->bind(frameInfo.commandBuffer);
 
@@ -40,8 +40,12 @@ namespace vre
 			0, nullptr
 		);
 
-		for (auto& obj : gameObjects)
+		for (auto& objPair : frameInfo.gameObjects)
 		{
+			auto& obj = objPair.second;
+			if (obj.model == nullptr)
+				continue;
+
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();

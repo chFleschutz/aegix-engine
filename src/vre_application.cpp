@@ -98,7 +98,8 @@ namespace vre
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					mGameObjects
 				};
 
 				// update
@@ -109,7 +110,7 @@ namespace vre
 
 				// render
 				mVreRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(frameInfo, mGameObjects);
+				simpleRenderSystem.renderGameObjects(frameInfo);
 				mVreRenderer.endSwapChainRenderPass(commandBuffer);
 				mVreRenderer.endFrame();
 			}
@@ -125,21 +126,21 @@ namespace vre
 		flatVase.model = vreModel;
 		flatVase.transform.translation = { -0.75f, 0.5f, 0.0f };
 		flatVase.transform.scale = glm::vec3{ 3.0f };
-        mGameObjects.push_back(std::move(flatVase));
+        mGameObjects.emplace(flatVase.id(), std::move(flatVase));
 
 		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/smooth_vase.obj");
 		auto smoothVase = VreGameObject::createGameObject();
 		smoothVase.model = vreModel;
 		smoothVase.transform.translation = { 0.75f, 0.5f, 0.0f };
 		smoothVase.transform.scale = glm::vec3{ 3.0f };
-		mGameObjects.push_back(std::move(smoothVase));
+		mGameObjects.emplace(smoothVase.id(), std::move(smoothVase));
 
 		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/plane.obj");
 		auto floor = VreGameObject::createGameObject();
 		floor.model = vreModel;
 		floor.transform.translation = { 0.0f, 0.5f, 0.0f };
 		floor.transform.scale = glm::vec3{ 3.0f };
-		mGameObjects.push_back(std::move(floor));
+		mGameObjects.emplace(floor.id(), std::move(floor));
 	}
 
 } // namespace vre
