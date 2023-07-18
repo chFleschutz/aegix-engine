@@ -3,7 +3,8 @@
 #include "keyboard_movement_controller.h"
 #include "vre_buffer.h"
 #include "vre_camera.h"
-#include "simple_render_system.h"
+#include "systems/simple_render_system.h"
+#include "systems/point_light_system.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -18,7 +19,8 @@ namespace vre
 {
 	struct GlobalUbo
 	{
-		glm::mat4 projectionView{1.0f};
+		glm::mat4 projection{1.0f};
+		glm::mat4 view{1.0f};
 		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
 		glm::vec3 lightPosition{-0.5f, -1.0f, -1.0f};
 		alignas(16) glm::vec4 lightColor{1.0f}; // w is the light intensity
@@ -67,6 +69,7 @@ namespace vre
 		}
 
 		SimpleRenderSystem simpleRenderSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
+		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		VreCamera camera{};
         auto viewerObject = VreGameObject::createGameObject();
@@ -104,13 +107,15 @@ namespace vre
 
 				// update
 				GlobalUbo ubo{};
-				ubo.projectionView = camera.projectionMatrix() * camera.viewMatrix();
+				ubo.projection = camera.projectionMatrix();
+				ubo.view = camera.viewMatrix();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
 				// render
 				mVreRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(frameInfo);
+				pointLightSystem.render(frameInfo);
 				mVreRenderer.endSwapChainRenderPass(commandBuffer);
 				mVreRenderer.endFrame();
 			}
