@@ -75,7 +75,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+//*.obj Do not ignore model.obj files (folder of build.obj files is already ignored) 
 *.iobj
 *.pch
 *.pdb
