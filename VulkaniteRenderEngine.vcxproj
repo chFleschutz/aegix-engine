@@ -140,9 +140,9 @@
       <Message />
     </CustomBuildStep>
     <PostBuildEvent>
-      <Message>
-      </Message>
-      <Command>call "$(ProjectDir)src\shaders\compile.bat" "$(ProjectDir)src\shaders"</Command>
+      <Message>Compiling shaders</Message>
+      <Command>cd $(ProjectDir)shaders
+for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.spv %%f</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,9 +170,9 @@
       <Message />
     </CustomBuildStep>
     <PostBuildEvent>
-      <Message>
-      </Message>
-      <Command>call "$(ProjectDir)src\shaders\compile.bat" "$(ProjectDir)src\shaders"</Command>
+      <Message>Compiling shaders</Message>
+      <Command>cd $(ProjectDir)shaders
+for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.spv %%f</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -196,9 +196,9 @@
       <Message />
     </CustomBuildStep>
     <PostBuildEvent>
-      <Message>
-      </Message>
-      <Command>call "$(ProjectDir)src\shaders\compile.bat" "$(ProjectDir)src\shaders"</Command>
+      <Message>Compiling shaders</Message>
+      <Command>cd $(ProjectDir)shaders
+for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.spv %%f</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -226,9 +226,9 @@
       <Message />
     </CustomBuildStep>
     <PostBuildEvent>
-      <Message>
-      </Message>
-      <Command>call "$(ProjectDir)src\shaders\compile.bat" "$(ProjectDir)src\shaders"</Command>
+      <Message>Compiling shaders</Message>
+      <Command>cd $(ProjectDir)shaders
+for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.spv %%f</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

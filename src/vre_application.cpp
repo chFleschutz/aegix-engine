@@ -88,7 +88,7 @@ namespace vre
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
             float aspect = mVreRenderer.aspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+            camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -121,21 +121,21 @@ namespace vre
 
 	void VreApplication::loadGameObjects()
 	{
-		std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/flat_vase.obj");
+		std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/flat_vase.obj");
         auto flatVase = VreGameObject::createGameObject();
 		flatVase.model = vreModel;
 		flatVase.transform.translation = { -0.75f, 0.5f, 0.0f };
 		flatVase.transform.scale = glm::vec3{ 3.0f };
         mGameObjects.emplace(flatVase.id(), std::move(flatVase));
 
-		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/smooth_vase.obj");
+		vreModel = VreModel::createModelFromFile(mVreDevice, "models/smooth_vase.obj");
 		auto smoothVase = VreGameObject::createGameObject();
 		smoothVase.model = vreModel;
 		smoothVase.transform.translation = { 0.75f, 0.5f, 0.0f };
 		smoothVase.transform.scale = glm::vec3{ 3.0f };
 		mGameObjects.emplace(smoothVase.id(), std::move(smoothVase));
 
-		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/plane.obj");
+		vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
 		auto floor = VreGameObject::createGameObject();
 		floor.model = vreModel;
 		floor.transform.translation = { 0.0f, 0.5f, 0.0f };

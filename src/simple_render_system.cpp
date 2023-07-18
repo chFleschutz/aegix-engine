@@ -94,8 +94,8 @@ namespace vre
 
 		mVrePipeline = std::make_unique<VrePipeline>(
 			mVreDevice,
-			"src/shaders/simple_shader.vert.spv",
-			"src/shaders/simple_shader.frag.spv",
+			"shaders/simple_shader.vert.spv",
+			"shaders/simple_shader.frag.spv",
 			pipelineConfig);
 	}
 
