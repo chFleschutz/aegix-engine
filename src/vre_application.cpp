@@ -18,8 +18,10 @@ namespace vre
 {
 	struct GlobalUbo
 	{
-		alignas(16) glm::mat4 projectionView{1.0f};
-		alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+		glm::mat4 projectionView{1.0f};
+		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
+		glm::vec3 lightPosition{-1.0f};
+		alignas(16) glm::vec4 lightColor{1.0f}; // w is the light intensity
 	};
 
 	VreApplication::VreApplication()
@@ -69,6 +71,7 @@ namespace vre
         camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
         auto viewerObject = VreGameObject::createGameObject();
+		viewerObject.transform.translation.z = -2.0f;
         KeyboardMovementController cameraController{};
 
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -85,7 +88,7 @@ namespace vre
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
             float aspect = mVreRenderer.aspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -118,12 +121,25 @@ namespace vre
 	void VreApplication::loadGameObjects()
 	{
 		std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/flat_vase.obj");
+        auto flatVase = VreGameObject::createGameObject();
+		flatVase.model = vreModel;
+		flatVase.transform.translation = { -1.0f, 0.5f, 0.0f };
+		flatVase.transform.scale = glm::vec3{ 3.0f };
+        mGameObjects.push_back(std::move(flatVase));
 
-        auto gameObject = VreGameObject::createGameObject();
-        gameObject.model = vreModel;
-        gameObject.transform.translation = { 0.0f, 0.5f, 2.5f };
-		gameObject.transform.scale = glm::vec3{ 3.0f };
-        mGameObjects.push_back(std::move(gameObject));
+		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/smooth_vase.obj");
+		auto smoothVase = VreGameObject::createGameObject();
+		smoothVase.model = vreModel;
+		smoothVase.transform.translation = { 1.0f, 0.5f, 0.0f };
+		smoothVase.transform.scale = glm::vec3{ 3.0f };
+		mGameObjects.push_back(std::move(smoothVase));
+
+		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/plane.obj");
+		auto floor = VreGameObject::createGameObject();
+		floor.model = vreModel;
+		floor.transform.translation = { 0.0f, 0.5f, 0.0f };
+		floor.transform.scale = glm::vec3{ 3.0f };
+		mGameObjects.push_back(std::move(floor));
 	}
 
 } // namespace vre
