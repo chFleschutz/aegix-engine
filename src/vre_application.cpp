@@ -20,7 +20,7 @@ namespace vre
 	{
 		glm::mat4 projectionView{1.0f};
 		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
-		glm::vec3 lightPosition{-1.0f};
+		glm::vec3 lightPosition{-0.5f, -1.0f, -1.0f};
 		alignas(16) glm::vec4 lightColor{1.0f}; // w is the light intensity
 	};
 
@@ -54,7 +54,7 @@ namespace vre
 		}
 
 		auto globalSetLayout = VreDescriptorSetLayout::Builder(mVreDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(VreSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -67,11 +67,11 @@ namespace vre
 		}
 
 		SimpleRenderSystem simpleRenderSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
-        VreCamera camera{};
-        camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 2.5f));
 
+		VreCamera camera{};
         auto viewerObject = VreGameObject::createGameObject();
-		viewerObject.transform.translation.z = -2.0f;
+		viewerObject.transform.translation = { 1.0f, -0.5f, -2.0f };
+		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
         KeyboardMovementController cameraController{};
 
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -123,14 +123,14 @@ namespace vre
 		std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/flat_vase.obj");
         auto flatVase = VreGameObject::createGameObject();
 		flatVase.model = vreModel;
-		flatVase.transform.translation = { -1.0f, 0.5f, 0.0f };
+		flatVase.transform.translation = { -0.75f, 0.5f, 0.0f };
 		flatVase.transform.scale = glm::vec3{ 3.0f };
         mGameObjects.push_back(std::move(flatVase));
 
 		vreModel = VreModel::createModelFromFile(mVreDevice, "data/models/smooth_vase.obj");
 		auto smoothVase = VreGameObject::createGameObject();
 		smoothVase.model = vreModel;
-		smoothVase.transform.translation = { 1.0f, 0.5f, 0.0f };
+		smoothVase.transform.translation = { 0.75f, 0.5f, 0.0f };
 		smoothVase.transform.scale = glm::vec3{ 3.0f };
 		mGameObjects.push_back(std::move(smoothVase));
 
