@@ -19,6 +19,7 @@ namespace vre
 		const glm::mat4& projectionMatrix() const { return mProjectionMatrix; }
 		const glm::mat4& viewMatrix() const { return mViewMatrix; }
 		const glm::mat4& inverseViewMatrix() const { return mInverseViewMatrix; }
+		const glm::vec3 position() const { return glm::vec3(mInverseViewMatrix[3]); }
 
 	private:
 		glm::mat4 mProjectionMatrix{ 1.0f };

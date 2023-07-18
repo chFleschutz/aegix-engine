@@ -6,6 +6,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <array>
+#include <map>
 #include <stdexcept>
 
 namespace vre
@@ -49,6 +50,19 @@ namespace vre
 
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
+		// sort lights because of transparency
+		std::map<float, VreGameObject::id_t> sortedLights;
+		for (auto& objPair : frameInfo.gameObjects)
+		{
+			auto& obj = objPair.second;
+			if (obj.pointLight == nullptr) 
+				continue;
+
+			auto offset = frameInfo.camera.position() - obj.transform.translation;
+			float disSquared = glm::dot(offset, offset);
+			sortedLights[disSquared] = obj.id();
+		}
+
 		mVrePipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
@@ -60,11 +74,10 @@ namespace vre
 			0, nullptr
 		);
 
-		for (auto& objPair : frameInfo.gameObjects)
+
+		for (auto it = sortedLights.rbegin(); it != sortedLights.rend(); ++it)
 		{
-			auto& obj = objPair.second;
-			if (obj.pointLight == nullptr)
-				continue;
+			auto& obj = frameInfo.gameObjects.at(it->second);
 
 			PointLightPushConstants push{};
 			push.position = glm::vec4(obj.transform.translation, 1.0f);
@@ -108,6 +121,7 @@ namespace vre
 
 		PipelineConfigInfo pipelineConfig{};
 		VrePipeline::defaultPipelineConfigInfo(pipelineConfig);
+		VrePipeline::enableAlphaBlending(pipelineConfig);
 		pipelineConfig.bindingDescriptions.clear();
 		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
