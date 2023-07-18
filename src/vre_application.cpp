@@ -82,7 +82,7 @@ namespace vre
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
             float aspect = mVreRenderer.aspectRatio();
-            camera.setPerspectiveProjection(glm::radians(60.0f), aspect, 0.1f, 100.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -100,6 +100,7 @@ namespace vre
 				GlobalUbo ubo{};
 				ubo.projection = camera.projectionMatrix();
 				ubo.view = camera.viewMatrix();
+				ubo.inverseView = camera.inverseViewMatrix();
 
 				pointLightSystem.update(frameInfo, ubo);
 				
@@ -109,6 +110,7 @@ namespace vre
 				// render
 				mVreRenderer.beginSwapChainRenderPass(commandBuffer);
 				
+				// render solid objects first
 				simpleRenderSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
 				

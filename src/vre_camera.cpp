@@ -50,6 +50,20 @@ namespace vre
 		mViewMatrix[3][0] = -glm::dot(u, position);
 		mViewMatrix[3][1] = -glm::dot(v, position);
 		mViewMatrix[3][2] = -glm::dot(w, position);
+
+		mInverseViewMatrix = glm::mat4{ 1.f };
+		mInverseViewMatrix[0][0] = u.x;
+		mInverseViewMatrix[0][1] = u.y;
+		mInverseViewMatrix[0][2] = u.z;
+		mInverseViewMatrix[1][0] = v.x;
+		mInverseViewMatrix[1][1] = v.y;
+		mInverseViewMatrix[1][2] = v.z;
+		mInverseViewMatrix[2][0] = w.x;
+		mInverseViewMatrix[2][1] = w.y;
+		mInverseViewMatrix[2][2] = w.z;
+		mInverseViewMatrix[3][0] = position.x;
+		mInverseViewMatrix[3][1] = position.y;
+		mInverseViewMatrix[3][2] = position.z;
 	}
 
 	void VreCamera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up)
@@ -81,6 +95,20 @@ namespace vre
 		mViewMatrix[3][0] = -glm::dot(u, position);
 		mViewMatrix[3][1] = -glm::dot(v, position);
 		mViewMatrix[3][2] = -glm::dot(w, position);
+
+		mInverseViewMatrix = glm::mat4{ 1.f };
+		mInverseViewMatrix[0][0] = u.x;
+		mInverseViewMatrix[0][1] = u.y;
+		mInverseViewMatrix[0][2] = u.z;
+		mInverseViewMatrix[1][0] = v.x;
+		mInverseViewMatrix[1][1] = v.y;
+		mInverseViewMatrix[1][2] = v.z;
+		mInverseViewMatrix[2][0] = w.x;
+		mInverseViewMatrix[2][1] = w.y;
+		mInverseViewMatrix[2][2] = w.z;
+		mInverseViewMatrix[3][0] = position.x;
+		mInverseViewMatrix[3][1] = position.y;
+		mInverseViewMatrix[3][2] = position.z;
 	}
 
 } // namespace vre
