@@ -62,4 +62,14 @@ namespace vre
 			}};
 	}
 
+	VreGameObject VreGameObject::makePointLight(float intensity, float radius, glm::vec3 color)
+	{
+		VreGameObject gameObj = VreGameObject::createGameObject();
+		gameObj.color = color;
+		gameObj.transform.scale.x = radius;
+		gameObj.pointLight = std::make_unique<PointLightComponent>();
+		gameObj.pointLight->lightIntensity = intensity;
+		return gameObj;
+	}
+
 } // namespace vre

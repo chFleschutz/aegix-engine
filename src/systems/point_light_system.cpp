@@ -10,7 +10,14 @@
 
 namespace vre
 {
-	PointLightSystem::PointLightSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{device}
+	struct PointLightPushConstants
+	{
+		glm::vec4 position{};
+		glm::vec4 color{};
+		float radius;
+	};
+
+	PointLightSystem::PointLightSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{ device }
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
@@ -19,6 +26,25 @@ namespace vre
 	PointLightSystem::~PointLightSystem()
 	{
 		vkDestroyPipelineLayout(mVreDevice.device(), mPipelineLayout, nullptr);
+	}
+
+	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
+	{
+		int lighIndex = 0;
+		for (auto& objPair : frameInfo.gameObjects)
+		{
+			auto& obj = objPair.second;
+			if (obj.pointLight == nullptr)
+				continue;
+
+			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
+
+			ubo.pointLights[lighIndex].position = glm::vec4(obj.transform.translation, 1.0f);
+			ubo.pointLights[lighIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			lighIndex++;
+		}
+
+		ubo.numLights = lighIndex;
 	}
 
 	void PointLightSystem::render(FrameInfo& frameInfo)
@@ -34,15 +60,34 @@ namespace vre
 			0, nullptr
 		);
 
-		vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		for (auto& objPair : frameInfo.gameObjects)
+		{
+			auto& obj = objPair.second;
+			if (obj.pointLight == nullptr)
+				continue;
+
+			PointLightPushConstants push{};
+			push.position = glm::vec4(obj.transform.translation, 1.0f);
+			push.color = glm::vec4(obj.color, 1.0f);
+			push.radius = obj.transform.scale.x;
+
+			vkCmdPushConstants(
+				frameInfo.commandBuffer,
+				mPipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(PointLightPushConstants),
+				&push);
+			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		}
 	}
 
 	void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
-		//VkPushConstantRange pushConstantRange{};
-		//pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		//pushConstantRange.offset = 0;
-		//pushConstantRange.size = sizeof(SimplePushConstantData);
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(PointLightPushConstants);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{globalSetLayout};
 
@@ -50,8 +95,8 @@ namespace vre
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 		if (vkCreatePipelineLayout(mVreDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout");

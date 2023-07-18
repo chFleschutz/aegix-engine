@@ -21,6 +21,11 @@ namespace vre
 		glm::mat3 normalMatrix();
 	};
 
+	struct PointLightComponent
+	{
+		float lightIntensity = 1.0f;
+	};
+
 	class VreGameObject
 	{
 	public:
@@ -33,6 +38,8 @@ namespace vre
 			return VreGameObject{ currentId++ };
 		}
 
+		static VreGameObject makePointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
+
 		VreGameObject(const VreGameObject&) = delete;
 		VreGameObject& operator=(const VreGameObject&) = delete;
 		VreGameObject(VreGameObject&&) = default;
@@ -40,9 +47,12 @@ namespace vre
 
 		id_t id() { return mId; }
 
-		std::shared_ptr<VreModel> model{};
 		glm::vec3 color{};
 		TransformComponent transform{};
+
+		// Optional components
+		std::shared_ptr<VreModel> model{};
+		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
 		VreGameObject(id_t objId) : mId{ objId } {}
