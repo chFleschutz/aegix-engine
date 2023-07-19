@@ -15,6 +15,12 @@ namespace vre
 		loadTexture(createInfo.textureFilePath);
 	}
 
+	VreTexture::~VreTexture()
+	{
+		vkDestroyImage(mVreDevice.device(), mTextureImage, nullptr);
+		vkFreeMemory(mVreDevice.device(), mTextureImageMemory, nullptr);
+	}
+
 	void VreTexture::loadTexture(const std::string& filePath)
 	{
 		int texWidth, texHeight, texChannels;
