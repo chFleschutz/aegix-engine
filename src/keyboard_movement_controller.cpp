@@ -60,6 +60,8 @@ namespace vre
 		const glm::vec3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
 		const glm::vec3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
 		const glm::vec3 upDir{0.0f, -1.0f, 0.0f};
+		// Todo: update all directions properly according to the rotation 
+		// maybe use rotation matrix see: https://en.wikipedia.org/wiki/Rotation_matrix
 
 		glm::vec3 moveDir{0.0f};
 		if (glfwGetKey(window, mKeys.moveForward) == GLFW_PRESS) moveDir += forwardDir;
