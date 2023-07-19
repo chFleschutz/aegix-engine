@@ -37,7 +37,7 @@ namespace vre
 
     private:
         VreDevice& mVreDevice;
-        VkDescriptorSetLayout mDescriptorSetLayout;
+        VkDescriptorSetLayout mDescriptorSetLayout = VK_NULL_HANDLE;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> mBindings;
 
         friend class VreDescriptorWriter;
