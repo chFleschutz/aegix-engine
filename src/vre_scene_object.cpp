@@ -1,4 +1,4 @@
-#include "vre_game_object.h"
+#include "vre_scene_object.h"
 
 namespace vre
 {
@@ -29,8 +29,8 @@ namespace vre
 				scale.z * (c1 * c2),
 				0.0f,
 			},
-			{ 
-				translation.x, translation.y, translation.z, 1.0f 
+			{
+				location.x, location.y, location.z, 1.0f
 			}};
 	}
 
@@ -46,9 +46,9 @@ namespace vre
 
 		return glm::mat3{
 			{
-				invScale.x * (c1 * c3 + s1 * s2 * s3),
-				invScale.x * (c2 * s3),
-				invScale.x * (c1 * s2 * s3 - c3 * s1),
+				invScale.x* (c1* c3 + s1 * s2 * s3),
+				invScale.x* (c2* s3),
+				invScale.x* (c1* s2* s3 - c3 * s1),
 			},
 			{
 				invScale.y * (c3 * s1 * s2 - c1 * s3),
@@ -62,14 +62,27 @@ namespace vre
 			}};
 	}
 
-	VreGameObject VreGameObject::makePointLight(float intensity, float radius, glm::vec3 color)
+	VreSceneObject VreSceneObject::createEmpty()
 	{
-		VreGameObject gameObj = VreGameObject::createGameObject();
-		gameObj.color = color;
-		gameObj.transform.scale.x = radius;
-		gameObj.pointLight = std::make_unique<PointLightComponent>();
-		gameObj.pointLight->lightIntensity = intensity;
-		return gameObj;
+		static id_t currentId = 0;
+		return VreSceneObject{ currentId++ };
+	}
+
+	VreSceneObject VreSceneObject::createPointLight(float intensity, float radius, glm::vec3 color)
+	{
+		VreSceneObject obj = VreSceneObject::createEmpty();
+		obj.color = color;
+		obj.transform.scale.x = radius;
+		obj.pointLight = std::make_unique<PointLightComponent>();
+		obj.pointLight->lightIntensity = intensity;
+		return obj;
+	}
+
+	VreSceneObject VreSceneObject::createModel(std::shared_ptr<VreModel> model)
+	{
+		VreSceneObject obj = VreSceneObject::createEmpty();
+		obj.model = std::move(model);
+		return obj;
 	}
 
 } // namespace vre

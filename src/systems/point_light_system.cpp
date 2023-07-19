@@ -40,7 +40,7 @@ namespace vre
 
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
 
-			ubo.pointLights[lighIndex].position = glm::vec4(obj.transform.translation, 1.0f);
+			ubo.pointLights[lighIndex].position = glm::vec4(obj.transform.location, 1.0f);
 			ubo.pointLights[lighIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
 			lighIndex++;
 		}
@@ -51,14 +51,14 @@ namespace vre
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
 		// sort lights because of transparency
-		std::map<float, VreGameObject::id_t> sortedLights;
+		std::map<float, VreSceneObject::id_t> sortedLights;
 		for (auto& objPair : frameInfo.gameObjects)
 		{
 			auto& obj = objPair.second;
 			if (obj.pointLight == nullptr) 
 				continue;
 
-			auto offset = frameInfo.camera.position() - obj.transform.translation;
+			auto offset = frameInfo.camera.position() - obj.transform.location;
 			float disSquared = glm::dot(offset, offset);
 			sortedLights[disSquared] = obj.id();
 		}
@@ -80,7 +80,7 @@ namespace vre
 			auto& obj = frameInfo.gameObjects.at(it->second);
 
 			PointLightPushConstants push{};
-			push.position = glm::vec4(obj.transform.translation, 1.0f);
+			push.position = glm::vec4(obj.transform.location, 1.0f);
 			push.color = glm::vec4(obj.color, 1.0f);
 			push.radius = obj.transform.scale.x;
 

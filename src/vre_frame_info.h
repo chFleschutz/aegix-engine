@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vre_camera.h"
-#include "vre_game_object.h"
+#include "vre_scene_object.h"
 
 #include <vulkan/vulkan.h>
 
@@ -32,7 +32,7 @@ namespace vre
 		VkCommandBuffer commandBuffer;
 		VreCamera& camera;
 		VkDescriptorSet globalDescriptorSet;
-		VreGameObject::Map& gameObjects;
+		VreSceneObject::Map& gameObjects;
 	};
 
 } // namespace vre

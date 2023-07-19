@@ -112,8 +112,7 @@ namespace vre
         vkDestroyDescriptorPool(mVreDevice.device(), mDescriptorPool, nullptr);
     }
 
-    bool VreDescriptorPool::allocateDescriptorSet(
-        const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
+    bool VreDescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
     {
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -192,11 +191,9 @@ namespace vre
 
     bool VreDescriptorWriter::build(VkDescriptorSet& set)
     {
-        bool success = mPool.allocateDescriptorSet(mSetLayout.descriptorSetLayout(), set);
-        if (!success)
-        {
+        if (!mPool.allocateDescriptorSet(mSetLayout.descriptorSetLayout(), set))
             return false;
-        }
+
         overwrite(set);
         return true;
     }
@@ -207,7 +204,12 @@ namespace vre
         {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(mPool.mVreDevice.device(), mWrites.size(), mWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(
+            mPool.mVreDevice.device(), 
+            static_cast<uint32_t>(mWrites.size()), 
+            mWrites.data(), 
+            0, 
+            nullptr);
     }
 
 }  // namespace vre

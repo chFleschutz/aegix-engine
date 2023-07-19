@@ -11,9 +11,9 @@ namespace vre
 {
 	struct TransformComponent
 	{
-		glm::vec3 translation{};
-		glm::vec3 scale{1.0f, 1.0f, 1.0f};
+		glm::vec3 location{};
 		glm::vec3 rotation{};
+		glm::vec3 scale{1.0f, 1.0f, 1.0f};
 
 		// Transformation-matrix: Translate * Ry * Rx * Rz * Scale
 		// https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
@@ -26,24 +26,20 @@ namespace vre
 		float lightIntensity = 1.0f;
 	};
 
-	class VreGameObject
+	class VreSceneObject
 	{
 	public:
 		using id_t = unsigned int;
-		using Map = std::unordered_map<id_t, VreGameObject>;
+		using Map = std::unordered_map<id_t, VreSceneObject>;
 
-		static VreGameObject createGameObject()
-		{
-			static id_t currentId = 0;
-			return VreGameObject{ currentId++ };
-		}
+		static VreSceneObject createEmpty();
+		static VreSceneObject createPointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
+		static VreSceneObject createModel(std::shared_ptr<VreModel> model);
 
-		static VreGameObject makePointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
-
-		VreGameObject(const VreGameObject&) = delete;
-		VreGameObject& operator=(const VreGameObject&) = delete;
-		VreGameObject(VreGameObject&&) = default;
-		VreGameObject& operator=(VreGameObject&&) = default;
+		VreSceneObject(const VreSceneObject&) = delete;
+		VreSceneObject& operator=(const VreSceneObject&) = delete;
+		VreSceneObject(VreSceneObject&&) = default;
+		VreSceneObject& operator=(VreSceneObject&&) = default;
 
 		id_t id() { return mId; }
 
@@ -55,7 +51,7 @@ namespace vre
 		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
-		VreGameObject(id_t objId) : mId{ objId } {}
+		VreSceneObject(id_t objId) : mId{ objId } {}
 
 		id_t mId;
 	};

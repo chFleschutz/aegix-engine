@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vre_game_object.h"
+#include "vre_scene_object.h"
 #include "vre_window.h"
 
 namespace vre
@@ -22,7 +22,7 @@ namespace vre
 			int lookDown = GLFW_KEY_DOWN;
 		};
 
-		void moveInPlaneXZ(GLFWwindow* window, float dt, VreGameObject& gameObject);
+		void moveInPlaneXZ(GLFWwindow* window, float dt, VreSceneObject& gameObject);
 
 		KeyMappings keys{};
 		float moveSpeed{ 2.5f };

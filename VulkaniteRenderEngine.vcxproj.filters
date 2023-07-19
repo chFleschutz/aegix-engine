@@ -36,7 +36,7 @@
     <ClCompile Include="src\vre_model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_game_object.cpp">
+    <ClCompile Include="src\vre_scene_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vre_renderer.cpp">
@@ -80,7 +80,7 @@
     <ClInclude Include="src\vre_model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_game_object.h">
+    <ClInclude Include="src\vre_scene_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vre_renderer.h">

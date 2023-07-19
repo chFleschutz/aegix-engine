@@ -24,7 +24,7 @@ namespace vre
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 
-		loadGameObjects();
+		loadScene();
 	}
 
 	VreApplication::~VreApplication()
@@ -33,6 +33,7 @@ namespace vre
 
 	void vre::VreApplication::run()
 	{
+		// Init
 		std::vector<std::unique_ptr<VreBuffer>> uboBuffers(VreSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++)
 		{
@@ -63,8 +64,8 @@ namespace vre
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		VreCamera camera{};
-        auto viewerObject = VreGameObject::createGameObject();
-		viewerObject.transform.translation = { 1.0f, -0.5f, -2.0f };
+        auto viewerObject = VreSceneObject::createEmpty();
+		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
 		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
         KeyboardMovementController cameraController{};
 
@@ -79,7 +80,7 @@ namespace vre
             currentTime = newTime;
 
             cameraController.moveInPlaneXZ(mVreWindow.glfwWindow(), frameTime, viewerObject);
-            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+            camera.setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
 
             float aspect = mVreRenderer.aspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
@@ -122,37 +123,34 @@ namespace vre
 		vkDeviceWaitIdle(mVreDevice.device());
 	}
 
-	void VreApplication::loadGameObjects()
+	void VreApplication::loadScene()
 	{
 		{
 			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/flat_vase.obj");
-			auto flatVase = VreGameObject::createGameObject();
-			flatVase.model = vreModel;
-			flatVase.transform.translation = { -0.75f, 0.5f, 0.0f };
+			auto flatVase = VreSceneObject::createModel(vreModel);
+			flatVase.transform.location = { -0.75f, 0.5f, 0.0f };
 			flatVase.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(flatVase.id(), std::move(flatVase));
 
 			vreModel = VreModel::createModelFromFile(mVreDevice, "models/smooth_vase.obj");
-			auto smoothVase = VreGameObject::createGameObject();
-			smoothVase.model = vreModel;
-			smoothVase.transform.translation = { 0.75f, 0.5f, 0.0f };
+			auto smoothVase = VreSceneObject::createModel(vreModel);
+			smoothVase.transform.location = { 0.75f, 0.5f, 0.0f };
 			smoothVase.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(smoothVase.id(), std::move(smoothVase));
 
 			vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
-			auto floor = VreGameObject::createGameObject();
-			floor.model = vreModel;
-			floor.transform.translation = { 0.0f, 0.5f, 0.0f };
+			auto floor = VreSceneObject::createModel(vreModel);
+			floor.transform.location = { 0.0f, 0.5f, 0.0f };
 			floor.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(floor.id(), std::move(floor));
 		}
 		{
-			auto pointLight = VreGameObject::makePointLight(0.2f);
-			pointLight.transform.translation = { -1.0f, -1.0f, -1.0f };
+			auto pointLight = VreSceneObject::createPointLight(0.2f);
+			pointLight.transform.location = { -1.0f, -1.0f, -1.0f };
 			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
 
-			pointLight = VreGameObject::makePointLight(0.2f);
-			pointLight.transform.translation = { 0.0f, -1.0f, -1.0f };
+			pointLight = VreSceneObject::createPointLight(0.2f);
+			pointLight.transform.location = { 0.0f, -1.0f, -1.0f };
 			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
 		}
 	}

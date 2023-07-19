@@ -3,7 +3,6 @@
 #include "vre_camera.h"
 #include "vre_device.h"
 #include "vre_frame_info.h"
-#include "vre_game_object.h"
 #include "vre_pipeline.h"
 
 #include <memory>
