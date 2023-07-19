@@ -120,4 +120,4 @@ namespace vre
         return invalidate(mAlignmentSize, index * mAlignmentSize);
     }
 
-}  // namespace lve
+}  // namespace vre

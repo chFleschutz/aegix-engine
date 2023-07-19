@@ -33,6 +33,7 @@
     <ClCompile Include="src\vre_pipeline.cpp" />
     <ClCompile Include="src\vre_renderer.cpp" />
     <ClCompile Include="src\vre_swap_chain.cpp" />
+    <ClCompile Include="src\vre_texture.cpp" />
     <ClCompile Include="src\vre_window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +51,7 @@
     <ClInclude Include="src\vre_pipeline.h" />
     <ClInclude Include="src\vre_renderer.h" />
     <ClInclude Include="src\vre_swap_chain.h" />
+    <ClInclude Include="src\vre_texture.h" />
     <ClInclude Include="src\vre_utils.h" />
     <ClInclude Include="src\vre_window.h" />
   </ItemGroup>
@@ -127,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\stb;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -155,7 +157,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\stb;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -183,7 +185,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\stb;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -211,7 +213,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Workspace\Visual Studio\VulkaniteRenderEngine\src;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\stb;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\tiny_obj_loader;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glm;C:\VulkanSDK\1.3.250.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

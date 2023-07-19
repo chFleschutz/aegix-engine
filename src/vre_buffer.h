@@ -98,4 +98,4 @@ namespace vre
 		VkMemoryPropertyFlags mMemoryPropertyFlags;
 	};
 
-}  // namespace lve
+}  // namespace vre
