@@ -33,6 +33,7 @@ namespace vre
 
 	void vre::VreApplication::run()
 	{
+		// ****
 		// Init
 		std::vector<std::unique_ptr<VreBuffer>> uboBuffers(VreSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++)
@@ -67,10 +68,12 @@ namespace vre
         auto viewerObject = VreSceneObject::createEmpty();
 		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
 		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
-        KeyboardMovementController cameraController{};
+        KeyboardMovementController cameraController{ mVreWindow.glfwWindow() };
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
+		// ***********
+		// update loop
 		while (!mVreWindow.shouldClose())
 		{
 			glfwPollEvents();
@@ -79,7 +82,7 @@ namespace vre
             float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
 
-            cameraController.moveInPlaneXZ(mVreWindow.glfwWindow(), frameTime, viewerObject);
+            cameraController.applyInput(mVreWindow.glfwWindow(), frameTime, viewerObject);
             camera.setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
 
             float aspect = mVreRenderer.aspectRatio();
