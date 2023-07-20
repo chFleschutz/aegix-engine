@@ -20,7 +20,6 @@ namespace vre
 		: mDevice{ deviceRef }, mWindowExtent{ windowExtent }, mOldSwapChain{ previous }
 	{
 		init();
-
 		mOldSwapChain = nullptr;
 	}
 
@@ -85,9 +84,8 @@ namespace vre
 		const VkCommandBuffer* buffers, uint32_t* imageIndex)
 	{
 		if (mImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
-		{
 			vkWaitForFences(mDevice.device(), 1, &mImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
-		}
+
 		mImagesInFlight[*imageIndex] = mInFlightFences[mCurrentFrame];
 
 		VkSubmitInfo submitInfo = {};
@@ -107,22 +105,16 @@ namespace vre
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		vkResetFences(mDevice.device(), 1, &mInFlightFences[mCurrentFrame]);
-		if (vkQueueSubmit(mDevice.graphicsQueue(), 1, &submitInfo, mInFlightFences[mCurrentFrame]) !=
-			VK_SUCCESS)
-		{
+		if (vkQueueSubmit(mDevice.graphicsQueue(), 1, &submitInfo, mInFlightFences[mCurrentFrame]) != VK_SUCCESS)
 			throw std::runtime_error("failed to submit draw command buffer!");
-		}
-
-		VkPresentInfoKHR presentInfo = {};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
 
 		VkSwapchainKHR swapChains[] = { mSwapChain };
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
-
 		presentInfo.pImageIndices = imageIndex;
 
 		auto result = vkQueuePresentKHR(mDevice.presentQueue(), &presentInfo);
@@ -151,8 +143,7 @@ namespace vre
 		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
 		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-		if (swapChainSupport.capabilities.maxImageCount > 0 &&
-			imageCount > swapChainSupport.capabilities.maxImageCount)
+		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
 		{
 			imageCount = swapChainSupport.capabilities.maxImageCount;
 		}
@@ -192,10 +183,6 @@ namespace vre
 		if (vkCreateSwapchainKHR(mDevice.device(), &createInfo, nullptr, &mSwapChain) != VK_SUCCESS)
 			throw std::runtime_error("failed to create swap chain");
 
-		// we only specified a minimum number of images in the swap chain, so the implementation is
-		// allowed to create a swap chain with more. That's why we'll first query the final number of
-		// images with vkGetSwapchainImagesKHR, then resize the container and finally call it again to
-		// retrieve the handles.
 		vkGetSwapchainImagesKHR(mDevice.device(), mSwapChain, &imageCount, nullptr);
 		mSwapChainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(mDevice.device(), mSwapChain, &imageCount, mSwapChainImages.data());
@@ -290,7 +277,6 @@ namespace vre
 		{
 			std::array<VkImageView, 2> attachments = { mSwapChainImageViews[i], mDepthImageViews[i] };
 
-			//VkExtent2D swapChainExtent = mSwapChainExtent;
 			VkFramebufferCreateInfo framebufferInfo = {};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferInfo.renderPass = mRenderPass;
@@ -309,7 +295,6 @@ namespace vre
 	{
 		VkFormat depthFormat = findDepthFormat();
 		mSwapChainDepthFormat = depthFormat;
-		//VkExtent2D swapChainExtent = swapChainExtent();
 
 		mDepthImages.resize(imageCount());
 		mDepthImageMemorys.resize(imageCount());
@@ -403,12 +388,6 @@ namespace vre
 				std::cout << "Present mode: Mailbox" << std::endl;
 				return availablePresentMode;
 			}
-
-			//if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
-			//{
-			//	std::cout << "Present mode: Immediate" << std::endl;
-			//	return availablePresentMode;
-			//}
 		}
 
 		std::cout << "Present mode: V-Sync" << std::endl;
