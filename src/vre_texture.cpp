@@ -13,12 +13,25 @@ namespace vre
 		: mVreDevice{ device }
 	{
 		loadTexture(createInfo.textureFilePath);
+		createImageView();
+		createTextureSampler();
 	}
 
 	VreTexture::~VreTexture()
 	{
+		vkDestroySampler(mVreDevice.device(), mTextureSampler, nullptr);
+		vkDestroyImageView(mVreDevice.device(), mTextureImageView, nullptr);
 		vkDestroyImage(mVreDevice.device(), mTextureImage, nullptr);
 		vkFreeMemory(mVreDevice.device(), mTextureImageMemory, nullptr);
+	}
+
+	VkDescriptorImageInfo VreTexture::descriptorImageInfo()
+	{
+		VkDescriptorImageInfo info{};
+		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		info.imageView = mTextureImageView;
+		info.sampler = mTextureSampler;
+		return info;
 	}
 
 	void VreTexture::loadTexture(const std::string& filePath)
@@ -61,6 +74,47 @@ namespace vre
 		mVreDevice.transitionImageLayout(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1);
 		mVreDevice.copyBufferToImage(stagingBuffer.buffer(), mTextureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
 		mVreDevice.transitionImageLayout(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
+	}
+
+	void VreTexture::createImageView()
+	{
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = mTextureImage;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(mVreDevice.device(), &viewInfo, nullptr, &mTextureImageView) != VK_SUCCESS)
+			throw std::runtime_error("failed to create texture image view");
+	}
+
+	void VreTexture::createTextureSampler()
+	{
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.maxAnisotropy = mVreDevice.properties.limits.maxSamplerAnisotropy;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+		samplerInfo.mipLodBias = 0.0f;
+
+		if (vkCreateSampler(mVreDevice.device(), &samplerInfo, nullptr, &mTextureSampler) != VK_SUCCESS)
+			throw std::runtime_error("failed to create texture sampler");
 	}
 
 } // namespace vre

@@ -22,13 +22,19 @@ namespace vre
 		VreTexture(const VreTexture&) = delete;
 		VreTexture& operator=(const VreTexture&) = delete;
 
+		VkDescriptorImageInfo descriptorImageInfo();
+
 	private:
 		void loadTexture(const std::string& filePath);
+		void createImageView();
+		void createTextureSampler();
 
 		VreDevice& mVreDevice;
 
 		VkImage mTextureImage;
 		VkDeviceMemory mTextureImageMemory;
+		VkImageView mTextureImageView;
+		VkSampler mTextureSampler;
 	};
 
 } // namespace vre
