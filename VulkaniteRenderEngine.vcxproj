@@ -185,13 +185,13 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(VULKAN_SDK)\Include;$(VisualStudioDir)\Libraries\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\chfle\Documents\Visual Studio 2022\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2022;$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(VisualStudioDir)\Libraries\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
