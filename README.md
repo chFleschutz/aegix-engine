@@ -1,20 +1,48 @@
 # VulkaniteRenderEngine
 
-Vulkanite is a simple Render Engine created as an exercise.   
-Like the name implies it uses the Vulkan API for rendering. 
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Vulkan.svg" width="500"/>
 
-## External Libaries:
-- [glfw](https://github.com/glfw/glfw)
-- [glm](https://github.com/g-truc/glm)
+## Introduction
+
+Vulkanite Render Engine is a simple rendering engine built as an exercise in preparation for my upcoming bachelor's thesis. It leverages the power of the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. Please note that this project is a work in progress and will be continually developed alongside my thesis work.
+
+## Prerequisites
+
+Before you can run Vulkanite Render Engine, you'll need to have the following prerequisites in place:
+
+- [Vulkan SDK](https://vulkan.lunarg.com/) installed on your system.
+
+- Download [GLFW](https://www.glfw.org/download.html) (version 3.3.8, but the latest should also work).
+
+## Getting Started
+
+Follow these steps to get started with Vulkanite Render Engine:
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/yourusername/VulkaniteRenderEngine.git
+    ```
+
+2. Open the Visual Studio solution.
+
+3. Update the GLFW location in project properties (ensure you select all configurations):
+
+    - Project Properties -> C/C++ -> General -> Additional Include Directories: Update the GLFW include path.
+    
+    - Project Properties -> Linker -> General -> Additional Library Directories: Update the GLFW lib path.
+
+4. Build and run the project.
+
+## External Libraries
+
+This project uses several external libraries to enhance its functionality:
+
+- [GLFW](https://github.com/glfw/glfw)
+- [GLM](https://github.com/g-truc/glm)
 - [stb](https://github.com/nothings/stb)
-- [tiny_obj_loader](https://github.com/tinyobjloader/tinyobjloader)
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
 - [Vulkan](https://www.vulkan.org/)
 
-## Project setup:
-- Install the Vulkan SDK from https://vulkan.lunarg.com/ 
-- Download glfw from https://www.glfw.org/download.html (version 3.3.8 but latest should also work)
-- Clone the repository and open the vs solution
-- Update the glfw location in project properties (make sure to select all configurations)
-  - project properties -> C/C++ -> General -> Additional Include Directories -> Update the glfw include path
-  - project properties -> Linker -> General -> Additional Library Directories -> Update the glfw lib path
-- Build and run 
+Feel free to explore these libraries to understand their contributions to Vulkanite Render Engine.
+
