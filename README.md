@@ -21,7 +21,7 @@ Follow these steps to get started with Vulkanite Render Engine:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/VulkaniteRenderEngine.git
+    git clone https://github.com/chFleschutz/VulkaniteRenderEngine.git
     ```
 
 2. Open the Visual Studio solution.
