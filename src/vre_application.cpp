@@ -129,17 +129,11 @@ namespace vre
 	void VreApplication::loadScene()
 	{
 		{
-			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/flat_vase.obj");
+			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");
 			auto flatVase = VreSceneObject::createModel(vreModel);
 			flatVase.transform.location = { -0.75f, 0.5f, 0.0f };
 			flatVase.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(flatVase.id(), std::move(flatVase));
-
-			vreModel = VreModel::createModelFromFile(mVreDevice, "models/smooth_vase.obj");
-			auto smoothVase = VreSceneObject::createModel(vreModel);
-			smoothVase.transform.location = { 0.75f, 0.5f, 0.0f };
-			smoothVase.transform.scale = glm::vec3{ 3.0f };
-			mGameObjects.emplace(smoothVase.id(), std::move(smoothVase));
 
 			vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
 			auto floor = VreSceneObject::createModel(vreModel);
