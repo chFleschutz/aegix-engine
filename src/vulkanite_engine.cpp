@@ -24,7 +24,7 @@ namespace vre
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 
-		loadScene();
+		loadSceneOld();
 	}
 
 	VulkaniteEngine::~VulkaniteEngine()
@@ -97,7 +97,7 @@ namespace vre
 					commandBuffer,
 					camera,
 					globalDescriptorSets[frameIndex],
-					mGameObjects
+					mScene->objects()
 				};
 
 				// update
@@ -126,7 +126,7 @@ namespace vre
 		vkDeviceWaitIdle(mVreDevice.device());
 	}
 
-	void VulkaniteEngine::loadScene()
+	void VulkaniteEngine::loadSceneOld()
 	{
 		{
 			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");

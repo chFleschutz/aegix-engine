@@ -40,10 +40,10 @@ namespace vre
 
 	std::unique_ptr<VreModel> VreModel::createModelFromFile(VreDevice& device, const std::string& filepath)
 	{
-		Builder builer{};
-		builer.loadModel(filepath);
+		Builder builder{};
+		builder.loadModel(filepath);
 
-		return std::make_unique<VreModel>(device, builer);
+		return std::make_unique<VreModel>(device, builder);
 	}
 
 	void VreModel::bind(VkCommandBuffer commandBuffer)
