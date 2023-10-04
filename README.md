@@ -12,8 +12,6 @@ Before you can run Vulkanite Render Engine, you'll need to have the following pr
 
 - [Vulkan SDK](https://vulkan.lunarg.com/) installed on your system.
 
-- Download [GLFW](https://www.glfw.org/download.html) binaries (version 3.3.8, but the latest should also work).
-
 ## Getting Started
 
 Follow these steps to get started with Vulkanite Render Engine:
