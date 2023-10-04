@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vre_window.h"
+#include "window.h"
 
 #include <string>
 #include <vector>

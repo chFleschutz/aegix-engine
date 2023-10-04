@@ -1,8 +1,8 @@
-#include "vre_vulkanite_engine.h"
+#include "vulkanite_engine.h"
+#include "camera.h"
 
 #include <iostream>
 #include <stdexcept>
-#include "vre_camera.h"
 
 auto main() -> int 
 {

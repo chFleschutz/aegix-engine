@@ -1,4 +1,4 @@
-#include "vre_scene_object.h"
+#include "scene_object.h"
 
 namespace vre
 {

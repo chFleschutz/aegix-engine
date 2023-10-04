@@ -1,4 +1,4 @@
-#include "vre_swap_chain.h"
+#include "swap_chain.h"
 
 #include <array>
 #include <cstdlib>

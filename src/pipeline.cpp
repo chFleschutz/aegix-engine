@@ -1,6 +1,6 @@
-#include "vre_pipeline.h"
+#include "pipeline.h"
 
-#include "vre_model.h"
+#include "model.h"
 
 #include <array>
 #include <cassert>

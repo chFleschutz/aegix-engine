@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vre_device.h"
+#include "device.h"
 
 #include <vulkan/vulkan.h>
 

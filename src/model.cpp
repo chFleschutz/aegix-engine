@@ -1,6 +1,6 @@
-#include "vre_model.h"
+#include "model.h"
 
-#include "vre_utils.h"
+#include "utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
