@@ -26,12 +26,6 @@ Follow these steps to get started with Vulkanite Render Engine:
 
 2. Open the Visual Studio solution.
 
-3. Update the GLFW location in project properties (ensure you select all configurations):
-
-    - Project Properties -> C/C++ -> General -> Additional Include Directories: Update the GLFW include path.
-    
-    - Project Properties -> Linker -> General -> Additional Library Directories: Update the GLFW lib path.
-
 4. Build and run the project.
 
 ## External Libraries
