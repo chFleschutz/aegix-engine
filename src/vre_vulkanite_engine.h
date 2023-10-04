@@ -11,17 +11,17 @@
 
 namespace vre
 {
-	class VreApplication
+	class VulkaniteEngine
 	{
 	public:
 		static constexpr int WIDTH = 1080;
 		static constexpr int HEIGHT = 720;
 
-		VreApplication();
-		~VreApplication();
+		VulkaniteEngine();
+		~VulkaniteEngine();
 
-		VreApplication(const VreApplication&) = delete;
-		VreApplication& operator=(const VreApplication&) = delete;
+		VulkaniteEngine(const VulkaniteEngine&) = delete;
+		VulkaniteEngine& operator=(const VulkaniteEngine&) = delete;
 
 		void run();
 

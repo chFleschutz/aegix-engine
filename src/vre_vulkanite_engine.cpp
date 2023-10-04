@@ -1,4 +1,4 @@
-#include "vre_application.h"
+#include "vre_vulkanite_engine.h"
 
 #include "keyboard_movement_controller.h"
 #include "vre_buffer.h"
@@ -17,7 +17,7 @@
 
 namespace vre
 {
-	VreApplication::VreApplication()
+	VulkaniteEngine::VulkaniteEngine()
 	{
 		mGlobalPool = VreDescriptorPool::Builder(mVreDevice)
 			.setMaxSets(VreSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -27,11 +27,11 @@ namespace vre
 		loadScene();
 	}
 
-	VreApplication::~VreApplication()
+	VulkaniteEngine::~VulkaniteEngine()
 	{
 	}
 
-	void vre::VreApplication::run()
+	void vre::VulkaniteEngine::run()
 	{
 		// ****
 		// Init
@@ -126,7 +126,7 @@ namespace vre
 		vkDeviceWaitIdle(mVreDevice.device());
 	}
 
-	void VreApplication::loadScene()
+	void VulkaniteEngine::loadScene()
 	{
 		{
 			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");

@@ -21,7 +21,7 @@
     <ClCompile Include="src\vre_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_application.cpp">
+    <ClCompile Include="src\vre_vulkanite_engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vre_pipeline.cpp">
@@ -68,7 +68,7 @@
     <ClInclude Include="src\vre_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_application.h">
+    <ClInclude Include="src\vre_vulkanite_engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vre_pipeline.h">

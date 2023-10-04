@@ -1,4 +1,4 @@
-#include "vre_application.h"
+#include "vre_vulkanite_engine.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -6,7 +6,7 @@
 
 auto main() -> int 
 {
-	vre::VreApplication app{};
+	vre::VulkaniteEngine app{};
 
 	try
 	{
