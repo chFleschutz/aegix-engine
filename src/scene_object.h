@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vre_model.h"
+#include "model.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 

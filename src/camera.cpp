@@ -1,4 +1,4 @@
-#include "vre_camera.h"
+#include "camera.h"
 
 #include <cassert>
 #include <limits>

@@ -1,4 +1,4 @@
-#include "vre_window.h"
+#include "window.h"
 
 #include <stdexcept>
 

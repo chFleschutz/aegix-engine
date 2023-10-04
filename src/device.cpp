@@ -1,4 +1,4 @@
-#include "vre_device.h"
+#include "device.h"
 
 #include <cstring>
 #include <iostream>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "vre_device.h"
-#include "vre_swap_chain.h"
-#include "vre_window.h"
+#include "device.h"
+#include "swap_chain.h"
+#include "window.h"
 
 #include <cassert>
 #include <memory>

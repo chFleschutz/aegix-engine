@@ -1,8 +1,8 @@
-#include "vre_vulkanite_engine.h"
+#include "vulkanite_engine.h"
 
 #include "keyboard_movement_controller.h"
-#include "vre_buffer.h"
-#include "vre_camera.h"
+#include "buffer.h"
+#include "camera.h"
 #include "systems/simple_render_system.h"
 #include "systems/point_light_system.h"
 

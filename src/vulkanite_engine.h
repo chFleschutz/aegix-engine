@@ -1,10 +1,10 @@
 #pragma once
 
-#include "vre_descriptors.h"
-#include "vre_device.h"
-#include "vre_scene_object.h"
-#include "vre_window.h"
-#include "vre_renderer.h"
+#include "descriptors.h"
+#include "device.h"
+#include "scene_object.h"
+#include "window.h"
+#include "renderer.h"
 
 #include <memory>
 #include <vector>

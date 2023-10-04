@@ -1,6 +1,6 @@
-#include "vre_texture.h"
+#include "texture.h"
 
-#include "vre_buffer.h"
+#include "buffer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

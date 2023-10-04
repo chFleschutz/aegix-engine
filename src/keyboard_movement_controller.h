@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vre_scene_object.h"
-#include "vre_window.h"
+#include "scene_object.h"
+#include "window.h"
 
 namespace vre
 {

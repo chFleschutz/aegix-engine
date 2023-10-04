@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vre_camera.h"
-#include "vre_scene_object.h"
+#include "camera.h"
+#include "scene_object.h"
 
 #include <vulkan/vulkan.h>
 

@@ -18,40 +18,40 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_window.cpp">
+    <ClCompile Include="src\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_vulkanite_engine.cpp">
+    <ClCompile Include="src\vulkanite_engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_pipeline.cpp">
+    <ClCompile Include="src\pipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_device.cpp">
+    <ClCompile Include="src\device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_swap_chain.cpp">
+    <ClCompile Include="src\swap_chain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_model.cpp">
+    <ClCompile Include="src\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_scene_object.cpp">
+    <ClCompile Include="src\scene_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_renderer.cpp">
+    <ClCompile Include="src\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_camera.cpp">
+    <ClCompile Include="src\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\keyboard_movement_controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_buffer.cpp">
+    <ClCompile Include="src\buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_descriptors.cpp">
+    <ClCompile Include="src\descriptors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\systems\point_light_system.cpp">
@@ -60,51 +60,51 @@
     <ClCompile Include="src\systems\simple_render_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vre_texture.cpp">
+    <ClCompile Include="src\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\vre_window.h">
+    <ClInclude Include="src\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_vulkanite_engine.h">
+    <ClInclude Include="src\vulkanite_engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_pipeline.h">
+    <ClInclude Include="src\pipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_device.h">
+    <ClInclude Include="src\device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_swap_chain.h">
+    <ClInclude Include="src\swap_chain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_model.h">
+    <ClInclude Include="src\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_scene_object.h">
+    <ClInclude Include="src\scene_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_renderer.h">
+    <ClInclude Include="src\renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_camera.h">
+    <ClInclude Include="src\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\keyboard_movement_controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_utils.h">
+    <ClInclude Include="src\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_buffer.h">
+    <ClInclude Include="src\buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_frame_info.h">
+    <ClInclude Include="src\frame_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_descriptors.h">
+    <ClInclude Include="src\descriptors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\systems\point_light_system.h">
@@ -113,7 +113,7 @@
     <ClInclude Include="src\systems\simple_render_system.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vre_texture.h">
+    <ClInclude Include="src\texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

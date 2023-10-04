@@ -1,9 +1,9 @@
 #pragma once
 
-#include "vre_camera.h"
-#include "vre_device.h"
-#include "vre_frame_info.h"
-#include "vre_pipeline.h"
+#include "camera.h"
+#include "device.h"
+#include "frame_info.h"
+#include "pipeline.h"
 
 #include <memory>
 #include <vector>
