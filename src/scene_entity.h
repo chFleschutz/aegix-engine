@@ -1,5 +1,6 @@
 #pragma once
 
+#include "component.h"
 #include "model.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -43,6 +44,16 @@ namespace vre
 
 		id_t id() { return mId; }
 
+		/// @brief Adds a component to the entity
+		/// @tparam T Class of the Component that should be added
+		/// @tparam Has to be a subclass of Component
+		template<class T, class = std::enable_if_t<std::is_base_of_v<Component, T>>>
+		void addComponent()
+		{
+			mComponents.emplace_back(std::move(T{}));
+		}
+
+		// Todo remove puplic member
 		glm::vec3 color{};
 		TransformComponent transform{};
 
@@ -54,6 +65,7 @@ namespace vre
 		SceneEntity(id_t objId) : mId{ objId } {}
 
 		id_t mId;
+		std::vector<Component> mComponents;
 	};
 
 } // namespace vre

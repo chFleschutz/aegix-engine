@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\default_scene.cpp" />
     <ClCompile Include="src\keyboard_movement_controller.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\component.h" />
     <ClInclude Include="src\default_scene.h" />
     <ClInclude Include="src\keyboard_movement_controller.h" />
     <ClInclude Include="src\scene.h" />
