@@ -26,20 +26,20 @@ namespace vre
 		float lightIntensity = 1.0f;
 	};
 
-	class VreSceneObject
+	class SceneEntity
 	{
 	public:
 		using id_t = unsigned int;
-		using Map = std::unordered_map<id_t, VreSceneObject>;
+		using Map = std::unordered_map<id_t, SceneEntity>;
 
-		static VreSceneObject createEmpty();
-		static VreSceneObject createPointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
-		static VreSceneObject createModel(std::shared_ptr<VreModel> model);
+		static SceneEntity createEmpty();
+		static SceneEntity createPointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
+		static SceneEntity createModel(std::shared_ptr<VreModel> model);
 
-		VreSceneObject(const VreSceneObject&) = delete;
-		VreSceneObject& operator=(const VreSceneObject&) = delete;
-		VreSceneObject(VreSceneObject&&) = default;
-		VreSceneObject& operator=(VreSceneObject&&) = default;
+		SceneEntity(const SceneEntity&) = delete;
+		SceneEntity& operator=(const SceneEntity&) = delete;
+		SceneEntity(SceneEntity&&) = default;
+		SceneEntity& operator=(SceneEntity&&) = default;
 
 		id_t id() { return mId; }
 
@@ -51,7 +51,7 @@ namespace vre
 		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
-		VreSceneObject(id_t objId) : mId{ objId } {}
+		SceneEntity(id_t objId) : mId{ objId } {}
 
 		id_t mId;
 	};

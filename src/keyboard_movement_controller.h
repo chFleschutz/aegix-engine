@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene_object.h"
+#include "scene_entity.h"
 #include "window.h"
 
 namespace vre
@@ -29,11 +29,11 @@ namespace vre
 		KeyboardMovementController(GLFWwindow* window);
 		~KeyboardMovementController() = default;
 
-		void applyInput(GLFWwindow* window, float dt, VreSceneObject& object);
+		void applyInput(GLFWwindow* window, float dt, SceneEntity& object);
 
 	private:
-		void applyRotation(GLFWwindow* window, float deltaTime, VreSceneObject& object);
-		void applyMovement(GLFWwindow* window, float deltaTime, VreSceneObject& object);
+		void applyRotation(GLFWwindow* window, float deltaTime, SceneEntity& object);
+		void applyMovement(GLFWwindow* window, float deltaTime, SceneEntity& object);
 
 		void toggleMouseRotate(GLFWwindow* window, bool enabled);
 		void toogleMousePan(GLFWwindow* window, bool enabled);

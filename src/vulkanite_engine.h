@@ -2,7 +2,7 @@
 
 #include "descriptors.h"
 #include "device.h"
-#include "scene_object.h"
+#include "scene_entity.h"
 #include "window.h"
 #include "renderer.h"
 #include "scene.h"
@@ -45,7 +45,7 @@ namespace vre
 		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };
 
 		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
-		VreSceneObject::Map mGameObjects;
+		SceneEntity::Map mGameObjects;
 		std::unique_ptr<Scene> mScene;
 	};
 

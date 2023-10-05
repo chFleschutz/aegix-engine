@@ -1,4 +1,4 @@
-#include "scene_object.h"
+#include "scene_entity.h"
 
 namespace vre
 {
@@ -62,15 +62,15 @@ namespace vre
 			}};
 	}
 
-	VreSceneObject VreSceneObject::createEmpty()
+	SceneEntity SceneEntity::createEmpty()
 	{
 		static id_t currentId = 0;
-		return VreSceneObject{ currentId++ };
+		return SceneEntity{ currentId++ };
 	}
 
-	VreSceneObject VreSceneObject::createPointLight(float intensity, float radius, glm::vec3 color)
+	SceneEntity SceneEntity::createPointLight(float intensity, float radius, glm::vec3 color)
 	{
-		VreSceneObject obj = VreSceneObject::createEmpty();
+		SceneEntity obj = SceneEntity::createEmpty();
 		obj.color = color;
 		obj.transform.scale.x = radius;
 		obj.pointLight = std::make_unique<PointLightComponent>();
@@ -78,9 +78,9 @@ namespace vre
 		return obj;
 	}
 
-	VreSceneObject VreSceneObject::createModel(std::shared_ptr<VreModel> model)
+	SceneEntity SceneEntity::createModel(std::shared_ptr<VreModel> model)
 	{
-		VreSceneObject obj = VreSceneObject::createEmpty();
+		SceneEntity obj = SceneEntity::createEmpty();
 		obj.model = std::move(model);
 		return obj;
 	}

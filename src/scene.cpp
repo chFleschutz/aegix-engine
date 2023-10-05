@@ -6,19 +6,20 @@ namespace vre
 	{
 	}
 
-	VreSceneObject& Scene::create(std::shared_ptr<VreModel> model, const glm::vec3& location)
+	SceneEntity& Scene::createEntity(std::shared_ptr<VreModel> model, const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale)
 	{
-		auto object = VreSceneObject::createModel(model);
+		auto object = SceneEntity::createModel(model);
 		object.transform.location = location;
-		object.transform.scale = glm::vec3{ 3.0f };
+		object.transform.rotation = rotation;
+		object.transform.scale = scale;
 		auto emplaceResult = mObjects.emplace(object.id(), std::move(object));
 		return emplaceResult.first->second;
 	}
 
-	VreSceneObject& Scene::createPointLight(float intensity, const glm::vec3& location)
+	SceneEntity& Scene::createPointLight(const glm::vec3& location, float intensity, float radius, const glm::vec3& color)
 	{
-		auto pointLight = VreSceneObject::createPointLight(0.2f);
-		pointLight.transform.location = { -1.0f, -1.0f, -1.0f };
+		auto pointLight = SceneEntity::createPointLight(0.2f, radius, color);
+		pointLight.transform.location = location;
 		auto emplaceResult = mObjects.emplace(pointLight.id(), std::move(pointLight));
 		return emplaceResult.first->second;
 	}

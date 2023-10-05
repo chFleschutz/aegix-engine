@@ -30,7 +30,7 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\descriptors.cpp" />
     <ClCompile Include="src\device.cpp" />
-    <ClCompile Include="src\scene_object.cpp" />
+    <ClCompile Include="src\scene_entity.cpp" />
     <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\pipeline.cpp" />
     <ClCompile Include="src\renderer.cpp" />
@@ -50,7 +50,7 @@
     <ClInclude Include="src\descriptors.h" />
     <ClInclude Include="src\device.h" />
     <ClInclude Include="src\frame_info.h" />
-    <ClInclude Include="src\scene_object.h" />
+    <ClInclude Include="src\scene_entity.h" />
     <ClInclude Include="src\model.h" />
     <ClInclude Include="src\pipeline.h" />
     <ClInclude Include="src\renderer.h" />

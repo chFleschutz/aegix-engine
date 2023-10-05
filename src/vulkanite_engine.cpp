@@ -65,7 +65,7 @@ namespace vre
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		VreCamera camera{};
-        auto viewerObject = VreSceneObject::createEmpty();
+        auto viewerObject = SceneEntity::createEmpty();
 		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
 		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
         KeyboardMovementController cameraController{ mVreWindow.glfwWindow() };
@@ -130,23 +130,23 @@ namespace vre
 	{
 		{
 			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");
-			auto flatVase = VreSceneObject::createModel(vreModel);
+			auto flatVase = SceneEntity::createModel(vreModel);
 			flatVase.transform.location = { -0.75f, 0.5f, 0.0f };
 			flatVase.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(flatVase.id(), std::move(flatVase));
 
 			vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
-			auto floor = VreSceneObject::createModel(vreModel);
+			auto floor = SceneEntity::createModel(vreModel);
 			floor.transform.location = { 0.0f, 0.5f, 0.0f };
 			floor.transform.scale = glm::vec3{ 3.0f };
 			mGameObjects.emplace(floor.id(), std::move(floor));
 		}
 		{
-			auto pointLight = VreSceneObject::createPointLight(0.2f);
+			auto pointLight = SceneEntity::createPointLight(0.2f);
 			pointLight.transform.location = { -1.0f, -1.0f, -1.0f };
 			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
 
-			pointLight = VreSceneObject::createPointLight(0.2f);
+			pointLight = SceneEntity::createPointLight(0.2f);
 			pointLight.transform.location = { 0.0f, -1.0f, -1.0f };
 			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
 		}

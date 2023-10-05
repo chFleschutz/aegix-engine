@@ -15,13 +15,13 @@ namespace vre
 		mPreviousCursorPos = { cursorXPos,cursorYPos };
 	}
 
-	void KeyboardMovementController::applyInput(GLFWwindow* window, float deltaTime, VreSceneObject& object)
+	void KeyboardMovementController::applyInput(GLFWwindow* window, float deltaTime, SceneEntity& object)
 	{
 		applyRotation(window, deltaTime, object);
 		applyMovement(window, deltaTime, object);
 	}
 
-	void KeyboardMovementController::applyRotation(GLFWwindow* window, float deltaTime, VreSceneObject& object)
+	void KeyboardMovementController::applyRotation(GLFWwindow* window, float deltaTime, SceneEntity& object)
 	{
 		// Key input rotation
 		glm::vec3 rotate{0.0f};
@@ -52,7 +52,7 @@ namespace vre
 		object.transform.rotation.y = glm::mod(object.transform.rotation.y, glm::two_pi<float>());
 	}
 
-	void KeyboardMovementController::applyMovement(GLFWwindow* window, float deltaTime, VreSceneObject& object)
+	void KeyboardMovementController::applyMovement(GLFWwindow* window, float deltaTime, SceneEntity& object)
 	{
 		// Key input movement
 		float yaw = object.transform.rotation.y;

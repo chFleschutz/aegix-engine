@@ -51,7 +51,7 @@ namespace vre
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
 		// sort lights because of transparency
-		std::map<float, VreSceneObject::id_t> sortedLights;
+		std::map<float, SceneEntity::id_t> sortedLights;
 		for (auto& objPair : frameInfo.gameObjects)
 		{
 			auto& obj = objPair.second;
