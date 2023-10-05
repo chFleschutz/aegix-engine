@@ -1,12 +1,10 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include <iostream>
 
 namespace vre
 {
-	class Color : public glm::vec3
+	class Color 
 	{
 	public:
 		Color(float red, float green, float blue);

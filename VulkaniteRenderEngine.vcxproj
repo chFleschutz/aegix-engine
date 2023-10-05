@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\color.cpp" />
     <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\default_scene.cpp" />
     <ClCompile Include="src\input.cpp" />
@@ -41,6 +42,7 @@
     <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\color.h" />
     <ClInclude Include="src\component.h" />
     <ClInclude Include="src\default_scene.h" />
     <ClInclude Include="src\input.h" />
