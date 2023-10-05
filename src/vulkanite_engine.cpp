@@ -64,7 +64,10 @@ namespace vre
 		SimpleRenderSystem simpleRenderSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
-		VreCamera camera{};
+		auto camera = mScene->camera().getComponent<VreCamera>();
+		if (!camera)
+			throw std::runtime_error("Could not find camera in scene");
+
 		auto viewerObject = SceneEntity::createEmpty();
 		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
 		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
@@ -85,14 +88,14 @@ namespace vre
 			currentTime = newTime;
 
 			cameraController.applyInput(mVreWindow.glfwWindow(), frameTime, viewerObject);
-			camera.setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
+			camera->setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
 
 			updateComponets(frameTime);
 
 
 			// RENDERING
 			float aspect = mVreRenderer.aspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+			camera->setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -108,9 +111,9 @@ namespace vre
 
 				// update
 				GlobalUbo ubo{};
-				ubo.projection = camera.projectionMatrix();
-				ubo.view = camera.viewMatrix();
-				ubo.inverseView = camera.inverseViewMatrix();
+				ubo.projection = camera->projectionMatrix();
+				ubo.view = camera->viewMatrix();
+				ubo.inverseView = camera->inverseViewMatrix();
 
 				pointLightSystem.update(frameInfo, ubo);
 

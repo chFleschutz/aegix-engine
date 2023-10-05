@@ -1,9 +1,22 @@
 #include "Scene.h"
 
+#include "camera.h"
+
 namespace vre
 {
-	Scene::Scene(VreDevice& device) : mDevice{device}
+	Scene::Scene(VreDevice& device) : mDevice{device}, mCamera{createEntity()}
 	{
+		mCamera.addComponent<VreCamera>();
+	}
+
+	SceneEntity& Scene::createEntity(const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale)
+	{
+		auto entity = SceneEntity::createEmpty();
+		entity.transform.location = location;
+		entity.transform.rotation = rotation;
+		entity.transform.scale = scale;
+		auto emplaceResult = mObjects.emplace(entity.id(), std::move(entity));
+		return emplaceResult.first->second;
 	}
 
 	SceneEntity& Scene::createEntity(std::shared_ptr<VreModel> model, const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale)

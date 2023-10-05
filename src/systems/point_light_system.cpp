@@ -58,7 +58,7 @@ namespace vre
 			if (obj.pointLight == nullptr) 
 				continue;
 
-			auto offset = frameInfo.camera.position() - obj.transform.location;
+			auto offset = frameInfo.camera->position() - obj.transform.location;
 			float disSquared = glm::dot(offset, offset);
 			sortedLights[disSquared] = obj.id();
 		}

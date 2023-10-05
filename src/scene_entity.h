@@ -53,6 +53,21 @@ namespace vre
 			mComponents.emplace_back(std::make_unique<T>(*this));
 		}
 
+		/// @brief Retrieves a component of type T attached to the entity
+		/// @tparam T Type of the component to retrieve
+		/// @return Returns a pointer to the component or nullptr if not found
+		/// @note Ownership of the component remains with the entity, caller should not delete it manually
+		template<class T, class = std::enable_if_t<std::is_base_of_v<Component, T>>>
+		T* getComponent()
+		{
+			for (auto& component : mComponents)
+			{
+				if (typeid(*component) == typeid(T))
+					return dynamic_cast<T*>(component.get());
+			}
+			return nullptr;
+		}
+
 		/// @brief Access to all components attached to this entity
 		/// @return Returns a vector of all attached entitys
 		std::vector<std::unique_ptr<Component>>& components() { return mComponents; }

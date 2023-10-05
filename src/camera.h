@@ -1,14 +1,18 @@
 #pragma once
 
+#include "component.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
 namespace vre
 {
-	class VreCamera
+	class VreCamera : public Component
 	{
 	public:
+		using Component::Component;
+
 		void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
 		void setPerspectiveProjection(float fovy, float aspect, float near, float far);
 
