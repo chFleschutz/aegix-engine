@@ -50,9 +50,11 @@ namespace vre
 		template<class T, class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 		void addComponent()
 		{
-			mComponents.emplace_back(std::make_unique<T>());
+			mComponents.emplace_back(std::make_unique<T>(*this));
 		}
 
+		/// @brief Access to all components attached to this entity
+		/// @return Returns a vector of all attached entitys
 		std::vector<std::unique_ptr<Component>>& components() { return mComponents; }
 
 		// Todo remove puplic member
