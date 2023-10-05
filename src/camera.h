@@ -33,11 +33,13 @@ namespace vre
 		/// @param direction Direction in which the camera should face
 		/// @param up Specifies the rotation of the camera
 		void setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3(0.0f, -1.0f, 0.0f));
+		
 		/// @brief Sets the view direction centered on the target
 		/// @param position Position of the camera
 		/// @param target Target position which should be in center
 		/// @param up Specifies the rotation
 		void setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3(0.0f, -1.0f, 0.0f));
+		
 		/// @brief Sets the view- and inverse-view-matrix based on position and rotation
 		/// @param position Position of the camera
 		/// @param rotation Rotation of the camera

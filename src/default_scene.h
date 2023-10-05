@@ -2,37 +2,38 @@
 
 #include "scene.h"
 
-namespace vre
+/// @brief Example of a custom Component
+class Rotator : public vre::Component
 {
-	class Rotator : public Component
+public:
+	using vre::Component::Component;
+
+	void update(float deltaSeconds) override
 	{
-	public:
-		using Component::Component;
+		entity().transform.rotation += glm::vec3{0.0f, 1.0f, 0.0f} *deltaSeconds;
+	}
+};
 
-		void update(float deltaSeconds) override
-		{
-			entity().transform.rotation += glm::vec3{0.0f, 1.0f, 0.0f} *deltaSeconds;
-		}
-	};
+/// @brief Example of a custom scene
+class DefaultScene : public vre::Scene
+{
+public:
+	using vre::Scene::Scene;
 
-	class DefaultScene : public Scene
+	/// @brief All objects in a scene are created here
+	void initialize() override
 	{
-	public:
-		DefaultScene(VreDevice& device) : Scene(device)
-		{
-			{ // Models
-				auto teapotModel = loadModel("models/teapot.obj");
-				auto& teapot = createEntity(teapotModel, { 0.0f, 0.5f, 0.0f });
-				teapot.addComponent<Rotator>();
+		{ // Models
+			auto teapotModel = loadModel("models/teapot.obj");
+			auto& teapot = createEntity(teapotModel, { 0.0f, 0.5f, 0.0f });
+			teapot.addComponent<Rotator>();
 
-				auto plane = loadModel("models/plane.obj");
-				createEntity(plane, { 0.0f, 0.5f, 0.0f });
-			}
-			{ // Lights
-				createPointLight({ -1.0f, -1.0f, -1.0f });
-				createPointLight({ 0.0f, -1.0f, -1.0f });
-			}
+			auto plane = loadModel("models/plane.obj");
+			createEntity(plane, { 0.0f, 0.5f, 0.0f });
 		}
-	};
-
-} // namespace vre
+		{ // Lights
+			createPointLight({ -1.0f, -1.0f, -1.0f });
+			createPointLight({ 0.0f, -1.0f, -1.0f });
+		}
+	}
+};

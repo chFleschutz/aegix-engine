@@ -12,6 +12,7 @@ namespace vre
 	public:
 		using Component::Component;
 
+		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
 			int moveLeft = GLFW_KEY_A;
@@ -30,10 +31,15 @@ namespace vre
 			int mousePan = GLFW_MOUSE_BUTTON_MIDDLE;
 		};
 
-		KeyboardMovementController(GLFWwindow* window);
-
 		void begin() override;
 		void update(float deltaSeconds) override;
+		
+		/// @brief Sets new overall move speed
+		void setMoveSpeed(float speed) { mMoveSpeed = speed; }
+		/// @brief Sets new overall look speed
+		void setLookSpeed(float speed) { mLookSpeed = speed; }
+		/// @brief Sets speed for looking with the mouse
+		void setMouseSensitivity(float sensitivity) { mMouseSensitivity = sensitivity; }
 
 	private:
 		void applyRotation(float deltaSeconds);

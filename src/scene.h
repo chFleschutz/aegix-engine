@@ -15,10 +15,15 @@ namespace vre
 	public:
 		Scene(VreDevice& device);
 
+		/// @brief Abstract method for creating the scene in a subclass
+		virtual void initilize() = 0;
+
 		/// @brief Access to the map containing all objects of the scene
 		/// @return Returns a reference to the map  
 		SceneEntity::Map& entities() { return mObjects; }
 
+		/// @brief Access to the default created camera entity
+		/// @return Returns the entity with a camera component
 		SceneEntity& camera() { return mCamera; }
 
 	protected:
