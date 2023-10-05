@@ -16,7 +16,7 @@ namespace vre
 		Scene(VreDevice& device);
 
 		/// @brief Abstract method for creating the scene in a subclass
-		virtual void initilize() = 0;
+		virtual void initialize() = 0;
 
 		/// @brief Access to the map containing all objects of the scene
 		/// @return Returns a reference to the map  

@@ -10,7 +10,7 @@ auto main() -> int
 	try
 	{
 		vre::VulkaniteEngine engine{};
-		engine.loadScene<vre::DefaultScene>();
+		engine.loadScene<DefaultScene>();
 		engine.run();
 	}
 	catch (const std::exception& e)

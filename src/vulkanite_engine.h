@@ -34,6 +34,7 @@ namespace vre
 		void loadScene()
 		{
 			mScene = std::make_unique<T>(mVreDevice);
+			mScene->initialize();
 		}
 
 
