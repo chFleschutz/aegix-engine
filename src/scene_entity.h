@@ -10,7 +10,8 @@
 
 namespace vre
 {
-	struct TransformComponent
+	/// @brief Combines location, rotation and scale and represents all transformations
+	struct Transform
 	{
 		glm::vec3 location{};
 		glm::vec3 rotation{};
@@ -74,7 +75,7 @@ namespace vre
 
 		// Todo remove puplic member
 		glm::vec3 color{};
-		TransformComponent transform{};
+		Transform transform{};
 
 		// Optional components
 		std::shared_ptr<VreModel> model{};
