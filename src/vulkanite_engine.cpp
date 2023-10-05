@@ -66,7 +66,7 @@ namespace vre
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto camera = mScene->camera().getComponent<VreCamera>();
+		auto camera = mScene->camera().getComponent<Camera>();
 		if (!camera)
 			throw std::runtime_error("Could not find camera in scene");
 

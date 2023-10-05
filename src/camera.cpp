@@ -8,12 +8,12 @@
 
 namespace vre
 {
-	void VreCamera::update(float deltaSeconds)
+	void Camera::update(float deltaSeconds)
 	{
 		setViewYXZ(entity().transform.location, entity().transform.rotation);
 	}
 
-	void VreCamera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
+	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
 		mProjectionMatrix = glm::mat4{ 1.0f };
 		mProjectionMatrix[0][0] = 2.f / (right - left);
@@ -24,7 +24,7 @@ namespace vre
 		mProjectionMatrix[3][2] = -near / (far - near);
 	}
 
-	void VreCamera::setPerspectiveProjection(float fovy, float aspect, float near, float far)
+	void Camera::setPerspectiveProjection(float fovy, float aspect, float near, float far)
 	{
 		assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
 
@@ -37,7 +37,7 @@ namespace vre
 		mProjectionMatrix[3][2] = -(far * near) / (far - near);
 	}
 
-	void VreCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up)
+	void Camera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up)
 	{
 		assert(glm::abs(glm::length(direction) - std::numeric_limits<float>::epsilon()) > 0.0f);
 
@@ -74,12 +74,12 @@ namespace vre
 		mInverseViewMatrix[3][2] = position.z;
 	}
 
-	void VreCamera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up)
+	void Camera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up)
 	{
 		setViewDirection(position, target - position, up);
 	}
 
-	void VreCamera::setViewYXZ(glm::vec3 position, glm::vec3 rotation)
+	void Camera::setViewYXZ(glm::vec3 position, glm::vec3 rotation)
 	{
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);

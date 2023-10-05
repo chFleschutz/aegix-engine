@@ -30,7 +30,7 @@ namespace vre
 		int frameIndex;
 		float frameTime;
 		VkCommandBuffer commandBuffer;
-		VreCamera* camera;
+		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
 		SceneEntity::Map& gameObjects;
 	};

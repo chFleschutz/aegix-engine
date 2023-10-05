@@ -7,7 +7,7 @@ namespace vre
 {
 	Scene::Scene(VreDevice& device) : mDevice{device}, mCamera{createEntity()}
 	{
-		mCamera.addComponent<VreCamera>();
+		mCamera.addComponent<Camera>();
 		mCamera.addComponent<KeyboardMovementController>();
 		mCamera.transform.location = { -0.5f, 0.1f, -0.5 };
 		mCamera.transform.rotation = { -0.4f, 0.8f, 0 };
