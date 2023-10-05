@@ -45,6 +45,7 @@
     <ClInclude Include="src\default_scene.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\keyboard_movement_controller.h" />
+    <ClInclude Include="src\math_utilities.h" />
     <ClInclude Include="src\scene.h" />
     <ClInclude Include="src\systems\point_light_system.h" />
     <ClInclude Include="src\systems\simple_render_system.h" />
