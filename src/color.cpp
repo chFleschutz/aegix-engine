@@ -8,6 +8,10 @@ namespace vre
 	const Color Color::green = Color(0.0f, 1.0f, 0.0f);
 	const Color Color::blue = Color(0.0f, 0.0f, 1.0f);
 
+	Color::Color() : r{1.0f}, g{1.0f}, b{1.0f}
+	{
+	}
+
 	Color::Color(float red, float green, float blue) : r{red}, g{green}, b{blue}
 	{
 	}

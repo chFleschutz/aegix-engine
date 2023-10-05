@@ -7,6 +7,7 @@ namespace vre
 	class Color 
 	{
 	public:
+		Color();
 		Color(float red, float green, float blue);
 
 		static const Color white;
