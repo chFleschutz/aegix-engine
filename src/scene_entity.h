@@ -50,8 +50,10 @@ namespace vre
 		template<class T, class = std::enable_if_t<std::is_base_of_v<Component, T>>>
 		void addComponent()
 		{
-			mComponents.emplace_back(std::move(T{}));
+			mComponents.emplace_back(std::make_unique<T>());
 		}
+
+		std::vector<std::unique_ptr<Component>>& components() { return mComponents; }
 
 		// Todo remove puplic member
 		glm::vec3 color{};
@@ -65,7 +67,7 @@ namespace vre
 		SceneEntity(id_t objId) : mId{ objId } {}
 
 		id_t mId;
-		std::vector<Component> mComponents;
+		std::vector<std::unique_ptr<Component>> mComponents;
 	};
 
 } // namespace vre

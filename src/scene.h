@@ -17,7 +17,7 @@ namespace vre
 
 		/// @brief Access to the map containing all objects of the scene
 		/// @return Returns a reference to the map  
-		SceneEntity::Map& objects() { return mObjects; }
+		SceneEntity::Map& entities() { return mObjects; }
 
 	protected:
 		/// @brief Creates a VreSceneObject with a model
