@@ -38,7 +38,6 @@ namespace vre
 
 
 	private:
-		void loadSceneOld();
 		void initializeComponents();
 		void updateComponets(float deltaSeconds);
 		void cleanupComponents();
@@ -48,7 +47,6 @@ namespace vre
 		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };
 
 		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
-		SceneEntity::Map mGameObjects;
 		std::unique_ptr<Scene> mScene;
 	};
 

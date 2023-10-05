@@ -25,8 +25,6 @@ namespace vre
 			.setMaxSets(VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
-
-		loadSceneOld();
 	}
 
 	VulkaniteEngine::~VulkaniteEngine()
@@ -132,32 +130,6 @@ namespace vre
 		}
 		vkDeviceWaitIdle(mVreDevice.device());
 		cleanupComponents();
-	}
-
-	void VulkaniteEngine::loadSceneOld()
-	{
-		{
-			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");
-			auto flatVase = SceneEntity::createModel(vreModel);
-			flatVase.transform.location = { -0.75f, 0.5f, 0.0f };
-			flatVase.transform.scale = glm::vec3{ 3.0f };
-			mGameObjects.emplace(flatVase.id(), std::move(flatVase));
-
-			vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
-			auto floor = SceneEntity::createModel(vreModel);
-			floor.transform.location = { 0.0f, 0.5f, 0.0f };
-			floor.transform.scale = glm::vec3{ 3.0f };
-			mGameObjects.emplace(floor.id(), std::move(floor));
-		}
-		{
-			auto pointLight = SceneEntity::createPointLight(0.2f);
-			pointLight.transform.location = { -1.0f, -1.0f, -1.0f };
-			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
-
-			pointLight = SceneEntity::createPointLight(0.2f);
-			pointLight.transform.location = { 0.0f, -1.0f, -1.0f };
-			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
-		}
 	}
 
 	void VulkaniteEngine::initializeComponents()
