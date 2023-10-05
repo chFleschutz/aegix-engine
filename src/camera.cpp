@@ -1,10 +1,18 @@
 #include "camera.h"
+#include "scene_entity.h"
 
 #include <cassert>
 #include <limits>
 
+#include <iostream>
+
 namespace vre
 {
+	void VreCamera::update(float deltaSeconds)
+	{
+		setViewYXZ(entity().transform.location, entity().transform.rotation);
+	}
+
 	void VreCamera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
 		mProjectionMatrix = glm::mat4{ 1.0f };

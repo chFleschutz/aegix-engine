@@ -1,8 +1,9 @@
 #include "vulkanite_engine.h"
 
-#include "keyboard_movement_controller.h"
 #include "buffer.h"
 #include "camera.h"
+#include "input.h"
+#include "keyboard_movement_controller.h"
 #include "systems/simple_render_system.h"
 #include "systems/point_light_system.h"
 
@@ -13,9 +14,9 @@
 
 #include <array>
 #include <chrono>
+#include <iostream>
 #include <stdexcept>
 
-#include <iostream>
 
 namespace vre
 {
@@ -64,18 +65,18 @@ namespace vre
 		SimpleRenderSystem simpleRenderSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
+		// Init Camera
 		auto camera = mScene->camera().getComponent<VreCamera>();
 		if (!camera)
 			throw std::runtime_error("Could not find camera in scene");
 
-		auto viewerObject = SceneEntity::createEmpty();
-		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
-		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
-		KeyboardMovementController cameraController{ mVreWindow.glfwWindow() };
+		// Init Input
+		Input::instance().initialize(mVreWindow.glfwWindow());
+
+		// Init Entity Components
+		initializeComponents();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
-
-		initializeComponents();
 
 		// ***********
 		// update loop
@@ -83,15 +84,13 @@ namespace vre
 		{
 			glfwPollEvents();
 
+			// Calculate time
 			auto newTime = std::chrono::high_resolution_clock::now();
 			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 			currentTime = newTime;
 
-			cameraController.applyInput(mVreWindow.glfwWindow(), frameTime, viewerObject);
-			camera->setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
-
+			// Update all components
 			updateComponets(frameTime);
-
 
 			// RENDERING
 			float aspect = mVreRenderer.aspectRatio();

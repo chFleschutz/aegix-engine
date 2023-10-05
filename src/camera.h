@@ -13,6 +13,8 @@ namespace vre
 	public:
 		using Component::Component;
 
+		void update(float deltaSeconds) override;
+
 		void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
 		void setPerspectiveProjection(float fovy, float aspect, float near, float far);
 

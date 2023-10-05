@@ -1,13 +1,17 @@
 #pragma once
 
-#include "scene_entity.h"
+#include "component.h"
 #include "window.h"
+
+#include <glm/glm.hpp>
 
 namespace vre
 {
-	class KeyboardMovementController
+	class KeyboardMovementController : public Component
 	{
 	public:
+		using Component::Component;
+
 		struct KeyMappings
 		{
 			int moveLeft = GLFW_KEY_A;
@@ -27,16 +31,16 @@ namespace vre
 		};
 
 		KeyboardMovementController(GLFWwindow* window);
-		~KeyboardMovementController() = default;
 
-		void applyInput(GLFWwindow* window, float dt, SceneEntity& object);
+		void begin() override;
+		void update(float deltaSeconds) override;
 
 	private:
-		void applyRotation(GLFWwindow* window, float deltaTime, SceneEntity& object);
-		void applyMovement(GLFWwindow* window, float deltaTime, SceneEntity& object);
+		void applyRotation(float deltaSeconds);
+		void applyMovement(float deltaSeconds);
 
-		void toggleMouseRotate(GLFWwindow* window, bool enabled);
-		void toogleMousePan(GLFWwindow* window, bool enabled);
+		void toggleMouseRotate(bool enabled);
+		void toogleMousePan(bool enabled);
 
 		KeyMappings mKeys{};
 		float mMoveSpeed{ 2.5f };

@@ -1,12 +1,16 @@
 #include "Scene.h"
 
 #include "camera.h"
+#include "keyboard_movement_controller.h"
 
 namespace vre
 {
 	Scene::Scene(VreDevice& device) : mDevice{device}, mCamera{createEntity()}
 	{
 		mCamera.addComponent<VreCamera>();
+		mCamera.addComponent<KeyboardMovementController>();
+		mCamera.transform.location = { -0.5f, 0.1f, -0.5 };
+		mCamera.transform.rotation = { -0.4f, 0.8f, 0 };
 	}
 
 	SceneEntity& Scene::createEntity(const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale)
