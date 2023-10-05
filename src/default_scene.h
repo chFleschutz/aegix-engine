@@ -2,7 +2,8 @@
 
 #include "scene.h"
 
-/// @brief Example of a custom Component
+/// @brief Rotates the entity around the vertical axis
+/// @note Example of a custom Component
 class Rotator : public vre::Component
 {
 public:
@@ -14,7 +15,8 @@ public:
 	}
 };
 
-/// @brief Example of a custom scene
+/// @brief Scene with a teapot on a plane
+/// @note Example of a custom scene
 class DefaultScene : public vre::Scene
 {
 public:

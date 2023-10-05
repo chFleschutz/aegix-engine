@@ -13,6 +13,7 @@ namespace vre
 	class Scene
 	{
 	public:
+		/// @brief Creates a scene with camera
 		Scene(VreDevice& device);
 
 		/// @brief Abstract method for creating the scene in a subclass
