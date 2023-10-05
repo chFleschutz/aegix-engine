@@ -1,4 +1,4 @@
-#include "vre_renderer.h"
+#include "renderer.h"
 
 #include <array>
 #include <stdexcept>

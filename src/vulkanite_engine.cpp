@@ -1,8 +1,9 @@
-#include "vre_application.h"
+#include "vulkanite_engine.h"
 
+#include "buffer.h"
+#include "camera.h"
+#include "input.h"
 #include "keyboard_movement_controller.h"
-#include "vre_buffer.h"
-#include "vre_camera.h"
 #include "systems/simple_render_system.h"
 #include "systems/point_light_system.h"
 
@@ -13,25 +14,25 @@
 
 #include <array>
 #include <chrono>
+#include <iostream>
 #include <stdexcept>
+
 
 namespace vre
 {
-	VreApplication::VreApplication()
+	VulkaniteEngine::VulkaniteEngine()
 	{
 		mGlobalPool = VreDescriptorPool::Builder(mVreDevice)
 			.setMaxSets(VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
-
-		loadScene();
 	}
 
-	VreApplication::~VreApplication()
+	VulkaniteEngine::~VulkaniteEngine()
 	{
 	}
 
-	void vre::VreApplication::run()
+	void vre::VulkaniteEngine::run()
 	{
 		// ****
 		// Init
@@ -64,13 +65,18 @@ namespace vre
 		SimpleRenderSystem simpleRenderSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
-		VreCamera camera{};
-        auto viewerObject = VreSceneObject::createEmpty();
-		viewerObject.transform.location = { 1.0f, -0.5f, -2.0f };
-		viewerObject.transform.rotation = { -0.2f, 5.86f, 0.0f };
-        KeyboardMovementController cameraController{ mVreWindow.glfwWindow() };
+		// Init Camera
+		auto camera = mScene->camera().getComponent<Camera>();
+		if (!camera)
+			throw std::runtime_error("Could not find camera in scene");
 
-        auto currentTime = std::chrono::high_resolution_clock::now();
+		// Init Input
+		Input::instance().initialize(mVreWindow.glfwWindow());
+
+		// Init Entity Components
+		initializeComponents();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// ***********
 		// update loop
@@ -78,15 +84,17 @@ namespace vre
 		{
 			glfwPollEvents();
 
-            auto newTime = std::chrono::high_resolution_clock::now();
-            float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
-            currentTime = newTime;
+			// Calculate time
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
 
-            cameraController.applyInput(mVreWindow.glfwWindow(), frameTime, viewerObject);
-            camera.setViewYXZ(viewerObject.transform.location, viewerObject.transform.rotation);
+			// Update all components
+			updateComponets(frameTime);
 
-            float aspect = mVreRenderer.aspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+			// RENDERING
+			float aspect = mVreRenderer.aspectRatio();
+			camera->setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -97,59 +105,68 @@ namespace vre
 					commandBuffer,
 					camera,
 					globalDescriptorSets[frameIndex],
-					mGameObjects
+					mScene->entities()
 				};
 
 				// update
 				GlobalUbo ubo{};
-				ubo.projection = camera.projectionMatrix();
-				ubo.view = camera.viewMatrix();
-				ubo.inverseView = camera.inverseViewMatrix();
+				ubo.projection = camera->projectionMatrix();
+				ubo.view = camera->viewMatrix();
+				ubo.inverseView = camera->inverseViewMatrix();
 
 				pointLightSystem.update(frameInfo, ubo);
-				
+
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
 				// render
 				mVreRenderer.beginSwapChainRenderPass(commandBuffer);
-				
+
 				// render solid objects first
 				simpleRenderSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
-				
+
 				mVreRenderer.endSwapChainRenderPass(commandBuffer);
 				mVreRenderer.endFrame();
 			}
 		}
-
 		vkDeviceWaitIdle(mVreDevice.device());
+		cleanupComponents();
 	}
 
-	void VreApplication::loadScene()
+	void VulkaniteEngine::initializeComponents()
 	{
+		for (auto& [id, entity] : mScene->entities())
 		{
-			std::shared_ptr<VreModel> vreModel = VreModel::createModelFromFile(mVreDevice, "models/teapot.obj");
-			auto flatVase = VreSceneObject::createModel(vreModel);
-			flatVase.transform.location = { -0.75f, 0.5f, 0.0f };
-			flatVase.transform.scale = glm::vec3{ 3.0f };
-			mGameObjects.emplace(flatVase.id(), std::move(flatVase));
-
-			vreModel = VreModel::createModelFromFile(mVreDevice, "models/plane.obj");
-			auto floor = VreSceneObject::createModel(vreModel);
-			floor.transform.location = { 0.0f, 0.5f, 0.0f };
-			floor.transform.scale = glm::vec3{ 3.0f };
-			mGameObjects.emplace(floor.id(), std::move(floor));
+			for (auto& component : entity.components())
+			{
+				component->begin();
+			}
 		}
+		std::cout << "Components initialized" << std::endl;
+	}
+
+	void VulkaniteEngine::updateComponets(float deltaSeconds)
+	{
+		for (auto& [id, entity] : mScene->entities())
 		{
-			auto pointLight = VreSceneObject::createPointLight(0.2f);
-			pointLight.transform.location = { -1.0f, -1.0f, -1.0f };
-			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
-
-			pointLight = VreSceneObject::createPointLight(0.2f);
-			pointLight.transform.location = { 0.0f, -1.0f, -1.0f };
-			mGameObjects.emplace(pointLight.id(), std::move(pointLight));
+			for (auto& component : entity.components())
+			{
+				component->update(deltaSeconds);
+			}
 		}
+	}
+
+	void VulkaniteEngine::cleanupComponents()
+	{
+		for (auto& [id, entity] : mScene->entities())
+		{
+			for (auto& component : entity.components())
+			{
+				component->end();
+			}
+		}
+		std::cout << "Components cleaned up" << std::endl;
 	}
 
 } // namespace vre

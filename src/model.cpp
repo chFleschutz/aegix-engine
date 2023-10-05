@@ -1,6 +1,6 @@
-#include "vre_model.h"
+#include "model.h"
 
-#include "vre_utils.h"
+#include "utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -38,12 +38,12 @@ namespace vre
 	{
 	}
 
-	std::unique_ptr<VreModel> VreModel::createModelFromFile(VreDevice& device, const std::string& filepath)
+	std::unique_ptr<VreModel> VreModel::createModelFromFile(VreDevice& device, const std::filesystem::path& filepath)
 	{
-		Builder builer{};
-		builer.loadModel(filepath);
+		Builder builder{};
+		builder.loadModel(filepath);
 
-		return std::make_unique<VreModel>(device, builer);
+		return std::make_unique<VreModel>(device, builder);
 	}
 
 	void VreModel::bind(VkCommandBuffer commandBuffer)
@@ -149,14 +149,14 @@ namespace vre
 		return attributeDescriptions;
 	}
 
-	void VreModel::Builder::loadModel(const std::string& filepath)
+	void VreModel::Builder::loadModel(const std::filesystem::path& filepath)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str()))
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str()))
 			throw std::runtime_error(warn + err);
 
 		vertices.clear();

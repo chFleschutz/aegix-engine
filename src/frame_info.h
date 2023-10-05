@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vre_camera.h"
-#include "vre_scene_object.h"
+#include "camera.h"
+#include "scene_entity.h"
 
 #include <vulkan/vulkan.h>
 
@@ -30,9 +30,9 @@ namespace vre
 		int frameIndex;
 		float frameTime;
 		VkCommandBuffer commandBuffer;
-		VreCamera& camera;
+		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		VreSceneObject::Map& gameObjects;
+		SceneEntity::Map& gameObjects;
 	};
 
 } // namespace vre

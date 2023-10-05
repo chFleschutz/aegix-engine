@@ -1,13 +1,18 @@
 #pragma once
 
-#include "vre_scene_object.h"
-#include "vre_window.h"
+#include "component.h"
+#include "window.h"
+
+#include <glm/glm.hpp>
 
 namespace vre
 {
-	class KeyboardMovementController
+	class KeyboardMovementController : public Component
 	{
 	public:
+		using Component::Component;
+
+		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
 			int moveLeft = GLFW_KEY_A;
@@ -26,17 +31,22 @@ namespace vre
 			int mousePan = GLFW_MOUSE_BUTTON_MIDDLE;
 		};
 
-		KeyboardMovementController(GLFWwindow* window);
-		~KeyboardMovementController() = default;
-
-		void applyInput(GLFWwindow* window, float dt, VreSceneObject& object);
+		void begin() override;
+		void update(float deltaSeconds) override;
+		
+		/// @brief Sets new overall move speed
+		void setMoveSpeed(float speed) { mMoveSpeed = speed; }
+		/// @brief Sets new overall look speed
+		void setLookSpeed(float speed) { mLookSpeed = speed; }
+		/// @brief Sets speed for looking with the mouse
+		void setMouseSensitivity(float sensitivity) { mMouseSensitivity = sensitivity; }
 
 	private:
-		void applyRotation(GLFWwindow* window, float deltaTime, VreSceneObject& object);
-		void applyMovement(GLFWwindow* window, float deltaTime, VreSceneObject& object);
+		void applyRotation(float deltaSeconds);
+		void applyMovement(float deltaSeconds);
 
-		void toggleMouseRotate(GLFWwindow* window, bool enabled);
-		void toogleMousePan(GLFWwindow* window, bool enabled);
+		void toggleMouseRotate(bool enabled);
+		void toogleMousePan(bool enabled);
 
 		KeyMappings mKeys{};
 		float mMoveSpeed{ 2.5f };

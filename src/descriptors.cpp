@@ -1,4 +1,4 @@
-#include "vre_descriptors.h"
+#include "descriptors.h"
 
 #include <cassert>
 #include <stdexcept>

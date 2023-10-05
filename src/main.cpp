@@ -1,16 +1,17 @@
-#include "vre_application.h"
+#include "vulkanite_engine.h"
+#include "camera.h"
+#include "default_scene.h"
 
 #include <iostream>
 #include <stdexcept>
-#include "vre_camera.h"
 
 auto main() -> int 
 {
-	vre::VreApplication app{};
-
 	try
 	{
-		app.run();
+		vre::VulkaniteEngine engine{};
+		engine.loadScene<DefaultScene>();
+		engine.run();
 	}
 	catch (const std::exception& e)
 	{

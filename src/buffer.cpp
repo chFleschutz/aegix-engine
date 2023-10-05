@@ -1,4 +1,4 @@
-#include "vre_buffer.h"
+#include "buffer.h"
 
 #include <cassert>
 #include <cstring>

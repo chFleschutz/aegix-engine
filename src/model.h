@@ -1,12 +1,13 @@
 #pragma once
 
-#include "vre_buffer.h"
-#include "vre_device.h"
+#include "buffer.h"
+#include "device.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace vre
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
 
-			void loadModel(const std::string& filepath);
+			void loadModel(const std::filesystem::path& filepath);
 		};
 
 		VreModel(VreDevice& device, const VreModel::Builder& builder);
@@ -45,7 +46,7 @@ namespace vre
 		VreModel(const VreModel&) = delete;
 		VreModel& operator=(const VreModel&) = delete;
 
-		static std::unique_ptr<VreModel> createModelFromFile(VreDevice& device, const std::string& filepath);
+		static std::unique_ptr<VreModel> createModelFromFile(VreDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
