@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene.h"
+#include "scene/scene.h"
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component

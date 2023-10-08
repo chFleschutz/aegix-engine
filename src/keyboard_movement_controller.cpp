@@ -1,7 +1,7 @@
 #include "keyboard_movement_controller.h"
 
 #include "input.h"
-#include "scene_entity.h"
+#include "scene/scene_entity.h"
 
 #include <limits>
 

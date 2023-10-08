@@ -1,7 +1,7 @@
 #pragma once
 
 #include "camera.h"
-#include "scene_entity.h"
+#include "scene/scene_entity.h"
 
 #include <vulkan/vulkan.h>
 

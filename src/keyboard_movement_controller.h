@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "scene/component.h"
 #include "window.h"
 
 #include <glm/glm.hpp>
