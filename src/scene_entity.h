@@ -2,7 +2,6 @@
 
 #include "component.h"
 #include "model.h"
-#include "color.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -75,7 +74,7 @@ namespace vre
 		std::vector<std::unique_ptr<Component>>& components() { return mComponents; }
 
 		// Todo remove puplic member
-		Color color{};
+		glm::vec3 color{};
 		Transform transform{};
 
 		// Optional components
