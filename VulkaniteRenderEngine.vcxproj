@@ -138,7 +138,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(ProjectDir)lib\entt\single_include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -166,7 +166,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(ProjectDir)lib\entt\single_include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -194,7 +194,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(ProjectDir)lib\entt\single_include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -222,7 +222,7 @@ for %%f in (*.vert *.frag) do $(VULKAN_SDK)\Bin\glslangValidator.exe -V -o %%f.s
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)lib\stb;$(ProjectDir)lib\tinyobjloader;$(ProjectDir)lib\glm;$(ProjectDir)lib\glfw\include;$(ProjectDir)lib\entt\single_include;$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
