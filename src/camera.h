@@ -10,13 +10,9 @@ namespace vre
 {
 	/// @brief Representation of a camera
 	/// @note A Camera is created by default when creating a Scene
-	class Camera : public Component
+	class Camera
 	{
 	public:
-		using Component::Component;
-
-		void update(float deltaSeconds) override;
-
 		/// @brief Sets the Camera to orthographic projection 
 		/// @param Distance to each clipping plane
 		void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);

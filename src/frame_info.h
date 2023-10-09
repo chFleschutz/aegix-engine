@@ -1,7 +1,7 @@
 #pragma once
 
 #include "camera.h"
-#include "scene/scene_entity.h"
+#include "scene/scene.h"
 
 #include <vulkan/vulkan.h>
 
@@ -32,7 +32,7 @@ namespace vre
 		VkCommandBuffer commandBuffer;
 		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		SceneEntity::Map& gameObjects;
+		Scene* scene;
 	};
 
 } // namespace vre

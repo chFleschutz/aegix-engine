@@ -43,7 +43,7 @@ namespace vre
 	private:
 		Input() {}
 
-		GLFWwindow* mWindow;
+		GLFWwindow* mWindow = nullptr;
 	};
 
 } // namespace vre

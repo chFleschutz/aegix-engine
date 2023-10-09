@@ -1,7 +1,8 @@
 #include "vulkanite_engine.h"
 
 #include "buffer.h"
-#include "camera.h"
+#include "scene/components.h"
+#include "scene/entity.h"
 #include "input.h"
 #include "keyboard_movement_controller.h"
 #include "systems/simple_render_system.h"
@@ -66,9 +67,7 @@ namespace vre
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto camera = mScene->camera().getComponent<Camera>();
-		if (!camera)
-			throw std::runtime_error("Could not find camera in scene");
+		auto& camera = mScene->camera().getComponent<CameraComponent>().Camera;
 
 		// Init Input
 		Input::instance().initialize(mVreWindow.glfwWindow());
@@ -94,7 +93,7 @@ namespace vre
 
 			// RENDERING
 			float aspect = mVreRenderer.aspectRatio();
-			camera->setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
@@ -103,16 +102,16 @@ namespace vre
 					frameIndex,
 					frameTime,
 					commandBuffer,
-					camera,
+					&camera,
 					globalDescriptorSets[frameIndex],
-					mScene->entities()
+					mScene.get()
 				};
 
 				// update
 				GlobalUbo ubo{};
-				ubo.projection = camera->projectionMatrix();
-				ubo.view = camera->viewMatrix();
-				ubo.inverseView = camera->inverseViewMatrix();
+				ubo.projection = camera.projectionMatrix();
+				ubo.view = camera.viewMatrix();
+				ubo.inverseView = camera.inverseViewMatrix();
 
 				pointLightSystem.update(frameInfo, ubo);
 
@@ -136,36 +135,36 @@ namespace vre
 
 	void VulkaniteEngine::initializeComponents()
 	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->begin();
-			}
-		}
+		//for (auto& [id, entity] : mScene->entities())
+		//{
+		//	for (auto& component : entity.components())
+		//	{
+		//		component->begin();
+		//	}
+		//}
 		std::cout << "Components initialized" << std::endl;
 	}
 
 	void VulkaniteEngine::updateComponets(float deltaSeconds)
 	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->update(deltaSeconds);
-			}
-		}
+		//for (auto& [id, entity] : mScene->entities())
+		//{
+		//	for (auto& component : entity.components())
+		//	{
+		//		component->update(deltaSeconds);
+		//	}
+		//}
 	}
 
 	void VulkaniteEngine::cleanupComponents()
 	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->end();
-			}
-		}
+		//for (auto& [id, entity] : mScene->entities())
+		//{
+		//	for (auto& component : entity.components())
+		//	{
+		//		component->end();
+		//	}
+		//}
 		std::cout << "Components cleaned up" << std::endl;
 	}
 

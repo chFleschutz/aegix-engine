@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model.h"
+#include "camera.h"
 
 #include <glm/glm.hpp>
 
@@ -29,6 +30,9 @@ namespace vre
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::vec3& location)
 			: Location(location) {}
+
+		glm::mat4 mat4();
+		glm::mat3 normalMatrix();
 	};
 
 	struct MeshComponent
@@ -43,7 +47,8 @@ namespace vre
 
 	struct PointLightComponent
 	{
-		float intensity = 1.0f;
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		float Intensity = 1.0f;
 
 		PointLightComponent() = default;
 		PointLightComponent(const PointLightComponent&) = default;
@@ -51,7 +56,10 @@ namespace vre
 
 	struct CameraComponent
 	{
+		Camera Camera{};
 
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 	};
 
 } // namespace vre

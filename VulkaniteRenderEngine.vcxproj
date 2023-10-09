@@ -24,6 +24,7 @@
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\keyboard_movement_controller.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\scene\components.cpp" />
     <ClCompile Include="src\scene\entity.cpp" />
     <ClCompile Include="src\scene\entity.h" />
     <ClCompile Include="src\scene\scene.cpp" />

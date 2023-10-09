@@ -23,10 +23,10 @@ namespace vre
 		glm::mat3 normalMatrix();
 	};
 
-	struct PointLightComponent
-	{
-		float lightIntensity = 1.0f;
-	};
+	//struct PointLightComponent
+	//{
+	//	float lightIntensity = 1.0f;
+	//};
 
 	class SceneEntity
 	{
@@ -79,7 +79,7 @@ namespace vre
 
 		// Optional components
 		std::shared_ptr<VreModel> model{};
-		std::unique_ptr<PointLightComponent> pointLight = nullptr;
+		//std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
 		SceneEntity(id_t objId) : mId{ objId } {}
