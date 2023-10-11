@@ -2,6 +2,7 @@
 
 #include "model.h"
 #include "camera.h"
+#include "scene/script_component_base.h"
 
 #include <glm/glm.hpp>
 
@@ -65,6 +66,12 @@ namespace vre
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	/// @brief Stores a custom script
+	struct ScriptComponent
+	{
+		ScriptComponentBase* Script = nullptr;
 	};
 
 } // namespace vre
