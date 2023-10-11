@@ -54,18 +54,12 @@ namespace vre
 	{
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		float Intensity = 1.0f;
-
-		PointLightComponent() = default;
-		PointLightComponent(const PointLightComponent&) = default;
 	};
 
 	/// @brief Holds a camera to view the scene
 	struct CameraComponent
 	{
 		Camera Camera{};
-
-		CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
 	};
 
 	/// @brief Stores a custom script

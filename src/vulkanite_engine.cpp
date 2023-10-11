@@ -138,36 +138,29 @@ namespace vre
 
 	void VulkaniteEngine::initializeComponents()
 	{
-		//for (auto& [id, entity] : mScene->entities())
-		//{
-		//	for (auto& component : entity.components())
-		//	{
-		//		component->begin();
-		//	}
-		//}
+		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
+		{
+			component.Script->begin();
+		}
+
 		std::cout << "Components initialized" << std::endl;
 	}
 
 	void VulkaniteEngine::updateComponets(float deltaSeconds)
 	{
-		//for (auto& [id, entity] : mScene->entities())
-		//{
-		//	for (auto& component : entity.components())
-		//	{
-		//		component->update(deltaSeconds);
-		//	}
-		//}
+		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
+		{
+			component.Script->update(deltaSeconds);
+		}
 	}
 
 	void VulkaniteEngine::cleanupComponents()
 	{
-		//for (auto& [id, entity] : mScene->entities())
-		//{
-		//	for (auto& component : entity.components())
-		//	{
-		//		component->end();
-		//	}
-		//}
+		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
+		{
+			component.Script->end();
+		}
+
 		std::cout << "Components cleaned up" << std::endl;
 	}
 
