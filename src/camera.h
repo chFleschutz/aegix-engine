@@ -48,8 +48,8 @@ namespace vre
 
 	private:
 		glm::mat4 mProjectionMatrix{ 1.0f };
-		glm::mat4 mViewMatrix{1.0f};
-		glm::mat4 mInverseViewMatrix{1.0f};
+		glm::mat4 mViewMatrix{ 1.0f };
+		glm::mat4 mInverseViewMatrix{ 1.0f };
 	};
 
 } // namespace vre

@@ -38,7 +38,7 @@ public:
 			auto plane = createEntity("Plane");
 			plane.addComponent<vre::MeshComponent>(planeModel);
 			auto planeTransform = plane.getComponent<vre::TransformComponent>();
-			planeTransform.Location = { 0.0f, -1.0f, 0.0f };
+			planeTransform.Location = { 0.0f, 1.0f, 0.0f };
 			planeTransform.Scale = { 10.0f, 10.0f, 10.0f };
 		}
 		{ // Lights

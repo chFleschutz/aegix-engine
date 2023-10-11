@@ -56,7 +56,7 @@ namespace vre
 		camera.addComponent<CameraComponent>();
 		//camera.addComponent<KeyboardMovementController>();
 		auto cameraTransform = camera.getComponent<TransformComponent>();
-		cameraTransform.Location = { -0.5f, 0.1f, -0.5 };
+		cameraTransform.Location = { -0.5f, 1.0f, -0.5 };
 		cameraTransform.Rotation = { -0.4f, 0.8f, 0 };
 	}
 

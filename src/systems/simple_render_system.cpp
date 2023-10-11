@@ -64,7 +64,6 @@ namespace vre
 		//	obj.model->bind(frameInfo.commandBuffer);
 		//	obj.model->draw(frameInfo.commandBuffer);
 		//}
-		int count = 0;
 		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
 		{
 			SimplePushConstantData push{};
@@ -81,9 +80,7 @@ namespace vre
 			
 			mesh.Model->bind(frameInfo.commandBuffer);
 			mesh.Model->draw(frameInfo.commandBuffer);
-			count++;
 		}
-		std::cout << "Drew " << count << " objects in frame " << frameInfo.frameTime << std::endl;
 	}
 
 	void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)

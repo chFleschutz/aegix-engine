@@ -68,6 +68,7 @@ namespace vre
 
 		// Init Camera
 		auto& camera = mScene->camera().getComponent<CameraComponent>().Camera;
+		auto& cameraTransform = mScene->camera().getComponent<TransformComponent>();
 
 		// Init Input
 		Input::instance().initialize(mVreWindow.glfwWindow());
@@ -91,10 +92,12 @@ namespace vre
 			// Update all components
 			updateComponets(frameTime);
 
-			// RENDERING
 			float aspect = mVreRenderer.aspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+			//camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
+			camera.setViewTarget(cameraTransform.Location, { 0.0f, 0.0f, 0.0f });
 
+			// RENDERING
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
 				int frameIndex = mVreRenderer.frameIndex();
