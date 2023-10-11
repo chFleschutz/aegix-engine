@@ -1,17 +1,14 @@
 #pragma once
 
-#include "scene/component.h"
 #include "window.h"
 
 #include <glm/glm.hpp>
 
 namespace vre
 {
-	class KeyboardMovementController : public Component
+	class KeyboardMovementController
 	{
 	public:
-		using Component::Component;
-
 		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
@@ -31,9 +28,10 @@ namespace vre
 			int mousePan = GLFW_MOUSE_BUTTON_MIDDLE;
 		};
 
-		void begin() override;
-		void update(float deltaSeconds) override;
+		//void begin() override;
+		//void update(float deltaSeconds) override;
 		
+
 		/// @brief Sets new overall move speed
 		void setMoveSpeed(float speed) { mMoveSpeed = speed; }
 		/// @brief Sets new overall look speed

@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\scene\component.cpp" />
     <ClCompile Include="src\default_scene.cpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\keyboard_movement_controller.cpp" />
@@ -35,7 +34,6 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\descriptors.cpp" />
     <ClCompile Include="src\device.cpp" />
-    <ClCompile Include="src\scene\scene_entity.cpp" />
     <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\pipeline.cpp" />
     <ClCompile Include="src\renderer.cpp" />
@@ -44,7 +42,6 @@
     <ClCompile Include="src\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\scene\component.h" />
     <ClInclude Include="src\default_scene.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\keyboard_movement_controller.h" />
@@ -59,7 +56,6 @@
     <ClInclude Include="src\descriptors.h" />
     <ClInclude Include="src\device.h" />
     <ClInclude Include="src\frame_info.h" />
-    <ClInclude Include="src\scene\scene_entity.h" />
     <ClInclude Include="src\model.h" />
     <ClInclude Include="src\pipeline.h" />
     <ClInclude Include="src\renderer.h" />

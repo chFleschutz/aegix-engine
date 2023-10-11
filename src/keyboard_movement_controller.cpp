@@ -1,22 +1,21 @@
 #include "keyboard_movement_controller.h"
 
 #include "input.h"
-#include "scene/scene_entity.h"
 
 #include <limits>
 
 namespace vre
 {
-	void KeyboardMovementController::begin()
-	{
-		mPreviousCursorPos = Input::instance().cursorPosition();
-	}
+	//void KeyboardMovementController::begin()
+	//{
+	//	mPreviousCursorPos = Input::instance().cursorPosition();
+	//}
 
-	void KeyboardMovementController::update(float deltaSeconds)
-	{
-		applyRotation(deltaSeconds);
-		applyMovement(deltaSeconds);
-	}
+	//void KeyboardMovementController::update(float deltaSeconds)
+	//{
+	//	applyRotation(deltaSeconds);
+	//	applyMovement(deltaSeconds);
+	//}
 
 	void KeyboardMovementController::applyRotation(float deltaSeconds)
 	{
@@ -28,7 +27,9 @@ namespace vre
 		if (Input::instance().keyPressed(mKeys.lookDown)) rotate.x -= 1.0f;
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-			entity().transform.rotation += mLookSpeed * glm::normalize(rotate) * deltaSeconds;
+		{
+			//entity().transform.rotation += mLookSpeed * glm::normalize(rotate) * deltaSeconds;
+		}
 
 		// Mouse input rotation
 		toggleMouseRotate(Input::instance().mouseButtonPressed(mKeys.mouseRotate));
@@ -40,18 +41,22 @@ namespace vre
 			mPreviousCursorPos = cursorPos;
 
 			if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-				entity().transform.rotation += mMouseSensitivity * rotate * deltaSeconds;
+			{
+				//entity().transform.rotation += mMouseSensitivity * rotate * deltaSeconds;
+			}
 		}
 
-		entity().transform.rotation.x = glm::clamp(entity().transform.rotation.x, -1.5f, 1.5f);
-		entity().transform.rotation.y = glm::mod(entity().transform.rotation.y, glm::two_pi<float>());
+		//entity().transform.rotation.x = glm::clamp(entity().transform.rotation.x, -1.5f, 1.5f);
+		//entity().transform.rotation.y = glm::mod(entity().transform.rotation.y, glm::two_pi<float>());
 	}
 
 	void KeyboardMovementController::applyMovement(float deltaSeconds)
 	{
 		// Key input movement
-		float yaw = entity().transform.rotation.y;
-		float pitch = entity().transform.rotation.x;
+		//float yaw = entity().transform.rotation.y;
+		//float pitch = entity().transform.rotation.x;
+		float yaw = 0, pitch = 0; // Todo: remove;
+
 		const glm::vec3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
 		const glm::vec3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
 		const glm::vec3 upDir{0.0f, -1.0f, 0.0f};
@@ -67,7 +72,9 @@ namespace vre
 		if (Input::instance().keyPressed(mKeys.moveDown)) moveDir -= upDir;
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
-			entity().transform.location += mMoveSpeed * glm::normalize(moveDir) * deltaSeconds;
+		{ 
+			//entity().transform.location += mMoveSpeed * glm::normalize(moveDir) * deltaSeconds;
+		}
 
 		// Mouse pan input movement
 		toogleMousePan(Input::instance().mouseButtonPressed(mKeys.mousePan));
@@ -79,7 +86,9 @@ namespace vre
 			mPreviousCursorPos = cursorPos;
 
 			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
-				entity().transform.location += mMouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
+			{
+				//entity().transform.location += mMouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
+			}
 		}
 	}
 

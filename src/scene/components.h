@@ -10,6 +10,7 @@
 
 namespace vre
 {
+	/// @brief Gives a name to the entity
 	struct NameComponent
 	{
 		std::string Name;
@@ -20,6 +21,7 @@ namespace vre
 			: Name(name) {}
 	};
 
+	/// @brief Stores the transformation of the entity
 	struct TransformComponent
 	{
 		glm::vec3 Location = { 0.0f, 0.0f, 0.0f };
@@ -35,6 +37,7 @@ namespace vre
 		glm::mat3 normalMatrix();
 	};
 
+	/// @brief Holds a pointer to a model
 	struct MeshComponent
 	{
 		std::shared_ptr<VreModel> Model;
@@ -45,6 +48,7 @@ namespace vre
 			: Model(model) {}
 	};
 
+	/// @brief Creates a light 
 	struct PointLightComponent
 	{
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -54,6 +58,7 @@ namespace vre
 		PointLightComponent(const PointLightComponent&) = default;
 	};
 
+	/// @brief Holds a camera to view the scene
 	struct CameraComponent
 	{
 		Camera Camera{};
