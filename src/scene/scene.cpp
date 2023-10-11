@@ -55,7 +55,7 @@ namespace vre
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<CameraComponent>();
 		//camera.addComponent<KeyboardMovementController>();
-		auto cameraTransform = camera.getComponent<TransformComponent>();
+		auto& cameraTransform = camera.getComponent<TransformComponent>();
 		cameraTransform.Location = { -0.5f, 1.0f, -0.5 };
 		cameraTransform.Rotation = { -0.4f, 0.8f, 0 };
 	}
