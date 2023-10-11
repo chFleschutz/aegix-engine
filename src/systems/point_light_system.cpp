@@ -46,19 +46,6 @@ namespace vre
 
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
-		//// sort lights because of transparency
-		//std::map<float, Entity> sortedLights;
-		//for (auto& objPair : frameInfo.gameObjects)
-		//{
-		//	auto& obj = objPair.second;
-		//	if (obj.pointLight == nullptr) 
-		//		continue;
-
-		//	auto offset = frameInfo.camera->position() - obj.transform.location;
-		//	float disSquared = glm::dot(offset, offset);
-		//	sortedLights[disSquared] = obj.id();
-		//}
-
 		mVrePipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(

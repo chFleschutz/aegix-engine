@@ -43,27 +43,6 @@ namespace vre
 			0, nullptr
 		);
 
-		//for (auto& objPair : frameInfo.gameObjects)
-		//{
-		//	auto& obj = objPair.second;
-		//	if (obj.model == nullptr)
-		//		continue;
-
-		//	SimplePushConstantData push{};
-		//	push.modelMatrix = obj.transform.mat4();
-		//	push.normalMatrix = obj.transform.normalMatrix();
-
-		//	vkCmdPushConstants(
-		//		frameInfo.commandBuffer,
-		//		mPipelineLayout,
-		//		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-		//		0,
-		//		sizeof(SimplePushConstantData),
-		//		&push);
-
-		//	obj.model->bind(frameInfo.commandBuffer);
-		//	obj.model->draw(frameInfo.commandBuffer);
-		//}
 		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
 		{
 			SimplePushConstantData push{};
