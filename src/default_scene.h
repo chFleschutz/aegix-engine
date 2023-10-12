@@ -1,22 +1,21 @@
 #pragma once
 
 #include "scene/components.h"
+#include "scene/script_component_base.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
 
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
-//class Rotator : public vre::Component
-//{
-//public:
-//	using vre::Component::Component;
-//
-//	void update(float deltaSeconds) override
-//	{
-//		entity().transform.rotation += glm::vec3{0.0f, 1.0f, 0.0f} *deltaSeconds;
-//	}
-//};
+class Rotator : public vre::ScriptComponentBase
+{
+public:
+	void update(float deltaSeconds) override
+	{
+		getComponent<vre::TransformComponent>().Rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+	}
+};
 
 /// @brief Scene with a teapot on a plane
 /// @note Example of a custom scene
@@ -32,7 +31,7 @@ public:
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<vre::MeshComponent>(teapotModel);
-			//teapot.addComponent<Rotator>();
+			teapot.addScript<Rotator>();
 
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
