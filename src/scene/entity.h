@@ -15,7 +15,8 @@ namespace vre
 	{
 	public:
 		Entity() = default;
-		Entity(entt::entity entityHandle, Scene* scene);
+		Entity(entt::entity entityHandle, Scene* scene)
+			: m_entityHandle{ entityHandle }, m_scene{ scene } {}
 
 		/// @brief Adds a component of type T to the entity
 		/// @tparam T Type of the component to add

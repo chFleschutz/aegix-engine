@@ -36,8 +36,11 @@ namespace vre
 		/// @brief Returns the camera
 		Entity camera();
 
+		/// @brief Initialized script components and calls the begin() function
 		void runtimeBegin();
+		/// @brief Calls the update function on all script components
 		void update(float deltaSeconds);
+		/// @brief Calls the end function on all script components
 		void runtimeEnd();
 
 	protected:
