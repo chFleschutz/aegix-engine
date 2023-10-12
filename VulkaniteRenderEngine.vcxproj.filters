@@ -63,9 +63,6 @@
     <ClCompile Include="src\scene\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\default_scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
