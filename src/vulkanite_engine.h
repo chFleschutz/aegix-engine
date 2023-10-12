@@ -2,10 +2,9 @@
 
 #include "descriptors.h"
 #include "device.h"
-#include "scene_entity.h"
+#include "scene/scene.h"
 #include "window.h"
 #include "renderer.h"
-#include "scene.h"
 
 #include <memory>
 #include <type_traits>
@@ -37,12 +36,7 @@ namespace vre
 			mScene->initialize();
 		}
 
-
 	private:
-		void initializeComponents();
-		void updateComponets(float deltaSeconds);
-		void cleanupComponents();
-
 		VreWindow mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
 		VreDevice mVreDevice{ mVreWindow };
 		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };

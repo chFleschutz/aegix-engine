@@ -1,17 +1,19 @@
 #pragma once
 
-#include "scene.h"
+#include "scene/components.h"
+#include "scene/script_component_base.h"
+#include "scene/entity.h"
+#include "scene/scene.h"
+
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
-class Rotator : public vre::Component
+class Rotator : public vre::ScriptComponentBase
 {
-public:
-	using vre::Component::Component;
-
+protected:
 	void update(float deltaSeconds) override
 	{
-		entity().transform.rotation += glm::vec3{0.0f, 1.0f, 0.0f} *deltaSeconds;
+		getComponent<vre::TransformComponent>().Rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
 	}
 };
 
@@ -27,15 +29,20 @@ public:
 	{
 		{ // Models
 			auto teapotModel = loadModel("models/teapot.obj");
-			auto& teapot = createEntity(teapotModel, { 0.0f, 0.5f, 0.0f });
-			teapot.addComponent<Rotator>();
+			auto teapot = createEntity("Teapot");
+			teapot.addComponent<vre::MeshComponent>(teapotModel);
+			teapot.addScript<Rotator>();
 
-			auto plane = loadModel("models/plane.obj");
-			createEntity(plane, { 0.0f, 0.5f, 0.0f });
+			auto planeModel = loadModel("models/plane.obj");
+			auto plane = createEntity("Plane");
+			plane.addComponent<vre::MeshComponent>(planeModel);
 		}
 		{ // Lights
-			createPointLight({ -1.0f, -1.0f, -1.0f });
-			createPointLight({ 0.0f, -1.0f, -1.0f });
+			auto light1 = createEntity("Light 1", { -1.0f, -1.0f, -1.0f });
+			light1.addComponent<vre::PointLightComponent>();
+
+			auto light2 = createEntity("Light 2", { 0.0f, -1.0f, -1.0f });
+			light2.addComponent<vre::PointLightComponent>();
 		}
 	}
 };

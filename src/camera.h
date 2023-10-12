@@ -1,7 +1,5 @@
 #pragma once
 
-#include "component.h"
-
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -10,13 +8,9 @@ namespace vre
 {
 	/// @brief Representation of a camera
 	/// @note A Camera is created by default when creating a Scene
-	class Camera : public Component
+	class Camera
 	{
 	public:
-		using Component::Component;
-
-		void update(float deltaSeconds) override;
-
 		/// @brief Sets the Camera to orthographic projection 
 		/// @param Distance to each clipping plane
 		void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
@@ -52,8 +46,8 @@ namespace vre
 
 	private:
 		glm::mat4 mProjectionMatrix{ 1.0f };
-		glm::mat4 mViewMatrix{1.0f};
-		glm::mat4 mInverseViewMatrix{1.0f};
+		glm::mat4 mViewMatrix{ 1.0f };
+		glm::mat4 mInverseViewMatrix{ 1.0f };
 	};
 
 } // namespace vre

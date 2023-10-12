@@ -1,5 +1,7 @@
 #include "point_light_system.h"
 
+#include "./../scene/components.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -32,37 +34,18 @@ namespace vre
 	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
 	{
 		int lighIndex = 0;
-		for (auto& objPair : frameInfo.gameObjects)
+		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>().each())
 		{
-			auto& obj = objPair.second;
-			if (obj.pointLight == nullptr)
-				continue;
-
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-
-			ubo.pointLights[lighIndex].position = glm::vec4(obj.transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			ubo.pointLights[lighIndex].position = glm::vec4(transform.Location, 1.0f);
+			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.Color, pointLight.Intensity);
 			lighIndex++;
 		}
-
 		ubo.numLights = lighIndex;
 	}
 
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
-		// sort lights because of transparency
-		std::map<float, SceneEntity::id_t> sortedLights;
-		for (auto& objPair : frameInfo.gameObjects)
-		{
-			auto& obj = objPair.second;
-			if (obj.pointLight == nullptr) 
-				continue;
-
-			auto offset = frameInfo.camera->position() - obj.transform.location;
-			float disSquared = glm::dot(offset, offset);
-			sortedLights[disSquared] = obj.id();
-		}
-
 		mVrePipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
@@ -74,15 +57,14 @@ namespace vre
 			0, nullptr
 		);
 
-
-		for (auto it = sortedLights.rbegin(); it != sortedLights.rend(); ++it)
+		auto view = frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>();
+		view.use<TransformComponent>(); // Sort because of Transparency
+		for (auto&& [entity, transform, pointLight] : view.each())
 		{
-			auto& obj = frameInfo.gameObjects.at(it->second);
-
 			PointLightPushConstants push{};
-			push.position = glm::vec4(obj.transform.location, 1.0f);
-			push.color = glm::vec4(obj.color, 1.0f);
-			push.radius = obj.transform.scale.x;
+			push.position = glm::vec4(transform.Location, 1.0f);
+			push.color = glm::vec4(pointLight.Color, 1.0f);
+			push.radius = transform.Scale.x * pointLight.Intensity;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
@@ -91,6 +73,7 @@ namespace vre
 				0,
 				sizeof(PointLightPushConstants),
 				&push);
+
 			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
 		}
 	}

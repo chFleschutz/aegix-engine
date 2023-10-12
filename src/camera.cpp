@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "scene_entity.h"
 
 #include <cassert>
 #include <limits>
@@ -8,11 +7,6 @@
 
 namespace vre
 {
-	void Camera::update(float deltaSeconds)
-	{
-		setViewYXZ(entity().transform.location, entity().transform.rotation);
-	}
-
 	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
 		mProjectionMatrix = glm::mat4{ 1.0f };

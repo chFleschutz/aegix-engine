@@ -1,7 +1,8 @@
 #include "vulkanite_engine.h"
 
 #include "buffer.h"
-#include "camera.h"
+#include "scene/components.h"
+#include "scene/entity.h"
 #include "input.h"
 #include "keyboard_movement_controller.h"
 #include "systems/simple_render_system.h"
@@ -66,15 +67,14 @@ namespace vre
 		PointLightSystem pointLightSystem{ mVreDevice, mVreRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto camera = mScene->camera().getComponent<Camera>();
-		if (!camera)
-			throw std::runtime_error("Could not find camera in scene");
+		auto& camera = mScene->camera().getComponent<CameraComponent>().Camera;
+		auto& cameraTransform = mScene->camera().getComponent<TransformComponent>();
 
 		// Init Input
 		Input::instance().initialize(mVreWindow.glfwWindow());
 
 		// Init Entity Components
-		initializeComponents();
+		mScene->runtimeBegin();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -86,33 +86,34 @@ namespace vre
 
 			// Calculate time
 			auto newTime = std::chrono::high_resolution_clock::now();
-			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 			currentTime = newTime;
 
 			// Update all components
-			updateComponets(frameTime);
+			mScene->update(frameTimeSec);
+
+			float aspect = mVreRenderer.aspectRatio();
+			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+			camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
 
 			// RENDERING
-			float aspect = mVreRenderer.aspectRatio();
-			camera->setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-
 			if (auto commandBuffer = mVreRenderer.beginFrame())
 			{
 				int frameIndex = mVreRenderer.frameIndex();
 				FrameInfo frameInfo{
 					frameIndex,
-					frameTime,
+					frameTimeSec,
 					commandBuffer,
-					camera,
+					&camera,
 					globalDescriptorSets[frameIndex],
-					mScene->entities()
+					mScene.get()
 				};
 
 				// update
 				GlobalUbo ubo{};
-				ubo.projection = camera->projectionMatrix();
-				ubo.view = camera->viewMatrix();
-				ubo.inverseView = camera->inverseViewMatrix();
+				ubo.projection = camera.projectionMatrix();
+				ubo.view = camera.viewMatrix();
+				ubo.inverseView = camera.inverseViewMatrix();
 
 				pointLightSystem.update(frameInfo, ubo);
 
@@ -131,42 +132,8 @@ namespace vre
 			}
 		}
 		vkDeviceWaitIdle(mVreDevice.device());
-		cleanupComponents();
-	}
 
-	void VulkaniteEngine::initializeComponents()
-	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->begin();
-			}
-		}
-		std::cout << "Components initialized" << std::endl;
-	}
-
-	void VulkaniteEngine::updateComponets(float deltaSeconds)
-	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->update(deltaSeconds);
-			}
-		}
-	}
-
-	void VulkaniteEngine::cleanupComponents()
-	{
-		for (auto& [id, entity] : mScene->entities())
-		{
-			for (auto& component : entity.components())
-			{
-				component->end();
-			}
-		}
-		std::cout << "Components cleaned up" << std::endl;
+		mScene->runtimeEnd();
 	}
 
 } // namespace vre

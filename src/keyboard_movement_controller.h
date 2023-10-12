@@ -1,17 +1,15 @@
 #pragma once
 
-#include "component.h"
 #include "window.h"
+#include "scene/script_component_base.h"
 
 #include <glm/glm.hpp>
 
 namespace vre
 {
-	class KeyboardMovementController : public Component
+	class KeyboardMovementController : public ScriptComponentBase
 	{
 	public:
-		using Component::Component;
-
 		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
@@ -33,7 +31,7 @@ namespace vre
 
 		void begin() override;
 		void update(float deltaSeconds) override;
-		
+
 		/// @brief Sets new overall move speed
 		void setMoveSpeed(float speed) { mMoveSpeed = speed; }
 		/// @brief Sets new overall look speed

@@ -1,5 +1,4 @@
 #include "vulkanite_engine.h"
-#include "camera.h"
 #include "default_scene.h"
 
 #include <iostream>

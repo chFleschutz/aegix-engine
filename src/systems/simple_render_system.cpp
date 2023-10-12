@@ -1,5 +1,7 @@
 #include "simple_render_system.h"
 
+#include "./../scene/components.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -7,6 +9,7 @@
 
 #include <array>
 #include <stdexcept>
+#include <iostream>
 
 namespace vre
 {
@@ -40,15 +43,11 @@ namespace vre
 			0, nullptr
 		);
 
-		for (auto& objPair : frameInfo.gameObjects)
+		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
 		{
-			auto& obj = objPair.second;
-			if (obj.model == nullptr)
-				continue;
-
 			SimplePushConstantData push{};
-			push.modelMatrix = obj.transform.mat4();
-			push.normalMatrix = obj.transform.normalMatrix();
+			push.modelMatrix = transform.mat4();
+			push.normalMatrix = transform.normalMatrix();
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
@@ -57,9 +56,9 @@ namespace vre
 				0,
 				sizeof(SimplePushConstantData),
 				&push);
-
-			obj.model->bind(frameInfo.commandBuffer);
-			obj.model->draw(frameInfo.commandBuffer);
+			
+			mesh.Model->bind(frameInfo.commandBuffer);
+			mesh.Model->draw(frameInfo.commandBuffer);
 		}
 	}
 
