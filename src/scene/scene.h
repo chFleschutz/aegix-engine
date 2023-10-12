@@ -1,8 +1,6 @@
 #pragma once
 
 #include "device.h"
-#pragma once
-
 #include "model.h"
 
 #include <entt/entt.hpp>
@@ -19,7 +17,8 @@ namespace vre
 	class Scene
 	{
 	public:
-		Scene(VreDevice& device);
+		// Todo: remove device parameter
+		Scene(VreDevice& device); 
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -36,6 +35,10 @@ namespace vre
 		// Todo: save camera somehow and allow multiple cameras
 		/// @brief Returns the camera
 		Entity camera();
+
+		void runtimeBegin();
+		void update(float deltaSeconds);
+		void runtimeEnd();
 
 	protected:
 		/// @brief Loads a model frome the given path

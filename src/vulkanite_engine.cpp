@@ -74,7 +74,7 @@ namespace vre
 		Input::instance().initialize(mVreWindow.glfwWindow());
 
 		// Init Entity Components
-		initializeComponents();
+		mScene->runtimeBegin();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -86,16 +86,15 @@ namespace vre
 
 			// Calculate time
 			auto newTime = std::chrono::high_resolution_clock::now();
-			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 			currentTime = newTime;
 
 			// Update all components
-			updateComponets(frameTime);
+			mScene->update(frameTimeSec);
 
 			float aspect = mVreRenderer.aspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-			//camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
-			camera.setViewTarget(cameraTransform.Location, { 0.0f, 0.0f, 0.0f });
+			camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
 
 			// RENDERING
 			if (auto commandBuffer = mVreRenderer.beginFrame())
@@ -103,7 +102,7 @@ namespace vre
 				int frameIndex = mVreRenderer.frameIndex();
 				FrameInfo frameInfo{
 					frameIndex,
-					frameTime,
+					frameTimeSec,
 					commandBuffer,
 					&camera,
 					globalDescriptorSets[frameIndex],
@@ -133,35 +132,8 @@ namespace vre
 			}
 		}
 		vkDeviceWaitIdle(mVreDevice.device());
-		cleanupComponents();
-	}
 
-	void VulkaniteEngine::initializeComponents()
-	{
-		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
-		{
-			component.Script->begin();
-		}
-
-		std::cout << "Components initialized" << std::endl;
-	}
-
-	void VulkaniteEngine::updateComponets(float deltaSeconds)
-	{
-		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
-		{
-			component.Script->update(deltaSeconds);
-		}
-	}
-
-	void VulkaniteEngine::cleanupComponents()
-	{
-		for (auto&& [entity, component] : mScene->viewEntitiesByType<ScriptComponent>().each())
-		{
-			component.Script->end();
-		}
-
-		std::cout << "Components cleaned up" << std::endl;
+		mScene->runtimeEnd();
 	}
 
 } // namespace vre

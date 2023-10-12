@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scene/entity.h"
+#include "scene/components.h"
 
 namespace vre
 {
@@ -9,11 +10,11 @@ namespace vre
 	public:
 		virtual ~ScriptComponentBase() {}
 
-		virtual void begin() = 0;
-		virtual void update(float deltaSeconds) = 0;
-		virtual void end() = 0;
-
 	protected:
+		virtual void begin() {}
+		virtual void update(float deltaSeconds) {}
+		virtual void end() {}
+
 		template<typename T>
 		T& getComponent()
 		{
@@ -22,6 +23,8 @@ namespace vre
 
 	private:
 		Entity m_Entity;
+
+		friend class Scene;
 	};
 
 } // namespace vre

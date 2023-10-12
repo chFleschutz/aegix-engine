@@ -1,6 +1,7 @@
 #pragma once
 
-#include "scene.h"
+#include "scene/scene.h"
+#include "scene/components.h"
 
 #include <entt/entt.hpp>
 
@@ -20,11 +21,21 @@ namespace vre
 		/// @tparam T Type of the component to add
 		/// @param ...args Arguments for the constructor of T
 		/// @return A refrence to the new component
+		/// @note When adding a custom script ScriptComponent is added as its container
 		template<typename T, typename... Args>
 		T& addComponent(Args&&... args)
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+		}
+
+		template<typename T, typename... Args>
+		ScriptComponent& addScript(Args&&... args)
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			auto& script = m_scene->m_registry.emplace<ScriptComponent>(m_entityHandle);
+			script.Script = new T(std::forward<Args>(args)...);
+			return script;
 		}
 
 		/// @brief Checks if the entity has a component of type T

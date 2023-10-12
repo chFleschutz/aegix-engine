@@ -2,7 +2,6 @@
 
 #include "model.h"
 #include "camera.h"
-#include "scene/script_component_base.h"
 
 #include <glm/glm.hpp>
 
@@ -53,7 +52,7 @@ namespace vre
 	struct PointLightComponent
 	{
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
-		float Intensity = 1.0f;
+		float Intensity = 0.2f;
 	};
 
 	/// @brief Holds a camera to view the scene
@@ -62,6 +61,7 @@ namespace vre
 		Camera Camera{};
 	};
 
+	class ScriptComponentBase;
 	/// @brief Stores a custom script
 	struct ScriptComponent
 	{

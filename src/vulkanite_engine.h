@@ -36,12 +36,7 @@ namespace vre
 			mScene->initialize();
 		}
 
-
 	private:
-		void initializeComponents();
-		void updateComponets(float deltaSeconds);
-		void cleanupComponents();
-
 		VreWindow mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
 		VreDevice mVreDevice{ mVreWindow };
 		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };
