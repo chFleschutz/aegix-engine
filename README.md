@@ -12,7 +12,7 @@
 
 ## Introduction <a name="introduction"></a>
 
-Vulkanite Render Engine is a simple rendering engine built as an exercise in preparation for my upcoming bachelor's thesis. It leverages the power of the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. Please note that this project is a work in progress and will be continually developed alongside my thesis work.
+Vulkanite is a simple rendering / game engine built as an exercise in preparation for my upcoming bachelor's thesis. It leverages the power of the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. Please note that this project is a work in progress and will be continually developed alongside my thesis work.
 
 ## Prerequisites <a name="prerequisites"></a>
 
@@ -36,22 +36,49 @@ Follow these steps to get started with Vulkanite Render Engine:
 
 This project uses several external libraries to enhance its functionality:
 
-- [GLFW](https://github.com/glfw/glfw)
-- [GLM](https://github.com/g-truc/glm)
-- [stb](https://github.com/nothings/stb)
-- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader)
-- [Vulkan](https://www.vulkan.org/)
+- [entt](https://github.com/skypjack/entt) 				(Entity Component System)
+- [glfw](https://github.com/glfw/glfw) 					(Windowing)
+- [glm](https://github.com/g-truc/glm) 					(Math Library)
+- [stb](https://github.com/nothings/stb) 				(Image Loading)
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader) 	(Loading 3D Models)
+- [Vulkan](https://www.vulkan.org/) 					(Graphics API)
 
 ## Usage <a name="usage"></a>
 
-View [default_scene.h](src/default_scene.h) for a complete example
+
+### Creating the engine 
+
+1. Create an instance of `vre::VulkaniteEngine` 
+
+2. Load a scene using `loadScene<>()`
+   
+3. Call the `run()` function
+
+   ```cpp
+   #include "vulkanite_engine.h"
+   #include "default_scene.h"
+
+   ...
+
+   try
+   {
+   	vre::VulkaniteEngine engine{};
+   	engine.loadScene<DefaultScene>();
+   	engine.run();
+   }
+   catch (const std::exception& e)
+   {
+   	std::cerr << e.what() << std::endl;
+   }
+   ```
+It's recommended to use a try-catch block because exceptions are used in some cases.
 
 ### Creating a new scene:
 
 1.  Create a subclass of `vre::Scene` and override the `initialize` method
    
     ```cpp
-    #include "scene.h"
+    #include "scene/scene.h"
 
     class ExampleScene : public vre::Scene
     {
@@ -76,7 +103,7 @@ View [default_scene.h](src/default_scene.h) for a complete example
     }
     ```
     
-7. Load the scene after creating the engine
+7. Load the scene before calling the run function
    
    ```cpp
     vre::VulkaniteEngine engine{};
@@ -89,6 +116,8 @@ View [default_scene.h](src/default_scene.h) for a complete example
 1. Create a subclass of `vre::ScriptComponentBase`
 
    ```cpp
+   #include "scene/script_component_base.h"
+   
    class ExampleScript : public vre::ScriptComponentBase
    {
     
@@ -108,4 +137,6 @@ View [default_scene.h](src/default_scene.h) for a complete example
    ```cpp
     myEntity.addScript<ExampleScript>();
    ```
+
+View [default_scene.h](src/default_scene.h) for an example
 
