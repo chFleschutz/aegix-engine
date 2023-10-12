@@ -64,7 +64,7 @@ namespace vre
 			PointLightPushConstants push{};
 			push.position = glm::vec4(transform.Location, 1.0f);
 			push.color = glm::vec4(pointLight.Color, 1.0f);
-			push.radius = transform.Scale.x;
+			push.radius = transform.Scale.x * pointLight.Intensity;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
@@ -73,27 +73,9 @@ namespace vre
 				0,
 				sizeof(PointLightPushConstants),
 				&push);
+
 			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
 		}
-
-		//for (auto it = sortedLights.rbegin(); it != sortedLights.rend(); ++it)
-		//{
-		//	auto& obj = frameInfo.gameObjects.at(it->second);
-
-		//	PointLightPushConstants push{};
-		//	push.position = glm::vec4(obj.transform.location, 1.0f);
-		//	push.color = glm::vec4(obj.color, 1.0f);
-		//	push.radius = obj.transform.scale.x;
-
-		//	vkCmdPushConstants(
-		//		frameInfo.commandBuffer,
-		//		mPipelineLayout,
-		//		VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-		//		0,
-		//		sizeof(PointLightPushConstants),
-		//		&push);
-		//	vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
-		//}
 	}
 
 	void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
