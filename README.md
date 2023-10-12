@@ -67,10 +67,12 @@ View [default_scene.h](src/default_scene.h) for a complete example
     ```cpp
     void ExampleScene::initialize()
     {
-        auto model = loadModel("models/teapot.obj");
-        auto& teapot = createEntity(model, { 0.0f, 0.5f, 0.0f });
-    
-        createPointLight({ -1.0f, -1.0f, -1.0f });
+    	auto teapotModel = loadModel("models/teapot.obj");
+    	auto teapot = createEntity("Teapot");
+    	teapot.addComponent<vre::MeshComponent>(teapotModel);
+
+    	auto light1 = createEntity("Light 1", { -1.0f, -1.0f, -1.0f });
+    	light1.addComponent<vre::PointLightComponent>();
     }
     ```
     
@@ -82,17 +84,15 @@ View [default_scene.h](src/default_scene.h) for a complete example
     engine.run();
    ```
 
-### Custom Components:
+### Custom Scripts:
 
-1. Create a subclass of `vre::Component`
+1. Create a subclass of `vre::ScriptComponentBase`
 
    ```cpp
-   class ExampleComponent : public vre::Component
-    {
-    public:
-    	using vre::Component::Component;
+   class ExampleScript : public vre::ScriptComponentBase
+   {
     
-    };
+   };
    ```
 
 3. Add functionality by overriding `begin`, `update` or `end`
@@ -103,9 +103,9 @@ View [default_scene.h](src/default_scene.h) for a complete example
 	void end() override;                        // Called once after the last frame
    ```
    
-4. Add the component to an entity in your `Scene::initialize` method
+4. Add the script to an entity in your `Scene::initialize` method
 
    ```cpp
-    myEntity.addComponent<ExampleComponent>();
+    myEntity.addScript<ExampleScript>();
    ```
 
