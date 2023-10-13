@@ -1,6 +1,6 @@
 #include "texture.h"
 
-#include "buffer.h"
+#include "renderer/buffer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -9,32 +9,32 @@
 
 namespace vre
 {
-	VreTexture::VreTexture(VreDevice& device, const VreTexture::CreateInfo& createInfo)
-		: mVreDevice{ device }
+	Texture::Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo)
+		: m_device{ device }
 	{
 		loadTexture(createInfo.textureFilePath);
 		createImageView();
 		createTextureSampler();
 	}
 
-	VreTexture::~VreTexture()
+	Texture::~Texture()
 	{
-		vkDestroySampler(mVreDevice.device(), mTextureSampler, nullptr);
-		vkDestroyImageView(mVreDevice.device(), mTextureImageView, nullptr);
-		vkDestroyImage(mVreDevice.device(), mTextureImage, nullptr);
-		vkFreeMemory(mVreDevice.device(), mTextureImageMemory, nullptr);
+		vkDestroySampler(m_device.device(), m_textureSampler, nullptr);
+		vkDestroyImageView(m_device.device(), m_textureImageView, nullptr);
+		vkDestroyImage(m_device.device(), m_textureImage, nullptr);
+		vkFreeMemory(m_device.device(), m_textureImageMemory, nullptr);
 	}
 
-	VkDescriptorImageInfo VreTexture::descriptorImageInfo()
+	VkDescriptorImageInfo Texture::descriptorImageInfo()
 	{
 		VkDescriptorImageInfo info{};
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = mTextureImageView;
-		info.sampler = mTextureSampler;
+		info.imageView = m_textureImageView;
+		info.sampler = m_textureSampler;
 		return info;
 	}
 
-	void VreTexture::loadTexture(const std::string& filePath)
+	void Texture::loadTexture(const std::string& filePath)
 	{
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load(filePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -43,8 +43,8 @@ namespace vre
 		if (!pixels)
 			throw std::runtime_error("Failed to load texture image");
 
-		VreBuffer stagingBuffer{
-			mVreDevice,
+		Buffer stagingBuffer{
+			m_device,
 			imageSize,
 			1,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -70,17 +70,17 @@ namespace vre
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-		mVreDevice.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mTextureImage, mTextureImageMemory);
-		mVreDevice.transitionImageLayout(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1);
-		mVreDevice.copyBufferToImage(stagingBuffer.buffer(), mTextureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
-		mVreDevice.transitionImageLayout(mTextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
+		m_device.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_textureImage, m_textureImageMemory);
+		m_device.transitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1);
+		m_device.copyBufferToImage(stagingBuffer.buffer(), m_textureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
+		m_device.transitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
 	}
 
-	void VreTexture::createImageView()
+	void Texture::createImageView()
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = mTextureImage;
+		viewInfo.image = m_textureImage;
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -89,11 +89,11 @@ namespace vre
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(mVreDevice.device(), &viewInfo, nullptr, &mTextureImageView) != VK_SUCCESS)
+		if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_textureImageView) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture image view");
 	}
 
-	void VreTexture::createTextureSampler()
+	void Texture::createTextureSampler()
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -103,7 +103,7 @@ namespace vre
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = mVreDevice.properties.limits.maxSamplerAnisotropy;
+		samplerInfo.maxAnisotropy = m_device.properties.limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareEnable = VK_FALSE;
@@ -113,7 +113,7 @@ namespace vre
 		samplerInfo.maxLod = 0.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if (vkCreateSampler(mVreDevice.device(), &samplerInfo, nullptr, &mTextureSampler) != VK_SUCCESS)
+		if (vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture sampler");
 	}
 

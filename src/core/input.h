@@ -1,8 +1,7 @@
 #pragma once
 
-#include "window.h"
-
-#include <glm/glm.hpp>
+#include "core/math_utilities.h"
+#include "renderer/window.h"
 
 namespace vre
 {
@@ -43,7 +42,7 @@ namespace vre
 	private:
 		Input() {}
 
-		GLFWwindow* mWindow = nullptr;
+		GLFWwindow* m_window = nullptr;
 	};
 
 } // namespace vre

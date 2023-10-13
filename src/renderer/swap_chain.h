@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device.h"
+#include "renderer/device.h"
 
 #include <vulkan/vulkan.h>
 
@@ -11,17 +11,17 @@
 namespace vre
 {
 
-	class VreSwapChain
+	class SwapChain
 	{
 	public:
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-		VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent);
-		VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous);
-		~VreSwapChain();
+		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
+		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+		~SwapChain();
 
-		VreSwapChain(const VreSwapChain&) = delete;
-		void operator=(const VreSwapChain&) = delete;
+		SwapChain(const SwapChain&) = delete;
+		void operator=(const SwapChain&) = delete;
 
 		VkFramebuffer frameBuffer(int index) { return mSwapChainFramebuffers[index]; }
 		VkRenderPass renderPass() { return mRenderPass; }
@@ -38,7 +38,7 @@ namespace vre
 		VkResult acquireNextImage(uint32_t* imageIndex);
 		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-		bool compareSwapFormats(const VreSwapChain& swapchain) const 
+		bool compareSwapFormats(const SwapChain& swapchain) const 
 		{
 			return swapchain.mSwapChainDepthFormat == mSwapChainDepthFormat &&
 				swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
@@ -71,17 +71,17 @@ namespace vre
 		std::vector<VkImage> mSwapChainImages;
 		std::vector<VkImageView> mSwapChainImageViews;
 
-		VreDevice& mDevice;
-		VkExtent2D mWindowExtent;
+		VulkanDevice& m_device;
+		VkExtent2D m_windowExtent;
 
-		VkSwapchainKHR mSwapChain;
-		std::shared_ptr<VreSwapChain> mOldSwapChain;
+		VkSwapchainKHR m_swapChain;
+		std::shared_ptr<SwapChain> m_oldSwapChain;
 
-		std::vector<VkSemaphore> mImageAvailableSemaphores;
-		std::vector<VkSemaphore> mRenderFinishedSemaphores;
-		std::vector<VkFence> mInFlightFences;
-		std::vector<VkFence> mImagesInFlight;
-		size_t mCurrentFrame = 0;
+		std::vector<VkSemaphore> m_imageAvailableSemaphores;
+		std::vector<VkSemaphore> m_renderFinishedSemaphores;
+		std::vector<VkFence> m_inFlightFences;
+		std::vector<VkFence> m_imagesInFlight;
+		size_t m_currentFrame = 0;
 	};
 
 } // namespace vre

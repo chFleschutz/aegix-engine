@@ -1,8 +1,6 @@
 #pragma once
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
+#include "core/math_utilities.h"
 
 namespace vre
 {
@@ -39,15 +37,15 @@ namespace vre
 		/// @param rotation Rotation of the camera
 		void setViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
-		const glm::mat4& projectionMatrix() const { return mProjectionMatrix; }
-		const glm::mat4& viewMatrix() const { return mViewMatrix; }
-		const glm::mat4& inverseViewMatrix() const { return mInverseViewMatrix; }
-		const glm::vec3 position() const { return glm::vec3(mInverseViewMatrix[3]); }
+		const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
+		const glm::mat4& viewMatrix() const { return m_viewMatrix; }
+		const glm::mat4& inverseViewMatrix() const { return m_inverseViewMatrix; }
+		const glm::vec3 position() const { return glm::vec3(m_inverseViewMatrix[3]); }
 
 	private:
-		glm::mat4 mProjectionMatrix{ 1.0f };
-		glm::mat4 mViewMatrix{ 1.0f };
-		glm::mat4 mInverseViewMatrix{ 1.0f };
+		glm::mat4 m_projectionMatrix{ 1.0f };
+		glm::mat4 m_viewMatrix{ 1.0f };
+		glm::mat4 m_inverseViewMatrix{ 1.0f };
 	};
 
 } // namespace vre

@@ -1,11 +1,8 @@
 #pragma once
 
-#include "buffer.h"
-#include "device.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
+#include "core/math_utilities.h"
+#include "renderer/buffer.h"
+#include "renderer/device.h"
 
 #include <filesystem>
 #include <memory>
@@ -13,7 +10,7 @@
 
 namespace vre
 {
-	class VreModel
+	class Model
 	{
 	public:
 		struct Vertex
@@ -40,13 +37,13 @@ namespace vre
 			void loadModel(const std::filesystem::path& filepath);
 		};
 
-		VreModel(VreDevice& device, const VreModel::Builder& builder);
-		~VreModel();
+		Model(VulkanDevice& device, const Model::Builder& builder);
+		~Model();
 
-		VreModel(const VreModel&) = delete;
-		VreModel& operator=(const VreModel&) = delete;
+		Model(const Model&) = delete;
+		Model& operator=(const Model&) = delete;
 
-		static std::unique_ptr<VreModel> createModelFromFile(VreDevice& device, const std::filesystem::path& filepath);
+		static std::unique_ptr<Model> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
@@ -55,14 +52,14 @@ namespace vre
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& m_device;
 
-		std::unique_ptr<VreBuffer> mVertexBuffer;
-		uint32_t mVertexCount;
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		uint32_t m_vertexCount;
 
-		bool mHasIndexBuffer = false;
-		std::unique_ptr<VreBuffer> mIndexBuffer;
-		uint32_t mIndexCount;
+		bool m_hasIndexBuffer = false;
+		std::unique_ptr<Buffer> m_indexBuffer;
+		uint32_t m_indexCount;
 	};
 
 } // namespace vre

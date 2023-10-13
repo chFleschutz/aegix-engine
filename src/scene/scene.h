@@ -1,7 +1,7 @@
 #pragma once
 
-#include "device.h"
-#include "model.h"
+#include "renderer/device.h"
+#include "renderer/model.h"
 
 #include <entt/entt.hpp>
 
@@ -18,7 +18,7 @@ namespace vre
 	{
 	public:
 		// Todo: remove device parameter
-		Scene(VreDevice& device); 
+		Scene(VulkanDevice& device); 
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -48,14 +48,14 @@ namespace vre
 		/// @param modelPath Path to the model 
 		/// @return A shared pointer with the loaded model
 		/// @note The shared pointer can be used multiple times
-		std::shared_ptr<VreModel> loadModel(const std::filesystem::path& modelPath);
+		std::shared_ptr<Model> loadModel(const std::filesystem::path& modelPath);
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
 		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
-		VreDevice& mDevice;
+		VulkanDevice& m_device;
 		entt::registry m_registry;
 
 		friend class Entity;

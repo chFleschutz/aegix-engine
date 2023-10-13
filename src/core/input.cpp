@@ -10,7 +10,7 @@ namespace vre
 
 	void Input::initialize(GLFWwindow* window)
 	{
-		mWindow = window;
+		m_window = window;
 
 		if (glfwRawMouseMotionSupported())
 			glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -18,24 +18,24 @@ namespace vre
 
 	bool Input::keyPressed(int key)
 	{
-		return glfwGetKey(mWindow, key) == GLFW_PRESS;
+		return glfwGetKey(m_window, key) == GLFW_PRESS;
 	}
 
 	bool Input::mouseButtonPressed(int button)
 	{
-		return glfwGetMouseButton(mWindow, button) == GLFW_PRESS;
+		return glfwGetMouseButton(m_window, button) == GLFW_PRESS;
 	}
 
 	glm::vec2 Input::cursorPosition()
 	{
 		double xPos, yPos;
-		glfwGetCursorPos(mWindow, &xPos, &yPos);
+		glfwGetCursorPos(m_window, &xPos, &yPos);
 		return { xPos, yPos };
 	}
 
 	void Input::setInputMode(int mode, int value)
 	{
-		glfwSetInputMode(mWindow, mode, value);
+		glfwSetInputMode(m_window, mode, value);
 	}
 
 } // namespace vre

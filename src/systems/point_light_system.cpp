@@ -1,11 +1,8 @@
 #include "point_light_system.h"
 
-#include "./../scene/components.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
+#include "core/math_utilities.h"
+#include "renderer/camera.h"
+#include "scene/components.h"
 
 #include <array>
 #include <map>
@@ -20,7 +17,8 @@ namespace vre
 		float radius;
 	};
 
-	PointLightSystem::PointLightSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{ device }
+	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
+		: m_device{ device }
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
@@ -28,7 +26,7 @@ namespace vre
 
 	PointLightSystem::~PointLightSystem()
 	{
-		vkDestroyPipelineLayout(mVreDevice.device(), mPipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_device.device(), mPipelineLayout, nullptr);
 	}
 
 	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
@@ -37,8 +35,8 @@ namespace vre
 		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>().each())
 		{
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = glm::vec4(transform.Location, 1.0f);
-			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.Color, pointLight.Intensity);
+			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
 			lighIndex++;
 		}
 		ubo.numLights = lighIndex;
@@ -46,7 +44,7 @@ namespace vre
 
 	void PointLightSystem::render(FrameInfo& frameInfo)
 	{
-		mVrePipeline->bind(frameInfo.commandBuffer);
+		mPipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
@@ -62,9 +60,9 @@ namespace vre
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{};
-			push.position = glm::vec4(transform.Location, 1.0f);
-			push.color = glm::vec4(pointLight.Color, 1.0f);
-			push.radius = transform.Scale.x * pointLight.Intensity;
+			push.position = glm::vec4(transform.location, 1.0f);
+			push.color = glm::vec4(pointLight.color, 1.0f);
+			push.radius = transform.scale.x * pointLight.intensity;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
@@ -94,7 +92,7 @@ namespace vre
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-		if (vkCreatePipelineLayout(mVreDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout");
 	}
 
@@ -103,15 +101,15 @@ namespace vre
 		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
-		VrePipeline::defaultPipelineConfigInfo(pipelineConfig);
-		VrePipeline::enableAlphaBlending(pipelineConfig);
+		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
+		Pipeline::enableAlphaBlending(pipelineConfig);
 		pipelineConfig.bindingDescriptions.clear();
 		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		mVrePipeline = std::make_unique<VrePipeline>(
-			mVreDevice,
+		mPipeline = std::make_unique<Pipeline>(
+			m_device,
 			"shaders/point_light.vert.spv",
 			"shaders/point_light.frag.spv",
 			pipelineConfig);

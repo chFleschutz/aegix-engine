@@ -1,9 +1,8 @@
 #pragma once
 
-#include "camera.h"
-#include "device.h"
-#include "frame_info.h"
-#include "pipeline.h"
+#include "renderer/device.h"
+#include "renderer/frame_info.h"
+#include "renderer/pipeline.h"
 
 #include <memory>
 #include <vector>
@@ -13,7 +12,7 @@ namespace vre
 	class SimpleRenderSystem
 	{
 	public:
-		SimpleRenderSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -25,9 +24,9 @@ namespace vre
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& m_device;
 
-		std::unique_ptr<VrePipeline> mVrePipeline;
+		std::unique_ptr<Pipeline> mPipeline;
 		VkPipelineLayout mPipelineLayout;
 	};
 

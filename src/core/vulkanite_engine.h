@@ -1,10 +1,10 @@
 #pragma once
 
-#include "descriptors.h"
-#include "device.h"
+#include "renderer/descriptors.h"
+#include "renderer/device.h"
 #include "scene/scene.h"
-#include "window.h"
-#include "renderer.h"
+#include "renderer/window.h"
+#include "renderer/renderer.h"
 
 #include <memory>
 #include <type_traits>
@@ -32,17 +32,17 @@ namespace vre
 		template<class T, class = std::enable_if_t<std::is_base_of_v<Scene, T>>>
 		void loadScene()
 		{
-			mScene = std::make_unique<T>(mVreDevice);
-			mScene->initialize();
+			m_scene = std::make_unique<T>(m_device);
+			m_scene->initialize();
 		}
 
 	private:
-		VreWindow mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
-		VreDevice mVreDevice{ mVreWindow };
-		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };
+		Window m_window{ WIDTH, HEIGHT, "Vulkanite" };
+		VulkanDevice m_device{ m_window };
+		Renderer m_renderer{ m_window, m_device };
 
-		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
-		std::unique_ptr<Scene> mScene;
+		std::unique_ptr<DescriptorPool> m_globalPool{};
+		std::unique_ptr<Scene> m_scene;
 	};
 
 } // namespace vre

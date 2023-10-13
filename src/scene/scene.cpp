@@ -1,6 +1,5 @@
 #include "Scene.h"
 
-#include "camera.h"
 #include "components.h"
 #include "entity.h"
 #include "keyboard_movement_controller.h"
@@ -9,19 +8,19 @@
 
 namespace vre
 {
-	std::shared_ptr<VreModel> Scene::loadModel(const std::filesystem::path& modelPath)
+	std::shared_ptr<Model> Scene::loadModel(const std::filesystem::path& modelPath)
 	{
-		return VreModel::createModelFromFile(mDevice, modelPath);
+		return Model::createModelFromFile(m_device, modelPath);
 	}
 
-	Scene::Scene(VreDevice& device) : mDevice{ device }
+	Scene::Scene(VulkanDevice& device) : m_device{ device }
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<CameraComponent>();
 		camera.addScript<KeyboardMovementController>();
 		auto& cameraTransform = camera.getComponent<TransformComponent>();
-		cameraTransform.Location = { -0.5f, -0.5f, -0.5 };
-		cameraTransform.Rotation = { -0.4f, 0.8f, 0 };
+		cameraTransform.location = { -0.5f, -0.5f, -0.5 };
+		cameraTransform.rotation = { -0.4f, 0.8f, 0 };
 	}
 
 	Entity Scene::camera()
@@ -37,13 +36,13 @@ namespace vre
 		// Initialize all script components
 		for (auto&& [entity, component] : view.each())
 		{
-			component.Script->m_Entity = { entity, this };
+			component.script->m_entity = { entity, this };
 		}
 
 		// Call begin after all scripts have been initialized
 		for (auto&& [entity, component] : view.each())
 		{
-			component.Script->begin();
+			component.script->begin();
 		}
 	}
 
@@ -51,7 +50,7 @@ namespace vre
 	{
 		for (auto&& [entity, component] : m_registry.view<ScriptComponent>().each())
 		{
-			component.Script->update(deltaSeconds);
+			component.script->update(deltaSeconds);
 		}
 	}
 
@@ -59,7 +58,7 @@ namespace vre
 	{
 		for (auto&& [entity, component] : m_registry.view<ScriptComponent>().each())
 		{
-			component.Script->end();
+			component.script->end();
 		}
 	}
 

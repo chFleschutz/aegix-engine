@@ -1,24 +1,24 @@
 #pragma once
 
-#include "device.h"
+#include "renderer/device.h"
 
 namespace vre
 {
 	/// @brief Encapsulates a vulkan buffer
-	class VreBuffer
+	class Buffer
 	{
 	public:
-		VreBuffer(
-			VreDevice& device,
+		Buffer(
+			VulkanDevice& device,
 			VkDeviceSize instanceSize,
 			uint32_t instanceCount,
 			VkBufferUsageFlags usageFlags,
 			VkMemoryPropertyFlags memoryPropertyFlags,
 			VkDeviceSize minOffsetAlignment = 1);
-		~VreBuffer();
+		~Buffer();
 
-		VreBuffer(const VreBuffer&) = delete;
-		VreBuffer& operator=(const VreBuffer&) = delete;
+		Buffer(const Buffer&) = delete;
+		Buffer& operator=(const Buffer&) = delete;
 
 		/// @brief Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
 		/// @param size (Optional) Size of the memory range to map. Pass VK_WHOLE_SIZE to map the complete buffer range.
@@ -69,14 +69,14 @@ namespace vre
 		/// @return VkResult of the invalidate call
 		VkResult invalidateIndex(int index);
 
-		VkBuffer buffer() const { return mBuffer; }
-		void* mappedMemory() const { return mMapped; }
-		uint32_t instanceCount() const { return mInstanceCount; }
-		VkDeviceSize instanceSize() const { return mInstanceSize; }
-		VkDeviceSize alignmentSize() const { return mInstanceSize; }
-		VkBufferUsageFlags usageFlags() const { return mUsageFlags; }
-		VkMemoryPropertyFlags memoryPropertyFlags() const { return mMemoryPropertyFlags; }
-		VkDeviceSize bufferSize() const { return mBufferSize; }
+		VkBuffer buffer() const { return m_buffer; }
+		void* mappedMemory() const { return m_mapped; }
+		uint32_t instanceCount() const { return m_instanceCount; }
+		VkDeviceSize instanceSize() const { return m_instanceSize; }
+		VkDeviceSize alignmentSize() const { return m_instanceSize; }
+		VkBufferUsageFlags usageFlags() const { return m_usageFlags; }
+		VkMemoryPropertyFlags memoryPropertyFlags() const { return m_memoryPropertyFlags; }
+		VkDeviceSize bufferSize() const { return m_bufferSize; }
 
 	private:
 		/// @brief Returns the minimum instance size required to be compatible with devices minOffsetAlignment
@@ -85,17 +85,17 @@ namespace vre
 		/// @return VkResult of the buffer mapping call
 		static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-		VreDevice& mVreDevice;
-		void* mMapped = nullptr;
-		VkBuffer mBuffer = VK_NULL_HANDLE;
-		VkDeviceMemory mMemory = VK_NULL_HANDLE;
+		VulkanDevice& m_device;
+		void* m_mapped = nullptr;
+		VkBuffer m_buffer = VK_NULL_HANDLE;
+		VkDeviceMemory m_memory = VK_NULL_HANDLE;
 
-		VkDeviceSize mBufferSize;
-		uint32_t mInstanceCount;
-		VkDeviceSize mInstanceSize;
-		VkDeviceSize mAlignmentSize;
-		VkBufferUsageFlags mUsageFlags;
-		VkMemoryPropertyFlags mMemoryPropertyFlags;
+		VkDeviceSize m_bufferSize;
+		uint32_t m_instanceCount;
+		VkDeviceSize m_instanceSize;
+		VkDeviceSize m_alignmentSize;
+		VkBufferUsageFlags m_usageFlags;
+		VkMemoryPropertyFlags m_memoryPropertyFlags;
 	};
 
 }  // namespace vre

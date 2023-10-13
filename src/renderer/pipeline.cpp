@@ -10,29 +10,29 @@
 
 namespace vre
 {
-	VrePipeline::VrePipeline(
-		VreDevice& device, 
+	Pipeline::Pipeline(
+		VulkanDevice& device, 
 		const std::string& vertShaderPath, 
 		const std::string& fragShaderPath, 
 		const PipelineConfigInfo& configInfo)
-		: mVreDevice{ device }
+		: m_device{ device }
 	{
 		createGraphicsPipeline(vertShaderPath, fragShaderPath, configInfo);
 	}
 
-	VrePipeline::~VrePipeline()
+	Pipeline::~Pipeline()
 	{
-		vkDestroyShaderModule(mVreDevice.device(), mFragShaderModule, nullptr);
-		vkDestroyShaderModule(mVreDevice.device(), mVertShaderModule, nullptr);
-		vkDestroyPipeline(mVreDevice.device(), mGraphicsPipeline, nullptr);
+		vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
+		vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
+		vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
 	}
 
-	void VrePipeline::bind(VkCommandBuffer commandBuffer)
+	void Pipeline::bind(VkCommandBuffer commandBuffer)
 	{
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mGraphicsPipeline);
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 	}
 
-	void VrePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
+	void Pipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
 	{
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -100,11 +100,11 @@ namespace vre
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = VreModel::Vertex::bindingDescriptions();
-		configInfo.attributeDescriptions = VreModel::Vertex::attributeDescriptions();
+		configInfo.bindingDescriptions = Model::Vertex::bindingDescriptions();
+		configInfo.attributeDescriptions = Model::Vertex::attributeDescriptions();
 	}
 
-	void VrePipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)
+	void Pipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)
 	{
 		configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
 		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -116,7 +116,7 @@ namespace vre
 		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 
-	std::vector<char> VrePipeline::readFile(const std::string& filePath)
+	std::vector<char> Pipeline::readFile(const std::string& filePath)
 	{
 		std::ifstream file{filePath, std::ios::ate | std::ios::binary};
 		if (!(file.is_open()))
@@ -132,20 +132,20 @@ namespace vre
 		return buffer;
 	}
 
-	void VrePipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo)
+	void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
 
 		auto vertCode = readFile(vertShaderPath);
 		auto fragCode = readFile(fragShaderPath);
-		createShaderModule(vertCode, &mVertShaderModule);
-		createShaderModule(fragCode, &mFragShaderModule);
+		createShaderModule(vertCode, &m_vertShaderModule);
+		createShaderModule(fragCode, &m_fragShaderModule);
 
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shaderStages[0].module = mVertShaderModule;
+		shaderStages[0].module = m_vertShaderModule;
 		shaderStages[0].pName = "main";
 		shaderStages[0].flags = 0;
 		shaderStages[0].pNext = nullptr;
@@ -153,7 +153,7 @@ namespace vre
 
 		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = mFragShaderModule;
+		shaderStages[1].module = m_fragShaderModule;
 		shaderStages[1].pName = "main";
 		shaderStages[1].flags = 0;
 		shaderStages[1].pNext = nullptr;
@@ -186,18 +186,18 @@ namespace vre
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(mVreDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &mGraphicsPipeline) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
 			throw std::runtime_error("failed to create graphics pipeline");
 	}
 
-	void VrePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
+	void Pipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(mVreDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
+		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
 			throw std::runtime_error("failed to create shader module");
 	}
 }

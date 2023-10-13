@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device.h"
+#include "renderer/device.h"
 
 #include <string>
 #include <vector>
@@ -29,14 +29,14 @@ namespace vre
 		uint32_t subpass = 0;
 	};
 
-	class VrePipeline
+	class Pipeline
 	{
 	public:
-		VrePipeline(VreDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
-		~VrePipeline();
+		Pipeline(VulkanDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
+		~Pipeline();
 
-		VrePipeline(const VrePipeline&) = delete;
-		VrePipeline operator=(const VrePipeline&) = delete;
+		Pipeline(const Pipeline&) = delete;
+		Pipeline operator=(const Pipeline&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
 
@@ -50,10 +50,10 @@ namespace vre
 
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-		VreDevice& mVreDevice;
-		VkPipeline mGraphicsPipeline;
-		VkShaderModule mVertShaderModule;
-		VkShaderModule mFragShaderModule;
+		VulkanDevice& m_device;
+		VkPipeline m_graphicsPipeline;
+		VkShaderModule m_vertShaderModule;
+		VkShaderModule m_fragShaderModule;
 	};
 
 } // namespace vre

@@ -1,6 +1,6 @@
 #include "model.h"
 
-#include "utils.h"
+#include "core/utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -14,9 +14,9 @@
 namespace std
 {
 	template <>
-	struct hash<vre::VreModel::Vertex>
+	struct hash<vre::Model::Vertex>
 	{
-		size_t operator()(vre::VreModel::Vertex const& vertex) const
+		size_t operator()(vre::Model::Vertex const& vertex) const
 		{
 			size_t seed = 0;
 			vre::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
@@ -28,58 +28,58 @@ namespace std
 
 namespace vre
 {
-	VreModel::VreModel(VreDevice& device, const VreModel::Builder& builder) : mVreDevice{ device }
+	Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_device{ device }
 	{
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
 	}
 
-	VreModel::~VreModel()
+	Model::~Model()
 	{
 	}
 
-	std::unique_ptr<VreModel> VreModel::createModelFromFile(VreDevice& device, const std::filesystem::path& filepath)
+	std::unique_ptr<Model> Model::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
 	{
 		Builder builder{};
 		builder.loadModel(filepath);
 
-		return std::make_unique<VreModel>(device, builder);
+		return std::make_unique<Model>(device, builder);
 	}
 
-	void VreModel::bind(VkCommandBuffer commandBuffer)
+	void Model::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[] = { mVertexBuffer->buffer() };
+		VkBuffer buffers[] = { m_vertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
-		if (mHasIndexBuffer)
-			vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+		if (m_hasIndexBuffer)
+			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	void VreModel::draw(VkCommandBuffer commandBuffer)
+	void Model::draw(VkCommandBuffer commandBuffer)
 	{
-		if (mHasIndexBuffer)
+		if (m_hasIndexBuffer)
 		{
-			vkCmdDrawIndexed(commandBuffer, mIndexCount, 1, 0, 0, 0);
+			vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 		}
 		else
 		{
-			vkCmdDraw(commandBuffer, mVertexCount, 1, 0, 0);
+			vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 		}
 	}
 
-	void VreModel::createVertexBuffers(const std::vector<Vertex>& vertices)
+	void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
 	{
-		mVertexCount = static_cast<uint32_t>(vertices.size());
-		assert(mVertexCount >= 3 && "Vertex count must be atleast 3");
+		m_vertexCount = static_cast<uint32_t>(vertices.size());
+		assert(m_vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		VkDeviceSize bufferSize = sizeof(vertices[0]) * mVertexCount;
+		VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
 		uint32_t vertexSize = sizeof(vertices[0]);
 
-		VreBuffer stagingBuffer{
-			mVreDevice,
+		Buffer stagingBuffer{
+			m_device,
 			vertexSize,
-			mVertexCount,
+			m_vertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		};
@@ -87,31 +87,31 @@ namespace vre
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer((void*)vertices.data());
 
-		mVertexBuffer = std::make_unique<VreBuffer>(
-			mVreDevice,
+		m_vertexBuffer = std::make_unique<Buffer>(
+			m_device,
 			vertexSize,
-			mVertexCount,
+			m_vertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		mVreDevice.copyBuffer(stagingBuffer.buffer(), mVertexBuffer->buffer(), bufferSize);
+		m_device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
 	}
 
-	void VreModel::createIndexBuffers(const std::vector<uint32_t>& indices)
+	void Model::createIndexBuffers(const std::vector<uint32_t>& indices)
 	{
-		mIndexCount = static_cast<uint32_t>(indices.size());
-		mHasIndexBuffer = mIndexCount > 0;
-		if (!mHasIndexBuffer)
+		m_indexCount = static_cast<uint32_t>(indices.size());
+		m_hasIndexBuffer = m_indexCount > 0;
+		if (!m_hasIndexBuffer)
 			return;
 
-		VkDeviceSize bufferSize = sizeof(indices[0]) * mIndexCount;
+		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
 		uint32_t indexSize = sizeof(indices[0]);
 
-		VreBuffer stagingBuffer{
-			mVreDevice,
+		Buffer stagingBuffer{
+			m_device,
 			indexSize,
-			mIndexCount,
+			m_indexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
@@ -119,18 +119,18 @@ namespace vre
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer((void*)indices.data());
 
-		mIndexBuffer = std::make_unique<VreBuffer>(
-			mVreDevice,
+		m_indexBuffer = std::make_unique<Buffer>(
+			m_device,
 			indexSize,
-			mIndexCount,
+			m_indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		mVreDevice.copyBuffer(stagingBuffer.buffer(), mIndexBuffer->buffer(), bufferSize);
+		m_device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 	}
 
-	std::vector<VkVertexInputBindingDescription> VreModel::Vertex::bindingDescriptions()
+	std::vector<VkVertexInputBindingDescription> Model::Vertex::bindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
@@ -139,7 +139,7 @@ namespace vre
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> VreModel::Vertex::attributeDescriptions()
+	std::vector<VkVertexInputAttributeDescription> Model::Vertex::attributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
@@ -149,7 +149,7 @@ namespace vre
 		return attributeDescriptions;
 	}
 
-	void VreModel::Builder::loadModel(const std::filesystem::path& filepath)
+	void Model::Builder::loadModel(const std::filesystem::path& filepath)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

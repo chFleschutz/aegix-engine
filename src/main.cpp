@@ -1,5 +1,5 @@
-#include "vulkanite_engine.h"
-#include "default_scene.h"
+#include "core/vulkanite_engine.h"
+#include "scene/default_scene.h"
 
 #include <iostream>
 #include <stdexcept>

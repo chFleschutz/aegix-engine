@@ -18,11 +18,11 @@ namespace vre
 		template<typename T>
 		T& getComponent()
 		{
-			return m_Entity.getComponent<T>();
+			return m_entity.getComponent<T>();
 		}
 
 	private:
-		Entity m_Entity;
+		Entity m_entity;
 
 		friend class Scene;
 	};

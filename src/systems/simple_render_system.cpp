@@ -1,11 +1,8 @@
 #include "simple_render_system.h"
 
-#include "./../scene/components.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
+#include "core/math_utilities.h"
+#include "renderer/renderer.h"
+#include "scene/components.h"
 
 #include <array>
 #include <stdexcept>
@@ -19,7 +16,7 @@ namespace vre
 		glm::mat4 normalMatrix{1.0f};
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{device}
+	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_device{device}
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
@@ -27,12 +24,12 @@ namespace vre
 
 	SimpleRenderSystem::~SimpleRenderSystem()
 	{
-		vkDestroyPipelineLayout(mVreDevice.device(), mPipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_device.device(), mPipelineLayout, nullptr);
 	}
 
 	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo)
 	{
-		mVrePipeline->bind(frameInfo.commandBuffer);
+		mPipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
@@ -57,8 +54,8 @@ namespace vre
 				sizeof(SimplePushConstantData),
 				&push);
 			
-			mesh.Model->bind(frameInfo.commandBuffer);
-			mesh.Model->draw(frameInfo.commandBuffer);
+			mesh.model->bind(frameInfo.commandBuffer);
+			mesh.model->draw(frameInfo.commandBuffer);
 		}
 	}
 
@@ -78,7 +75,7 @@ namespace vre
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-		if (vkCreatePipelineLayout(mVreDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout");
 	}
 
@@ -87,12 +84,12 @@ namespace vre
 		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
-		VrePipeline::defaultPipelineConfigInfo(pipelineConfig);
+		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		mVrePipeline = std::make_unique<VrePipeline>(
-			mVreDevice,
+		mPipeline = std::make_unique<Pipeline>(
+			m_device,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
 			pipelineConfig);

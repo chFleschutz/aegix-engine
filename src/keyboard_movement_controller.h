@@ -1,9 +1,8 @@
 #pragma once
 
-#include "window.h"
+#include "core/math_utilities.h"
+#include "renderer/window.h"
 #include "scene/script_component_base.h"
-
-#include <glm/glm.hpp>
 
 namespace vre
 {
@@ -33,11 +32,11 @@ namespace vre
 		void update(float deltaSeconds) override;
 
 		/// @brief Sets new overall move speed
-		void setMoveSpeed(float speed) { mMoveSpeed = speed; }
+		void setMoveSpeed(float speed) { m_moveSpeed = speed; }
 		/// @brief Sets new overall look speed
-		void setLookSpeed(float speed) { mLookSpeed = speed; }
+		void setLookSpeed(float speed) { m_lookSpeed = speed; }
 		/// @brief Sets speed for looking with the mouse
-		void setMouseSensitivity(float sensitivity) { mMouseSensitivity = sensitivity; }
+		void setMouseSensitivity(float sensitivity) { m_mouseSensitivity = sensitivity; }
 
 	private:
 		void applyRotation(float deltaSeconds);
@@ -46,14 +45,14 @@ namespace vre
 		void toggleMouseRotate(bool enabled);
 		void toogleMousePan(bool enabled);
 
-		KeyMappings mKeys{};
-		float mMoveSpeed{ 2.5f };
-		float mLookSpeed{ 1.5f };
-		float mMouseSensitivity{ 3.0f };
-		glm::vec2 mPreviousCursorPos{0.0f};
+		KeyMappings m_keys{};
+		float m_moveSpeed{ 2.5f };
+		float m_lookSpeed{ 1.5f };
+		float m_mouseSensitivity{ 3.0f };
+		glm::vec2 m_previousCursorPos{0.0f};
 
-		bool mMouseRotateEnabled{ false };
-		bool mMousePanEnabled{ false };
+		bool m_mouseRotateEnabled{ false };
+		bool m_mousePanEnabled{ false };
 	};
 
 } // namespace vre
