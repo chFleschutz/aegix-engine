@@ -7,7 +7,7 @@ namespace vre
 {
     // *************** Descriptor Set Layout Builder *********************
 
-    VreDescriptorSetLayout::Builder& VreDescriptorSetLayout::Builder::addBinding(
+    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(
         uint32_t binding,
         VkDescriptorType descriptorType,
         VkShaderStageFlags stageFlags,
@@ -23,14 +23,14 @@ namespace vre
         return *this;
     }
 
-    std::unique_ptr<VreDescriptorSetLayout> VreDescriptorSetLayout::Builder::build() const
+    std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::Builder::build() const
     {
-        return std::make_unique<VreDescriptorSetLayout>(mVreDevice, mBindings);
+        return std::make_unique<DescriptorSetLayout>(mVreDevice, mBindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
-    VreDescriptorSetLayout::VreDescriptorSetLayout(VulkanDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
+    DescriptorSetLayout::DescriptorSetLayout(VulkanDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
         : mVreDevice{ device }, mBindings{ bindings }
     {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
@@ -54,39 +54,39 @@ namespace vre
         }
     }
 
-    VreDescriptorSetLayout::~VreDescriptorSetLayout()
+    DescriptorSetLayout::~DescriptorSetLayout()
     {
         vkDestroyDescriptorSetLayout(mVreDevice.device(), mDescriptorSetLayout, nullptr);
     }
 
     // *************** Descriptor Pool Builder *********************
 
-    VreDescriptorPool::Builder& VreDescriptorPool::Builder::addPoolSize(VkDescriptorType descriptorType, uint32_t count)
+    DescriptorPool::Builder& DescriptorPool::Builder::addPoolSize(VkDescriptorType descriptorType, uint32_t count)
     {
         poolSizes.push_back({ descriptorType, count });
         return *this;
     }
 
-    VreDescriptorPool::Builder& VreDescriptorPool::Builder::setPoolFlags(
+    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(
         VkDescriptorPoolCreateFlags flags)
     {
         poolFlags = flags;
         return *this;
     }
-    VreDescriptorPool::Builder& VreDescriptorPool::Builder::setMaxSets(uint32_t count)
+    DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count)
     {
         maxSets = count;
         return *this;
     }
 
-    std::unique_ptr<VreDescriptorPool> VreDescriptorPool::Builder::build() const
+    std::unique_ptr<DescriptorPool> DescriptorPool::Builder::build() const
     {
-        return std::make_unique<VreDescriptorPool>(mVreDevice, maxSets, poolFlags, poolSizes);
+        return std::make_unique<DescriptorPool>(mVreDevice, maxSets, poolFlags, poolSizes);
     }
 
     // *************** Descriptor Pool *********************
 
-    VreDescriptorPool::VreDescriptorPool(
+    DescriptorPool::DescriptorPool(
         VulkanDevice& device,
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
@@ -107,12 +107,12 @@ namespace vre
         }
     }
 
-    VreDescriptorPool::~VreDescriptorPool()
+    DescriptorPool::~DescriptorPool()
     {
         vkDestroyDescriptorPool(mVreDevice.device(), mDescriptorPool, nullptr);
     }
 
-    bool VreDescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
+    bool DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
     {
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -128,7 +128,7 @@ namespace vre
         return true;
     }
 
-    void VreDescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
+    void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
     {
         vkFreeDescriptorSets(
             mVreDevice.device(),
@@ -137,19 +137,19 @@ namespace vre
             descriptors.data());
     }
 
-    void VreDescriptorPool::resetPool()
+    void DescriptorPool::resetPool()
     {
         vkResetDescriptorPool(mVreDevice.device(), mDescriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
 
-    VreDescriptorWriter::VreDescriptorWriter(VreDescriptorSetLayout& setLayout, VreDescriptorPool& pool)
+    DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool)
         : mSetLayout{ setLayout }, mPool{ pool }
     {
     }
 
-    VreDescriptorWriter& VreDescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
+    DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
     {
         assert(mSetLayout.mBindings.count(binding) == 1 && "Layout does not contain specified binding");
 
@@ -168,7 +168,7 @@ namespace vre
         return *this;
     }
 
-    VreDescriptorWriter& VreDescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
+    DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
     {
         assert(mSetLayout.mBindings.count(binding) == 1 && "Layout does not contain specified binding");
 
@@ -189,7 +189,7 @@ namespace vre
         return *this;
     }
 
-    bool VreDescriptorWriter::build(VkDescriptorSet& set)
+    bool DescriptorWriter::build(VkDescriptorSet& set)
     {
         if (!mPool.allocateDescriptorSet(mSetLayout.descriptorSetLayout(), set))
             return false;
@@ -198,7 +198,7 @@ namespace vre
         return true;
     }
 
-    void VreDescriptorWriter::overwrite(VkDescriptorSet& set)
+    void DescriptorWriter::overwrite(VkDescriptorSet& set)
     {
         for (auto& write : mWrites)
         {

@@ -41,7 +41,7 @@ namespace vre
 		VulkanDevice mDevice{ mWindow };
 		Renderer mRenderer{ mWindow, mDevice };
 
-		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
+		std::unique_ptr<DescriptorPool> mGlobalPool{};
 		std::unique_ptr<Scene> mScene;
 	};
 

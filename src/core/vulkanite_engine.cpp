@@ -23,7 +23,7 @@ namespace vre
 {
 	VulkaniteEngine::VulkaniteEngine()
 	{
-		mGlobalPool = VreDescriptorPool::Builder(mDevice)
+		mGlobalPool = DescriptorPool::Builder(mDevice)
 			.setMaxSets(VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VreSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
@@ -50,7 +50,7 @@ namespace vre
 			uboBuffers[i]->map();
 		}
 
-		auto globalSetLayout = VreDescriptorSetLayout::Builder(mDevice)
+		auto globalSetLayout = DescriptorSetLayout::Builder(mDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
@@ -58,7 +58,7 @@ namespace vre
 		for (int i = 0; i < globalDescriptorSets.size(); i++)
 		{
 			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			VreDescriptorWriter(*globalSetLayout, *mGlobalPool)
+			DescriptorWriter(*globalSetLayout, *mGlobalPool)
 				.writeBuffer(0, &bufferInfo)
 				.build(globalDescriptorSets[i]);
 		}
