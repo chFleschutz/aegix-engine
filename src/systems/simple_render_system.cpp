@@ -20,7 +20,7 @@ namespace vre
 		glm::mat4 normalMatrix{1.0f};
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{device}
+	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mDevice{device}
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
@@ -28,12 +28,12 @@ namespace vre
 
 	SimpleRenderSystem::~SimpleRenderSystem()
 	{
-		vkDestroyPipelineLayout(mVreDevice.device(), mPipelineLayout, nullptr);
+		vkDestroyPipelineLayout(mDevice.device(), mPipelineLayout, nullptr);
 	}
 
 	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo)
 	{
-		mVrePipeline->bind(frameInfo.commandBuffer);
+		mPipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
@@ -79,7 +79,7 @@ namespace vre
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-		if (vkCreatePipelineLayout(mVreDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(mDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout");
 	}
 
@@ -92,8 +92,8 @@ namespace vre
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		mVrePipeline = std::make_unique<Pipeline>(
-			mVreDevice,
+		mPipeline = std::make_unique<Pipeline>(
+			mDevice,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
 			pipelineConfig);

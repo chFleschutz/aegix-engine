@@ -5,7 +5,7 @@
 
 namespace vre
 {
-	Renderer::Renderer(Window& window, VulkanDevice& device) : mVreWindow{ window }, mVreDevice{ device }
+	Renderer::Renderer(Window& window, VulkanDevice& device) : mWindow{ window }, mDevice{ device }
 	{
 		recreateSwapChain();
 		createCommandBuffers();
@@ -20,7 +20,7 @@ namespace vre
 	{
 		assert(!mIsFrameStarted && "Cannot call beginFrame while already in progress");
 
-		auto result = mVreSwapChain->acquireNextImage(&mCurrentImageIndex);
+		auto result = mSwapChain->acquireNextImage(&mCurrentImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
@@ -49,10 +49,10 @@ namespace vre
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("failed to record command buffer");
 
-		auto result = mVreSwapChain->submitCommandBuffers(&commandBuffer, &mCurrentImageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || mVreWindow.wasWindowResized())
+		auto result = mSwapChain->submitCommandBuffers(&commandBuffer, &mCurrentImageIndex);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || mWindow.wasWindowResized())
 		{
-			mVreWindow.resetWindowResizedFlag();
+			mWindow.resetWindowResizedFlag();
 			recreateSwapChain();
 		}
 		else if (result != VK_SUCCESS)
@@ -71,11 +71,11 @@ namespace vre
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = mVreSwapChain->renderPass();
-		renderPassInfo.framebuffer = mVreSwapChain->frameBuffer(mCurrentImageIndex);
+		renderPassInfo.renderPass = mSwapChain->renderPass();
+		renderPassInfo.framebuffer = mSwapChain->frameBuffer(mCurrentImageIndex);
 
 		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = { mVreSwapChain->swapChainExtent() };
+		renderPassInfo.renderArea.extent = { mSwapChain->swapChainExtent() };
 
 		std::array<VkClearValue, 2> clearValues{};
 		clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
@@ -88,11 +88,11 @@ namespace vre
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(mVreSwapChain->swapChainExtent().width);
-		viewport.height = static_cast<float>(mVreSwapChain->swapChainExtent().height);
+		viewport.width = static_cast<float>(mSwapChain->swapChainExtent().width);
+		viewport.height = static_cast<float>(mSwapChain->swapChainExtent().height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
-		VkRect2D scissor{ {0,0}, mVreSwapChain->swapChainExtent() };
+		VkRect2D scissor{ {0,0}, mSwapChain->swapChainExtent() };
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
@@ -113,18 +113,18 @@ namespace vre
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = mVreDevice.commandPool();
+		allocInfo.commandPool = mDevice.commandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(mCommandBuffers.size());
 
-		if (vkAllocateCommandBuffers(mVreDevice.device(), &allocInfo, mCommandBuffers.data()) != VK_SUCCESS)
+		if (vkAllocateCommandBuffers(mDevice.device(), &allocInfo, mCommandBuffers.data()) != VK_SUCCESS)
 			throw std::runtime_error("failed to allocate command buffers");
 	}
 
 	void Renderer::freeCommandBuffers()
 	{
 		vkFreeCommandBuffers(
-			mVreDevice.device(),
-			mVreDevice.commandPool(),
+			mDevice.device(),
+			mDevice.commandPool(),
 			static_cast<uint32_t>(mCommandBuffers.size()),
 			mCommandBuffers.data());
 
@@ -133,23 +133,23 @@ namespace vre
 
 	void Renderer::recreateSwapChain()
 	{
-		auto extend = mVreWindow.extend();
+		auto extend = mWindow.extend();
 		while (extend.width == 0 || extend.height == 0) // minimized
 		{
-			extend = mVreWindow.extend();
+			extend = mWindow.extend();
 			glfwWaitEvents();
 		}
-		vkDeviceWaitIdle(mVreDevice.device());
+		vkDeviceWaitIdle(mDevice.device());
 
-		if (mVreSwapChain == nullptr)
+		if (mSwapChain == nullptr)
 		{
-			mVreSwapChain = std::make_unique<SwapChain>(mVreDevice, extend);
+			mSwapChain = std::make_unique<SwapChain>(mDevice, extend);
 		}
 		else
 		{
-			std::shared_ptr<SwapChain> oldSwapChain = std::move(mVreSwapChain);
-			mVreSwapChain = std::make_unique<SwapChain>(mVreDevice, extend, oldSwapChain);
-			if (!oldSwapChain->compareSwapFormats(*mVreSwapChain.get()))
+			std::shared_ptr<SwapChain> oldSwapChain = std::move(mSwapChain);
+			mSwapChain = std::make_unique<SwapChain>(mDevice, extend, oldSwapChain);
+			if (!oldSwapChain->compareSwapFormats(*mSwapChain.get()))
 				throw std::runtime_error("Swap chain image or depth format has changed");
 		}
 

@@ -19,8 +19,8 @@ namespace vre
 		Renderer(const Renderer&) = delete;
 		Renderer& operator=(const Renderer&) = delete;
 
-		VkRenderPass swapChainRenderPass() const { return mVreSwapChain->renderPass(); }
-		float aspectRatio() const { return mVreSwapChain->extentAspectRatio(); }
+		VkRenderPass swapChainRenderPass() const { return mSwapChain->renderPass(); }
+		float aspectRatio() const { return mSwapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return mIsFrameStarted; }
 		VkCommandBuffer currentCommandBuffer() const
 		{
@@ -44,9 +44,9 @@ namespace vre
 		void freeCommandBuffers();
 		void recreateSwapChain();
 
-		Window& mVreWindow;
-		VulkanDevice& mVreDevice;
-		std::unique_ptr<SwapChain> mVreSwapChain;
+		Window& mWindow;
+		VulkanDevice& mDevice;
+		std::unique_ptr<SwapChain> mSwapChain;
 		std::vector<VkCommandBuffer> mCommandBuffers;
 
 		uint32_t mCurrentImageIndex;

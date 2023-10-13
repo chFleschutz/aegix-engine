@@ -25,9 +25,9 @@ namespace vre
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VulkanDevice& mVreDevice;
+		VulkanDevice& mDevice;
 
-		std::unique_ptr<Pipeline> mVrePipeline;
+		std::unique_ptr<Pipeline> mPipeline;
 		VkPipelineLayout mPipelineLayout;
 	};
 
