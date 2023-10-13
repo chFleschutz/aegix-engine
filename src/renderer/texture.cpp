@@ -43,7 +43,7 @@ namespace vre
 		if (!pixels)
 			throw std::runtime_error("Failed to load texture image");
 
-		VreBuffer stagingBuffer{
+		Buffer stagingBuffer{
 			mVreDevice,
 			imageSize,
 			1,

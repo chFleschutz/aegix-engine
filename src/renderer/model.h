@@ -57,11 +57,11 @@ namespace vre
 
 		VulkanDevice& mVreDevice;
 
-		std::unique_ptr<VreBuffer> mVertexBuffer;
+		std::unique_ptr<Buffer> mVertexBuffer;
 		uint32_t mVertexCount;
 
 		bool mHasIndexBuffer = false;
-		std::unique_ptr<VreBuffer> mIndexBuffer;
+		std::unique_ptr<Buffer> mIndexBuffer;
 		uint32_t mIndexCount;
 	};
 

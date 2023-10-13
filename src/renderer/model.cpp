@@ -76,7 +76,7 @@ namespace vre
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * mVertexCount;
 		uint32_t vertexSize = sizeof(vertices[0]);
 
-		VreBuffer stagingBuffer{
+		Buffer stagingBuffer{
 			mVreDevice,
 			vertexSize,
 			mVertexCount,
@@ -87,7 +87,7 @@ namespace vre
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer((void*)vertices.data());
 
-		mVertexBuffer = std::make_unique<VreBuffer>(
+		mVertexBuffer = std::make_unique<Buffer>(
 			mVreDevice,
 			vertexSize,
 			mVertexCount,
@@ -108,7 +108,7 @@ namespace vre
 		VkDeviceSize bufferSize = sizeof(indices[0]) * mIndexCount;
 		uint32_t indexSize = sizeof(indices[0]);
 
-		VreBuffer stagingBuffer{
+		Buffer stagingBuffer{
 			mVreDevice,
 			indexSize,
 			mIndexCount,
@@ -119,7 +119,7 @@ namespace vre
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer((void*)indices.data());
 
-		mIndexBuffer = std::make_unique<VreBuffer>(
+		mIndexBuffer = std::make_unique<Buffer>(
 			mVreDevice,
 			indexSize,
 			mIndexCount,

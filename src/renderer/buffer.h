@@ -5,20 +5,20 @@
 namespace vre
 {
 	/// @brief Encapsulates a vulkan buffer
-	class VreBuffer
+	class Buffer
 	{
 	public:
-		VreBuffer(
+		Buffer(
 			VulkanDevice& device,
 			VkDeviceSize instanceSize,
 			uint32_t instanceCount,
 			VkBufferUsageFlags usageFlags,
 			VkMemoryPropertyFlags memoryPropertyFlags,
 			VkDeviceSize minOffsetAlignment = 1);
-		~VreBuffer();
+		~Buffer();
 
-		VreBuffer(const VreBuffer&) = delete;
-		VreBuffer& operator=(const VreBuffer&) = delete;
+		Buffer(const Buffer&) = delete;
+		Buffer& operator=(const Buffer&) = delete;
 
 		/// @brief Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
 		/// @param size (Optional) Size of the memory range to map. Pass VK_WHOLE_SIZE to map the complete buffer range.

@@ -37,10 +37,10 @@ namespace vre
 	{
 		// ****
 		// Init
-		std::vector<std::unique_ptr<VreBuffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++)
 		{
-			uboBuffers[i] = std::make_unique<VreBuffer>(
+			uboBuffers[i] = std::make_unique<Buffer>(
 				mDevice,
 				sizeof(GlobalUbo),
 				1,
