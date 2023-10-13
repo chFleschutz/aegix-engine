@@ -32,7 +32,7 @@ namespace vre
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 		{
-			transform.Rotation += m_lookSpeed * glm::normalize(rotate) * deltaSeconds;
+			transform.rotation += m_lookSpeed * glm::normalize(rotate) * deltaSeconds;
 		}
 
 		// Mouse input rotation
@@ -46,12 +46,12 @@ namespace vre
 
 			if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 			{
-				transform.Rotation += m_mouseSensitivity * rotate * deltaSeconds;
+				transform.rotation += m_mouseSensitivity * rotate * deltaSeconds;
 			}
 		}
 
-		transform.Rotation.x = glm::clamp(transform.Rotation.x, -1.5f, 1.5f);
-		transform.Rotation.y = glm::mod(transform.Rotation.y, glm::two_pi<float>());
+		transform.rotation.x = glm::clamp(transform.rotation.x, -1.5f, 1.5f);
+		transform.rotation.y = glm::mod(transform.rotation.y, glm::two_pi<float>());
 	}
 
 	void KeyboardMovementController::applyMovement(float deltaSeconds)
@@ -59,8 +59,8 @@ namespace vre
 		auto& transform = getComponent<TransformComponent>();
 
 		// Key input movement
-		float yaw = transform.Rotation.y;
-		float pitch = transform.Rotation.x;
+		float yaw = transform.rotation.y;
+		float pitch = transform.rotation.x;
 
 		const glm::vec3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
 		const glm::vec3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
@@ -78,7 +78,7 @@ namespace vre
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 		{ 
-			transform.Location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
+			transform.location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement
@@ -92,7 +92,7 @@ namespace vre
 
 			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 			{
-				transform.Location += m_mouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
+				transform.location += m_mouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
 			}
 		}
 	}

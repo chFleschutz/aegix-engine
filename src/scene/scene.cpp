@@ -19,8 +19,8 @@ namespace vre
 		camera.addComponent<CameraComponent>();
 		camera.addScript<KeyboardMovementController>();
 		auto& cameraTransform = camera.getComponent<TransformComponent>();
-		cameraTransform.Location = { -0.5f, -0.5f, -0.5 };
-		cameraTransform.Rotation = { -0.4f, 0.8f, 0 };
+		cameraTransform.location = { -0.5f, -0.5f, -0.5 };
+		cameraTransform.rotation = { -0.4f, 0.8f, 0 };
 	}
 
 	Entity Scene::camera()
@@ -36,13 +36,13 @@ namespace vre
 		// Initialize all script components
 		for (auto&& [entity, component] : view.each())
 		{
-			component.Script->m_entity = { entity, this };
+			component.script->m_entity = { entity, this };
 		}
 
 		// Call begin after all scripts have been initialized
 		for (auto&& [entity, component] : view.each())
 		{
-			component.Script->begin();
+			component.script->begin();
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace vre
 	{
 		for (auto&& [entity, component] : m_registry.view<ScriptComponent>().each())
 		{
-			component.Script->update(deltaSeconds);
+			component.script->update(deltaSeconds);
 		}
 	}
 
@@ -58,7 +58,7 @@ namespace vre
 	{
 		for (auto&& [entity, component] : m_registry.view<ScriptComponent>().each())
 		{
-			component.Script->end();
+			component.script->end();
 		}
 	}
 

@@ -35,7 +35,7 @@ namespace vre
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			auto& script = m_scene->m_registry.emplace<ScriptComponent>(m_entityHandle);
-			script.Script = new T(std::forward<Args>(args)...);
+			script.script = new T(std::forward<Args>(args)...);
 			return script;
 		}
 

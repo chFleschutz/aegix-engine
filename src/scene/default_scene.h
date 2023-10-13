@@ -13,7 +13,7 @@ class Rotator : public vre::ScriptComponentBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<vre::TransformComponent>().Rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+		getComponent<vre::TransformComponent>().rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
 	}
 };
 

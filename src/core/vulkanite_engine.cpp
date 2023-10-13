@@ -62,7 +62,7 @@ namespace vre
 		PointLightSystem pointLightSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto& camera = m_scene->camera().getComponent<CameraComponent>().Camera;
+		auto& camera = m_scene->camera().getComponent<CameraComponent>().camera;
 		auto& cameraTransform = m_scene->camera().getComponent<TransformComponent>();
 
 		// Init Input
@@ -89,7 +89,7 @@ namespace vre
 
 			float aspect = m_renderer.aspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-			camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
+			camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
 			// RENDERING
 			if (auto commandBuffer = m_renderer.beginFrame())
