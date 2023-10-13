@@ -33,7 +33,7 @@ namespace vre
 		const bool enableValidationLayers = true;
 #endif
 
-		VreDevice(VreWindow& window);
+		VreDevice(Window& window);
 		~VreDevice();
 
 		// Not copyable or movable
@@ -92,7 +92,7 @@ namespace vre
 		VkInstance mInstance;
 		VkDebugUtilsMessengerEXT mDebugMessenger;
 		VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
-		VreWindow& mWindow;
+		Window& mWindow;
 		VkCommandPool mCommandPool;
 
 		VkDevice mDevice_;

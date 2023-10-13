@@ -4,32 +4,32 @@
 
 namespace vre
 {
-	VreWindow::VreWindow(int width, int height, std::string title) : mWidth(width), mHeight(height), mWindowTitle(std::move(title))
+	Window::Window(int width, int height, std::string title) : mWidth(width), mHeight(height), mWindowTitle(std::move(title))
 	{
 		initWindow();
 	}
 
-	VreWindow::~VreWindow()
+	Window::~Window()
 	{
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 	}
 
-	void VreWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+	void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
 	{
 		if (glfwCreateWindowSurface(instance, mWindow, nullptr, surface) != VK_SUCCESS)
 			throw std::runtime_error("failed to create window surface");
 	}
 
-	void VreWindow::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+	void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
-		auto vreWindow = reinterpret_cast<VreWindow*>(glfwGetWindowUserPointer(window));
+		auto vreWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
 		vreWindow->mFrameBufferResized = true;
 		vreWindow->mWidth = width;
 		vreWindow->mHeight = height;
 	}
 
-	void VreWindow::initWindow()
+	void Window::initWindow()
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

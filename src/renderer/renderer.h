@@ -13,7 +13,7 @@ namespace vre
 	class Renderer
 	{
 	public:
-		Renderer(VreWindow& window, VreDevice& device);
+		Renderer(Window& window, VreDevice& device);
 		~Renderer();
 
 		Renderer(const Renderer&) = delete;
@@ -44,7 +44,7 @@ namespace vre
 		void freeCommandBuffers();
 		void recreateSwapChain();
 
-		VreWindow& mVreWindow;
+		Window& mVreWindow;
 		VreDevice& mVreDevice;
 		std::unique_ptr<VreSwapChain> mVreSwapChain;
 		std::vector<VkCommandBuffer> mCommandBuffers;

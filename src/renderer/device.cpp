@@ -52,7 +52,7 @@ namespace vre
 	}
 
 	// class member functions
-	VreDevice::VreDevice(VreWindow& window) : mWindow{ window }
+	VreDevice::VreDevice(Window& window) : mWindow{ window }
 	{
 		createInstance();
 		setupDebugMessenger();

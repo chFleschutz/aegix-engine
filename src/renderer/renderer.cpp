@@ -5,7 +5,7 @@
 
 namespace vre
 {
-	Renderer::Renderer(VreWindow& window, VreDevice& device) : mVreWindow{ window }, mVreDevice{ device }
+	Renderer::Renderer(Window& window, VreDevice& device) : mVreWindow{ window }, mVreDevice{ device }
 	{
 		recreateSwapChain();
 		createCommandBuffers();

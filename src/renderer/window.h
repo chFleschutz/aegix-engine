@@ -7,14 +7,14 @@
 
 namespace vre 
 {
-	class VreWindow
+	class Window
 	{
 	public:
-		VreWindow(int width, int height, std::string title);
-		~VreWindow();
+		Window(int width, int height, std::string title);
+		~Window();
 
-		VreWindow(const VreWindow&) = delete;
-		VreWindow operator=(const VreWindow&) = delete;
+		Window(const Window&) = delete;
+		Window operator=(const Window&) = delete;
 
 		bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
 		VkExtent2D extend() const { return { static_cast<uint32_t>(mWidth), static_cast<uint32_t>(mHeight) }; }

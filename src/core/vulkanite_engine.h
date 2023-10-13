@@ -37,7 +37,7 @@ namespace vre
 		}
 
 	private:
-		VreWindow mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
+		Window mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
 		VreDevice mVreDevice{ mVreWindow };
 		Renderer mVreRenderer{ mVreWindow, mVreDevice };
 
