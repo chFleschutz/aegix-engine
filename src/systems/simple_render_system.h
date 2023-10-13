@@ -26,7 +26,7 @@ namespace vre
 
 		VulkanDevice& mVreDevice;
 
-		std::unique_ptr<VrePipeline> mVrePipeline;
+		std::unique_ptr<Pipeline> mVrePipeline;
 		VkPipelineLayout mPipelineLayout;
 	};
 

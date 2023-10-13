@@ -88,11 +88,11 @@ namespace vre
 		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
-		VrePipeline::defaultPipelineConfigInfo(pipelineConfig);
+		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		mVrePipeline = std::make_unique<VrePipeline>(
+		mVrePipeline = std::make_unique<Pipeline>(
 			mVreDevice,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",

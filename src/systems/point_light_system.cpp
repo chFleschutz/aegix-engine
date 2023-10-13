@@ -104,14 +104,14 @@ namespace vre
 		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		PipelineConfigInfo pipelineConfig{};
-		VrePipeline::defaultPipelineConfigInfo(pipelineConfig);
-		VrePipeline::enableAlphaBlending(pipelineConfig);
+		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
+		Pipeline::enableAlphaBlending(pipelineConfig);
 		pipelineConfig.bindingDescriptions.clear();
 		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		mVrePipeline = std::make_unique<VrePipeline>(
+		mVrePipeline = std::make_unique<Pipeline>(
 			mVreDevice,
 			"shaders/point_light.vert.spv",
 			"shaders/point_light.frag.spv",
