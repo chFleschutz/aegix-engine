@@ -5,18 +5,18 @@
 
 namespace vre
 {
-	VreRenderer::VreRenderer(VreWindow& window, VreDevice& device) : mVreWindow{ window }, mVreDevice{ device }
+	Renderer::Renderer(VreWindow& window, VreDevice& device) : mVreWindow{ window }, mVreDevice{ device }
 	{
 		recreateSwapChain();
 		createCommandBuffers();
 	}
 
-	VreRenderer::~VreRenderer()
+	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
 	}
 
-	VkCommandBuffer VreRenderer::beginFrame()
+	VkCommandBuffer Renderer::beginFrame()
 	{
 		assert(!mIsFrameStarted && "Cannot call beginFrame while already in progress");
 
@@ -42,7 +42,7 @@ namespace vre
 		return commandBuffer;
 	}
 
-	void VreRenderer::endFrame()
+	void Renderer::endFrame()
 	{
 		assert(mIsFrameStarted && "Cannot call endFrame while frame is not in progress");
 		auto commandBuffer = currentCommandBuffer();
@@ -64,7 +64,7 @@ namespace vre
 		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % VreSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void VreRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)
+	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)
 	{
 		assert(mIsFrameStarted && "Cannot call beginSwapChainRenderPass while frame is not in progress");
 		assert(commandBuffer == currentCommandBuffer() && "Cannot begin render pass on a command buffer from a diffrent frame");
@@ -97,7 +97,7 @@ namespace vre
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void VreRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer)
+	void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer)
 	{
 		assert(mIsFrameStarted && "Cannot call endSwapChainRenderPass while frame is not in progress");
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
@@ -106,7 +106,7 @@ namespace vre
 
 	}
 
-	void VreRenderer::createCommandBuffers()
+	void Renderer::createCommandBuffers()
 	{
 		mCommandBuffers.resize(VreSwapChain::MAX_FRAMES_IN_FLIGHT);
 
@@ -120,7 +120,7 @@ namespace vre
 			throw std::runtime_error("failed to allocate command buffers");
 	}
 
-	void VreRenderer::freeCommandBuffers()
+	void Renderer::freeCommandBuffers()
 	{
 		vkFreeCommandBuffers(
 			mVreDevice.device(),
@@ -131,7 +131,7 @@ namespace vre
 		mCommandBuffers.clear();
 	}
 
-	void VreRenderer::recreateSwapChain()
+	void Renderer::recreateSwapChain()
 	{
 		auto extend = mVreWindow.extend();
 		while (extend.width == 0 || extend.height == 0) // minimized

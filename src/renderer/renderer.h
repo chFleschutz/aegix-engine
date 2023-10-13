@@ -10,14 +10,14 @@
 
 namespace vre
 {
-	class VreRenderer
+	class Renderer
 	{
 	public:
-		VreRenderer(VreWindow& window, VreDevice& device);
-		~VreRenderer();
+		Renderer(VreWindow& window, VreDevice& device);
+		~Renderer();
 
-		VreRenderer(const VreRenderer&) = delete;
-		VreRenderer& operator=(const VreRenderer&) = delete;
+		Renderer(const Renderer&) = delete;
+		Renderer& operator=(const Renderer&) = delete;
 
 		VkRenderPass swapChainRenderPass() const { return mVreSwapChain->renderPass(); }
 		float aspectRatio() const { return mVreSwapChain->extentAspectRatio(); }

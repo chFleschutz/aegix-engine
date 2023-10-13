@@ -39,7 +39,7 @@ namespace vre
 	private:
 		VreWindow mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
 		VreDevice mVreDevice{ mVreWindow };
-		VreRenderer mVreRenderer{ mVreWindow, mVreDevice };
+		Renderer mVreRenderer{ mVreWindow, mVreDevice };
 
 		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
 		std::unique_ptr<Scene> mScene;
