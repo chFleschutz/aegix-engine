@@ -61,7 +61,7 @@ namespace vre
 		}
 
 		mIsFrameStarted = false;
-		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % VreSwapChain::MAX_FRAMES_IN_FLIGHT;
+		mCurrentFrameIndex = (mCurrentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)
@@ -108,7 +108,7 @@ namespace vre
 
 	void Renderer::createCommandBuffers()
 	{
-		mCommandBuffers.resize(VreSwapChain::MAX_FRAMES_IN_FLIGHT);
+		mCommandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -143,12 +143,12 @@ namespace vre
 
 		if (mVreSwapChain == nullptr)
 		{
-			mVreSwapChain = std::make_unique<VreSwapChain>(mVreDevice, extend);
+			mVreSwapChain = std::make_unique<SwapChain>(mVreDevice, extend);
 		}
 		else
 		{
-			std::shared_ptr<VreSwapChain> oldSwapChain = std::move(mVreSwapChain);
-			mVreSwapChain = std::make_unique<VreSwapChain>(mVreDevice, extend, oldSwapChain);
+			std::shared_ptr<SwapChain> oldSwapChain = std::move(mVreSwapChain);
+			mVreSwapChain = std::make_unique<SwapChain>(mVreDevice, extend, oldSwapChain);
 			if (!oldSwapChain->compareSwapFormats(*mVreSwapChain.get()))
 				throw std::runtime_error("Swap chain image or depth format has changed");
 		}

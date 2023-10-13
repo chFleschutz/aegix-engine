@@ -46,7 +46,7 @@ namespace vre
 
 		Window& mVreWindow;
 		VulkanDevice& mVreDevice;
-		std::unique_ptr<VreSwapChain> mVreSwapChain;
+		std::unique_ptr<SwapChain> mVreSwapChain;
 		std::vector<VkCommandBuffer> mCommandBuffers;
 
 		uint32_t mCurrentImageIndex;

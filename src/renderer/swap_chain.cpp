@@ -10,20 +10,20 @@
 
 namespace vre
 {
-	VreSwapChain::VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
+	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
 		: mDevice{ deviceRef }, mWindowExtent{ windowExtent }
 	{
 		init();
 	}
 
-	VreSwapChain::VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous)
+	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous)
 		: mDevice{ deviceRef }, mWindowExtent{ windowExtent }, mOldSwapChain{ previous }
 	{
 		init();
 		mOldSwapChain = nullptr;
 	}
 
-	VreSwapChain::~VreSwapChain()
+	SwapChain::~SwapChain()
 	{
 		for (auto imageView : mSwapChainImageViews)
 		{
@@ -60,7 +60,7 @@ namespace vre
 		}
 	}
 
-	VkResult VreSwapChain::acquireNextImage(uint32_t* imageIndex)
+	VkResult SwapChain::acquireNextImage(uint32_t* imageIndex)
 	{
 		vkWaitForFences(
 			mDevice.device(),
@@ -80,7 +80,7 @@ namespace vre
 		return result;
 	}
 
-	VkResult VreSwapChain::submitCommandBuffers(
+	VkResult SwapChain::submitCommandBuffers(
 		const VkCommandBuffer* buffers, uint32_t* imageIndex)
 	{
 		if (mImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
@@ -124,7 +124,7 @@ namespace vre
 		return result;
 	}
 
-	void VreSwapChain::init()
+	void SwapChain::init()
 	{
 		createSwapChain();
 		createImageViews();
@@ -134,7 +134,7 @@ namespace vre
 		createSyncObjects();
 	}
 
-	void VreSwapChain::createSwapChain()
+	void SwapChain::createSwapChain()
 	{
 		SwapChainSupportDetails swapChainSupport = mDevice.querySwapChainSupport();
 
@@ -191,7 +191,7 @@ namespace vre
 		mSwapChainExtent = extent;
 	}
 
-	void VreSwapChain::createImageViews()
+	void SwapChain::createImageViews()
 	{
 		mSwapChainImageViews.resize(mSwapChainImages.size());
 		for (size_t i = 0; i < mSwapChainImages.size(); i++)
@@ -212,7 +212,7 @@ namespace vre
 		}
 	}
 
-	void VreSwapChain::createRenderPass()
+	void SwapChain::createRenderPass()
 	{
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = findDepthFormat();
@@ -270,7 +270,7 @@ namespace vre
 			throw std::runtime_error("failed to create render pass!");
 	}
 
-	void VreSwapChain::createFramebuffers()
+	void SwapChain::createFramebuffers()
 	{
 		mSwapChainFramebuffers.resize(imageCount());
 		for (size_t i = 0; i < imageCount(); i++)
@@ -291,7 +291,7 @@ namespace vre
 		}
 	}
 
-	void VreSwapChain::createDepthResources()
+	void SwapChain::createDepthResources()
 	{
 		VkFormat depthFormat = findDepthFormat();
 		mSwapChainDepthFormat = depthFormat;
@@ -340,7 +340,7 @@ namespace vre
 		}
 	}
 
-	void VreSwapChain::createSyncObjects()
+	void SwapChain::createSyncObjects()
 	{
 		mImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		mRenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -365,7 +365,7 @@ namespace vre
 		}
 	}
 
-	VkSurfaceFormatKHR VreSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+	VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
@@ -379,7 +379,7 @@ namespace vre
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR VreSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+	VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 	{
 		for (const auto& availablePresentMode : availablePresentModes)
 		{
@@ -394,7 +394,7 @@ namespace vre
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkExtent2D VreSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 		{
@@ -414,7 +414,7 @@ namespace vre
 		}
 	}
 
-	VkFormat VreSwapChain::findDepthFormat()
+	VkFormat SwapChain::findDepthFormat()
 	{
 		return mDevice.findSupportedFormat(
 			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },

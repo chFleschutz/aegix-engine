@@ -11,17 +11,17 @@
 namespace vre
 {
 
-	class VreSwapChain
+	class SwapChain
 	{
 	public:
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-		VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
-		VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous);
-		~VreSwapChain();
+		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
+		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+		~SwapChain();
 
-		VreSwapChain(const VreSwapChain&) = delete;
-		void operator=(const VreSwapChain&) = delete;
+		SwapChain(const SwapChain&) = delete;
+		void operator=(const SwapChain&) = delete;
 
 		VkFramebuffer frameBuffer(int index) { return mSwapChainFramebuffers[index]; }
 		VkRenderPass renderPass() { return mRenderPass; }
@@ -38,7 +38,7 @@ namespace vre
 		VkResult acquireNextImage(uint32_t* imageIndex);
 		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-		bool compareSwapFormats(const VreSwapChain& swapchain) const 
+		bool compareSwapFormats(const SwapChain& swapchain) const 
 		{
 			return swapchain.mSwapChainDepthFormat == mSwapChainDepthFormat &&
 				swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
@@ -75,7 +75,7 @@ namespace vre
 		VkExtent2D mWindowExtent;
 
 		VkSwapchainKHR mSwapChain;
-		std::shared_ptr<VreSwapChain> mOldSwapChain;
+		std::shared_ptr<SwapChain> mOldSwapChain;
 
 		std::vector<VkSemaphore> mImageAvailableSemaphores;
 		std::vector<VkSemaphore> mRenderFinishedSemaphores;
