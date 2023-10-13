@@ -1,6 +1,7 @@
 #include "point_light_system.h"
 
-#include "./../scene/components.h"
+#include "scene/components.h"
+#include "renderer/camera.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

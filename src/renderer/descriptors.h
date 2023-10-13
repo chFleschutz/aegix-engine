@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device.h"
+#include "renderer/device.h"
 
 #include <memory>
 #include <unordered_map>

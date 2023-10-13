@@ -1,6 +1,5 @@
 #include "Scene.h"
 
-#include "camera.h"
 #include "components.h"
 #include "entity.h"
 #include "keyboard_movement_controller.h"

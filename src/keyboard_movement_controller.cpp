@@ -1,6 +1,6 @@
 #include "keyboard_movement_controller.h"
 
-#include "input.h"
+#include "core/input.h"
 
 #include "glm/gtc/constants.hpp"
 

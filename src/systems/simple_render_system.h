@@ -1,9 +1,8 @@
 #pragma once
 
-#include "camera.h"
-#include "device.h"
-#include "frame_info.h"
-#include "pipeline.h"
+#include "renderer/device.h"
+#include "renderer/frame_info.h"
+#include "renderer/pipeline.h"
 
 #include <memory>
 #include <vector>

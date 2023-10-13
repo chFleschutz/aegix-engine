@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window.h"
+#include "renderer/window.h"
 #include "scene/script_component_base.h"
 
 #include <glm/glm.hpp>

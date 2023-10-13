@@ -1,7 +1,7 @@
 #pragma once
 
-#include "device.h"
-#include "swap_chain.h"
+#include "renderer/device.h"
+#include "renderer/swap_chain.h"
 #include "window.h"
 
 #include <cassert>

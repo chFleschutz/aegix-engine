@@ -1,10 +1,10 @@
 #pragma once
 
-#include "descriptors.h"
-#include "device.h"
+#include "renderer/descriptors.h"
+#include "renderer/device.h"
 #include "scene/scene.h"
-#include "window.h"
-#include "renderer.h"
+#include "renderer/window.h"
+#include "renderer/renderer.h"
 
 #include <memory>
 #include <type_traits>

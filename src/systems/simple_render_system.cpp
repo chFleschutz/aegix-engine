@@ -1,6 +1,7 @@
 #include "simple_render_system.h"
 
-#include "./../scene/components.h"
+#include "scene/components.h"
+#include "renderer/renderer.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

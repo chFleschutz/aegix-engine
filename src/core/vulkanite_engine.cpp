@@ -1,9 +1,9 @@
 #include "vulkanite_engine.h"
 
-#include "buffer.h"
+#include "renderer/buffer.h"
 #include "scene/components.h"
 #include "scene/entity.h"
-#include "input.h"
+#include "core/input.h"
 #include "keyboard_movement_controller.h"
 #include "systems/simple_render_system.h"
 #include "systems/point_light_system.h"

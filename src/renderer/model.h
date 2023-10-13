@@ -1,7 +1,7 @@
 #pragma once
 
-#include "buffer.h"
-#include "device.h"
+#include "renderer/buffer.h"
+#include "renderer/device.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

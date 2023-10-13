@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window.h"
+#include "renderer/window.h"
 
 #include <glm/glm.hpp>
 
