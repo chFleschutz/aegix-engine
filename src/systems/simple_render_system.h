@@ -12,7 +12,7 @@ namespace vre
 	class SimpleRenderSystem
 	{
 	public:
-		SimpleRenderSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -24,7 +24,7 @@ namespace vre
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 
 		std::unique_ptr<VrePipeline> mVrePipeline;
 		VkPipelineLayout mPipelineLayout;

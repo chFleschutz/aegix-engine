@@ -20,7 +20,7 @@ namespace vre
 		glm::mat4 normalMatrix{1.0f};
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{device}
+	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{device}
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);

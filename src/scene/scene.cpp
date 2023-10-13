@@ -13,7 +13,7 @@ namespace vre
 		return VreModel::createModelFromFile(mDevice, modelPath);
 	}
 
-	Scene::Scene(VreDevice& device) : mDevice{ device }
+	Scene::Scene(VulkanDevice& device) : mDevice{ device }
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<CameraComponent>();

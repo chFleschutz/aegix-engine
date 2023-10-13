@@ -24,7 +24,7 @@ namespace vre
 		bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 	};
 
-	class VreDevice
+	class VulkanDevice
 	{
 	public:
 #ifdef NDEBUG
@@ -33,14 +33,14 @@ namespace vre
 		const bool enableValidationLayers = true;
 #endif
 
-		VreDevice(Window& window);
-		~VreDevice();
+		VulkanDevice(Window& window);
+		~VulkanDevice();
 
 		// Not copyable or movable
-		VreDevice(const VreDevice&) = delete;
-		void operator=(const VreDevice&) = delete;
-		VreDevice(VreDevice&&) = delete;
-		VreDevice& operator=(VreDevice&&) = delete;
+		VulkanDevice(const VulkanDevice&) = delete;
+		void operator=(const VulkanDevice&) = delete;
+		VulkanDevice(VulkanDevice&&) = delete;
+		VulkanDevice& operator=(VulkanDevice&&) = delete;
 
 		VkCommandPool commandPool() { return mCommandPool; }
 		VkDevice device() { return mDevice_; }

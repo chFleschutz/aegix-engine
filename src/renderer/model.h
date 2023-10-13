@@ -40,13 +40,13 @@ namespace vre
 			void loadModel(const std::filesystem::path& filepath);
 		};
 
-		VreModel(VreDevice& device, const VreModel::Builder& builder);
+		VreModel(VulkanDevice& device, const VreModel::Builder& builder);
 		~VreModel();
 
 		VreModel(const VreModel&) = delete;
 		VreModel& operator=(const VreModel&) = delete;
 
-		static std::unique_ptr<VreModel> createModelFromFile(VreDevice& device, const std::filesystem::path& filepath);
+		static std::unique_ptr<VreModel> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
@@ -55,7 +55,7 @@ namespace vre
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 
 		std::unique_ptr<VreBuffer> mVertexBuffer;
 		uint32_t mVertexCount;

@@ -12,7 +12,7 @@ namespace vre
 	class PointLightSystem
 	{
 	public:
-		PointLightSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~PointLightSystem();
 
 		PointLightSystem(const PointLightSystem&) = delete;
@@ -25,7 +25,7 @@ namespace vre
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 
 		std::unique_ptr<VrePipeline> mVrePipeline;
 		VkPipelineLayout mPipelineLayout;

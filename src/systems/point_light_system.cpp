@@ -21,7 +21,7 @@ namespace vre
 		float radius;
 	};
 
-	PointLightSystem::PointLightSystem(VreDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{ device }
+	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mVreDevice{ device }
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);

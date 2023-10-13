@@ -28,7 +28,7 @@ namespace std
 
 namespace vre
 {
-	VreModel::VreModel(VreDevice& device, const VreModel::Builder& builder) : mVreDevice{ device }
+	VreModel::VreModel(VulkanDevice& device, const VreModel::Builder& builder) : mVreDevice{ device }
 	{
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
@@ -38,7 +38,7 @@ namespace vre
 	{
 	}
 
-	std::unique_ptr<VreModel> VreModel::createModelFromFile(VreDevice& device, const std::filesystem::path& filepath)
+	std::unique_ptr<VreModel> VreModel::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
 	{
 		Builder builder{};
 		builder.loadModel(filepath);

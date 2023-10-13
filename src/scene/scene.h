@@ -18,7 +18,7 @@ namespace vre
 	{
 	public:
 		// Todo: remove device parameter
-		Scene(VreDevice& device); 
+		Scene(VulkanDevice& device); 
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -55,7 +55,7 @@ namespace vre
 		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
-		VreDevice& mDevice;
+		VulkanDevice& mDevice;
 		entt::registry m_registry;
 
 		friend class Entity;

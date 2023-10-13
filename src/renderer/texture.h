@@ -16,7 +16,7 @@ namespace vre
 			std::string textureFilePath;
 		};
 
-		VreTexture(VreDevice& device, const VreTexture::CreateInfo& createInfo);
+		VreTexture(VulkanDevice& device, const VreTexture::CreateInfo& createInfo);
 		~VreTexture();
 
 		VreTexture(const VreTexture&) = delete;
@@ -29,7 +29,7 @@ namespace vre
 		void createImageView();
 		void createTextureSampler();
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 
 		VkImage mTextureImage;
 		VkDeviceMemory mTextureImageMemory;

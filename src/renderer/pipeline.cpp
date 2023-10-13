@@ -11,7 +11,7 @@
 namespace vre
 {
 	VrePipeline::VrePipeline(
-		VreDevice& device, 
+		VulkanDevice& device, 
 		const std::string& vertShaderPath, 
 		const std::string& fragShaderPath, 
 		const PipelineConfigInfo& configInfo)

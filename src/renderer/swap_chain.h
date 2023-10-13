@@ -16,8 +16,8 @@ namespace vre
 	public:
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-		VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent);
-		VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous);
+		VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
+		VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous);
 		~VreSwapChain();
 
 		VreSwapChain(const VreSwapChain&) = delete;
@@ -71,7 +71,7 @@ namespace vre
 		std::vector<VkImage> mSwapChainImages;
 		std::vector<VkImageView> mSwapChainImageViews;
 
-		VreDevice& mDevice;
+		VulkanDevice& mDevice;
 		VkExtent2D mWindowExtent;
 
 		VkSwapchainKHR mSwapChain;

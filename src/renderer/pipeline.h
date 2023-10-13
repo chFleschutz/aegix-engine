@@ -32,7 +32,7 @@ namespace vre
 	class VrePipeline
 	{
 	public:
-		VrePipeline(VreDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
+		VrePipeline(VulkanDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
 		~VrePipeline();
 
 		VrePipeline(const VrePipeline&) = delete;
@@ -50,7 +50,7 @@ namespace vre
 
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 		VkPipeline mGraphicsPipeline;
 		VkShaderModule mVertShaderModule;
 		VkShaderModule mFragShaderModule;

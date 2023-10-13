@@ -9,7 +9,7 @@
 
 namespace vre
 {
-	VreTexture::VreTexture(VreDevice& device, const VreTexture::CreateInfo& createInfo)
+	VreTexture::VreTexture(VulkanDevice& device, const VreTexture::CreateInfo& createInfo)
 		: mVreDevice{ device }
 	{
 		loadTexture(createInfo.textureFilePath);

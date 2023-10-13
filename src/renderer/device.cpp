@@ -52,7 +52,7 @@ namespace vre
 	}
 
 	// class member functions
-	VreDevice::VreDevice(Window& window) : mWindow{ window }
+	VulkanDevice::VulkanDevice(Window& window) : mWindow{ window }
 	{
 		createInstance();
 		setupDebugMessenger();
@@ -62,7 +62,7 @@ namespace vre
 		createCommandPool();
 	}
 
-	VreDevice::~VreDevice()
+	VulkanDevice::~VulkanDevice()
 	{
 		vkDestroyCommandPool(mDevice_, mCommandPool, nullptr);
 		vkDestroyDevice(mDevice_, nullptr);
@@ -76,7 +76,7 @@ namespace vre
 		vkDestroyInstance(mInstance, nullptr);
 	}
 
-	void VreDevice::createInstance()
+	void VulkanDevice::createInstance()
 	{
 		if (enableValidationLayers && !checkValidationLayerSupport())
 			throw std::runtime_error("validation layers requested, but not available!");
@@ -118,7 +118,7 @@ namespace vre
 		hasGflwRequiredInstanceExtensions();
 	}
 
-	void VreDevice::pickPhysicalDevice()
+	void VulkanDevice::pickPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(mInstance, &deviceCount, nullptr);
@@ -146,7 +146,7 @@ namespace vre
 		std::cout << "Physical device: " << properties.deviceName << std::endl;
 	}
 
-	void VreDevice::createLogicalDevice()
+	void VulkanDevice::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(mPhysicalDevice);
 
@@ -193,7 +193,7 @@ namespace vre
 		vkGetDeviceQueue(mDevice_, indices.presentFamily, 0, &mPresentQueue_);
 	}
 
-	void VreDevice::createCommandPool()
+	void VulkanDevice::createCommandPool()
 	{
 		QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
@@ -206,12 +206,12 @@ namespace vre
 			throw std::runtime_error("failed to create command pool!");
 	}
 
-	void VreDevice::createSurface() 
+	void VulkanDevice::createSurface() 
 	{ 
 		mWindow.createWindowSurface(mInstance, &mSurface_); 
 	}
 
-	bool VreDevice::isDeviceSuitable(VkPhysicalDevice device)
+	bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device)
 	{
 		QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -230,7 +230,7 @@ namespace vre
 		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
-	void VreDevice::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+	void VulkanDevice::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 	{
 		createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -243,7 +243,7 @@ namespace vre
 		createInfo.pUserData = nullptr;  // Optional
 	}
 
-	void VreDevice::setupDebugMessenger()
+	void VulkanDevice::setupDebugMessenger()
 	{
 		if (!enableValidationLayers) return;
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -254,7 +254,7 @@ namespace vre
 		}
 	}
 
-	bool VreDevice::checkValidationLayerSupport()
+	bool VulkanDevice::checkValidationLayerSupport()
 	{
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -284,7 +284,7 @@ namespace vre
 		return true;
 	}
 
-	std::vector<const char*> VreDevice::getRequiredExtensions()
+	std::vector<const char*> VulkanDevice::getRequiredExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
@@ -300,7 +300,7 @@ namespace vre
 		return extensions;
 	}
 
-	void VreDevice::hasGflwRequiredInstanceExtensions()
+	void VulkanDevice::hasGflwRequiredInstanceExtensions()
 	{
 		uint32_t extensionCount = 0;
 		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -325,7 +325,7 @@ namespace vre
 		}
 	}
 
-	bool VreDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
+	bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -347,7 +347,7 @@ namespace vre
 		return requiredExtensions.empty();
 	}
 
-	QueueFamilyIndices VreDevice::findQueueFamilies(VkPhysicalDevice device)
+	QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device)
 	{
 		QueueFamilyIndices indices;
 
@@ -383,7 +383,7 @@ namespace vre
 		return indices;
 	}
 
-	SwapChainSupportDetails VreDevice::querySwapChainSupport(VkPhysicalDevice device)
+	SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device)
 	{
 		SwapChainSupportDetails details;
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, mSurface_, &details.capabilities);
@@ -412,7 +412,7 @@ namespace vre
 		return details;
 	}
 
-	VkFormat VreDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	VkFormat VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 	{
 		for (VkFormat format : candidates)
 		{
@@ -432,7 +432,7 @@ namespace vre
 		throw std::runtime_error("failed to find supported format!");
 	}
 
-	uint32_t VreDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProperties);
@@ -448,7 +448,7 @@ namespace vre
 		throw std::runtime_error("failed to find suitable memory type!");
 	}
 
-	void VreDevice::createBuffer(
+	void VulkanDevice::createBuffer(
 		VkDeviceSize size,
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags properties,
@@ -478,7 +478,7 @@ namespace vre
 		vkBindBufferMemory(mDevice_, buffer, bufferMemory, 0);
 	}
 
-	VkCommandBuffer VreDevice::beginSingleTimeCommands()
+	VkCommandBuffer VulkanDevice::beginSingleTimeCommands()
 	{
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -497,7 +497,7 @@ namespace vre
 		return commandBuffer;
 	}
 
-	void VreDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+	void VulkanDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 	{
 		vkEndCommandBuffer(commandBuffer);
 
@@ -512,7 +512,7 @@ namespace vre
 		vkFreeCommandBuffers(mDevice_, mCommandPool, 1, &commandBuffer);
 	}
 
-	void VreDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -525,7 +525,7 @@ namespace vre
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void VreDevice::copyBufferToImage(
+	void VulkanDevice::copyBufferToImage(
 		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
@@ -553,7 +553,7 @@ namespace vre
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void VreDevice::createImageWithInfo(
+	void VulkanDevice::createImageWithInfo(
 		const VkImageCreateInfo& imageInfo,
 		VkMemoryPropertyFlags properties,
 		VkImage& image,
@@ -577,7 +577,7 @@ namespace vre
 			throw std::runtime_error("failed to bind image memory");
 	}
 
-	void VreDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
+	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 

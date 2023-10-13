@@ -15,7 +15,7 @@ namespace vre
     }
 
     VreBuffer::VreBuffer(
-        VreDevice& device,
+        VulkanDevice& device,
         VkDeviceSize instanceSize,
         uint32_t instanceCount,
         VkBufferUsageFlags usageFlags,

@@ -10,13 +10,13 @@
 
 namespace vre
 {
-	VreSwapChain::VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent)
+	VreSwapChain::VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
 		: mDevice{ deviceRef }, mWindowExtent{ windowExtent }
 	{
 		init();
 	}
 
-	VreSwapChain::VreSwapChain(VreDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous)
+	VreSwapChain::VreSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VreSwapChain> previous)
 		: mDevice{ deviceRef }, mWindowExtent{ windowExtent }, mOldSwapChain{ previous }
 	{
 		init();

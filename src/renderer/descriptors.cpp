@@ -30,7 +30,7 @@ namespace vre
 
     // *************** Descriptor Set Layout *********************
 
-    VreDescriptorSetLayout::VreDescriptorSetLayout(VreDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
+    VreDescriptorSetLayout::VreDescriptorSetLayout(VulkanDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
         : mVreDevice{ device }, mBindings{ bindings }
     {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
@@ -87,7 +87,7 @@ namespace vre
     // *************** Descriptor Pool *********************
 
     VreDescriptorPool::VreDescriptorPool(
-        VreDevice& device,
+        VulkanDevice& device,
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes)

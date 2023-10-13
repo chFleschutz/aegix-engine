@@ -9,7 +9,7 @@ namespace vre
 	{
 	public:
 		VreBuffer(
-			VreDevice& device,
+			VulkanDevice& device,
 			VkDeviceSize instanceSize,
 			uint32_t instanceCount,
 			VkBufferUsageFlags usageFlags,
@@ -85,7 +85,7 @@ namespace vre
 		/// @return VkResult of the buffer mapping call
 		static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-		VreDevice& mVreDevice;
+		VulkanDevice& mVreDevice;
 		void* mMapped = nullptr;
 		VkBuffer mBuffer = VK_NULL_HANDLE;
 		VkDeviceMemory mMemory = VK_NULL_HANDLE;
