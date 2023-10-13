@@ -32,14 +32,14 @@ namespace vre
 		template<class T, class = std::enable_if_t<std::is_base_of_v<Scene, T>>>
 		void loadScene()
 		{
-			mScene = std::make_unique<T>(mVreDevice);
+			mScene = std::make_unique<T>(mDevice);
 			mScene->initialize();
 		}
 
 	private:
-		Window mVreWindow{ WIDTH, HEIGHT, "Vulkanite" };
-		VulkanDevice mVreDevice{ mVreWindow };
-		Renderer mVreRenderer{ mVreWindow, mVreDevice };
+		Window mWindow{ WIDTH, HEIGHT, "Vulkanite" };
+		VulkanDevice mDevice{ mWindow };
+		Renderer mRenderer{ mWindow, mDevice };
 
 		std::unique_ptr<VreDescriptorPool> mGlobalPool{};
 		std::unique_ptr<Scene> mScene;
