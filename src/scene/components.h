@@ -40,12 +40,12 @@ namespace vre
 	/// @brief Holds a pointer to a model
 	struct MeshComponent
 	{
-		std::shared_ptr<VreModel> Model;
+		std::shared_ptr<Model> Mesh;
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(std::shared_ptr<VreModel> model)
-			: Model(model) {}
+		MeshComponent(std::shared_ptr<Model> model)
+			: Mesh(model) {}
 	};
 
 	/// @brief Creates a light 

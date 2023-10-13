@@ -48,7 +48,7 @@ namespace vre
 		/// @param modelPath Path to the model 
 		/// @return A shared pointer with the loaded model
 		/// @note The shared pointer can be used multiple times
-		std::shared_ptr<VreModel> loadModel(const std::filesystem::path& modelPath);
+		std::shared_ptr<Model> loadModel(const std::filesystem::path& modelPath);
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id

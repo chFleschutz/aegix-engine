@@ -8,9 +8,9 @@
 
 namespace vre
 {
-	std::shared_ptr<VreModel> Scene::loadModel(const std::filesystem::path& modelPath)
+	std::shared_ptr<Model> Scene::loadModel(const std::filesystem::path& modelPath)
 	{
-		return VreModel::createModelFromFile(mDevice, modelPath);
+		return Model::createModelFromFile(mDevice, modelPath);
 	}
 
 	Scene::Scene(VulkanDevice& device) : mDevice{ device }

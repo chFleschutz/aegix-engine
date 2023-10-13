@@ -100,8 +100,8 @@ namespace vre
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = VreModel::Vertex::bindingDescriptions();
-		configInfo.attributeDescriptions = VreModel::Vertex::attributeDescriptions();
+		configInfo.bindingDescriptions = Model::Vertex::bindingDescriptions();
+		configInfo.attributeDescriptions = Model::Vertex::attributeDescriptions();
 	}
 
 	void VrePipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)

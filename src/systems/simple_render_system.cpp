@@ -58,8 +58,8 @@ namespace vre
 				sizeof(SimplePushConstantData),
 				&push);
 			
-			mesh.Model->bind(frameInfo.commandBuffer);
-			mesh.Model->draw(frameInfo.commandBuffer);
+			mesh.Mesh->bind(frameInfo.commandBuffer);
+			mesh.Mesh->draw(frameInfo.commandBuffer);
 		}
 	}
 

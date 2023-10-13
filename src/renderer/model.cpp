@@ -14,9 +14,9 @@
 namespace std
 {
 	template <>
-	struct hash<vre::VreModel::Vertex>
+	struct hash<vre::Model::Vertex>
 	{
-		size_t operator()(vre::VreModel::Vertex const& vertex) const
+		size_t operator()(vre::Model::Vertex const& vertex) const
 		{
 			size_t seed = 0;
 			vre::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
@@ -28,25 +28,25 @@ namespace std
 
 namespace vre
 {
-	VreModel::VreModel(VulkanDevice& device, const VreModel::Builder& builder) : mVreDevice{ device }
+	Model::Model(VulkanDevice& device, const Model::Builder& builder) : mDevice{ device }
 	{
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
 	}
 
-	VreModel::~VreModel()
+	Model::~Model()
 	{
 	}
 
-	std::unique_ptr<VreModel> VreModel::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
+	std::unique_ptr<Model> Model::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
 	{
 		Builder builder{};
 		builder.loadModel(filepath);
 
-		return std::make_unique<VreModel>(device, builder);
+		return std::make_unique<Model>(device, builder);
 	}
 
-	void VreModel::bind(VkCommandBuffer commandBuffer)
+	void Model::bind(VkCommandBuffer commandBuffer)
 	{
 		VkBuffer buffers[] = { mVertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
@@ -56,7 +56,7 @@ namespace vre
 			vkCmdBindIndexBuffer(commandBuffer, mIndexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	void VreModel::draw(VkCommandBuffer commandBuffer)
+	void Model::draw(VkCommandBuffer commandBuffer)
 	{
 		if (mHasIndexBuffer)
 		{
@@ -68,7 +68,7 @@ namespace vre
 		}
 	}
 
-	void VreModel::createVertexBuffers(const std::vector<Vertex>& vertices)
+	void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
 	{
 		mVertexCount = static_cast<uint32_t>(vertices.size());
 		assert(mVertexCount >= 3 && "Vertex count must be atleast 3");
@@ -77,7 +77,7 @@ namespace vre
 		uint32_t vertexSize = sizeof(vertices[0]);
 
 		Buffer stagingBuffer{
-			mVreDevice,
+			mDevice,
 			vertexSize,
 			mVertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -88,17 +88,17 @@ namespace vre
 		stagingBuffer.writeToBuffer((void*)vertices.data());
 
 		mVertexBuffer = std::make_unique<Buffer>(
-			mVreDevice,
+			mDevice,
 			vertexSize,
 			mVertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		mVreDevice.copyBuffer(stagingBuffer.buffer(), mVertexBuffer->buffer(), bufferSize);
+		mDevice.copyBuffer(stagingBuffer.buffer(), mVertexBuffer->buffer(), bufferSize);
 	}
 
-	void VreModel::createIndexBuffers(const std::vector<uint32_t>& indices)
+	void Model::createIndexBuffers(const std::vector<uint32_t>& indices)
 	{
 		mIndexCount = static_cast<uint32_t>(indices.size());
 		mHasIndexBuffer = mIndexCount > 0;
@@ -109,7 +109,7 @@ namespace vre
 		uint32_t indexSize = sizeof(indices[0]);
 
 		Buffer stagingBuffer{
-			mVreDevice,
+			mDevice,
 			indexSize,
 			mIndexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -120,17 +120,17 @@ namespace vre
 		stagingBuffer.writeToBuffer((void*)indices.data());
 
 		mIndexBuffer = std::make_unique<Buffer>(
-			mVreDevice,
+			mDevice,
 			indexSize,
 			mIndexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		mVreDevice.copyBuffer(stagingBuffer.buffer(), mIndexBuffer->buffer(), bufferSize);
+		mDevice.copyBuffer(stagingBuffer.buffer(), mIndexBuffer->buffer(), bufferSize);
 	}
 
-	std::vector<VkVertexInputBindingDescription> VreModel::Vertex::bindingDescriptions()
+	std::vector<VkVertexInputBindingDescription> Model::Vertex::bindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
@@ -139,7 +139,7 @@ namespace vre
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> VreModel::Vertex::attributeDescriptions()
+	std::vector<VkVertexInputAttributeDescription> Model::Vertex::attributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
@@ -149,7 +149,7 @@ namespace vre
 		return attributeDescriptions;
 	}
 
-	void VreModel::Builder::loadModel(const std::filesystem::path& filepath)
+	void Model::Builder::loadModel(const std::filesystem::path& filepath)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
