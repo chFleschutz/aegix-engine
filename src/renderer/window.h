@@ -16,11 +16,11 @@ namespace vre
 		Window(const Window&) = delete;
 		Window operator=(const Window&) = delete;
 
-		bool shouldClose() const { return glfwWindowShouldClose(mWindow); }
-		VkExtent2D extend() const { return { static_cast<uint32_t>(mWidth), static_cast<uint32_t>(mHeight) }; }
-		bool wasWindowResized() const { return mFrameBufferResized; }
-		void resetWindowResizedFlag() { mFrameBufferResized = false; }
-		GLFWwindow* glfwWindow() const { return mWindow; }
+		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
+		VkExtent2D extend() const { return { static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height) }; }
+		bool wasWindowResized() const { return m_frameBufferResized; }
+		void resetWindowResizedFlag() { m_frameBufferResized = false; }
+		GLFWwindow* glfwWindow() const { return m_window; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
@@ -29,12 +29,12 @@ namespace vre
 
 		void initWindow();
 
-		int mWidth;
-		int mHeight;
-		bool mFrameBufferResized = false;
+		int m_width;
+		int m_height;
+		bool m_frameBufferResized = false;
 
-		std::string mWindowTitle;
-		GLFWwindow* mWindow = nullptr;
+		std::string m_windowTitle;
+		GLFWwindow* m_window = nullptr;
 	};
 
 } // namespace vre

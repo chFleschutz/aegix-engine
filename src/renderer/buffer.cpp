@@ -22,50 +22,50 @@ namespace vre
         VkMemoryPropertyFlags memoryPropertyFlags,
         VkDeviceSize minOffsetAlignment)
         : 
-        mDevice{ device },
-        mInstanceSize{ instanceSize },
-        mInstanceCount{ instanceCount },
-        mUsageFlags{ usageFlags },
-        mMemoryPropertyFlags{ memoryPropertyFlags }
+        m_device{ device },
+        m_instanceSize{ instanceSize },
+        m_instanceCount{ instanceCount },
+        m_usageFlags{ usageFlags },
+        m_memoryPropertyFlags{ memoryPropertyFlags }
     {
-        mAlignmentSize = getAlignment(instanceSize, minOffsetAlignment);
-        mBufferSize = mAlignmentSize * instanceCount;
-        device.createBuffer(mBufferSize, usageFlags, memoryPropertyFlags, mBuffer, mMemory);
+        m_alignmentSize = getAlignment(instanceSize, minOffsetAlignment);
+        m_bufferSize = m_alignmentSize * instanceCount;
+        device.createBuffer(m_bufferSize, usageFlags, memoryPropertyFlags, m_buffer, m_memory);
     }
 
     Buffer::~Buffer()
     {
         unmap();
-        vkDestroyBuffer(mDevice.device(), mBuffer, nullptr);
-        vkFreeMemory(mDevice.device(), mMemory, nullptr);
+        vkDestroyBuffer(m_device.device(), m_buffer, nullptr);
+        vkFreeMemory(m_device.device(), m_memory, nullptr);
     }
 
     VkResult Buffer::map(VkDeviceSize size, VkDeviceSize offset)
     {
-        assert(mBuffer && mMemory && "Called map on buffer before create");
-        return vkMapMemory(mDevice.device(), mMemory, offset, size, 0, &mMapped);
+        assert(m_buffer && m_memory && "Called map on buffer before create");
+        return vkMapMemory(m_device.device(), m_memory, offset, size, 0, &m_mapped);
     }
 
     void Buffer::unmap()
     {
-        if (mMapped)
+        if (m_mapped)
         {
-            vkUnmapMemory(mDevice.device(), mMemory);
-            mMapped = nullptr;
+            vkUnmapMemory(m_device.device(), m_memory);
+            m_mapped = nullptr;
         }
     }
 
     void Buffer::writeToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset)
     {
-        assert(mMapped && "Cannot copy to unmapped buffer");
+        assert(m_mapped && "Cannot copy to unmapped buffer");
 
         if (size == VK_WHOLE_SIZE)
         {
-            memcpy(mMapped, data, mBufferSize);
+            memcpy(m_mapped, data, m_bufferSize);
         }
         else
         {
-            char* memOffset = (char*)mMapped;
+            char* memOffset = (char*)m_mapped;
             memOffset += offset;
             memcpy(memOffset, data, size);
         }
@@ -75,26 +75,26 @@ namespace vre
     {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = mMemory;
+        mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkFlushMappedMemoryRanges(mDevice.device(), 1, &mappedRange);
+        return vkFlushMappedMemoryRanges(m_device.device(), 1, &mappedRange);
     }
 
     VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
     {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = mMemory;
+        mappedRange.memory = m_memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkInvalidateMappedMemoryRanges(mDevice.device(), 1, &mappedRange);
+        return vkInvalidateMappedMemoryRanges(m_device.device(), 1, &mappedRange);
     }
 
     VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset)
     {
         return VkDescriptorBufferInfo{
-            mBuffer,
+            m_buffer,
             offset,
             size,
         };
@@ -102,22 +102,22 @@ namespace vre
 
     void Buffer::writeToIndex(void* data, int index)
     {
-        writeToBuffer(data, mInstanceSize, index * mAlignmentSize);
+        writeToBuffer(data, m_instanceSize, index * m_alignmentSize);
     }
 
     VkResult Buffer::flushIndex(int index) 
     { 
-        return flush(mAlignmentSize, index * mAlignmentSize); 
+        return flush(m_alignmentSize, index * m_alignmentSize); 
     }
 
     VkDescriptorBufferInfo Buffer::descriptorInfoForIndex(int index)
     {
-        return descriptorInfo(mAlignmentSize, index * mAlignmentSize);
+        return descriptorInfo(m_alignmentSize, index * m_alignmentSize);
     }
 
     VkResult Buffer::invalidateIndex(int index)
     {
-        return invalidate(mAlignmentSize, index * mAlignmentSize);
+        return invalidate(m_alignmentSize, index * m_alignmentSize);
     }
 
 }  // namespace vre

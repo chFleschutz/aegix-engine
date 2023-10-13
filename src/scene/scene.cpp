@@ -10,10 +10,10 @@ namespace vre
 {
 	std::shared_ptr<Model> Scene::loadModel(const std::filesystem::path& modelPath)
 	{
-		return Model::createModelFromFile(mDevice, modelPath);
+		return Model::createModelFromFile(m_device, modelPath);
 	}
 
-	Scene::Scene(VulkanDevice& device) : mDevice{ device }
+	Scene::Scene(VulkanDevice& device) : m_device{ device }
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<CameraComponent>();
@@ -36,7 +36,7 @@ namespace vre
 		// Initialize all script components
 		for (auto&& [entity, component] : view.each())
 		{
-			component.Script->m_Entity = { entity, this };
+			component.Script->m_entity = { entity, this };
 		}
 
 		// Call begin after all scripts have been initialized

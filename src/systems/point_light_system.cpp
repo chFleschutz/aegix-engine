@@ -21,7 +21,8 @@ namespace vre
 		float radius;
 	};
 
-	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : mDevice{ device }
+	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
+		: m_device{ device }
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
@@ -29,7 +30,7 @@ namespace vre
 
 	PointLightSystem::~PointLightSystem()
 	{
-		vkDestroyPipelineLayout(mDevice.device(), mPipelineLayout, nullptr);
+		vkDestroyPipelineLayout(m_device.device(), mPipelineLayout, nullptr);
 	}
 
 	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
@@ -95,7 +96,7 @@ namespace vre
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-		if (vkCreatePipelineLayout(mDevice.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
+		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
 			throw std::runtime_error("failed to create pipeline layout");
 	}
 
@@ -112,7 +113,7 @@ namespace vre
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
 		mPipeline = std::make_unique<Pipeline>(
-			mDevice,
+			m_device,
 			"shaders/point_light.vert.spv",
 			"shaders/point_light.frag.spv",
 			pipelineConfig);

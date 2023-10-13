@@ -71,17 +71,17 @@ namespace vre
 		std::vector<VkImage> mSwapChainImages;
 		std::vector<VkImageView> mSwapChainImageViews;
 
-		VulkanDevice& mDevice;
-		VkExtent2D mWindowExtent;
+		VulkanDevice& m_device;
+		VkExtent2D m_windowExtent;
 
-		VkSwapchainKHR mSwapChain;
-		std::shared_ptr<SwapChain> mOldSwapChain;
+		VkSwapchainKHR m_swapChain;
+		std::shared_ptr<SwapChain> m_oldSwapChain;
 
-		std::vector<VkSemaphore> mImageAvailableSemaphores;
-		std::vector<VkSemaphore> mRenderFinishedSemaphores;
-		std::vector<VkFence> mInFlightFences;
-		std::vector<VkFence> mImagesInFlight;
-		size_t mCurrentFrame = 0;
+		std::vector<VkSemaphore> m_imageAvailableSemaphores;
+		std::vector<VkSemaphore> m_renderFinishedSemaphores;
+		std::vector<VkFence> m_inFlightFences;
+		std::vector<VkFence> m_imagesInFlight;
+		size_t m_currentFrame = 0;
 	};
 
 } // namespace vre

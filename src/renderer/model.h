@@ -55,14 +55,14 @@ namespace vre
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-		VulkanDevice& mDevice;
+		VulkanDevice& m_device;
 
-		std::unique_ptr<Buffer> mVertexBuffer;
-		uint32_t mVertexCount;
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		uint32_t m_vertexCount;
 
-		bool mHasIndexBuffer = false;
-		std::unique_ptr<Buffer> mIndexBuffer;
-		uint32_t mIndexCount;
+		bool m_hasIndexBuffer = false;
+		std::unique_ptr<Buffer> m_indexBuffer;
+		uint32_t m_indexCount;
 	};
 
 } // namespace vre

@@ -23,7 +23,7 @@ namespace vre
 {
 	VulkaniteEngine::VulkaniteEngine()
 	{
-		mGlobalPool = DescriptorPool::Builder(mDevice)
+		m_globalPool = DescriptorPool::Builder(m_device)
 			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
@@ -41,7 +41,7 @@ namespace vre
 		for (int i = 0; i < uboBuffers.size(); i++)
 		{
 			uboBuffers[i] = std::make_unique<Buffer>(
-				mDevice,
+				m_device,
 				sizeof(GlobalUbo),
 				1,
 				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -50,7 +50,7 @@ namespace vre
 			uboBuffers[i]->map();
 		}
 
-		auto globalSetLayout = DescriptorSetLayout::Builder(mDevice)
+		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
@@ -58,29 +58,29 @@ namespace vre
 		for (int i = 0; i < globalDescriptorSets.size(); i++)
 		{
 			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			DescriptorWriter(*globalSetLayout, *mGlobalPool)
+			DescriptorWriter(*globalSetLayout, *m_globalPool)
 				.writeBuffer(0, &bufferInfo)
 				.build(globalDescriptorSets[i]);
 		}
 
-		SimpleRenderSystem simpleRenderSystem{ mDevice, mRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
-		PointLightSystem pointLightSystem{ mDevice, mRenderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
+		SimpleRenderSystem simpleRenderSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
+		PointLightSystem pointLightSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto& camera = mScene->camera().getComponent<CameraComponent>().Camera;
-		auto& cameraTransform = mScene->camera().getComponent<TransformComponent>();
+		auto& camera = m_scene->camera().getComponent<CameraComponent>().Camera;
+		auto& cameraTransform = m_scene->camera().getComponent<TransformComponent>();
 
 		// Init Input
-		Input::instance().initialize(mWindow.glfwWindow());
+		Input::instance().initialize(m_window.glfwWindow());
 
 		// Init Entity Components
-		mScene->runtimeBegin();
+		m_scene->runtimeBegin();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// ***********
 		// update loop
-		while (!mWindow.shouldClose())
+		while (!m_window.shouldClose())
 		{
 			glfwPollEvents();
 
@@ -90,23 +90,23 @@ namespace vre
 			currentTime = newTime;
 
 			// Update all components
-			mScene->update(frameTimeSec);
+			m_scene->update(frameTimeSec);
 
-			float aspect = mRenderer.aspectRatio();
+			float aspect = m_renderer.aspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 			camera.setViewYXZ(cameraTransform.Location, cameraTransform.Rotation);
 
 			// RENDERING
-			if (auto commandBuffer = mRenderer.beginFrame())
+			if (auto commandBuffer = m_renderer.beginFrame())
 			{
-				int frameIndex = mRenderer.frameIndex();
+				int frameIndex = m_renderer.frameIndex();
 				FrameInfo frameInfo{
 					frameIndex,
 					frameTimeSec,
 					commandBuffer,
 					&camera,
 					globalDescriptorSets[frameIndex],
-					mScene.get()
+					m_scene.get()
 				};
 
 				// update
@@ -121,19 +121,19 @@ namespace vre
 				uboBuffers[frameIndex]->flush();
 
 				// render
-				mRenderer.beginSwapChainRenderPass(commandBuffer);
+				m_renderer.beginSwapChainRenderPass(commandBuffer);
 
 				// render solid objects first
 				simpleRenderSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
 
-				mRenderer.endSwapChainRenderPass(commandBuffer);
-				mRenderer.endFrame();
+				m_renderer.endSwapChainRenderPass(commandBuffer);
+				m_renderer.endFrame();
 			}
 		}
-		vkDeviceWaitIdle(mDevice.device());
+		vkDeviceWaitIdle(m_device.device());
 
-		mScene->runtimeEnd();
+		m_scene->runtimeEnd();
 	}
 
 } // namespace vre

@@ -29,12 +29,12 @@ namespace vre
 		void createImageView();
 		void createTextureSampler();
 
-		VulkanDevice& mDevice;
+		VulkanDevice& m_device;
 
-		VkImage mTextureImage;
-		VkDeviceMemory mTextureImageMemory;
-		VkImageView mTextureImageView;
-		VkSampler mTextureSampler;
+		VkImage m_textureImage;
+		VkDeviceMemory m_textureImageMemory;
+		VkImageView m_textureImageView;
+		VkSampler m_textureSampler;
 	};
 
 } // namespace vre

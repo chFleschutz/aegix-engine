@@ -55,7 +55,7 @@ namespace vre
 		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
-		VulkanDevice& mDevice;
+		VulkanDevice& m_device;
 		entt::registry m_registry;
 
 		friend class Entity;

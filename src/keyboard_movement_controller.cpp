@@ -10,7 +10,7 @@ namespace vre
 {
 	void KeyboardMovementController::begin()
 	{
-		mPreviousCursorPos = Input::instance().cursorPosition();
+		m_previousCursorPos = Input::instance().cursorPosition();
 	}
 
 	void KeyboardMovementController::update(float deltaSeconds)
@@ -25,28 +25,28 @@ namespace vre
 
 		// Key input rotation
 		glm::vec3 rotate{0.0f};
-		if (Input::instance().keyPressed(mKeys.lookRight)) rotate.y += 1.0f;
-		if (Input::instance().keyPressed(mKeys.lookLeft)) rotate.y -= 1.0f;
-		if (Input::instance().keyPressed(mKeys.lookUp)) rotate.x += 1.0f;
-		if (Input::instance().keyPressed(mKeys.lookDown)) rotate.x -= 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.y += 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.y -= 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookUp)) rotate.x += 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookDown)) rotate.x -= 1.0f;
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 		{
-			transform.Rotation += mLookSpeed * glm::normalize(rotate) * deltaSeconds;
+			transform.Rotation += m_lookSpeed * glm::normalize(rotate) * deltaSeconds;
 		}
 
 		// Mouse input rotation
-		toggleMouseRotate(Input::instance().mouseButtonPressed(mKeys.mouseRotate));
-		if (mMouseRotateEnabled)
+		toggleMouseRotate(Input::instance().mouseButtonPressed(m_keys.mouseRotate));
+		if (m_mouseRotateEnabled)
 		{
 			auto cursorPos = Input::instance().cursorPosition();
-			rotate.x -= cursorPos.y - mPreviousCursorPos.y;
-			rotate.y += cursorPos.x - mPreviousCursorPos.x;
-			mPreviousCursorPos = cursorPos;
+			rotate.x -= cursorPos.y - m_previousCursorPos.y;
+			rotate.y += cursorPos.x - m_previousCursorPos.x;
+			m_previousCursorPos = cursorPos;
 
 			if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 			{
-				transform.Rotation += mMouseSensitivity * rotate * deltaSeconds;
+				transform.Rotation += m_mouseSensitivity * rotate * deltaSeconds;
 			}
 		}
 
@@ -69,67 +69,67 @@ namespace vre
 		// maybe use rotation matrix see: https://en.wikipedia.org/wiki/Rotation_matrix
 
 		glm::vec3 moveDir{0.0f};
-		if (Input::instance().keyPressed(mKeys.moveForward)) moveDir += forwardDir;
-		if (Input::instance().keyPressed(mKeys.moveBackward)) moveDir -= forwardDir;
-		if (Input::instance().keyPressed(mKeys.moveRight)) moveDir += rightDir;
-		if (Input::instance().keyPressed(mKeys.moveLeft)) moveDir -= rightDir;
-		if (Input::instance().keyPressed(mKeys.moveUp)) moveDir += upDir;
-		if (Input::instance().keyPressed(mKeys.moveDown)) moveDir -= upDir;
+		if (Input::instance().keyPressed(m_keys.moveForward)) moveDir += forwardDir;
+		if (Input::instance().keyPressed(m_keys.moveBackward)) moveDir -= forwardDir;
+		if (Input::instance().keyPressed(m_keys.moveRight)) moveDir += rightDir;
+		if (Input::instance().keyPressed(m_keys.moveLeft)) moveDir -= rightDir;
+		if (Input::instance().keyPressed(m_keys.moveUp)) moveDir += upDir;
+		if (Input::instance().keyPressed(m_keys.moveDown)) moveDir -= upDir;
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 		{ 
-			transform.Location += mMoveSpeed * glm::normalize(moveDir) * deltaSeconds;
+			transform.Location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement
-		toogleMousePan(Input::instance().mouseButtonPressed(mKeys.mousePan));
-		if (mMousePanEnabled)
+		toogleMousePan(Input::instance().mouseButtonPressed(m_keys.mousePan));
+		if (m_mousePanEnabled)
 		{
 			auto cursorPos = Input::instance().cursorPosition();
-			moveDir -= rightDir * (cursorPos.x - mPreviousCursorPos.x);
-			moveDir += upDir * (cursorPos.y - mPreviousCursorPos.y);
-			mPreviousCursorPos = cursorPos;
+			moveDir -= rightDir * (cursorPos.x - m_previousCursorPos.x);
+			moveDir += upDir * (cursorPos.y - m_previousCursorPos.y);
+			m_previousCursorPos = cursorPos;
 
 			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 			{
-				transform.Location += mMouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
+				transform.Location += m_mouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
 			}
 		}
 	}
 
 	void KeyboardMovementController::toggleMouseRotate(bool enabled)
 	{
-		if (mMousePanEnabled)
+		if (m_mousePanEnabled)
 			return;
 
-		if (!mMouseRotateEnabled && enabled)
+		if (!m_mouseRotateEnabled && enabled)
 		{
 			Input::instance().setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			mMouseRotateEnabled = true;
-			mPreviousCursorPos = Input::instance().cursorPosition();
+			m_mouseRotateEnabled = true;
+			m_previousCursorPos = Input::instance().cursorPosition();
 		}
-		else if (mMouseRotateEnabled && !enabled)
+		else if (m_mouseRotateEnabled && !enabled)
 		{
 			Input::instance().setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			mMouseRotateEnabled = false;
+			m_mouseRotateEnabled = false;
 		}
 	}
 
 	void KeyboardMovementController::toogleMousePan(bool enabled)
 	{
-		if (mMouseRotateEnabled)
+		if (m_mouseRotateEnabled)
 			return;
 
-		if (!mMousePanEnabled && enabled)
+		if (!m_mousePanEnabled && enabled)
 		{
 			Input::instance().setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			mMousePanEnabled = true;
-			mPreviousCursorPos = Input::instance().cursorPosition();
+			m_mousePanEnabled = true;
+			m_previousCursorPos = Input::instance().cursorPosition();
 		}
-		else if (mMousePanEnabled && !enabled)
+		else if (m_mousePanEnabled && !enabled)
 		{
 			Input::instance().setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			mMousePanEnabled = false;
+			m_mousePanEnabled = false;
 		}
 	}
 

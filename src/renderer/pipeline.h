@@ -50,10 +50,10 @@ namespace vre
 
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-		VulkanDevice& mDevice;
-		VkPipeline mGraphicsPipeline;
-		VkShaderModule mVertShaderModule;
-		VkShaderModule mFragShaderModule;
+		VulkanDevice& m_device;
+		VkPipeline m_graphicsPipeline;
+		VkShaderModule m_vertShaderModule;
+		VkShaderModule m_fragShaderModule;
 	};
 
 } // namespace vre
