@@ -22,7 +22,7 @@ namespace vre
         VkMemoryPropertyFlags memoryPropertyFlags,
         VkDeviceSize minOffsetAlignment)
         : 
-        mVreDevice{ device },
+        mDevice{ device },
         mInstanceSize{ instanceSize },
         mInstanceCount{ instanceCount },
         mUsageFlags{ usageFlags },
@@ -36,21 +36,21 @@ namespace vre
     Buffer::~Buffer()
     {
         unmap();
-        vkDestroyBuffer(mVreDevice.device(), mBuffer, nullptr);
-        vkFreeMemory(mVreDevice.device(), mMemory, nullptr);
+        vkDestroyBuffer(mDevice.device(), mBuffer, nullptr);
+        vkFreeMemory(mDevice.device(), mMemory, nullptr);
     }
 
     VkResult Buffer::map(VkDeviceSize size, VkDeviceSize offset)
     {
         assert(mBuffer && mMemory && "Called map on buffer before create");
-        return vkMapMemory(mVreDevice.device(), mMemory, offset, size, 0, &mMapped);
+        return vkMapMemory(mDevice.device(), mMemory, offset, size, 0, &mMapped);
     }
 
     void Buffer::unmap()
     {
         if (mMapped)
         {
-            vkUnmapMemory(mVreDevice.device(), mMemory);
+            vkUnmapMemory(mDevice.device(), mMemory);
             mMapped = nullptr;
         }
     }
@@ -78,7 +78,7 @@ namespace vre
         mappedRange.memory = mMemory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkFlushMappedMemoryRanges(mVreDevice.device(), 1, &mappedRange);
+        return vkFlushMappedMemoryRanges(mDevice.device(), 1, &mappedRange);
     }
 
     VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
@@ -88,7 +88,7 @@ namespace vre
         mappedRange.memory = mMemory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkInvalidateMappedMemoryRanges(mVreDevice.device(), 1, &mappedRange);
+        return vkInvalidateMappedMemoryRanges(mDevice.device(), 1, &mappedRange);
     }
 
     VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset)

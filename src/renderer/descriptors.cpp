@@ -25,13 +25,13 @@ namespace vre
 
     std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::Builder::build() const
     {
-        return std::make_unique<DescriptorSetLayout>(mVreDevice, mBindings);
+        return std::make_unique<DescriptorSetLayout>(mDevice, mBindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
     DescriptorSetLayout::DescriptorSetLayout(VulkanDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-        : mVreDevice{ device }, mBindings{ bindings }
+        : mDevice{ device }, mBindings{ bindings }
     {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
         for (auto& kv : bindings)
@@ -56,7 +56,7 @@ namespace vre
 
     DescriptorSetLayout::~DescriptorSetLayout()
     {
-        vkDestroyDescriptorSetLayout(mVreDevice.device(), mDescriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(mDevice.device(), mDescriptorSetLayout, nullptr);
     }
 
     // *************** Descriptor Pool Builder *********************
@@ -81,7 +81,7 @@ namespace vre
 
     std::unique_ptr<DescriptorPool> DescriptorPool::Builder::build() const
     {
-        return std::make_unique<DescriptorPool>(mVreDevice, maxSets, poolFlags, poolSizes);
+        return std::make_unique<DescriptorPool>(mDevice, maxSets, poolFlags, poolSizes);
     }
 
     // *************** Descriptor Pool *********************
@@ -91,7 +91,7 @@ namespace vre
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes)
-        : mVreDevice{ device }
+        : mDevice{ device }
     {
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
         descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -109,7 +109,7 @@ namespace vre
 
     DescriptorPool::~DescriptorPool()
     {
-        vkDestroyDescriptorPool(mVreDevice.device(), mDescriptorPool, nullptr);
+        vkDestroyDescriptorPool(mDevice.device(), mDescriptorPool, nullptr);
     }
 
     bool DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
@@ -122,7 +122,7 @@ namespace vre
 
         // Todo: Might want to create a "DescriptorPoolManager" class that handles this case, and builds
         // a new pool whenever an old pool fills up, see https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/
-        if (vkAllocateDescriptorSets(mVreDevice.device(), &allocInfo, &descriptor) != VK_SUCCESS)
+        if (vkAllocateDescriptorSets(mDevice.device(), &allocInfo, &descriptor) != VK_SUCCESS)
             return false;
 
         return true;
@@ -131,7 +131,7 @@ namespace vre
     void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
     {
         vkFreeDescriptorSets(
-            mVreDevice.device(),
+            mDevice.device(),
             mDescriptorPool,
             static_cast<uint32_t>(descriptors.size()),
             descriptors.data());
@@ -139,7 +139,7 @@ namespace vre
 
     void DescriptorPool::resetPool()
     {
-        vkResetDescriptorPool(mVreDevice.device(), mDescriptorPool, 0);
+        vkResetDescriptorPool(mDevice.device(), mDescriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
@@ -205,7 +205,7 @@ namespace vre
             write.dstSet = set;
         }
         vkUpdateDescriptorSets(
-            mPool.mVreDevice.device(), 
+            mPool.mDevice.device(), 
             static_cast<uint32_t>(mWrites.size()), 
             mWrites.data(), 
             0, 

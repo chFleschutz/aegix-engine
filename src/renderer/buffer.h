@@ -85,7 +85,7 @@ namespace vre
 		/// @return VkResult of the buffer mapping call
 		static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-		VulkanDevice& mVreDevice;
+		VulkanDevice& mDevice;
 		void* mMapped = nullptr;
 		VkBuffer mBuffer = VK_NULL_HANDLE;
 		VkDeviceMemory mMemory = VK_NULL_HANDLE;
