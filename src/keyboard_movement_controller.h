@@ -1,9 +1,8 @@
 #pragma once
 
+#include "core/math_utilities.h"
 #include "renderer/window.h"
 #include "scene/script_component_base.h"
-
-#include <glm/glm.hpp>
 
 namespace vre
 {

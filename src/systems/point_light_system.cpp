@@ -1,12 +1,8 @@
 #include "point_light_system.h"
 
-#include "scene/components.h"
+#include "core/math_utilities.h"
 #include "renderer/camera.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
+#include "scene/components.h"
 
 #include <array>
 #include <map>

@@ -1,11 +1,8 @@
 #pragma once
 
+#include "core/math_utilities.h"
 #include "renderer/buffer.h"
 #include "renderer/device.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
 
 #include <filesystem>
 #include <memory>

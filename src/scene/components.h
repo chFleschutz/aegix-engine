@@ -1,9 +1,8 @@
 #pragma once
 
+#include "core/math_utilities.h"
 #include "renderer/model.h"
 #include "renderer/camera.h"
-
-#include <glm/glm.hpp>
 
 #include <string>
 #include <memory>
