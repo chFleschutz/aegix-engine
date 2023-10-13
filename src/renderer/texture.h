@@ -8,7 +8,7 @@
 
 namespace vre
 {
-	class VreTexture
+	class Texture
 	{
 	public:
 		struct CreateInfo
@@ -16,11 +16,11 @@ namespace vre
 			std::string textureFilePath;
 		};
 
-		VreTexture(VulkanDevice& device, const VreTexture::CreateInfo& createInfo);
-		~VreTexture();
+		Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo);
+		~Texture();
 
-		VreTexture(const VreTexture&) = delete;
-		VreTexture& operator=(const VreTexture&) = delete;
+		Texture(const Texture&) = delete;
+		Texture& operator=(const Texture&) = delete;
 
 		VkDescriptorImageInfo descriptorImageInfo();
 
@@ -29,7 +29,7 @@ namespace vre
 		void createImageView();
 		void createTextureSampler();
 
-		VulkanDevice& mVreDevice;
+		VulkanDevice& mDevice;
 
 		VkImage mTextureImage;
 		VkDeviceMemory mTextureImageMemory;
