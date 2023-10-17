@@ -16,7 +16,8 @@ Vulkanite is a simple rendering / game engine built as an exercise in preparatio
 
 ## Prerequisites <a name="prerequisites"></a>
 
-Before you can run Vulkanite, you'll need to have the [Vulkan SDK](https://vulkan.lunarg.com/) installed on your system.
+- Before you can run Vulkanite, you'll need to have the [Vulkan SDK](https://vulkan.lunarg.com/) installed on your system.
+- CMake functions as the build system, so make sure it's installed or use an IDE with CMake support (Visual Studio is the recommended choice).
 
 ## Getting Started <a name="getting-started"></a>
 
@@ -28,13 +29,13 @@ Follow these steps to get started with Vulkanite Render Engine:
     git clone --recurse-submodules https://github.com/chFleschutz/VulkaniteRenderEngine.git
     ```
 
-2. Open the Visual Studio solution.
+2. Open the folder in Visual Studio and CMake will automatically set up the project.
 
 4. Build and run the project to view an example scene.
 
 ## External Libraries <a name="external-libraries"></a>
 
-This project uses several external libraries to enhance its functionality:
+This project uses several external libraries:
 
 - [entt](https://github.com/skypjack/entt) 				(Entity Component System)
 - [glfw](https://github.com/glfw/glfw) 					(Windowing)
