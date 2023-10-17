@@ -156,7 +156,9 @@ namespace vre
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str()))
+		std::filesystem::path path(ENGINE_DIR);
+		path += filepath;
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.string().c_str()))
 			throw std::runtime_error(warn + err);
 
 		vertices.clear();
