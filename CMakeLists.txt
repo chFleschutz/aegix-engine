@@ -3,22 +3,17 @@ cmake_minimum_required(VERSION 3.12)
 set(NAME Vulkanite)
 project(${NAME})
 
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-message("CMake Configuration:")
-message(STATUS "CMake Version: ${CMAKE_VERSION}")
-message(STATUS "CMake Generator: ${CMAKE_GENERATOR}")
-message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
-
-message(STATUS "CMake source directory: ${CMAKE_SOURCE_DIR}")
-message(STATUS "CMake binary directory: ${CMAKE_BINARY_DIR}")
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-
 # Find the Vulkan package
-find_package(Vulkan REQUIRED)
+find_package(Vulkan COMPONENTS glslc REQUIRED)
 if (NOT Vulkan_FOUND)
     message(FATAL_ERROR "Vulkan was not found. Make sure the Vulkan SDK is installed")
+endif()
+if (NOT Vulkan_glslc_FOUND)
+    message(FATAL_ERROR "glslc was not found")
 endif()
 
 # Top-level source directory 
@@ -45,7 +40,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib/glfw/lib-v
 target_link_libraries(${PROJECT_NAME} PRIVATE Vulkan::Vulkan)
 
 
-
 # Compile glsl shader files into SPIR-V
 # Get shader files
 set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)
@@ -53,13 +47,6 @@ file(GLOB_RECURSE SHADER_SOURCES
     "${SHADERS_DIR}/*.frag" 
     "${SHADERS_DIR}/*.vert"
 )
-
-# Find glsl validator 
-find_program(GLSL_VALIDATOR NAMES glslc HINTS Vulkan::glslc)
-if (NOT GLSL_VALIDATOR)
-    message(FATAL_ERROR "No glsl compiler found")
-endif()
-
 add_custom_target(compile_shaders)
 
 # Compile each shader
@@ -68,10 +55,21 @@ foreach(GLSL ${SHADER_SOURCES})
     set(SPIRV ${SHADERS_DIR}/${SHADER_NAME}.spv)
     add_custom_command(
         TARGET compile_shaders
-        COMMAND ${GLSL_VALIDATOR} -V ${GLSL} -o ${SPIRV}
+        COMMAND ${Vulkan_GLSLC_EXECUTABLE} ${GLSL} -o ${SPIRV}
         DEPENDS ${GLSL}
         VERBATIM
     )
 endforeach()
-
 add_dependencies(${PROJECT_NAME} compile_shaders)
+
+
+# Print configuration
+message("CMake Configuration:")
+message(STATUS "CMake Version: ${CMAKE_VERSION}")
+message(STATUS "CMake Generator: ${CMAKE_GENERATOR}")
+message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "CMake source directory: ${CMAKE_SOURCE_DIR}")
+message(STATUS "CMake binary directory: ${CMAKE_BINARY_DIR}")
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Vulkan SDK ${Vulkan_VERSION}: ${Vulkan_LIBRARY}")
+message(STATUS "GLSL Compiler: ${Vulkan_GLSLC_EXECUTABLE}")
