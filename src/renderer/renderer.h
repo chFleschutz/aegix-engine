@@ -50,7 +50,7 @@ namespace vre
 		std::vector<VkCommandBuffer> m_commandBuffers;
 
 		uint32_t m_currentImageIndex;
-		int m_currentFrameIndex;
+		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 	};
 
