@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#define ENGINE_DIR "../../"
+
 namespace vre
 {
 	struct SwapChainSupportDetails
