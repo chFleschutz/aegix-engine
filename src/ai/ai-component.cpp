@@ -13,7 +13,10 @@ namespace vai
 
     void AIComponent::update(float deltaSeconds)
     {
-        if (vre::Input::instance().keyPressed(GLFW_KEY_SPACE))
+        // Check for key press (compare to lastFrame to trigger only once)
+        static bool lastFramePressed = false;
+        bool keyPressed = vre::Input::instance().keyPressed(GLFW_KEY_SPACE);
+        if (keyPressed and !lastFramePressed)
         {
             if (m_option.isActive())
             {
@@ -24,6 +27,7 @@ namespace vai
                 m_option.start();
             }
         }
+        lastFramePressed = keyPressed;
 
         m_option.update(deltaSeconds);
     }
