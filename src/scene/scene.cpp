@@ -19,8 +19,8 @@ namespace vre
 		camera.addComponent<CameraComponent>();
 		camera.addScript<KeyboardMovementController>();
 		auto& cameraTransform = camera.getComponent<TransformComponent>();
-		cameraTransform.location = { -0.5f, -0.5f, -0.5 };
-		cameraTransform.rotation = { -0.4f, 0.8f, 0 };
+		cameraTransform.location = { 0.0f, -15.0f, -15.0f };
+		cameraTransform.rotation = { -0.9f, 0.0f, 0.0f };
 	}
 
 	Entity Scene::camera()
