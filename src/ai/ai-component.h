@@ -1,7 +1,9 @@
 #pragma once
 
 #include "scene/script_component_base.h"
-#include "ai/option.h"
+#include "ai/options/option.h"
+
+#include <memory>
 
 namespace vai
 {
@@ -14,6 +16,6 @@ namespace vai
         void update(float deltaSeconds) override;
 
     private:
-        Option m_option;
+        std::unique_ptr<Option> m_option;
     };
 }

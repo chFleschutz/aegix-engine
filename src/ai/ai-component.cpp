@@ -1,14 +1,15 @@
 #include "ai-component.h"
 
-#include "ai/option.h"
+#include "ai/options/option_text_output.h"
 #include "core/input.h"
 
 namespace vai
 {
     AIComponent::AIComponent()
     {
-        m_option.setDuration(1.0f);
-        m_option.setCooldown(0.2f);
+        m_option = std::make_unique<OptionTextOutput>();
+        m_option->setDuration(5.0f);
+        m_option->setCooldown(1.0f);
     }
 
     void AIComponent::update(float deltaSeconds)
@@ -18,18 +19,18 @@ namespace vai
         bool keyPressed = vre::Input::instance().keyPressed(GLFW_KEY_SPACE);
         if (keyPressed and !lastFramePressed)
         {
-            if (m_option.isActive())
+            if (m_option->isActive())
             {
-                m_option.pause();
+                m_option->pause();
             }
             else
             {
-                m_option.start();
+                m_option->start();
             }
         }
         lastFramePressed = keyPressed;
 
-        m_option.update(deltaSeconds);
+        m_option->update(deltaSeconds);
     }
 
 } // namespace vai

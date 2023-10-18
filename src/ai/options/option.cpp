@@ -15,27 +15,21 @@ namespace vai
     void Option::start()
     {
         if (m_onCooldown)
-        {
-            std::cout << "Option on cooldown" << std::endl;
             return;
-        }
 
         m_isActive = true;
-        std::cout << "Option started" << std::endl;
     }
 
     void Option::pause()
     {
         m_isActive = false;
         m_onCooldown = true;
-        std::cout << "Option paused" << std::endl;
     }
 
     void Option::stop()
     {
         m_isActive = false;
         m_elapsedTime = 0.0f;
-        std::cout << "Option stopped" << std::endl;
     }   
 
     void Option::update(float deltaSeconds)
