@@ -1,5 +1,5 @@
 #include "core/vulkanite_engine.h"
-#include "scene/default_scene.h"
+#include "ai/ai-scene.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -9,7 +9,7 @@ auto main() -> int
 	try
 	{
 		vre::VulkaniteEngine engine{};
-		engine.loadScene<DefaultScene>();
+		engine.loadScene<AIScene>();
 		engine.run();
 	}
 	catch (const std::exception& e)
