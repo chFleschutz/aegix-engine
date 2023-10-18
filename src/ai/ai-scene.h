@@ -1,8 +1,7 @@
 #include "scene/scene.h"
 #include "scene/entity.h"
 #include "ai/ai-component.h"
-
-#include <random>
+#include "utils/random.h"
 
 class AIScene : public vre::Scene
 {
@@ -23,12 +22,9 @@ public:
 
 			auto arrowModel = loadModel("models/arrow.obj");
 			// Init random generator
-			std::random_device rd;	
-			std::mt19937 gen(rd()); 
-			std::uniform_real_distribution<> dis(-9.0, 9.0);
 			for (int i = 0; i < npcCount; i++)
 			{
-				glm::vec3 randomLocation = { dis(gen), 0.0f, dis(gen) };
+				glm::vec3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto arrow = createEntity("NPC " + std::to_string(i), randomLocation);
 				arrow.addComponent<vre::MeshComponent>(arrowModel);
 			}
