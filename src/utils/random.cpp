@@ -36,3 +36,8 @@ int Random::normalIntRange(int min, int max)
 {
 	return std::clamp(normalInt((min + max) / 2.0f, (max - min) / 6.0f), min, max);
 }
+
+void Random::seed(unsigned int seed)
+{
+	m_generator.seed(seed);
+}

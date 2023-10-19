@@ -24,6 +24,9 @@ public:
 	/// @brief Returns a normal random int in the range [min, max]	
 	static int normalIntRange(int min, int max);
 
+	/// @brief Seeds the random number generator
+	static void seed(unsigned int seed);
+
 private:
 	static std::mt19937 m_generator;
 };
