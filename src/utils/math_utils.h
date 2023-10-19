@@ -16,19 +16,28 @@ public:
 		return (value - min) / (max - min);
 	}
 
-	/// @brief Simple linear interpolation between two values
-	static float interpolate(float percentage, float min, float max)
+	/// @brief Sigmoid function
+	/// @param x Input value x between [0, 1]
+	/// @return Returns x transformed by the sigmoid function between [0, 1]
+	static float sigmoid(float x)
 	{
-		return min + (max - min) * percentage;
+		return 1.0f / (1.0f + std::exp(-12.0f * x + 6.0f));
 	}
 
-	/// @brief This is a fast approximation of the sigmoid function
-	/// @param x Input value x
-	/// @return Returns the sigmoid of x (closely approximated)
+	/// @brief This is a fast approximation of the sigmoid function 
+	/// @param x Input value x beetwen [0, 1]
+	/// @return Returns x transformed by the sigmoid function between [0, 1] 
 	static float fastSigmoid(float x)
 	{
-		// Taken from: https://stackoverflow.com/questions/10732027/fast-sigmoid-algorithm
-		return x / (1.0f + std::abs(x));
+		x = 12.0f * x - 6.0f;
+		return x / (1.0f + std::abs(x)) / 2.0f + 0.5f;
 	}
 
+	/// @brief Tangens hyperbolicus function transformed into the range [0, 1]
+	/// @param x Input value x between [0, 1]
+	/// @return Returns x transformed by the tanh function between [0, 1]
+	static float tanh01(float x)
+	{
+		return std::tanh(6.0f * x - 3.0f) / 2.0f + 0.5f;
+	}
 };
