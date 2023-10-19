@@ -1,7 +1,7 @@
 #include "vulkanite_engine.h"
 
 #include "core/input.h"
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 #include "renderer/buffer.h"
 #include "scene/components.h"
 #include "scene/entity.h"

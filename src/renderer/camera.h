@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 
 namespace vre
 {

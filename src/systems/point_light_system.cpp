@@ -1,6 +1,6 @@
 #include "point_light_system.h"
 
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 #include "renderer/camera.h"
 #include "scene/components.h"
 
