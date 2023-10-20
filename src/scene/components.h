@@ -66,7 +66,7 @@ namespace vre
 	/// @brief Stores a custom script
 	struct ScriptComponent
 	{
-		ScriptComponentBase* script = nullptr;
+		std::unique_ptr<ScriptComponentBase> script;
 	};
 
 } // namespace vre

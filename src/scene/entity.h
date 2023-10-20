@@ -35,13 +35,13 @@ namespace vre
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			auto& script = m_scene->m_registry.emplace<ScriptComponent>(m_entityHandle);
-			script.script = new T(std::forward<Args>(args)...);
+			script.script = std::make_unique<T>(std::forward<Args>(args)...);
 			return script;
 		}
 
-		/// @brief Checks if the entity has a component of type T
-		/// @tparam ...T Type of the component
-		/// @return True if the entity has a component of type T otherwise false
+		/// @brief Checks if the entity has all components of type T...
+		/// @tparam ...T Type of the components to check
+		/// @return True if the entity has all components of type T... otherwise false
 		template<typename... T>
 		bool hasComponent()
 		{
