@@ -46,7 +46,7 @@ namespace vre
 			SimplePushConstantData push{};
 			push.modelMatrix = transform.mat4();
 			push.normalMatrix = transform.normalMatrix();
-			push.baseColor = mesh.color;
+			push.baseColor = mesh.color.rgb();
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,

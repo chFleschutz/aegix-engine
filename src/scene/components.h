@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/color.h"
 #include "utils/math_utils.h"
 #include "renderer/model.h"
 #include "renderer/camera.h"
@@ -40,11 +41,11 @@ namespace vre
 	struct MeshComponent
 	{
 		std::shared_ptr<Model> model;
-		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		Color color;
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(std::shared_ptr<Model> entityModel, glm::vec3 baseColor = glm::vec3{ 1.0f })
+		MeshComponent(std::shared_ptr<Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
 	};
 

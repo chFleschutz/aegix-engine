@@ -5,7 +5,6 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 
-
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
 class Rotator : public vre::ScriptComponentBase
@@ -30,12 +29,12 @@ public:
 		{ // Models 
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
-			teapot.addComponent<vre::MeshComponent>(teapotModel, glm::vec3{ 1.0f, 0.3f, 0.0f });
+			teapot.addComponent<vre::MeshComponent>(teapotModel, Color::red());
 			teapot.addScript<Rotator>();
-
+			
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
-			plane.addComponent<vre::MeshComponent>(planeModel);
+			plane.addComponent<vre::MeshComponent>(planeModel, Color::white());
 		}
 		{ // Lights
 			auto light1 = createEntity("Light 1", { -1.0f, -1.0f, -1.0f });
