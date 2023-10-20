@@ -14,6 +14,7 @@ namespace vre
 	{
 		glm::mat4 modelMatrix{1.0f};
 		glm::mat4 normalMatrix{1.0f};
+		glm::vec3 baseColor{1.0f};
 	};
 
 	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_device{device}
@@ -45,6 +46,7 @@ namespace vre
 			SimplePushConstantData push{};
 			push.modelMatrix = transform.mat4();
 			push.normalMatrix = transform.normalMatrix();
+			push.baseColor = mesh.color;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
