@@ -1,6 +1,6 @@
 #include "point_light_system.h"
 
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 #include "renderer/camera.h"
 #include "scene/components.h"
 
@@ -62,7 +62,7 @@ namespace vre
 			PointLightPushConstants push{};
 			push.position = glm::vec4(transform.location, 1.0f);
 			push.color = glm::vec4(pointLight.color, 1.0f);
-			push.radius = transform.scale.x * pointLight.intensity;
+			push.radius = transform.scale.x;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
