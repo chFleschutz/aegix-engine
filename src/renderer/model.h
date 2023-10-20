@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 #include "renderer/buffer.h"
 #include "renderer/device.h"
 

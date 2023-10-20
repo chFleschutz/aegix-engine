@@ -1,6 +1,6 @@
 #include "simple_render_system.h"
 
-#include "core/math_utilities.h"
+#include "utils/math_utils.h"
 #include "renderer/renderer.h"
 #include "scene/components.h"
 
