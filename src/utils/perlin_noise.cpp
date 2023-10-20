@@ -2,7 +2,6 @@
 
 #include "utils/random.h"
 
-#include <iostream>
 
 PerlinNoise1D::PerlinNoise1D(int rank)
 	: m_rank(rank)
@@ -26,9 +25,7 @@ float PerlinNoise1D::noise(float x, float persistence)
 	float noiseValue = 0.0f;
 	for (auto& octave : interval.octaves)
 	{
-		auto octaveValue = octave.value(relativeX);
-		noiseValue += octaveValue * std::pow(persistence, octave.rank());
-		std::cout << noiseValue << "\t" << octaveValue  << "\t" << std::pow(persistence, octave.rank()) << std::endl;
+		noiseValue += octave.value(relativeX) * static_cast<float>(std::pow(persistence, octave.rank()));
 	}
 	return noiseValue;
 }
