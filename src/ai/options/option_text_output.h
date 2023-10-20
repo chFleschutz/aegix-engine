@@ -6,6 +6,7 @@
 
 namespace vai
 {
+	/// @brief Debug option that prints to the console
 	class OptionTextOutput : public Option
 	{
 	public:
@@ -15,7 +16,7 @@ namespace vai
 
 			if (onCooldown())
 			{
-				std::cout << "Option is on Cooldown" << std::endl;
+				std::cout << "Option on Cooldown" << std::endl;
 				return;
 			}
 
@@ -36,7 +37,7 @@ namespace vai
 
 		void updateOption(float deltaSeconds) override
 		{
-			std::cout << "Option is active since " << elapsedTime() << " seconds" << std::endl;
+			std::cout << "Option active since " << elapsedTime() << " seconds" << std::endl;
 		}
 	};
 

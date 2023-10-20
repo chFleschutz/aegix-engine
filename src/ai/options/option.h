@@ -17,7 +17,7 @@ namespace vai
         bool isActive() const { return m_isActive; }
         /// @brief Returns true if the option is on cooldown otherwise false
         bool onCooldown() const { return m_onCooldown; }
-        /// @brief Returns the elapsed time 
+        /// @brief Returns the elapsed time since started
         float elapsedTime() const { return m_elapsedTime; }
         /// @brief Returns the overall duration
         float duration() const { return m_duration; }
@@ -37,7 +37,8 @@ namespace vai
         /// @brief Updates the option
         void update(float deltaSeconds);
         
-        /// @brief Function is called once per frame if the option is active
+    protected:
+        /// @brief Function is called once per frame only if the option is active
         /// @param deltaSeconds Seconds between frames
         /// @note Override this function to implement custom behaviour
         virtual void updateOption(float deltaSeconds) = 0;

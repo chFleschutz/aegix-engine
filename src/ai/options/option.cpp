@@ -29,6 +29,7 @@ namespace vai
     void Option::stop()
     {
         m_isActive = false;
+        m_onCooldown = true;
         m_elapsedTime = 0.0f;
     }   
 
@@ -37,8 +38,11 @@ namespace vai
         // Update cooldown
         if (m_onCooldown)
         {
-            m_cooldownTime += deltaSeconds;
-            if (m_cooldownTime > m_cooldown)
+            if (m_cooldownTime < m_cooldown)
+            {
+                m_cooldownTime += deltaSeconds;
+            }
+            else
             {
                 m_onCooldown = false;
                 m_cooldownTime = 0.0f;
@@ -48,11 +52,15 @@ namespace vai
         // Update option 
         if (m_isActive)
         {
-            m_elapsedTime += deltaSeconds;
-            updateOption(deltaSeconds);
-
-            if (m_elapsedTime > m_duration)
+            if (m_elapsedTime < m_duration)
+            {
+                m_elapsedTime += deltaSeconds;
+                updateOption(deltaSeconds);
+            }
+            else
+            {
                 stop();
+            }
         }
     }
 

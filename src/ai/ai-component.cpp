@@ -8,7 +8,7 @@ namespace vai
     AIComponent::AIComponent()
     {
         m_option = std::make_unique<OptionTextOutput>();
-        m_option->setDuration(5.0f);
+        m_option->setDuration(3.0f);
         m_option->setCooldown(1.0f);
     }
 
