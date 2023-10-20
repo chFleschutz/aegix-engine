@@ -1,7 +1,7 @@
 #include "vulkanite_engine.h"
 
 #include "core/input.h"
-#include "utils/math_utils.h"
+#include "core/math_utilities.h"
 #include "renderer/buffer.h"
 #include "scene/components.h"
 #include "scene/entity.h"
@@ -77,12 +77,12 @@ namespace vre
 		// update loop
 		while (!m_window.shouldClose())
 		{
-			// Calculate time
-			auto frameBeginTime = std::chrono::high_resolution_clock::now();
-			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(frameBeginTime - currentTime).count();
-			currentTime = frameBeginTime;
-
 			glfwPollEvents();
+
+			// Calculate time
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
 
 			// Update all components
 			m_scene->update(frameTimeSec);
@@ -125,21 +125,10 @@ namespace vre
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}
-
-			applyFrameBrake(frameBeginTime);
 		}
 		vkDeviceWaitIdle(m_device.device());
 
 		m_scene->runtimeEnd();
-	}
-
-	void VulkaniteEngine::applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime)
-	{
-		if (MAX_FPS <= 0)
-			return;
-
-		auto desiredFrameTime = std::chrono::round<std::chrono::nanoseconds>(std::chrono::duration<float>(1.0f / MAX_FPS));
-		while (std::chrono::high_resolution_clock::now() < frameBeginTime + desiredFrameTime);
 	}
 
 } // namespace vre

@@ -18,8 +18,6 @@ namespace vre
 		static constexpr int WIDTH = 1080;
 		static constexpr int HEIGHT = 720;
 
-		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
-
 		VulkaniteEngine();
 		~VulkaniteEngine();
 
@@ -39,8 +37,6 @@ namespace vre
 		}
 
 	private:
-		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
-
 		Window m_window{ WIDTH, HEIGHT, "Vulkanite" };
 		VulkanDevice m_device{ m_window };
 		Renderer m_renderer{ m_window, m_device };

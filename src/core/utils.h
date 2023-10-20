@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace utils 
+namespace vre 
 {
 	// from: https://stackoverflow.com/a/57595105
 	template <typename T, typename... Rest>
@@ -12,4 +12,4 @@ namespace utils
 		(hashCombine(seed, rest), ...);
 	};
 
-} // namespace utils
+} // namespace vre

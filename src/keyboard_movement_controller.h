@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utils/math_utils.h"
+#include "core/math_utilities.h"
 #include "renderer/window.h"
 #include "scene/script_component_base.h"
 
