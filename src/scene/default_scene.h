@@ -27,10 +27,10 @@ public:
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
-		{ // Models
+		{ // Models 
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
-			teapot.addComponent<vre::MeshComponent>(teapotModel);
+			teapot.addComponent<vre::MeshComponent>(teapotModel, glm::vec3{ 1.0f, 0.3f, 0.0f });
 			teapot.addScript<Rotator>();
 
 			auto planeModel = loadModel("models/plane.obj");
