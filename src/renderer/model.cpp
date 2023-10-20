@@ -1,6 +1,6 @@
 #include "model.h"
 
-#include "utils/utils.h"
+#include "core/utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
@@ -19,7 +19,7 @@ namespace std
 		size_t operator()(vre::Model::Vertex const& vertex) const
 		{
 			size_t seed = 0;
-			utils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			vre::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
 			return seed;
 		}
 	};
