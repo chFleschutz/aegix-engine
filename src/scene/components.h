@@ -40,6 +40,7 @@ namespace vre
 	struct MeshComponent
 	{
 		std::shared_ptr<Model> model;
+		glm::vec3 color { 1.0f, 1.0f, 1.0f };
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;
