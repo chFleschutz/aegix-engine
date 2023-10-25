@@ -36,7 +36,7 @@ namespace vre
 		{
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
 			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = Vector4(pointLight.color, pointLight.intensity);
+			ubo.pointLights[lighIndex].color = Vector4(pointLight.color.rgb(), pointLight.intensity);
 			lighIndex++;
 		}
 		ubo.numLights = lighIndex;
@@ -61,7 +61,7 @@ namespace vre
 		{
 			PointLightPushConstants push{};
 			push.position = Vector4(transform.location, 1.0f);
-			push.color = Vector4(pointLight.color, 1.0f);
+			push.color = Vector4(pointLight.color.rgb(), 1.0f);
 			push.radius = transform.scale.x;
 
 			vkCmdPushConstants(

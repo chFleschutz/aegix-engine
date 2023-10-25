@@ -49,8 +49,13 @@ namespace vre
 	/// @brief Creates a light 
 	struct PointLightComponent
 	{
-		Vector3 color = { 1.0f, 1.0f, 1.0f };
+		Color color;
 		float intensity = 0.2f;
+
+		PointLightComponent() = default;
+		PointLightComponent(const PointLightComponent&) = default;
+		PointLightComponent(const Color& lightColor, float lightIntensity = 0.2f)
+			: color(lightColor), intensity(lightIntensity) {}
 	};
 
 	/// @brief Holds a camera to view the scene
