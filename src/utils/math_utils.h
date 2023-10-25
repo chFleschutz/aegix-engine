@@ -36,4 +36,13 @@ public:
 	/// @param x Input value x between [0, 1]
 	/// @return Returns x transformed by the tanh function between [0, 1]
 	static float tanh01(float x);
+
+
+	/// @brief Composes a transformation matrix from location, rotation and scale
+	/// @return Composed transformation matrix
+	static Matrix4 tranformationMatrix(Vector3 location, Vector3 rotation, Vector3 scale);
+
+	/// @brief Compoeses a matrix to transform normals into world space
+	/// @return Composed normal matrix
+	static Matrix3 normalMatrix(Vector3 rotation, Vector3 scale);
 };

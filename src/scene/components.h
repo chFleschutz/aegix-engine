@@ -32,9 +32,6 @@ namespace vre
 		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const Vector3& entityLocation)
 			: location(entityLocation) {}
-
-		Matrix4 mat4();
-		Matrix3 normalMatrix();
 	};
 
 	/// @brief Holds a pointer to a model

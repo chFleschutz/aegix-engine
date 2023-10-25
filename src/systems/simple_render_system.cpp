@@ -44,8 +44,8 @@ namespace vre
 		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
 		{
 			SimplePushConstantData push{};
-			push.modelMatrix = transform.mat4();
-			push.normalMatrix = transform.normalMatrix();
+			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
+			push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
 			push.baseColor = mesh.color.rgb();
 
 			vkCmdPushConstants(
