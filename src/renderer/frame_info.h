@@ -17,9 +17,9 @@ namespace vre
 
 	struct GlobalUbo
 	{
-		glm::mat4 projection{1.0f};
-		glm::mat4 view{1.0f};
-		glm::mat4 inverseView{1.0f};
+		Matrix4 projection{1.0f};
+		Matrix4 view{1.0f};
+		Matrix4 inverseView{1.0f};
 		Vector4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
 		PointLight pointLights[MAX_LIGHTS];
 		int numLights;

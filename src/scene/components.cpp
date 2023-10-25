@@ -2,7 +2,7 @@
 
 namespace vre
 {
-	glm::mat4 TransformComponent::mat4()
+	Matrix4 TransformComponent::mat4()
 	{
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -10,7 +10,7 @@ namespace vre
 		const float s2 = glm::sin(rotation.x);
 		const float c1 = glm::cos(rotation.y);
 		const float s1 = glm::sin(rotation.y);
-		return glm::mat4{
+		return Matrix4{
 			{
 				scale.x* (c1* c3 + s1 * s2 * s3),
 				scale.x* (c2* s3),
@@ -34,7 +34,7 @@ namespace vre
 			}};
 	}
 
-	glm::mat3 TransformComponent::normalMatrix()
+	Matrix3 TransformComponent::normalMatrix()
 	{
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -44,7 +44,7 @@ namespace vre
 		const float s1 = glm::sin(rotation.y);
 		const Vector3 invScale = 1.0f / scale;
 
-		return glm::mat3{
+		return Matrix3{
 			{
 				invScale.x* (c1* c3 + s1 * s2 * s3),
 				invScale.x* (c2* s3),

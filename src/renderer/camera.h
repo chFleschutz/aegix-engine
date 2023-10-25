@@ -37,15 +37,15 @@ namespace vre
 		/// @param rotation Rotation of the camera
 		void setViewYXZ(Vector3 position, Vector3 rotation);
 
-		const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
-		const glm::mat4& viewMatrix() const { return m_viewMatrix; }
-		const glm::mat4& inverseViewMatrix() const { return m_inverseViewMatrix; }
+		const Matrix4& projectionMatrix() const { return m_projectionMatrix; }
+		const Matrix4& viewMatrix() const { return m_viewMatrix; }
+		const Matrix4& inverseViewMatrix() const { return m_inverseViewMatrix; }
 		const Vector3 position() const { return Vector3(m_inverseViewMatrix[3]); }
 
 	private:
-		glm::mat4 m_projectionMatrix{ 1.0f };
-		glm::mat4 m_viewMatrix{ 1.0f };
-		glm::mat4 m_inverseViewMatrix{ 1.0f };
+		Matrix4 m_projectionMatrix{ 1.0f };
+		Matrix4 m_viewMatrix{ 1.0f };
+		Matrix4 m_inverseViewMatrix{ 1.0f };
 	};
 
 } // namespace vre

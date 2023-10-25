@@ -33,8 +33,8 @@ namespace vre
 		TransformComponent(const Vector3& entityLocation)
 			: location(entityLocation) {}
 
-		glm::mat4 mat4();
-		glm::mat3 normalMatrix();
+		Matrix4 mat4();
+		Matrix3 normalMatrix();
 	};
 
 	/// @brief Holds a pointer to a model

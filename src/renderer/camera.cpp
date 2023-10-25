@@ -9,7 +9,7 @@ namespace vre
 {
 	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
-		m_projectionMatrix = glm::mat4{ 1.0f };
+		m_projectionMatrix = Matrix4{ 1.0f };
 		m_projectionMatrix[0][0] = 2.f / (right - left);
 		m_projectionMatrix[1][1] = 2.f / (bottom - top);
 		m_projectionMatrix[2][2] = 1.f / (far - near);
@@ -23,7 +23,7 @@ namespace vre
 		assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
 
 		const float tanHalfFovy = tan(fovy / 2.f);
-		m_projectionMatrix = glm::mat4{ 0.0f };
+		m_projectionMatrix = Matrix4{ 0.0f };
 		m_projectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);
 		m_projectionMatrix[1][1] = 1.f / (tanHalfFovy);
 		m_projectionMatrix[2][2] = far / (far - near);
@@ -39,7 +39,7 @@ namespace vre
 		const Vector3 u{glm::normalize(glm::cross(w, up))};
 		const Vector3 v{glm::cross(w, u)};
 
-		m_viewMatrix = glm::mat4{ 1.f };
+		m_viewMatrix = Matrix4{ 1.f };
 		m_viewMatrix[0][0] = u.x;
 		m_viewMatrix[1][0] = u.y;
 		m_viewMatrix[2][0] = u.z;
@@ -53,7 +53,7 @@ namespace vre
 		m_viewMatrix[3][1] = -glm::dot(v, position);
 		m_viewMatrix[3][2] = -glm::dot(w, position);
 
-		m_inverseViewMatrix = glm::mat4{ 1.f };
+		m_inverseViewMatrix = Matrix4{ 1.f };
 		m_inverseViewMatrix[0][0] = u.x;
 		m_inverseViewMatrix[0][1] = u.y;
 		m_inverseViewMatrix[0][2] = u.z;
@@ -84,7 +84,7 @@ namespace vre
 		const Vector3 u{(c1* c3 + s1 * s2 * s3), (c2* s3), (c1* s2* s3 - c3 * s1)};
 		const Vector3 v{(c3* s1* s2 - c1 * s3), (c2* c3), (c1* c3* s2 + s1 * s3)};
 		const Vector3 w{(c2* s1), (-s2), (c1* c2)};
-		m_viewMatrix = glm::mat4{ 1.0f };
+		m_viewMatrix = Matrix4{ 1.0f };
 		m_viewMatrix[0][0] = u.x;
 		m_viewMatrix[1][0] = u.y;
 		m_viewMatrix[2][0] = u.z;
@@ -98,7 +98,7 @@ namespace vre
 		m_viewMatrix[3][1] = -glm::dot(v, position);
 		m_viewMatrix[3][2] = -glm::dot(w, position);
 
-		m_inverseViewMatrix = glm::mat4{ 1.f };
+		m_inverseViewMatrix = Matrix4{ 1.f };
 		m_inverseViewMatrix[0][0] = u.x;
 		m_inverseViewMatrix[0][1] = u.y;
 		m_inverseViewMatrix[0][2] = u.z;

@@ -12,8 +12,8 @@ namespace vre
 {
 	struct SimplePushConstantData
 	{
-		glm::mat4 modelMatrix{1.0f};
-		glm::mat4 normalMatrix{1.0f};
+		Matrix4 modelMatrix{1.0f};
+		Matrix4 normalMatrix{1.0f};
 		Vector3 baseColor{1.0f};
 	};
 
