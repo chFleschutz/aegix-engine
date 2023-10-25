@@ -7,6 +7,15 @@
 
 #include <cmath>
 
+// Aliases for glm types
+using Vector2 = glm::vec2;
+using Vector3 = glm::vec3;
+using Vector4 = glm::vec4;
+using Matrix2 = glm::mat2;
+using Matrix3 = glm::mat3;
+using Matrix4 = glm::mat4;
+
+/// @brief MathLib contains some useful math functions
 class MathLib
 {
 public:

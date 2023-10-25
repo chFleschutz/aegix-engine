@@ -15,10 +15,10 @@ namespace vre
 	public:
 		struct Vertex
 		{
-			glm::vec3 position{};
-			glm::vec3 color{};
-			glm::vec3 normal{};
-			glm::vec2 uv{};
+			Vector3 position{};
+			Vector3 color{};
+			Vector3 normal{};
+			Vector2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> bindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> attributeDescriptions();

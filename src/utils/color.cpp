@@ -25,7 +25,7 @@ Color Color::random()
 	return Color(Random::uniformFloat(), Random::uniformFloat(), Random::uniformFloat());
 }
 
-glm::vec3 Color::parse(const std::string& hex)
+Vector3 Color::parse(const std::string& hex)
 {
 	assert(hex.length() == 7 and hex[0] == '#' and "Invalid hex color format");
 

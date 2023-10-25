@@ -24,13 +24,13 @@ namespace vre
 	/// @brief Stores the transformation of the entity
 	struct TransformComponent
 	{
-		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+		Vector3 location = { 0.0f, 0.0f, 0.0f };
+		Vector3 rotation = { 0.0f, 0.0f, 0.0f };
+		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
 		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& entityLocation)
+		TransformComponent(const Vector3& entityLocation)
 			: location(entityLocation) {}
 
 		glm::mat4 mat4();
@@ -52,7 +52,7 @@ namespace vre
 	/// @brief Creates a light 
 	struct PointLightComponent
 	{
-		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		Vector3 color = { 1.0f, 1.0f, 1.0f };
 		float intensity = 0.2f;
 	};
 

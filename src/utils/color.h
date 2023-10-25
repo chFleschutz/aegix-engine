@@ -26,14 +26,14 @@ public:
 	static Color brown() { return Color(0.5f, 0.25f, 0.0f); }
 	static Color random();
 
-	static glm::vec3 parse(const std::string& hex);
+	static Vector3 parse(const std::string& hex);
 
-	glm::vec3 rgb() const { return { m_color.r, m_color.g, m_color.b }; }
+	Vector3 rgb() const { return { m_color.r, m_color.g, m_color.b }; }
 	float alpha() const { return m_color.a; }
 
 	bool operator==(const Color& other) const;
 	bool operator!=(const Color& other) const;
 
 private:
-	glm::vec4 m_color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vector4 m_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 };

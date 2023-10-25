@@ -43,8 +43,8 @@ PerlinNoise1D::Octave::Octave(int rank) : Octave(rank, Random::uniformFloat())
 PerlinNoise1D::Octave::Octave(int rank, float firstValue)
 {
 	// Generate random signal values
-	m_signalValues.emplace_back(glm::vec2{0.0f, firstValue});
-	m_signalValues.emplace_back(glm::vec2{1.0f, Random::uniformFloat()});
+	m_signalValues.emplace_back(Vector2{0.0f, firstValue});
+	m_signalValues.emplace_back(Vector2{1.0f, Random::uniformFloat()});
 
 	while (m_rank < rank)
 	{

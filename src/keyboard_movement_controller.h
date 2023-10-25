@@ -49,7 +49,7 @@ namespace vre
 		float m_moveSpeed{ 2.5f };
 		float m_lookSpeed{ 1.5f };
 		float m_mouseSensitivity{ 0.4f };
-		glm::vec2 m_previousCursorPos{0.0f};
+		Vector2 m_previousCursorPos{0.0f};
 
 		bool m_mouseRotateEnabled{ false };
 		bool m_mousePanEnabled{ false };

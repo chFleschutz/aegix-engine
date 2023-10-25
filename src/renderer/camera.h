@@ -24,23 +24,23 @@ namespace vre
 		/// @param position Position of the camera
 		/// @param direction Direction in which the camera should face
 		/// @param up Specifies the rotation of the camera
-		void setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up = glm::vec3(0.0f, -1.0f, 0.0f));
+		void setViewDirection(Vector3 position, Vector3 direction, Vector3 up = Vector3(0.0f, -1.0f, 0.0f));
 		
 		/// @brief Sets the view direction centered on the target
 		/// @param position Position of the camera
 		/// @param target Target position which should be in center
 		/// @param up Specifies the rotation
-		void setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up = glm::vec3(0.0f, -1.0f, 0.0f));
+		void setViewTarget(Vector3 position, Vector3 target, Vector3 up = Vector3(0.0f, -1.0f, 0.0f));
 		
 		/// @brief Sets the view- and inverse-view-matrix based on position and rotation
 		/// @param position Position of the camera
 		/// @param rotation Rotation of the camera
-		void setViewYXZ(glm::vec3 position, glm::vec3 rotation);
+		void setViewYXZ(Vector3 position, Vector3 rotation);
 
 		const glm::mat4& projectionMatrix() const { return m_projectionMatrix; }
 		const glm::mat4& viewMatrix() const { return m_viewMatrix; }
 		const glm::mat4& inverseViewMatrix() const { return m_inverseViewMatrix; }
-		const glm::vec3 position() const { return glm::vec3(m_inverseViewMatrix[3]); }
+		const Vector3 position() const { return Vector3(m_inverseViewMatrix[3]); }
 
 	private:
 		glm::mat4 m_projectionMatrix{ 1.0f };

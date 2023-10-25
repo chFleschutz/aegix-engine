@@ -26,7 +26,7 @@ namespace vre
 		return glfwGetMouseButton(m_window, button) == GLFW_PRESS;
 	}
 
-	glm::vec2 Input::cursorPosition()
+	Vector2 Input::cursorPosition()
 	{
 		double xPos, yPos;
 		glfwGetCursorPos(m_window, &xPos, &yPos);

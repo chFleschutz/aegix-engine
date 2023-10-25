@@ -42,7 +42,7 @@ namespace vre
 		const float s2 = glm::sin(rotation.x);
 		const float c1 = glm::cos(rotation.y);
 		const float s1 = glm::sin(rotation.y);
-		const glm::vec3 invScale = 1.0f / scale;
+		const Vector3 invScale = 1.0f / scale;
 
 		return glm::mat3{
 			{

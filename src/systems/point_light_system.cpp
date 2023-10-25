@@ -12,8 +12,8 @@ namespace vre
 {
 	struct PointLightPushConstants
 	{
-		glm::vec4 position{};
-		glm::vec4 color{};
+		Vector4 position{};
+		Vector4 color{};
 		float radius;
 	};
 
@@ -35,8 +35,8 @@ namespace vre
 		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>().each())
 		{
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
+			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = Vector4(pointLight.color, pointLight.intensity);
 			lighIndex++;
 		}
 		ubo.numLights = lighIndex;
@@ -60,8 +60,8 @@ namespace vre
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{};
-			push.position = glm::vec4(transform.location, 1.0f);
-			push.color = glm::vec4(pointLight.color, 1.0f);
+			push.position = Vector4(transform.location, 1.0f);
+			push.color = Vector4(pointLight.color, 1.0f);
 			push.radius = transform.scale.x;
 
 			vkCmdPushConstants(

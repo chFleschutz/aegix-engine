@@ -27,7 +27,7 @@ private:
 		float lastValue() const { return m_signalValues.back().y; }
 
 	private:
-		std::vector<glm::vec2> m_signalValues;
+		std::vector<Vector2> m_signalValues;
 		int m_rank = 1;
 	};
 

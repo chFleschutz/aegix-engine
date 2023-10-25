@@ -24,7 +24,7 @@ public:
 			// Init random generator
 			for (int i = 0; i < npcCount; i++)
 			{
-				glm::vec3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
+				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto arrow = createEntity("NPC " + std::to_string(i), randomLocation);
 				arrow.addComponent<vre::MeshComponent>(arrowModel);
 			}

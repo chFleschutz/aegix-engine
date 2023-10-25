@@ -32,7 +32,7 @@ namespace vre
 
 		/// @brief Retrieves the mouse cursor position
 		/// @return Returns a vec2 with the cursor position
-		glm::vec2 cursorPosition();
+		Vector2 cursorPosition();
 
 		/// @brief Sets the input mode
 		/// @param mode The mode to change
