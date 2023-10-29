@@ -139,5 +139,5 @@ It's recommended to use a try-catch block because exceptions are used in some ca
     myEntity.addScript<ExampleScript>();
    ```
 
-View [default_scene.h](src/default_scene.h) for an example
+View [default_scene.h](src/scene/default_scene.h) for an example
 
