@@ -2,71 +2,73 @@
 
 #include "utils/random.h"
 
+#include <cassert>
 
-PerlinNoise1D::PerlinNoise1D(int rank)
-	: m_rank(rank)
+
+PerlinNoise1D::PerlinNoise1D()
 {
-	m_intervals.emplace_back(Interval(m_rank, 0.0f, 1.0f));
+	m_intervals.emplace_back(Interval(0.0f, 1.0f, Random::uniformFloat()));
 }
 
-float PerlinNoise1D::noise(float x, float persistence)
+float PerlinNoise1D::noise(float x, int rank, float persistence)
 {
+	assert(x >= 0.0f && "Perlin noise only works for positive values");
+
 	// Create new intervals if needed
 	while (m_intervals.back().max < x)
 	{
-		addInterval();
+		auto& lastInterval = m_intervals.back();
+		m_intervals.emplace_back(Interval(lastInterval.max, lastInterval.max + 1.0f, lastInterval.lastValue()));
 	}
 
-	// Get interval of x
-	auto& interval = m_intervals[static_cast<int>(x)];
-	auto relativeX = MathLib::percentage(x, interval.min, interval.max);
+	// Create new octaves if needed
+	auto& xInterval = m_intervals[static_cast<int>(x)];
+	while (xInterval.octaves.size() < rank)
+	{
+		xInterval.addOctave();
+	}
 
 	// Calculate noise value
 	float noiseValue = 0.0f;
-	for (auto& octave : interval.octaves)
+	float relativeX = MathLib::percentage(x, xInterval.min, xInterval.max);
+	for (const auto& octave : xInterval.octaves)
 	{
-		noiseValue += octave.value(relativeX) * static_cast<float>(std::pow(persistence, octave.rank()));
+		if (octave.rank > rank)
+			break;
+
+		noiseValue += octave.value(relativeX) * static_cast<float>(std::pow(persistence, octave.rank));
 	}
+
 	return noiseValue;
 }
 
-void PerlinNoise1D::addInterval()
-{
-	auto& lastInterval = m_intervals.back();
-	m_intervals.emplace_back(Interval(m_rank, lastInterval));
-}
 
-PerlinNoise1D::Octave::Octave(int rank) : Octave(rank, Random::uniformFloat())
+PerlinNoise1D::Octave::Octave(int rank, float firstValue, float lastValue)
+	: rank(rank)
 {
-}
+	signalValues.emplace_back(Vector2(0.0f, firstValue));
+	signalValues.emplace_back(Vector2(1.0f, lastValue));
 
-PerlinNoise1D::Octave::Octave(int rank, float firstValue)
-{
-	// Generate random signal values
-	m_signalValues.emplace_back(Vector2{0.0f, firstValue});
-	m_signalValues.emplace_back(Vector2{1.0f, Random::uniformFloat()});
-
-	while (m_rank < rank)
+	for (int i = 0; i < rank; i++)
 	{
-		for (int i = 1; i < m_signalValues.size(); i += 2)
+		for (int i = 1; i < signalValues.size(); i += 2)
 		{
-			float pos = (m_signalValues[i].x + m_signalValues[i - 1].x) / 2.0f;
+			float pos = (signalValues[i].x + signalValues[i - 1].x) / 2.0f;
 			float value = Random::uniformFloat();
-			m_signalValues.insert(m_signalValues.begin() + i, { pos, value });
+			signalValues.insert(signalValues.begin() + i, { pos, value });
 		}
-		m_rank++;
 	}
 }
 
-float PerlinNoise1D::Octave::value(float x)
+float PerlinNoise1D::Octave::value(float x) const
 {
-	// Binary search for the two closest signal values 
+	// Binary search for the two closest signal values to x
 	size_t left = 0;
-	size_t right = m_signalValues.size() - 1;
+	size_t right = signalValues.size() - 1;
 	while (left < right - 1)
 	{
 		size_t middle = (left + right) / 2;
-		if (x < m_signalValues[middle].x)
+		if (x < signalValues[middle].x)
 		{
 			right = middle;
 		}
@@ -75,28 +77,21 @@ float PerlinNoise1D::Octave::value(float x)
 			left = middle;
 		}
 	}
+
 	// Interpolate between the two closest signal values with tanh
-	float percent = MathLib::percentage(x, m_signalValues[left].x, m_signalValues[right].x);
-	return std::lerp(m_signalValues[left].y, m_signalValues[right].y, MathLib::tanh01(percent));
+	float percent = MathLib::percentage(x, signalValues[left].x, signalValues[right].x);
+	return std::lerp(signalValues[left].y, signalValues[right].y, MathLib::tanh01(percent));
 }
 
-PerlinNoise1D::Interval::Interval(int rank, float minBounds, float maxBounds)
+PerlinNoise1D::Interval::Interval(float minBounds, float maxBounds, float firstValue)
 	: min(minBounds)
 	, max(maxBounds)
 {
-	for (int i = 1; i <= rank; i++)
-	{
-		octaves.emplace_back(Octave(i));
-	}
+	octaves.emplace_back(Octave(1, firstValue, Random::uniformFloat()));
 }
 
-PerlinNoise1D::Interval::Interval(int rank, const Interval& previousInterval)
+void PerlinNoise1D::Interval::addOctave()
 {
-	min = previousInterval.max;
-	max = previousInterval.max + previousInterval.max - previousInterval.min;
-
-	for (const auto& octave : previousInterval.octaves)
-	{
-		octaves.emplace_back(Octave(octave.rank(), octave.lastValue()));
-	}
+	const auto& lastOctave = octaves.back();
+	octaves.emplace_back(Octave(lastOctave.rank + 1, lastOctave.signalValues.front().y, lastOctave.signalValues.back().y));
 }
