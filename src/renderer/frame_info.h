@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.h>
 
-namespace vre
+namespace VEGraphics
 {
 #define MAX_LIGHTS 10
 
@@ -32,7 +32,7 @@ namespace vre
 		VkCommandBuffer commandBuffer;
 		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		Scene* scene;
+		VEScene::Scene* scene;
 	};
 
 } // namespace vre

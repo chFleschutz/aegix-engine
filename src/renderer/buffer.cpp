@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace vre
+namespace VEGraphics
 {
     VkDeviceSize Buffer::getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment)
     {

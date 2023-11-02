@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-namespace vre
+namespace VEScene
 {
 	/// @brief An entity represents any object in a scene
 	/// @note This class is ment to be passed by value since its just an id
@@ -31,10 +31,10 @@ namespace vre
 		}
 
 		template<typename T, typename... Args>
-		ScriptComponent& addScript(Args&&... args)
+		VEComponents::ScriptComponent& addScript(Args&&... args)
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& script = m_scene->m_registry.emplace<ScriptComponent>(m_entityHandle);
+			auto& script = m_scene->m_registry.emplace<VEComponents::ScriptComponent>(m_entityHandle);
 			script.script = std::make_unique<T>(std::forward<Args>(args)...);
 			return script;
 		}

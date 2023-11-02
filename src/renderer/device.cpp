@@ -5,7 +5,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace vre
+namespace VEGraphics
 {
 	// local callback functions
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(

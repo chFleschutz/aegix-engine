@@ -8,7 +8,12 @@
 #include <string>
 #include <memory>
 
-namespace vre
+namespace VEScripting
+{
+	class ScriptComponentBase;
+}
+
+namespace VEComponents
 {
 	/// @brief Gives a name to the entity
 	struct NameComponent
@@ -37,12 +42,12 @@ namespace vre
 	/// @brief Holds a pointer to a model
 	struct MeshComponent
 	{
-		std::shared_ptr<Model> model;
+		std::shared_ptr<VEGraphics::Model> model;
 		Color color;
 
 		MeshComponent() = default;
 		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(std::shared_ptr<Model> entityModel, const Color& baseColor = Color())
+		MeshComponent(std::shared_ptr<VEGraphics::Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
 	};
 
@@ -61,14 +66,13 @@ namespace vre
 	/// @brief Holds a camera to view the scene
 	struct CameraComponent
 	{
-		Camera camera{};
+		VEGraphics::Camera camera{};
 	};
 
-	class ScriptComponentBase;
 	/// @brief Stores a custom script
 	struct ScriptComponent
 	{
-		std::unique_ptr<ScriptComponentBase> script;
+		std::unique_ptr<VEScripting::ScriptComponentBase> script;
 	};
 
 } // namespace vre

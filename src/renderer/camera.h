@@ -2,7 +2,7 @@
 
 #include "utils/math_utils.h"
 
-namespace vre
+namespace VEGraphics
 {
 	/// @brief Representation of a camera
 	/// @note A Camera is created by default when creating a Scene

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
 
 	class SwapChain

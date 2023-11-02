@@ -8,7 +8,7 @@
 #include <map>
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	struct PointLightPushConstants
 	{
@@ -32,7 +32,7 @@ namespace vre
 	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
 	{
 		int lighIndex = 0;
-		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>().each())
+		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<VEComponents::TransformComponent, VEComponents::PointLightComponent>().each())
 		{
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
 			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
@@ -55,8 +55,8 @@ namespace vre
 			0, nullptr
 		);
 
-		auto view = frameInfo.scene->viewEntitiesByType<TransformComponent, PointLightComponent>();
-		view.use<TransformComponent>(); // Sort because of Transparency
+		auto view = frameInfo.scene->viewEntitiesByType<VEComponents::TransformComponent, VEComponents::PointLightComponent>();
+		view.use<VEComponents::TransformComponent>(); // Sort because of Transparency
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{};

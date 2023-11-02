@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
 	class Model
 	{

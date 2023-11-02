@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
     class DescriptorSetLayout
     {

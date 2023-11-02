@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	Texture::Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo)
 		: m_device{ device }

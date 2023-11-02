@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace vre
+namespace VEGraphics
 {
 	struct SimplePushConstantData
 	{
@@ -41,7 +41,7 @@ namespace vre
 			0, nullptr
 		);
 
-		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
+		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponents::TransformComponent, VEComponents::MeshComponent>().each())
 		{
 			SimplePushConstantData push{};
 			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);

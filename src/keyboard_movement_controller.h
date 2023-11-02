@@ -4,7 +4,7 @@
 #include "renderer/window.h"
 #include "scene/script_component_base.h"
 
-namespace vre
+namespace VEScripting
 {
 	class KeyboardMovementController : public ScriptComponentBase
 	{

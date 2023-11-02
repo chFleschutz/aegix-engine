@@ -3,7 +3,7 @@
 #include "scene/entity.h"
 #include "scene/components.h"
 
-namespace vre
+namespace VEScripting
 {
 	class ScriptComponentBase
 	{
@@ -43,15 +43,15 @@ namespace vre
 
 		/// @brief Adds a script of type T to the entity and returns a reference to it
 		template<typename T, typename... Args>
-		ScriptComponent& addScript(Args&&... args)
+		VEComponents::ScriptComponent& addScript(Args&&... args)
 		{
 			return m_entity.addScript<T>(std::forward<Args>(args)...);
 		}
 
 	private:
-		Entity m_entity;
+		VEScene::Entity m_entity;
 
-		friend class Scene;
+		friend class VEScene::Scene;
 	};
 
 } // namespace vre

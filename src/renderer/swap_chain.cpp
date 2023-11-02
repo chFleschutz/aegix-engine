@@ -8,7 +8,7 @@
 #include <set>
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
 		: m_device{ deviceRef }, m_windowExtent{ windowExtent }

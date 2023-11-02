@@ -2,7 +2,7 @@
 
 #include "renderer/device.h"
 
-namespace vre
+namespace VEGraphics
 {
 	/// @brief Encapsulates a vulkan buffer
 	class Buffer

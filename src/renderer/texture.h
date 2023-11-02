@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace vre
+namespace VEGraphics
 {
 	class Texture
 	{

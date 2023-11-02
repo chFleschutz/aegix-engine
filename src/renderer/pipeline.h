@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
 	struct PipelineConfigInfo
 	{

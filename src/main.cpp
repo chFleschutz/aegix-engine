@@ -8,7 +8,7 @@ auto main() -> int
 {
 	try
 	{
-		vre::VulkaniteEngine engine{};
+		Vulkanite::Engine engine{};
 		engine.loadScene<AIScene>();
 		engine.run();
 	}

@@ -7,7 +7,7 @@
 
 #include <filesystem>
 
-namespace vre
+namespace VEScene
 {
 	class Entity;
 
@@ -18,7 +18,7 @@ namespace vre
 	{
 	public:
 		// Todo: remove device parameter
-		Scene(VulkanDevice& device); 
+		Scene(VEGraphics::VulkanDevice& device);
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -48,14 +48,14 @@ namespace vre
 		/// @param modelPath Path to the model 
 		/// @return A shared pointer with the loaded model
 		/// @note The shared pointer can be used multiple times
-		std::shared_ptr<Model> loadModel(const std::filesystem::path& modelPath);
+		std::shared_ptr<VEGraphics::Model> loadModel(const std::filesystem::path& modelPath);
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
 		Entity createEntity(const std::string& name = std::string(), const Vector3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
-		VulkanDevice& m_device;
+		VEGraphics::VulkanDevice& m_device;
 		entt::registry m_registry;
 
 		friend class Entity;
