@@ -4,19 +4,20 @@
 
 #include <vector>
 
+
 /// @brief 1D Perlin noise generator.
 class PerlinNoise1D
 {
 public:
 	/// @brief Creates a new Perlin noise random number generator.
 	/// @param intervalSize Size of the interval in which the noise is generated.
-	/// @note The Random class is used to generate the noise, if you want to have the same noise seed it BEFORE creating.
+	/// @note The noise is generated using the Random class, for the same result seed it BEFORE creating PerlinNoise1D object.
 	explicit PerlinNoise1D(float intervalSize = 1.0f);
 
 	/// @brief Returns the noise value at the given position.
 	/// @param x Position.
 	/// @param rank Rank of highest octave to use (more LOD but more expensive).
-	/// @param persistence Persistence of the noise (keep below 0.5 or return values can be greater 1).
+	/// @param persistence Influence of higher octaves to the noise value.
 	float noise(float x, int rank, float persistence = 0.5f);
 
 private:

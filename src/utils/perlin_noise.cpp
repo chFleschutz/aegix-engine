@@ -32,16 +32,21 @@ float PerlinNoise1D::noise(float x, int rank, float persistence)
 		addOctave(xIntervalIndex);
 	}
 
-	// Calculate noise value
+	// Calculate noise value for all octaves until rank
 	float noiseValue = 0.0f;
+	float maxAmplitude = 0.0f;
 	for (const auto& octave : xInterval.octaves)
 	{
 		if (octave.rank > rank)
 			break;
 
-		noiseValue += octave.value(xRelative) * static_cast<float>(std::pow(persistence, octave.rank));
+		float amplitude = static_cast<float>(std::pow(persistence, octave.rank));
+		noiseValue += octave.value(xRelative) * amplitude;
+		maxAmplitude += amplitude;
 	}
 
+	// Normalize the noise value
+	noiseValue /= maxAmplitude;
 	return noiseValue;
 }
 
@@ -60,7 +65,7 @@ void PerlinNoise1D::addOctave(int intervalIndex)
 	float lastValue = 0.0f;
 	int rank = m_intervals[intervalIndex].octaves.back().rank + 1; 
 
-	// Get the last value of the previous interval
+	// Get the last value of the previous interval if possible
 	if (intervalIndex - 1 >= 0 and m_intervals[intervalIndex - 1].octaves.size() >= rank)
 	{
 		const auto& octave = m_intervals[intervalIndex - 1].octaves[rank - 1];
@@ -71,7 +76,7 @@ void PerlinNoise1D::addOctave(int intervalIndex)
 		firstValue = Random::uniformFloat();
 	}
 
-	// Get the first value of the next interval
+	// Get the first value of the next interval if possible
 	if (intervalIndex + 1 < m_intervals.size() and m_intervals[intervalIndex + 1].octaves.size() >= rank)
 	{
 		const auto& octavei = m_intervals[intervalIndex + 1].octaves[rank - 1];
