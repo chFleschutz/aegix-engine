@@ -31,10 +31,10 @@ namespace VEScene
 		}
 
 		template<typename T, typename... Args>
-		VEComponents::ScriptComponent& addScript(Args&&... args)
+		VEComponent::Script& addScript(Args&&... args)
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& script = m_scene->m_registry.emplace<VEComponents::ScriptComponent>(m_entityHandle);
+			auto& script = m_scene->m_registry.emplace<VEComponent::Script>(m_entityHandle);
 			script.script = std::make_unique<T>(std::forward<Args>(args)...);
 			return script;
 		}

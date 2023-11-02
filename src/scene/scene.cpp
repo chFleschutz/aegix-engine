@@ -16,23 +16,23 @@ namespace VEScene
 	Scene::Scene(VEGraphics::VulkanDevice& device) : m_device{ device }
 	{
 		auto camera = createEntity("Main Camera");
-		camera.addComponent<VEComponents::CameraComponent>();
+		camera.addComponent<VEComponent::Camera>();
 		camera.addScript<VEScripting::KeyboardMovementController>();
-		auto& cameraTransform = camera.getComponent<VEComponents::TransformComponent>();
+		auto& cameraTransform = camera.getComponent<VEComponent::Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, -15.0f };
 		cameraTransform.rotation = { -0.9f, 0.0f, 0.0f };
 	}
 
 	Entity Scene::camera()
 	{
-		auto group = m_registry.group<VEComponents::CameraComponent>();
+		auto group = m_registry.group<VEComponent::Camera>();
 		assert(group.size() == 1 && "Scene has to contain exactly one camera");
 		return { group.front(), this };
 	}
 
 	void Scene::runtimeBegin()
 	{
-		auto view = m_registry.view<VEComponents::ScriptComponent>();
+		auto view = m_registry.view<VEComponent::Script>();
 		// Initialize all script components
 		for (auto&& [entity, component] : view.each())
 		{
@@ -48,7 +48,7 @@ namespace VEScene
 
 	void Scene::update(float deltaSeconds)
 	{
-		for (auto&& [entity, component] : m_registry.view<VEComponents::ScriptComponent>().each())
+		for (auto&& [entity, component] : m_registry.view<VEComponent::Script>().each())
 		{
 			component.script->update(deltaSeconds);
 		}
@@ -56,7 +56,7 @@ namespace VEScene
 
 	void Scene::runtimeEnd()
 	{
-		for (auto&& [entity, component] : m_registry.view<VEComponents::ScriptComponent>().each())
+		for (auto&& [entity, component] : m_registry.view<VEComponent::Script>().each())
 		{
 			component.script->end();
 		}
@@ -65,8 +65,8 @@ namespace VEScene
 	Entity Scene::createEntity(const std::string& name, const Vector3& location)
 	{
 		Entity entity = { m_registry.create(), this };
-		entity.addComponent<VEComponents::TransformComponent>(location);
-		entity.addComponent<VEComponents::NameComponent>(name.empty() ? "Entity" : name);
+		entity.addComponent<VEComponent::Transform>(location);
+		entity.addComponent<VEComponent::Name>(name.empty() ? "Entity" : name);
 		return entity;
 	}
 

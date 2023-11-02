@@ -41,7 +41,7 @@ namespace VEGraphics
 			0, nullptr
 		);
 
-		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponents::TransformComponent, VEComponents::MeshComponent>().each())
+		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::Mesh>().each())
 		{
 			SimplePushConstantData push{};
 			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);

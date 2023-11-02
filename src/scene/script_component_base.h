@@ -42,7 +42,7 @@ namespace VEScripting
 
 		/// @brief Adds a script of type T to the entity and returns a reference to it
 		template<typename T, typename... Args>
-		VEComponents::ScriptComponent& addScript(Args&&... args)
+		VEComponent::Script& addScript(Args&&... args)
 		{
 			return m_entity.addScript<T>(std::forward<Args>(args)...);
 		}

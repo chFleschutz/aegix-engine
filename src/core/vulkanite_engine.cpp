@@ -62,8 +62,8 @@ namespace Vulkanite
 		VEGraphics::PointLightSystem pointLightSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
 		// Init Camera
-		auto& camera = m_scene->camera().getComponent<VEComponents::CameraComponent>().camera;
-		auto& cameraTransform = m_scene->camera().getComponent<VEComponents::TransformComponent>();
+		auto& camera = m_scene->camera().getComponent<VEComponent::Camera>().camera;
+		auto& cameraTransform = m_scene->camera().getComponent<VEComponent::Transform>();
 
 		// Init Input
 		Input::instance().initialize(m_window.glfwWindow());

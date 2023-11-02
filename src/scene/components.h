@@ -13,64 +13,64 @@ namespace VEScripting
 	class ScriptBase;
 }
 
-namespace VEComponents
+namespace VEComponent
 {
 	/// @brief Gives a name to the entity
-	struct NameComponent
+	struct Name
 	{
 		std::string name;
 
-		NameComponent() = default;
-		NameComponent(const NameComponent&) = default;
-		NameComponent(const std::string& entityName)
+		Name() = default;
+		Name(const Name&) = default;
+		Name(const std::string& entityName)
 			: name(entityName) {}
 	};
 
 	/// @brief Stores the transformation of the entity
-	struct TransformComponent
+	struct Transform
 	{
 		Vector3 location = { 0.0f, 0.0f, 0.0f };
 		Vector3 rotation = { 0.0f, 0.0f, 0.0f };
 		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const Vector3& entityLocation)
+		Transform() = default;
+		Transform(const Transform&) = default;
+		Transform(const Vector3& entityLocation)
 			: location(entityLocation) {}
 	};
 
 	/// @brief Holds a pointer to a model
-	struct MeshComponent
+	struct Mesh
 	{
 		std::shared_ptr<VEGraphics::Model> model;
 		Color color;
 
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(std::shared_ptr<VEGraphics::Model> entityModel, const Color& baseColor = Color())
+		Mesh() = default;
+		Mesh(const Mesh&) = default;
+		Mesh(std::shared_ptr<VEGraphics::Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
 	};
 
 	/// @brief Creates a light 
-	struct PointLightComponent
+	struct PointLight
 	{
 		Color color;
 		float intensity = 0.2f;
 
-		PointLightComponent() = default;
-		PointLightComponent(const PointLightComponent&) = default;
-		PointLightComponent(const Color& lightColor, float lightIntensity = 0.2f)
+		PointLight() = default;
+		PointLight(const PointLight&) = default;
+		PointLight(const Color& lightColor, float lightIntensity = 0.2f)
 			: color(lightColor), intensity(lightIntensity) {}
 	};
 
 	/// @brief Holds a camera to view the scene
-	struct CameraComponent
+	struct Camera
 	{
 		VEGraphics::Camera camera{};
 	};
 
 	/// @brief Stores a custom script
-	struct ScriptComponent
+	struct Script
 	{
 		std::unique_ptr<VEScripting::ScriptBase> script;
 	};

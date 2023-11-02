@@ -12,7 +12,7 @@ class Rotator : public VEScripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<VEComponents::TransformComponent>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+		getComponent<VEComponent::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
 	}
 };
 
@@ -29,19 +29,19 @@ public:
 		{ // Models 
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
-			teapot.addComponent<VEComponents::MeshComponent>(teapotModel, Color::red());
+			teapot.addComponent<VEComponent::Mesh>(teapotModel, Color::red());
 			teapot.addScript<Rotator>();
 			
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
-			plane.addComponent<VEComponents::MeshComponent>(planeModel, Color::white());
+			plane.addComponent<VEComponent::Mesh>(planeModel, Color::white());
 		}
 		{ // Lights
 			auto light1 = createEntity("Light 1", { -1.0f, -1.0f, -1.0f });
-			light1.addComponent<VEComponents::PointLightComponent>();
+			light1.addComponent<VEComponent::PointLight>();
 
 			auto light2 = createEntity("Light 2", { 0.0f, -1.0f, -1.0f });
-			light2.addComponent<VEComponents::PointLightComponent>();
+			light2.addComponent<VEComponent::PointLight>();
 		}
 	}
 };
