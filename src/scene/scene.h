@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer/device.h"
-#include "renderer/model.h"
+#include "graphics/device.h"
+#include "graphics/model.h"
 
 #include <entt/entt.hpp>
 

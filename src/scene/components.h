@@ -1,12 +1,12 @@
 #pragma once
 
+#include "graphics/camera.h"
+#include "graphics/model.h"
 #include "utils/color.h"
 #include "utils/math_utils.h"
-#include "renderer/model.h"
-#include "renderer/camera.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace VEScripting
 {

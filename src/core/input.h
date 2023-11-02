@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/window.h"
+#include "graphics/window.h"
 #include "utils/math_utils.h"
 
 

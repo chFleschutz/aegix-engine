@@ -1,8 +1,8 @@
 #pragma once
 
-#include "renderer/device.h"
-#include "renderer/swap_chain.h"
-#include "window.h"
+#include "graphics/device.h"
+#include "graphics/swap_chain.h"
+#include "graphics/window.h"
 
 #include <cassert>
 #include <memory>

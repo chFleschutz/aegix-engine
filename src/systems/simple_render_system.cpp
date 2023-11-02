@@ -1,8 +1,8 @@
 #include "simple_render_system.h"
 
-#include "utils/math_utils.h"
-#include "renderer/renderer.h"
+#include "graphics/renderer.h"
 #include "scene/components.h"
+#include "utils/math_utils.h"
 
 #include <array>
 #include <stdexcept>

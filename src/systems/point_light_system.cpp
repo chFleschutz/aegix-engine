@@ -1,8 +1,8 @@
 #include "point_light_system.h"
 
-#include "utils/math_utils.h"
-#include "renderer/camera.h"
+#include "graphics/camera.h"
 #include "scene/components.h"
+#include "utils/math_utils.h"
 
 #include <array>
 #include <map>

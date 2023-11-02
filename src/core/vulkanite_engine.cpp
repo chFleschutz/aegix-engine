@@ -1,13 +1,13 @@
 #include "vulkanite_engine.h"
 
 #include "core/input.h"
-#include "utils/math_utils.h"
-#include "renderer/buffer.h"
+#include "graphics/buffer.h"
+#include "keyboard_movement_controller.h"
 #include "scene/components.h"
 #include "scene/entity.h"
-#include "systems/simple_render_system.h"
 #include "systems/point_light_system.h"
-#include "keyboard_movement_controller.h"
+#include "systems/simple_render_system.h"
+#include "utils/math_utils.h"
 
 #include <array>
 #include <chrono>
