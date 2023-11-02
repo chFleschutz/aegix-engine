@@ -8,7 +8,10 @@
 class PerlinNoise1D
 {
 public:
-	PerlinNoise1D();
+	/// @brief Creates a new Perlin noise random number generator.
+	/// @param intervalSize Size of the interval in which the noise is generated.
+	/// @note The Random class is used to generate the noise, if you want to have the same noise seed it BEFORE creating.
+	explicit PerlinNoise1D(float intervalSize = 1.0f);
 
 	/// @brief Returns the noise value at the given position.
 	/// @param x Position.
@@ -21,6 +24,8 @@ private:
 	{
 		Octave(int rank, float firstValue, float lastValue);
 
+		/// @brief Returns the value of the octave at the given position.
+		/// @param x Relative position in the octave between 0 and 1.
 		float value(float x) const;
 
 		int rank;
@@ -29,15 +34,17 @@ private:
 
 	struct Interval
 	{
-		Interval(float min, float max, float firstValue);
+		Interval(float firstValue);
 		
 		float lastValue() const { return octaves.front().signalValues.back().y; }
-		void addOctave();
+		void addOctave(float firstValue, float lastValue);
 
-		float min;
-		float max;
 		std::vector<Octave> octaves;
 	};
 
+	void addInterval(float firstValue);
+	void addOctave(int intervalIndex);
+
+	float m_bandwidth;
 	std::vector<Interval> m_intervals;
 };
