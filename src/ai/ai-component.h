@@ -7,7 +7,7 @@
 
 namespace vai
 {
-    class AIComponent : public VEScripting::ScriptComponentBase
+    class AIComponent : public VEScripting::ScriptBase
     {
     public:
         AIComponent();

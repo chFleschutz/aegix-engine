@@ -10,7 +10,7 @@
 
 namespace VEScripting
 {
-	class ScriptComponentBase;
+	class ScriptBase;
 }
 
 namespace VEComponents
@@ -72,7 +72,7 @@ namespace VEComponents
 	/// @brief Stores a custom script
 	struct ScriptComponent
 	{
-		std::unique_ptr<VEScripting::ScriptComponentBase> script;
+		std::unique_ptr<VEScripting::ScriptBase> script;
 	};
 
 } // namespace vre

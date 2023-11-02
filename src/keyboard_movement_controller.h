@@ -6,7 +6,7 @@
 
 namespace VEScripting
 {
-	class KeyboardMovementController : public ScriptComponentBase
+	class KeyboardMovementController : public ScriptBase
 	{
 	public:
 		/// @brief Default keybindings for movement and view control

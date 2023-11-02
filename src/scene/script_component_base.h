@@ -5,11 +5,10 @@
 
 namespace VEScripting
 {
-	class ScriptComponentBase
+	class ScriptBase
 	{
 	public:
-
-		virtual ~ScriptComponentBase() {}
+		virtual ~ScriptBase() {}
 
 	protected:
 		/// @brief Called once at the beginning of the scene
