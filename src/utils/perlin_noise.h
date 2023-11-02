@@ -30,7 +30,7 @@ private:
 		float value(float x) const;
 
 		int rank;
-		std::vector<Vector2> signalValues;
+		std::vector<float> signalValues;
 	};
 
 	/// @brief Represents an interval of the noise with multiple octaves.
@@ -47,7 +47,7 @@ private:
 
 	/// @brief Adds a new interval to the noise.
 	void addInterval();
-	/// @brief Adds a new octave (with higher rank) to the interval at intervalIndex.
+	/// @brief Adds a new octave with higher rank to the interval at intervalIndex.
 	void addOctave(int intervalIndex);
 
 	float m_bandwidth;
