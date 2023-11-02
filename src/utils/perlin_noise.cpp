@@ -16,13 +16,12 @@ float PerlinNoise1D::noise(float x, int rank, float persistence)
 	assert(x >= 0.0f && "Perlin noise only works for positive values");
 
 	int xIntervalIndex = static_cast<int>(x / m_bandwidth); // Get the interval of x
-	float xRelative = x / m_bandwidth - xIntervalIndex;		// Transform x to the interval [0, 1]
+	float xRelative = x / m_bandwidth - xIntervalIndex;		// Transform x to the interval [0, 1)
 
 	// Create new intervals if needed
 	while (m_intervals.size() - 1 < xIntervalIndex)
 	{
-		auto& lastInterval = m_intervals.back();
-		addInterval(lastInterval.lastValue());
+		addInterval(m_intervals.back().lastValue());
 	}
 
 	// Create new octaves if needed
@@ -61,8 +60,7 @@ void PerlinNoise1D::addOctave(int intervalIndex)
 	// Get the last value of the previous interval
 	if (intervalIndex - 1 >= 0 and m_intervals[intervalIndex - 1].octaves.size() >= rank)
 	{
-		const auto& previousInterval = m_intervals[intervalIndex - 1];
-		const auto& octave = previousInterval.octaves[rank - 1];
+		const auto& octave = m_intervals[intervalIndex - 1].octaves[rank - 1];
 		firstValue = octave.signalValues.back().y;
 	}
 	else
@@ -73,8 +71,7 @@ void PerlinNoise1D::addOctave(int intervalIndex)
 	// Get the first value of the next interval
 	if (intervalIndex + 1 < m_intervals.size() and m_intervals[intervalIndex + 1].octaves.size() >= rank)
 	{
-		const auto& nextInterval = m_intervals[intervalIndex + 1];
-		const auto& octavei = nextInterval.octaves[rank - 1];
+		const auto& octavei = m_intervals[intervalIndex + 1].octaves[rank - 1];
 		lastValue = octavei.signalValues.front().y;
 	}
 	else
@@ -106,25 +103,14 @@ PerlinNoise1D::Octave::Octave(int rank, float firstValue, float lastValue)
 
 float PerlinNoise1D::Octave::value(float x) const
 {
-	// Binary search for the two closest signal values to x
-	size_t left = 0;
-	size_t right = signalValues.size() - 1;
-	while (left < right - 1)
-	{
-		size_t middle = (left + right) / 2;
-		if (x < signalValues[middle].x)
-		{
-			right = middle;
-		}
-		else
-		{
-			left = middle;
-		}
-	}
+	assert(x >= 0.0f and x < 1.0f and "x must be in the interval [0, 1)");
+
+	int leftIndex = static_cast<int>((signalValues.size() - 1) * x);
+	int rightIndex = leftIndex + 1;
 
 	// Interpolate between the two closest signal values with tanh
-	float percent = MathLib::percentage(x, signalValues[left].x, signalValues[right].x);
-	return std::lerp(signalValues[left].y, signalValues[right].y, MathLib::tanh01(percent));
+	float percent = MathLib::percentage(x, signalValues[leftIndex].x, signalValues[rightIndex].x);
+	return std::lerp(signalValues[leftIndex].y, signalValues[rightIndex].y, MathLib::tanh01(percent));
 }
 
 PerlinNoise1D::Interval::Interval(float firstValue)

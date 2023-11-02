@@ -25,7 +25,7 @@ private:
 		Octave(int rank, float firstValue, float lastValue);
 
 		/// @brief Returns the value of the octave at the given position.
-		/// @param x Relative position in the octave between 0 and 1.
+		/// @param x Relative position in the octave between [0, 1).
 		float value(float x) const;
 
 		int rank;
