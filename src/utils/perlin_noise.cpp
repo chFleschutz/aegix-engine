@@ -8,7 +8,8 @@
 PerlinNoise1D::PerlinNoise1D(float bandwidth)
 	: m_bandwidth(bandwidth)
 {
-	addInterval(Random::uniformFloat());
+	// Add first interval
+	m_intervals.emplace_back(Interval(Random::uniformFloat()));
 }
 
 float PerlinNoise1D::noise(float x, int rank, float persistence)
@@ -21,7 +22,7 @@ float PerlinNoise1D::noise(float x, int rank, float persistence)
 	// Create new intervals if needed
 	while (m_intervals.size() - 1 < xIntervalIndex)
 	{
-		addInterval(m_intervals.back().lastValue());
+		addInterval();
 	}
 
 	// Create new octaves if needed
@@ -44,9 +45,11 @@ float PerlinNoise1D::noise(float x, int rank, float persistence)
 	return noiseValue;
 }
 
-void PerlinNoise1D::addInterval(float firstValue)
+void PerlinNoise1D::addInterval()
 {
-	m_intervals.emplace_back(Interval(firstValue));
+	// Add new interval with the last value of the previous interval as its first value
+	const auto& previousFirstOctave = m_intervals.back().octaves.front();
+	m_intervals.emplace_back(Interval(previousFirstOctave.signalValues.back().y));
 }
 
 void PerlinNoise1D::addOctave(int intervalIndex)
