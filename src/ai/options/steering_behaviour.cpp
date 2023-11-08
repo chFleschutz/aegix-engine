@@ -1,6 +1,6 @@
 #include "steering_behaviour.h"
 
-namespace vai
+namespace VEAI
 {
 	void SteeringBehaviour::updateOption(float deltaSeconds)
 	{
@@ -13,4 +13,4 @@ namespace vai
 		// motionDynamics.addAngularAcceleration(angularAcceleration);
 	}
 
-} // namespace vai
+} // namespace VEAI

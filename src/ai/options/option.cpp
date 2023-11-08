@@ -1,6 +1,6 @@
 #include "option.h"
 
-namespace vai
+namespace VEAI
 {
     void Option::setDuration(float seconds)
     {
@@ -64,4 +64,4 @@ namespace vai
         }
     }
 
-} // namespace vai
+} // namespace VEAI

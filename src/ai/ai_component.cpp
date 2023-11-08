@@ -3,7 +3,7 @@
 #include "ai/options/option_text_output.h"
 #include "core/input.h"
 
-namespace vai
+namespace VEAI
 {
     AIComponent::AIComponent()
     {
@@ -33,4 +33,4 @@ namespace vai
         m_option->update(deltaSeconds);
     }
 
-} // namespace vai
+} // namespace VEAI

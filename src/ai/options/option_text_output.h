@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace vai
+namespace VEAI
 {
 	/// @brief Debug option that prints to the console
 	class OptionTextOutput : public Option
@@ -41,4 +41,4 @@ namespace vai
 		}
 	};
 
-} // namespace vai
+} // namespace VEAI

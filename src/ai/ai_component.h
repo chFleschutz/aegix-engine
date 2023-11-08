@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace vai
+namespace VEAI
 {
     class AIComponent : public VEScripting::ScriptBase
     {
@@ -18,4 +18,5 @@ namespace vai
     private:
         std::unique_ptr<Option> m_option;
     };
-}
+
+} // namespace VEAI

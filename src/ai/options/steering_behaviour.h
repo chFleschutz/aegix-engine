@@ -3,7 +3,7 @@
 #include "ai/options/option.h"
 #include "utils/math_utils.h"
 
-namespace vai
+namespace VEAI
 {
 	class SteeringBehaviour : public Option
 	{
@@ -19,4 +19,4 @@ namespace vai
 
 	};
 
-} // namespace vai
+} // namespace VEAI

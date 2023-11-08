@@ -16,7 +16,7 @@ public:
 			plane.addComponent<VEComponent::Mesh>(planeModel);
 			plane.getComponent<VEComponent::Transform>().scale = { 2.0f, 2.0f, 2.0f };
 			
-			plane.addScript<vai::AIComponent>(); // TODO: Remove (for testing)
+			plane.addScript<VEAI::AIComponent>(); // TODO: Remove (for testing)
 
 			// Spawn NPCs at random locations
 			auto arrowModel = loadModel("models/arrow.obj");

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace vai
+namespace VEAI
 {
     class Option
     {
@@ -53,4 +53,4 @@ namespace vai
         bool m_onCooldown = false;
     };
     
-} // namespace vai
+} // namespace VEAI

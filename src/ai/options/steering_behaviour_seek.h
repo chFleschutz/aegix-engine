@@ -2,7 +2,7 @@
 
 #include "ai/options/steering_behaviour.h"
 
-namespace vai
+namespace VEAI
 {
 	class SteeringBehaviourSeek : public SteeringBehaviour
 	{
@@ -14,4 +14,5 @@ namespace vai
 	private:
 
 	};
-}
+
+} // namespace VEAI

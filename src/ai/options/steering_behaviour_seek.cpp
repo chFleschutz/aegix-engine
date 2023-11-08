@@ -1,6 +1,6 @@
 #include "steering_behaviour_seek.h"
 
-namespace vai
+namespace VEAI
 {
 
-} // namespace vai
+} // namespace VEAI
