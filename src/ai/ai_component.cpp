@@ -1,4 +1,4 @@
-#include "ai-component.h"
+#include "ai_component.h"
 
 #include "ai/options/option_text_output.h"
 #include "core/input.h"

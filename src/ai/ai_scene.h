@@ -1,6 +1,6 @@
 #include "scene/scene.h"
 #include "scene/entity.h"
-#include "ai/ai-component.h"
+#include "ai/ai_component.h"
 #include "utils/random.h"
 
 class AIScene : public VEScene::Scene

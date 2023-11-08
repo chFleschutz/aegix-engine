@@ -1,5 +1,5 @@
 #include "core/vulkanite_engine.h"
-#include "ai/ai-scene.h"
+#include "ai/ai_scene.h"
 
 #include <iostream>
 #include <stdexcept>
