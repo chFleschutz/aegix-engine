@@ -12,7 +12,7 @@ namespace VEGraphics
 	struct PointLight
 	{
 		Vector4 position{}; // ignore w
-		Vector4 color{}; // w is intensity
+		Vector4 color{};	// w is intensity
 	};
 
 	struct GlobalUbo
@@ -35,4 +35,4 @@ namespace VEGraphics
 		VEScene::Scene* scene;
 	};
 
-} // namespace vre
+} // namespace VEGraphics
