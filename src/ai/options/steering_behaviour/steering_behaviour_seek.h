@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ai/options/steering_behaviour.h"
+#include "ai/options/steering_behaviour/steering_behaviour.h"
 
 namespace VEAI
 {
