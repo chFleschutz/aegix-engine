@@ -11,10 +11,9 @@
 namespace VEGraphics
 {
 	struct SimplePushConstantData
-	{
+	{	// max 128 bytes
 		Matrix4 modelMatrix{1.0f};
 		Matrix4 normalMatrix{1.0f};
-		Vector3 baseColor{1.0f};
 	};
 
 	SimpleRenderSystem::SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_device{device}
@@ -43,10 +42,13 @@ namespace VEGraphics
 
 		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::Mesh>().each())
 		{
+			// TODO: transfer color as uniform
+			Matrix4 colorNormalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
+			colorNormalMatrix[3] = mesh.color.rgba();
+
 			SimplePushConstantData push{};
 			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
-			push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
-			push.baseColor = mesh.color.rgb();
+			push.normalMatrix = colorNormalMatrix;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
