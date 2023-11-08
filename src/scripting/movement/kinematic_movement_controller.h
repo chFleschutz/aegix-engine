@@ -1,12 +1,11 @@
 #pragma once
 
-#include "graphics/window.h"
-#include "scene/script_base.h"
+#include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
 namespace VEScripting
 {
-	class KeyboardMovementController : public ScriptBase
+	class KinematcMovementController : public ScriptBase
 	{
 	public:
 		/// @brief Default keybindings for movement and view control

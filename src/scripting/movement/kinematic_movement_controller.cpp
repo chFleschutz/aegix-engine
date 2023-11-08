@@ -1,25 +1,22 @@
-#include "keyboard_movement_controller.h"
+#include "kinematic_movement_controller.h"
 
 #include "core/input.h"
 
-#include "glm/gtc/constants.hpp"
-
-#include <limits>
 
 namespace VEScripting
 {
-	void KeyboardMovementController::begin()
+	void KinematcMovementController::begin()
 	{
 		m_previousCursorPos = Input::instance().cursorPosition();
 	}
 
-	void KeyboardMovementController::update(float deltaSeconds)
+	void KinematcMovementController::update(float deltaSeconds)
 	{
 		applyRotation(deltaSeconds);
 		applyMovement(deltaSeconds);
 	}
 
-	void KeyboardMovementController::applyRotation(float deltaSeconds)
+	void KinematcMovementController::applyRotation(float deltaSeconds)
 	{
 		auto& transform = getComponent<VEComponent::Transform>();
 
@@ -54,7 +51,7 @@ namespace VEScripting
 		transform.rotation.y = glm::mod(transform.rotation.y, glm::two_pi<float>());
 	}
 
-	void KeyboardMovementController::applyMovement(float deltaSeconds)
+	void KinematcMovementController::applyMovement(float deltaSeconds)
 	{
 		auto& transform = getComponent<VEComponent::Transform>();
 
@@ -97,7 +94,7 @@ namespace VEScripting
 		}
 	}
 
-	void KeyboardMovementController::toggleMouseRotate(bool enabled)
+	void KinematcMovementController::toggleMouseRotate(bool enabled)
 	{
 		if (m_mousePanEnabled)
 			return;
@@ -115,7 +112,7 @@ namespace VEScripting
 		}
 	}
 
-	void KeyboardMovementController::toogleMousePan(bool enabled)
+	void KinematcMovementController::toogleMousePan(bool enabled)
 	{
 		if (m_mouseRotateEnabled)
 			return;

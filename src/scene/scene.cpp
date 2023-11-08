@@ -2,7 +2,7 @@
 
 #include "components.h"
 #include "entity.h"
-#include "keyboard_movement_controller.h"
+#include "scripting/movement/kinematic_movement_controller.h"
 
 #include <cassert>
 
@@ -17,7 +17,7 @@ namespace VEScene
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<VEComponent::Camera>();
-		camera.addScript<VEScripting::KeyboardMovementController>();
+		camera.addScript<VEScripting::KinematcMovementController>();
 		auto& cameraTransform = camera.getComponent<VEComponent::Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, -15.0f };
 		cameraTransform.rotation = { -0.9f, 0.0f, 0.0f };
