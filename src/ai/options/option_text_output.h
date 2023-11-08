@@ -37,7 +37,7 @@ namespace vai
 
 		void updateOption(float deltaSeconds) override
 		{
-			std::cout << "Option active since " << elapsedTime() << " seconds" << std::endl;
+			std::cout << "Option active for " << elapsedTime() << " seconds" << std::endl;
 		}
 	};
 

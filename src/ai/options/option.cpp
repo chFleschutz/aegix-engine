@@ -52,9 +52,9 @@ namespace vai
         // Update option 
         if (m_isActive)
         {
+            m_elapsedTime += deltaSeconds;
             if (m_elapsedTime < m_duration)
             {
-                m_elapsedTime += deltaSeconds;
                 updateOption(deltaSeconds);
             }
             else
