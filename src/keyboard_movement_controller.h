@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/window.h"
-#include "scene/script_component_base.h"
+#include "scene/script_base.h"
 #include "utils/math_utils.h"
 
 namespace VEScripting

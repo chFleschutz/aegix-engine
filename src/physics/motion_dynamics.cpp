@@ -19,7 +19,7 @@ namespace VEPhysics
 		applyAcceleration(deltaSeconds);
 
 		// Update transform
-		auto& transform = getComponent<vre::TransformComponent>();
+		auto& transform = getComponent<VEComponent::Transform>();
 		transform.location += m_velocity * deltaSeconds;
 		transform.rotation += m_angularVelocity * deltaSeconds;
 	}
@@ -31,7 +31,8 @@ namespace VEPhysics
 		m_angularVelocity += m_angularAcceleration * deltaSeconds;
 		
 		// Reset acceleration
-		m_acceleration = Vector3::zero();
-		m_angularAcceleration = Vector3::zero();
+		m_acceleration = Vector3{ 0.0f };
+		m_angularAcceleration = Vector3{ 0.0f };
 	}
-}
+
+} // namespace VEPhysics

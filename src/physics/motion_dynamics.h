@@ -1,11 +1,11 @@
 #pragma once
 
+#include "scene/script_base.h"
 #include "utils/math_utils.h"
-#include "scene/script_component_base.h"
 
 namespace VEPhysics
 {
-	class MotionDynamics : public vre::ScriptComponentBase
+	class MotionDynamics : public VEScripting::ScriptBase
 	{
 	public:
 		void addAcceleration(const Vector3& acceleration);
