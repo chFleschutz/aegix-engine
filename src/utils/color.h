@@ -29,7 +29,11 @@ public:
 	static Vector3 parse(const std::string& hex);
 
 	Vector3 rgb() const { return { m_color.r, m_color.g, m_color.b }; }
-	float alpha() const { return m_color.a; }
+	Vector4 rgba() const { return m_color; }
+	float r() const { return m_color.r; }
+	float g() const { return m_color.g; }
+	float b() const { return m_color.b; }
+	float a() const { return m_color.a; }
 
 	bool operator==(const Color& other) const;
 	bool operator!=(const Color& other) const;
