@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/script_base.h"
+#include "scripting/script_base.h"
 #include "ai/options/option.h"
 
 #include <memory>
