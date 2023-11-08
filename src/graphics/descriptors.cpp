@@ -3,7 +3,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
     // *************** Descriptor Set Layout Builder *********************
 

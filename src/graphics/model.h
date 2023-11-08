@@ -1,14 +1,14 @@
 #pragma once
 
+#include "graphics/buffer.h"
+#include "graphics/device.h"
 #include "utils/math_utils.h"
-#include "renderer/buffer.h"
-#include "renderer/device.h"
 
 #include <filesystem>
 #include <memory>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
 	class Model
 	{

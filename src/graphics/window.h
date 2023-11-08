@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace vre 
+namespace VEGraphics
 {
 	class Window
 	{

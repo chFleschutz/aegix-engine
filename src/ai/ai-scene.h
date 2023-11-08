@@ -3,18 +3,18 @@
 #include "ai/ai-component.h"
 #include "utils/random.h"
 
-class AIScene : public vre::Scene
+class AIScene : public VEScene::Scene
 {
 public:
-	using vre::Scene::Scene;
+	using VEScene::Scene::Scene;
 
 	void initialize() override
 	{
 		{ // Models
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
-			plane.addComponent<vre::MeshComponent>(planeModel);
-			plane.getComponent<vre::TransformComponent>().scale = { 2.0f, 2.0f, 2.0f };
+			plane.addComponent<VEComponent::Mesh>(planeModel);
+			plane.getComponent<VEComponent::Transform>().scale = { 2.0f, 2.0f, 2.0f };
 			
 			plane.addScript<vai::AIComponent>(); // TODO: Remove (for testing)
 
@@ -25,15 +25,15 @@ public:
 			{
 				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto arrow = createEntity("NPC " + std::to_string(i), randomLocation);
-				arrow.addComponent<vre::MeshComponent>(arrowModel);
+				arrow.addComponent<VEComponent::Mesh>(arrowModel);
 			}
 		}
 		{ // Lights
 			auto light1 = createEntity("Light 1", {10.0f, -10.0f, -10.0f});
-			light1.addComponent<vre::PointLightComponent>(Color::white(), 100.0f);
+			light1.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 
 			auto light2 = createEntity("Light 2", {-10.0f, -10.0f, -10.0f});
-			light2.addComponent<vre::PointLightComponent>(Color::white(), 100.0f);
+			light2.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 		}
 	}
 };

@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	Window::Window(int width, int height, std::string title) : m_width(width), m_height(height), m_windowTitle(std::move(title))
 	{

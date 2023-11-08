@@ -14,19 +14,19 @@
 namespace std
 {
 	template <>
-	struct hash<vre::Model::Vertex>
+	struct hash<VEGraphics::Model::Vertex>
 	{
-		size_t operator()(vre::Model::Vertex const& vertex) const
+		size_t operator()(VEGraphics::Model::Vertex const& vertex) const
 		{
 			size_t seed = 0;
-			utils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			VEUtils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
 			return seed;
 		}
 	};
 
 } // namespace std
 
-namespace vre
+namespace VEGraphics
 {
 	Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_device{ device }
 	{

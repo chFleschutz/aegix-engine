@@ -3,7 +3,7 @@
 #include <array>
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	Renderer::Renderer(Window& window, VulkanDevice& device) : m_window{ window }, m_device{ device }
 	{

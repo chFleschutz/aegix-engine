@@ -1,13 +1,13 @@
 #pragma once
 
-#include "renderer/device.h"
-#include "renderer/frame_info.h"
-#include "renderer/pipeline.h"
+#include "graphics/device.h"
+#include "graphics/frame_info.h"
+#include "graphics/pipeline.h"
 
 #include <memory>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
 	class SimpleRenderSystem
 	{

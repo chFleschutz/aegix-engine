@@ -6,7 +6,7 @@
 
 #include <limits>
 
-namespace vre
+namespace VEScripting
 {
 	void KeyboardMovementController::begin()
 	{
@@ -21,7 +21,7 @@ namespace vre
 
 	void KeyboardMovementController::applyRotation(float deltaSeconds)
 	{
-		auto& transform = getComponent<TransformComponent>();
+		auto& transform = getComponent<VEComponent::Transform>();
 
 		// Key input rotation
 		Vector3 rotate{0.0f};
@@ -56,7 +56,7 @@ namespace vre
 
 	void KeyboardMovementController::applyMovement(float deltaSeconds)
 	{
-		auto& transform = getComponent<TransformComponent>();
+		auto& transform = getComponent<VEComponent::Transform>();
 
 		// Key input movement
 		float yaw = transform.rotation.y;

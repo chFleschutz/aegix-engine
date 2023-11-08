@@ -7,7 +7,7 @@
 
 #define ENGINE_DIR "../../"
 
-namespace vre
+namespace VEGraphics
 {
 	struct SwapChainSupportDetails
 	{

@@ -1,13 +1,13 @@
 #include "texture.h"
 
-#include "renderer/buffer.h"
+#include "graphics/buffer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	Texture::Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo)
 		: m_device{ device }

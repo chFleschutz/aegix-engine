@@ -1,12 +1,12 @@
 #pragma once
 
-#include "renderer/device.h"
+#include "graphics/device.h"
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
-namespace vre
+namespace VEGraphics
 {
     class DescriptorSetLayout
     {

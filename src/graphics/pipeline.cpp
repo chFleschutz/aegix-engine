@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace vre
+namespace VEGraphics
 {
 	Pipeline::Pipeline(
 		VulkanDevice& device, 

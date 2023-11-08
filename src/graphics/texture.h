@@ -1,12 +1,12 @@
 #pragma once
 
-#include "renderer/device.h"
+#include "graphics/device.h"
 
 #include <vulkan/vulkan.h>
 
 #include <string>
 
-namespace vre
+namespace VEGraphics
 {
 	class Texture
 	{

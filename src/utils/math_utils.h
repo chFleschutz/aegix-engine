@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <cmath>
 
 // Aliases for glm types
 using Vector2 = glm::vec2;

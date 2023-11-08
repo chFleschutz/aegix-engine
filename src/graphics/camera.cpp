@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace vre
+namespace VEGraphics
 {
 	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "renderer/device.h"
+#include "graphics/device.h"
 
-namespace vre
+namespace VEGraphics
 {
 	/// @brief Encapsulates a vulkan buffer
 	class Buffer

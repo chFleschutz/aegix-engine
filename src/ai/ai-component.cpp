@@ -16,7 +16,7 @@ namespace vai
     {
         // Check for key press (compare to lastFrame to trigger only once)
         static bool lastFramePressed = false;
-        bool keyPressed = vre::Input::instance().keyPressed(GLFW_KEY_SPACE);
+        bool keyPressed = Input::instance().keyPressed(GLFW_KEY_SPACE);
         if (keyPressed and !lastFramePressed)
         {
             if (m_option->isActive())

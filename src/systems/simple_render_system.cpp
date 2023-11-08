@@ -1,14 +1,14 @@
 #include "simple_render_system.h"
 
-#include "utils/math_utils.h"
-#include "renderer/renderer.h"
+#include "graphics/renderer.h"
 #include "scene/components.h"
+#include "utils/math_utils.h"
 
 #include <array>
 #include <stdexcept>
 #include <iostream>
 
-namespace vre
+namespace VEGraphics
 {
 	struct SimplePushConstantData
 	{
@@ -41,7 +41,7 @@ namespace vre
 			0, nullptr
 		);
 
-		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<TransformComponent, MeshComponent>().each())
+		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::Mesh>().each())
 		{
 			SimplePushConstantData push{};
 			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
