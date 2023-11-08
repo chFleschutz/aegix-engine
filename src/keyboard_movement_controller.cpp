@@ -133,4 +133,4 @@ namespace VEScripting
 		}
 	}
 
-} // namespace vre
+} // namespace VEScripting

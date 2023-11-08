@@ -12,4 +12,4 @@ namespace VEUtils
 		(hashCombine(seed, rest), ...);
 	};
 
-} // namespace utils
+} // namespace VEUtils

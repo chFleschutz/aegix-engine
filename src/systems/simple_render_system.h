@@ -30,4 +30,4 @@ namespace VEGraphics
 		VkPipelineLayout mPipelineLayout;
 	};
 
-} // namespace vre
+} // namespace VEGraphics

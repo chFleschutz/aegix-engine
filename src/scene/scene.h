@@ -61,4 +61,4 @@ namespace VEScene
 		friend class Entity;
 	};
 
-} // namespace vre
+} // namespace VEScene

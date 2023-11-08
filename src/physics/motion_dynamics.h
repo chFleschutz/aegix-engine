@@ -23,4 +23,5 @@ namespace VEPhysics
 		Vector3 m_acceleration;
 		Vector3 m_angularAcceleration;
 	};
-}
+
+} // namespace VEPhysics

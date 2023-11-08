@@ -63,4 +63,4 @@ namespace VEScene
 		Scene* m_scene = nullptr;
 	};
 
-} // namespace vre
+} // namespace VEScene

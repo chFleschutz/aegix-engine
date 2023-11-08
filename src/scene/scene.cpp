@@ -70,4 +70,4 @@ namespace VEScene
 		return entity;
 	}
 
-} // namespace vre
+} // namespace VEScene

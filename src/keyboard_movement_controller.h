@@ -55,6 +55,6 @@ namespace VEScripting
 		bool m_mousePanEnabled{ false };
 	};
 
-} // namespace vre
+} // namespace VEScripting
 
 

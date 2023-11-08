@@ -53,4 +53,4 @@ namespace VEScripting
 		friend class VEScene::Scene;
 	};
 
-} // namespace vre
+} // namespace VEScripting

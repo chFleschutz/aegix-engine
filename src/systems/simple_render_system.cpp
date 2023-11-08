@@ -97,4 +97,4 @@ namespace VEGraphics
 			pipelineConfig);
 	}
 
-} // namespace vre
+} // namespace VEGraphics
