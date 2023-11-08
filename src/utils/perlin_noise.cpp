@@ -45,9 +45,8 @@ float PerlinNoise1D::noise(float x, int rank, float persistence)
 		maxAmplitude += amplitude;
 	}
 
-	// Normalize the noise value
-	noiseValue /= maxAmplitude;
-	return noiseValue;
+	// Return normalized noise value
+	return noiseValue / maxAmplitude;
 }
 
 void PerlinNoise1D::addInterval()
