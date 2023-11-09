@@ -39,9 +39,33 @@ public:
 
 	/// @brief Composes a transformation matrix from location, rotation and scale
 	/// @return Composed transformation matrix
-	static Matrix4 tranformationMatrix(Vector3 location, Vector3 rotation, Vector3 scale);
+	static Matrix4 tranformationMatrix(const Vector3& location, const Vector3& rotation, const Vector3& scale);
 
 	/// @brief Compoeses a matrix to transform normals into world space
 	/// @return Composed normal matrix
-	static Matrix3 normalMatrix(Vector3 rotation, Vector3 scale);
+	static Matrix3 normalMatrix(const Vector3& rotation, const Vector3& scale);
+
+	/// @brief Returns the global forward direction
+	static Vector3 forward() { return { 0.0f, 0.0f, 1.0f }; }
+
+	/// @brief Returns the global right direction
+	static Vector3 right() { return { 1.0f, 0.0f, 0.0f }; }
+
+	/// @brief Returns the global up direction
+	static Vector3 up() { return { 0.0f, -1.0f, 0.0f }; }
+
+	/// @brief Returns the forward direction of a rotation
+	/// @param rotation Rotation in euler angles
+	/// @return Forward direction of the rotation
+	static Vector3 forward(const Vector3& rotation);
+
+	/// @brief Returns the right direction of a rotation
+	/// @param rotation Rotation in euler angles
+	/// @return Right direction of the rotation
+	static Vector3 right(const Vector3& rotation);
+
+	/// @brief Returns the up direction of a rotation
+	/// @param rotation Rotation in euler angles
+	/// @return Up direction of the rotation
+	static Vector3 up(const Vector3& rotation);
 };

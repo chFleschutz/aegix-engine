@@ -37,6 +37,10 @@ namespace VEComponent
 		Transform(const Transform&) = default;
 		Transform(const Vector3& entityLocation)
 			: location(entityLocation) {}
+
+		Vector3 forward() const { return MathLib::forward(rotation); }
+		Vector3 right() const { return MathLib::right(rotation);  }
+		Vector3 up() const { return MathLib::up(rotation); }
 	};
 
 	/// @brief Holds a pointer to a model

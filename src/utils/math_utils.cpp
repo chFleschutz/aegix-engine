@@ -22,7 +22,7 @@ float MathLib::tanh01(float x)
 	return std::tanh(6.0f * x - 3.0f) / 2.0f + 0.5f;
 }
 
-Matrix4 MathLib::tranformationMatrix(Vector3 location, Vector3 rotation, Vector3 scale)
+Matrix4 MathLib::tranformationMatrix(const Vector3& location, const Vector3& rotation, const Vector3& scale)
 {
 	const float c3 = glm::cos(rotation.z);
 	const float s3 = glm::sin(rotation.z);
@@ -54,7 +54,7 @@ Matrix4 MathLib::tranformationMatrix(Vector3 location, Vector3 rotation, Vector3
 		} };
 }
 
-Matrix3 MathLib::normalMatrix(Vector3 rotation, Vector3 scale)
+Matrix3 MathLib::normalMatrix(const Vector3& rotation, const Vector3& scale)
 {
 	const float c3 = glm::cos(rotation.z);
 	const float s3 = glm::sin(rotation.z);
@@ -80,4 +80,38 @@ Matrix3 MathLib::normalMatrix(Vector3 rotation, Vector3 scale)
 			invScale.z * (-s2),
 			invScale.z * (c1 * c2),
 		} };
+}
+
+Vector3 MathLib::forward(const Vector3& rotation)
+{
+	const float sx = glm::sin(rotation.x);
+	const float cx = glm::cos(rotation.x);
+	const float sy = glm::sin(rotation.y);
+	const float cy = glm::cos(rotation.y);
+	const float cz = glm::cos(rotation.z);
+	const float sz = glm::sin(rotation.z);
+
+	return { cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy };
+}
+
+Vector3 MathLib::right(const Vector3& rotation)
+{
+	const float sy = glm::sin(rotation.y);
+	const float cy = glm::cos(rotation.y);
+	const float cz = glm::cos(rotation.z);
+	const float sz = glm::sin(rotation.z);
+
+	return { cy * cz, cy * sz, -sy };
+}
+
+Vector3 MathLib::up(const Vector3& rotation)
+{
+	const float sx = glm::sin(rotation.x);
+	const float cx = glm::cos(rotation.x);
+	const float sy = glm::sin(rotation.y);
+	const float cy = glm::cos(rotation.y);
+	const float cz = glm::cos(rotation.z);
+	const float sz = glm::sin(rotation.z);
+
+	return { -cz * sx * sy + cx * sz, -cx * cz - sx * sy * sz, -cy * sx };
 }
