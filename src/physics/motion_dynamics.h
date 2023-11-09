@@ -32,6 +32,9 @@ namespace VEPhysics
 		/// @brief Returns a normalized vector in the current movement direction.
 		Vector3 moveDirection() const { return glm::normalize(m_velocity); }
 
+		/// @brief Returns a normalized vector in the current angular direction.
+		Vector3 angularDirection() const { return glm::normalize(m_angularVelocity); }
+
 		/// @brief Sets the mass.
 		void setMass(float mass) { m_mass = mass; }
 

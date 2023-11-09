@@ -12,18 +12,34 @@ namespace VEScripting
 		auto& transform = getComponent<VEComponent::Transform>();
 		auto& dynamics = getComponent<VEPhysics::MotionDynamics>();
 
-		Vector3 forwardDir = transform.forward();
-		Vector3 rightDir = transform.right();
-		Vector3 upDir = transform.up();
+		bool forwardPressed = Input::instance().keyPressed(m_keys.moveForward);
+		bool backwardPressed = Input::instance().keyPressed(m_keys.moveBackward);
+		bool leftPressed = Input::instance().keyPressed(m_keys.rotateLeft);
+		bool rightPressed = Input::instance().keyPressed(m_keys.rotateRight);
 
-		Vector3 move{ 0.0f };
-		if (Input::instance().keyPressed(m_keys.moveForward)) move += forwardDir * m_acceleration;
-		if (Input::instance().keyPressed(m_keys.moveBackward)) move -= forwardDir * m_acceleration;
-		dynamics.addForce(move);
-		
+		auto speed = dynamics.speed();
+		auto angularSpeed = dynamics.angularSpeed();
+
+		// Directional forces
+		Vector3 moveForce{ 0.0f };
+		if (forwardPressed)
+			moveForce += transform.forward() * m_acceleration;
+		if (backwardPressed)
+			moveForce -= transform.forward() * m_acceleration;
+		if (!forwardPressed and !backwardPressed and speed > 0.0f)
+			moveForce = -dynamics.moveDirection() * m_dragFactor * speed;
+
+		// Angular forces
 		Vector3 rotation{ 0.0f };
-		if (Input::instance().keyPressed(m_keys.rotateRight)) rotation -= upDir * m_acceleration;
-		if (Input::instance().keyPressed(m_keys.rotateLeft)) rotation += upDir * m_acceleration;
+		if (leftPressed)
+			rotation += transform.up() * m_acceleration;
+		if (rightPressed)
+			rotation -= transform.up() * m_acceleration;
+		if (!leftPressed and !rightPressed and angularSpeed > 0.0f)
+			rotation = -dynamics.angularVelocity() * m_dragFactor * angularSpeed;
+
+		// Add forces
+		dynamics.addForce(moveForce);
 		dynamics.addAngularForce(rotation);
 	}
 

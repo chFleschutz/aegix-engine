@@ -20,7 +20,7 @@ namespace VEScripting
 	private:
 		KeyMappings m_keys{};
 
-		float m_dragFactor = 0.5f;
+		float m_dragFactor = 2.0f;
 		float m_acceleration = 2.0f;
 	};
 
