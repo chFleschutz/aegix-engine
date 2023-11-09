@@ -2,11 +2,11 @@
 
 #include "core/input.h"
 #include "graphics/buffer.h"
+#include "graphics/systems/point_light_system.h"
+#include "graphics/systems/simple_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scripting/script_base.h"
-#include "systems/point_light_system.h"
-#include "systems/simple_render_system.h"
 #include "utils/math_utils.h"
 
 #include <array>
