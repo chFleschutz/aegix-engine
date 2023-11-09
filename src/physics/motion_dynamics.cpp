@@ -4,19 +4,19 @@
 
 namespace VEPhysics
 {
-	void MotionDynamics::addAcceleration(const Vector3& acceleration)
+	void MotionDynamics::addForce(const Vector3& force)
 	{
-		m_acceleration += acceleration;
+		m_accumulatedForce += force;
 	}
 
-	void MotionDynamics::addAngularAcceleration(const Vector3& angularAcceleration)
+	void MotionDynamics::addAngularForce(const Vector3& angularForce)
 	{
-		m_angularAcceleration += angularAcceleration;
+		m_accumulatedAngularForce += angularForce;
 	}
 
 	void MotionDynamics::update(float deltaSeconds)
 	{
-		applyAcceleration(deltaSeconds);
+		applyForces(deltaSeconds);
 
 		// Update transform
 		auto& transform = getComponent<VEComponent::Transform>();
@@ -24,15 +24,15 @@ namespace VEPhysics
 		transform.rotation += m_angularVelocity * deltaSeconds;
 	}
 
-	void MotionDynamics::applyAcceleration(float deltaSeconds)
+	void MotionDynamics::applyForces(float deltaSeconds)
 	{
-		// Update velocities
-		m_velocity += m_acceleration * deltaSeconds;
-		m_angularVelocity += m_angularAcceleration * deltaSeconds;
-		
-		// Reset acceleration
-		m_acceleration = Vector3{ 0.0f };
-		m_angularAcceleration = Vector3{ 0.0f };
+		// Apply directional forces
+		m_velocity += m_accumulatedForce / m_mass * deltaSeconds;
+		m_accumulatedForce = Vector3{ 0.0f };
+
+		// Apply angular forces
+		m_angularVelocity += m_accumulatedAngularForce / m_mass * deltaSeconds;
+		m_accumulatedAngularForce = Vector3{ 0.0f };
 	}
 
 } // namespace VEPhysics

@@ -19,12 +19,12 @@ namespace VEScripting
 		Vector3 move{ 0.0f };
 		if (Input::instance().keyPressed(m_keys.moveForward)) move += forwardDir * m_acceleration;
 		if (Input::instance().keyPressed(m_keys.moveBackward)) move -= forwardDir * m_acceleration;
-		dynamics.addAcceleration(move);
+		dynamics.addForce(move);
 		
 		Vector3 rotation{ 0.0f };
 		if (Input::instance().keyPressed(m_keys.rotateRight)) rotation -= upDir * m_acceleration;
 		if (Input::instance().keyPressed(m_keys.rotateLeft)) rotation += upDir * m_acceleration;
-		dynamics.addAngularAcceleration(rotation);
+		dynamics.addAngularForce(rotation);
 	}
 
 } // namespace VEScripting
