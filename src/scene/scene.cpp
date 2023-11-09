@@ -17,7 +17,7 @@ namespace VEScene
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<VEComponent::Camera>();
-		camera.addScript<VEScripting::KinematcMovementController>();
+		camera.addComponent<VEScripting::KinematcMovementController>();
 		auto& cameraTransform = camera.getComponent<VEComponent::Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, -15.0f };
 		cameraTransform.rotation = { -0.9f, 0.0f, 0.0f };
@@ -32,34 +32,31 @@ namespace VEScene
 
 	void Scene::runtimeBegin()
 	{
-		auto view = m_registry.view<VEComponent::Script>();
-		// Initialize all script components
-		for (auto&& [entity, component] : view.each())
+		for (auto& script : m_scripts)
 		{
-			component.script->m_entity = { entity, this };
-		}
-
-		// Call begin after all scripts have been initialized
-		for (auto&& [entity, component] : view.each())
-		{
-			component.script->begin();
+			script->begin();
 		}
 	}
 
 	void Scene::update(float deltaSeconds)
 	{
-		for (auto&& [entity, component] : m_registry.view<VEComponent::Script>().each())
+		for (auto& script : m_scripts)
 		{
-			component.script->update(deltaSeconds);
+			script->update(deltaSeconds);
 		}
 	}
 
 	void Scene::runtimeEnd()
 	{
-		for (auto&& [entity, component] : m_registry.view<VEComponent::Script>().each())
+		for (auto& script : m_scripts)
 		{
-			component.script->end();
+			script->end();
 		}
+	}
+
+	void Scene::addScript(VEScripting::ScriptBase* script)
+	{
+		m_scripts.push_back(script);
 	}
 
 	Entity Scene::createEntity(const std::string& name, const Vector3& location)

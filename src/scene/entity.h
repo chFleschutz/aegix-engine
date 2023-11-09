@@ -18,27 +18,6 @@ namespace VEScene
 		Entity(entt::entity entityHandle, Scene* scene)
 			: m_entityHandle{ entityHandle }, m_scene{ scene } {}
 
-		/// @brief Adds a component of type T to the entity
-		/// @tparam T Type of the component to add
-		/// @param ...args Arguments for the constructor of T
-		/// @return A refrence to the new component
-		/// @note When adding a custom script ScriptComponent is added as its container
-		template<typename T, typename... Args>
-		T& addComponent(Args&&... args)
-		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
-		}
-
-		template<typename T, typename... Args>
-		VEComponent::Script& addScript(Args&&... args)
-		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& script = m_scene->m_registry.emplace<VEComponent::Script>(m_entityHandle);
-			script.script = std::make_unique<T>(std::forward<Args>(args)...);
-			return script;
-		}
-
 		/// @brief Checks if the entity has all components of type T...
 		/// @tparam ...T Type of the components to check
 		/// @return True if the entity has all components of type T... otherwise false
@@ -56,6 +35,29 @@ namespace VEScene
 		{
 			assert(hasComponent<T>() && "Entity does not have the component");
 			return m_scene->m_registry.get<T>(m_entityHandle);
+		}
+
+		/// @brief Adds a component of type T to the entity
+		/// @tparam T Type of the component to add
+		/// @param ...args Arguments for the constructor of T
+		/// @return A refrence to the new component
+		/// @note When adding a custom script ScriptComponent is added as its container
+		template<typename T, typename... Args>
+		auto addComponent(Args&&... args) -> typename std::enable_if<!std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+		}
+
+		/// @brief Adds a script derived from VEScripting::ScriptBase to the entity
+		template<typename T, typename... Args>
+		auto addComponent(Args&&... args) -> typename std::enable_if<std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			auto& script = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			script.m_entity = *this;
+			m_scene->addScript(&script);
+			return script;
 		}
 
 	private:

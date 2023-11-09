@@ -7,6 +7,11 @@
 
 #include <filesystem>
 
+namespace VEScripting
+{
+	class ScriptBase;
+}
+
 namespace VEScene
 {
 	class Entity;
@@ -43,6 +48,8 @@ namespace VEScene
 		/// @brief Calls the end function on all script components
 		void runtimeEnd();
 
+		void addScript(VEScripting::ScriptBase* script);
+
 	protected:
 		/// @brief Loads a model frome the given path
 		/// @param modelPath Path to the model 
@@ -57,6 +64,8 @@ namespace VEScene
 	private:
 		VEGraphics::VulkanDevice& m_device;
 		entt::registry m_registry;
+
+		std::vector<VEScripting::ScriptBase*> m_scripts;
 
 		friend class Entity;
 	};

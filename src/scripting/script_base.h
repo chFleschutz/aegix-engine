@@ -10,7 +10,6 @@ namespace VEScripting
 	public:
 		virtual ~ScriptBase() {}
 
-	protected:
 		/// @brief Called once at the beginning of the scene
 		virtual void begin() {}
 		/// @brief Called every frame with the delta of the last two frames in seconds
@@ -40,17 +39,10 @@ namespace VEScripting
 			return m_entity.addComponent<T>(std::forward<Args>(args)...);
 		}
 
-		/// @brief Adds a script of type T to the entity and returns a reference to it
-		template<typename T, typename... Args>
-		VEComponent::Script& addScript(Args&&... args)
-		{
-			return m_entity.addScript<T>(std::forward<Args>(args)...);
-		}
-
 	private:
 		VEScene::Entity m_entity;
 
-		friend class VEScene::Scene;
+		friend class VEScene::Entity;
 	};
 
 } // namespace VEScripting
