@@ -18,13 +18,14 @@ namespace VEScripting
 			int moveUp = GLFW_KEY_E;
 			int moveDown = GLFW_KEY_Q;
 
-			int lookLeft = GLFW_KEY_LEFT;
-			int lookRight = GLFW_KEY_RIGHT;
-			int lookUp = GLFW_KEY_UP;
-			int lookDown = GLFW_KEY_DOWN;
-
 			int mouseRotate = GLFW_MOUSE_BUTTON_RIGHT;
 			int mousePan = GLFW_MOUSE_BUTTON_MIDDLE;
+			
+			// Disabled by default
+			int lookLeft = GLFW_KEY_UNKNOWN; 
+			int lookRight = GLFW_KEY_UNKNOWN;
+			int lookUp = GLFW_KEY_UNKNOWN;
+			int lookDown = GLFW_KEY_UNKNOWN;
 		};
 
 		void begin() override;
@@ -45,7 +46,7 @@ namespace VEScripting
 		void toogleMousePan(bool enabled);
 
 		KeyMappings m_keys{};
-		float m_moveSpeed{ 2.5f };
+		float m_moveSpeed{ 5.0f };
 		float m_lookSpeed{ 1.5f };
 		float m_mouseSensitivity{ 0.4f };
 		Vector2 m_previousCursorPos{0.0f};

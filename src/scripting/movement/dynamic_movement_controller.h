@@ -9,10 +9,10 @@ namespace VEScripting
 	public:
 		struct KeyMappings
 		{
-			int moveForward = GLFW_KEY_W;
-			int moveBackward = GLFW_KEY_S;
-			int rotateLeft = GLFW_KEY_A;
-			int rotateRight = GLFW_KEY_D;
+			int moveForward = GLFW_KEY_UP;
+			int moveBackward = GLFW_KEY_DOWN;
+			int rotateLeft = GLFW_KEY_LEFT;
+			int rotateRight = GLFW_KEY_RIGHT;
 		};
 
 		virtual void update(float deltaSeconds) override;
