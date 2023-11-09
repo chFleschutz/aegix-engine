@@ -1,12 +1,22 @@
 #pragma once
 
+#include "ai/knowledge.h"
+
 namespace VEAI
 {
+    class AIComponent;
+
     class Option
     {
     public:
         Option() = default;
         virtual ~Option() = default;    
+
+        /// @brief Initializes the option with the AIComponent, duration and cooldown
+        /// @note Call this function after creating the option and before using it
+        void initialize(AIComponent* aiComponent, float duration = 0.0f, float cooldown = 0.0f);
+
+        void setKnowledge(const Knowledge& knowledge) { m_knowledge = knowledge; }
 
         /// @brief Sets the duration of the option in seconds
         void setDuration(float seconds);
@@ -34,16 +44,24 @@ namespace VEAI
         /// @note When overriding call base function first
         virtual void stop();
 
+        /// @brief Returns true if the option is finished otherwise false
+        virtual bool isFinished() const { return m_finished; }
+
         /// @brief Updates the option
         void update(float deltaSeconds);
-        
+
     protected:
         /// @brief Function is called once per frame only if the option is active
         /// @param deltaSeconds Seconds between frames
         /// @note Override this function to implement custom behaviour
         virtual void updateOption(float deltaSeconds) = 0;
 
+        AIComponent* m_aiComponent = nullptr;
+        Knowledge m_knowledge;
+
     private:
+        bool m_finished = false;
+        
         float m_duration = 0.0f;
         float m_elapsedTime = 0.0f;
         bool m_isActive = false;

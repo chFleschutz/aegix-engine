@@ -8,8 +8,7 @@ namespace VEAI
     AIComponent::AIComponent()
     {
         m_option = std::make_unique<OptionTextOutput>();
-        m_option->setDuration(3.0f);
-        m_option->setCooldown(1.0f);
+        m_option->initialize(this, 5.0f, 2.0f);
     }
 
     void AIComponent::update(float deltaSeconds)

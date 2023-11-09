@@ -2,6 +2,13 @@
 
 namespace VEAI
 {
+    void Option::initialize(AIComponent* aiComponent, float duration, float cooldown)
+    {
+        m_aiComponent = aiComponent;
+		m_duration = duration;
+		m_cooldown = cooldown;
+    }
+
     void Option::setDuration(float seconds)
     {
         m_duration = seconds;
@@ -28,6 +35,7 @@ namespace VEAI
 
     void Option::stop()
     {
+        m_finished = true;
         m_isActive = false;
         m_onCooldown = true;
         m_elapsedTime = 0.0f;
@@ -38,14 +46,14 @@ namespace VEAI
         // Update cooldown
         if (m_onCooldown)
         {
-            if (m_cooldownTime < m_cooldown)
-            {
-                m_cooldownTime += deltaSeconds;
-            }
-            else
+            if (m_cooldownTime > m_cooldown)
             {
                 m_onCooldown = false;
                 m_cooldownTime = 0.0f;
+            }
+            else
+            {
+                m_cooldownTime += deltaSeconds;
             }
         }
 
@@ -53,13 +61,13 @@ namespace VEAI
         if (m_isActive)
         {
             m_elapsedTime += deltaSeconds;
-            if (m_elapsedTime < m_duration)
+            if (m_elapsedTime > m_duration and m_duration > 0.0f)
             {
-                updateOption(deltaSeconds);
+                stop();
             }
             else
             {
-                stop();
+                updateOption(deltaSeconds);
             }
         }
     }
