@@ -19,7 +19,7 @@ public:
 
 			// Floor
 			auto plane = createEntity("Plane");
-			plane.addComponent<VEComponent::Mesh>(planeModel);
+			plane.addComponent<VEComponent::Mesh>(planeModel, Color::gray());
 			plane.getComponent<VEComponent::Transform>().scale = { 2.0f, 2.0f, 2.0f };
 			
 			// Player
@@ -34,7 +34,7 @@ public:
 			{
 				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto arrow = createEntity("NPC " + std::to_string(i), randomLocation);
-				arrow.addComponent<VEComponent::Mesh>(arrowModel);
+				arrow.addComponent<VEComponent::Mesh>(arrowModel, Color::orange());
 			}
 		}
 		{ // Lights
@@ -43,6 +43,12 @@ public:
 
 			auto light2 = createEntity("Light 2", {-10.0f, -10.0f, -10.0f});
 			light2.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
+
+			auto light3 = createEntity("Light 2", { -10.0f, -10.0f, 10.0f });
+			light3.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
+
+			auto light4 = createEntity("Light 2", { 10.0f, -10.0f, 10.0f });
+			light4.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 		}
 	}
 };
