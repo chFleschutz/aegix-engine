@@ -1,6 +1,8 @@
+#include "ai/ai_component.h"
+#include "physics/motion_dynamics.h"
 #include "scene/scene.h"
 #include "scene/entity.h"
-#include "ai/ai_component.h"
+#include "scripting/movement/dynamic_movement_controller.h"
 #include "utils/random.h"
 
 class AIScene : public VEScene::Scene
@@ -10,16 +12,23 @@ public:
 
 	void initialize() override
 	{
-		{ // Models
+		{ 
+			// Models
 			auto planeModel = loadModel("models/plane.obj");
+			auto arrowModel = loadModel("models/arrow.obj");
+
+			// Floor
 			auto plane = createEntity("Plane");
 			plane.addComponent<VEComponent::Mesh>(planeModel);
 			plane.getComponent<VEComponent::Transform>().scale = { 2.0f, 2.0f, 2.0f };
 			
-			plane.addScript<VEAI::AIComponent>(); // TODO: Remove (for testing)
+			// Player
+			auto player = createEntity("Player");
+			player.addComponent<VEComponent::Mesh>(arrowModel, Color::blue());
+			player.addComponent<VEPhysics::MotionDynamics>();
+			player.addComponent<VEScripting::DynamicMovementController>();
 
 			// Spawn NPCs at random locations
-			auto arrowModel = loadModel("models/arrow.obj");
 			int npcCount = 10; 
 			for (int i = 0; i < npcCount; i++)
 			{
