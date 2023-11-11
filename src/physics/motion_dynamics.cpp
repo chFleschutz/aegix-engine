@@ -26,12 +26,16 @@ namespace VEPhysics
 
 	void MotionDynamics::applyForces(float deltaSeconds)
 	{
-		// Apply directional forces
-		m_velocity += m_accumulatedForce / m_mass * deltaSeconds;
-		m_accumulatedForce = Vector3{ 0.0f };
+		// Calculate new velocities
+		m_velocity += m_accumulatedForce / m_properties.mass * deltaSeconds;
+		m_angularVelocity += m_accumulatedAngularForce / m_properties.mass * deltaSeconds;
+		
+		// Limit velocities
+		m_velocity *= std::min(1.0f, m_properties.maxLinearSpeed / m_velocity.length());
+		m_angularVelocity *= std::min(1.0f, m_properties.maxAngularSpeed / m_angularVelocity.length());
 
-		// Apply angular forces
-		m_angularVelocity += m_accumulatedAngularForce / m_mass * deltaSeconds;
+		// Reset accumulated forces
+		m_accumulatedForce = Vector3{ 0.0f };
 		m_accumulatedAngularForce = Vector3{ 0.0f };
 	}
 

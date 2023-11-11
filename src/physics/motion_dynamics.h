@@ -9,6 +9,17 @@ namespace VEPhysics
 	class MotionDynamics : public VEScripting::ScriptBase
 	{
 	public:
+		struct Properties
+		{
+			float mass = 1.0f;
+
+			float linearDamping = 0.0f;
+			float angularDamping = 0.0f;
+
+			float maxLinearSpeed = 10.0f;
+			float maxAngularSpeed = 10.0f;
+		};
+
 		/// @brief Adds a directional force to the object.
 		/// @param force Directional force to add.
 		void addForce(const Vector3& force);
@@ -36,10 +47,10 @@ namespace VEPhysics
 		Vector3 angularDirection() const { return glm::normalize(m_angularVelocity); }
 
 		/// @brief Sets the mass.
-		void setMass(float mass) { m_mass = mass; }
+		void setMass(float mass) { m_properties.mass = mass; }
 
 		/// @brief Returns the mass.
-		float mass() const { return m_mass; }
+		float mass() const { return m_properties.mass; }
 
 		/// @brief Updates the position and rotation of the object based on the current velocity.
 		/// @note This function is called automatically each frame.
@@ -50,7 +61,7 @@ namespace VEPhysics
 		/// @note Resets the accelerations to zero for the next frame.
 		void applyForces(float deltaSeconds);
 
-		float m_mass{ 1.0f };
+		Properties m_properties;
 
 		Vector3 m_velocity{ 0.0f };
 		Vector3 m_angularVelocity{ 0.0f };
