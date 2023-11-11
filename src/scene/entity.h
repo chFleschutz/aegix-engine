@@ -22,7 +22,7 @@ namespace VEScene
 		/// @tparam ...T Type of the components to check
 		/// @return True if the entity has all components of type T... otherwise false
 		template<typename... T>
-		bool hasComponent()
+		bool hasComponent() const
 		{
 			return m_scene->m_registry.all_of<T...>(m_entityHandle);
 		}
@@ -31,7 +31,7 @@ namespace VEScene
 		/// @tparam T Type of the component
 		/// @return A reference to the component 
 		template<typename T>
-		T& getComponent()
+		T& getComponent() const
 		{
 			assert(hasComponent<T>() && "Entity does not have the component");
 			return m_scene->m_registry.get<T>(m_entityHandle);

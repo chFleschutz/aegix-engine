@@ -19,15 +19,15 @@ namespace VEScripting
 
 		/// @brief Returns true if the entity has all components of type T...
 		template<typename... T>
-		bool hasComponent()
+		bool hasComponent() const
 		{
-			return m_entity->hasComponent<T...>();
+			return m_entity.hasComponent<T...>();
 		}
 
 		/// @brief Returns a reference of the component of type T
 		/// @note Component of type T must exist
 		template<typename T>
-		T& getComponent()
+		T& getComponent() const
 		{
 			return m_entity.getComponent<T>();
 		}
