@@ -25,32 +25,33 @@ namespace VEAI
 		/// @param option The option to push
 		/// @note The option only starts after all other options have finished
 		template<typename T, typename... Args>
-		void emplaceQueued(Args&&... initArgs)
+		T& emplaceQueued(Args&&... initArgs)
 		{
 			static_assert(std::is_base_of_v<Option, T>, "T must be derived from Option");
-
-			m_options.emplace_back(std::make_unique<T>());
-			m_options.back()->initialize(std::forward<Args>(initArgs)...);
+			auto& option = m_options.emplace_back(std::make_unique<T>());
+			option->initialize(std::forward<Args>(initArgs)...);
 
 			if (m_options.size() == 1)
 				m_options.front()->start();
+
+			return static_cast<T&>(*option);
 		}
 
 		/// @brief Pushes an option to the front of the queue
 		/// @param option The option to push
 		/// @note The current option will be paused and the new option will be started immediately
 		template<typename T, typename... Args>
-		void emplacePrioritized(Args&&... args)
+		T& emplacePrioritized(Args&&... args)
 		{
 			static_assert(std::is_base_of_v<Option, T>, "T must be derived from Option");
-
 			if (!m_options.empty())
 				m_options.front()->pause();
 
-			m_options.emplace_front(std::make_unique<T>());
-			m_options.front()->initialize(std::forward<Args>(args)...);
+			auto& option = m_options.emplace_front(std::make_unique<T>());
+			option->initialize(std::forward<Args>(args)...);
 
 			m_options.front()->start();
+			return static_cast<T&>(*option);
 		}
 
 		/// @brief Stops and removes the currently active option and starts the next one

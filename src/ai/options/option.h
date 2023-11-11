@@ -16,8 +16,6 @@ namespace VEAI
         /// @note Call this function after creating the option and before using it
         void initialize(AIComponent* aiComponent, float duration = 0.0f, float cooldown = 0.0f);
 
-        void setKnowledge(const Knowledge& knowledge) { m_knowledge = knowledge; }
-
         /// @brief Sets the duration of the option in seconds
         void setDuration(float seconds);
         /// @brief Sets the cooldown of the option in seconds
@@ -57,7 +55,6 @@ namespace VEAI
         virtual void updateOption(float deltaSeconds) = 0;
 
         AIComponent* m_aiComponent = nullptr;
-        Knowledge m_knowledge;
 
     private:
         bool m_finished = false;
