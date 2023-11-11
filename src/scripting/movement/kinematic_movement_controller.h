@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/input.h"
 #include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
@@ -11,21 +12,21 @@ namespace VEScripting
 		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
-			int moveLeft = GLFW_KEY_A;
-			int moveRight = GLFW_KEY_D;
-			int moveForward = GLFW_KEY_W;
-			int moveBackward = GLFW_KEY_S;
-			int moveUp = GLFW_KEY_E;
-			int moveDown = GLFW_KEY_Q;
+			Input::Key moveLeft = Input::A;
+			Input::Key moveRight = Input::D;
+			Input::Key moveForward = Input::W;
+			Input::Key moveBackward = Input::S;
+			Input::Key moveUp = Input::E;
+			Input::Key moveDown = Input::Q;
 
-			int mouseRotate = GLFW_MOUSE_BUTTON_RIGHT;
-			int mousePan = GLFW_MOUSE_BUTTON_MIDDLE;
+			Input::MouseButton mouseRotate = Input::MouseRight;
+			Input::MouseButton mousePan = Input::MouseMiddle;
 			
 			// Disabled by default
-			int lookLeft = GLFW_KEY_UNKNOWN; 
-			int lookRight = GLFW_KEY_UNKNOWN;
-			int lookUp = GLFW_KEY_UNKNOWN;
-			int lookDown = GLFW_KEY_UNKNOWN;
+			Input::Key lookLeft = Input::Unknown;
+			Input::Key lookRight = Input::Unknown;
+			Input::Key lookUp = Input::Unknown;
+			Input::Key lookDown = Input::Unknown;
 		};
 
 		void begin() override;

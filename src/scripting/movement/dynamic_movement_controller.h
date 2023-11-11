@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/input.h"
 #include "scripting/script_base.h"
 
 namespace VEScripting
@@ -9,10 +10,10 @@ namespace VEScripting
 	public:
 		struct KeyMappings
 		{
-			int moveForward = GLFW_KEY_UP;
-			int moveBackward = GLFW_KEY_DOWN;
-			int rotateLeft = GLFW_KEY_LEFT;
-			int rotateRight = GLFW_KEY_RIGHT;
+			Input::Key moveForward = Input::Up;
+			Input::Key moveBackward = Input::Down;
+			Input::Key rotateLeft = Input::Left;
+			Input::Key rotateRight = Input::Right;
 		};
 
 		virtual void update(float deltaSeconds) override;

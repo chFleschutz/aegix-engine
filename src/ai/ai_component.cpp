@@ -10,9 +10,9 @@ namespace VEAI
 		: m_player(m_player)
 	{
         auto& input = Input::instance();
-        input.bind(this, &AIComponent::seekPlayer, GLFW_KEY_1);
-        input.bind(this, &AIComponent::startPauseOption, GLFW_KEY_SPACE);
-        input.bind(this, &AIComponent::stopOption, GLFW_KEY_ESCAPE);
+        input.bind(this, &AIComponent::seekPlayer, Input::One);
+        input.bind(this, &AIComponent::startPauseOption, Input::Space);
+        input.bind(this, &AIComponent::stopOption, Input::Escape);
 	}
 
     void AIComponent::update(float deltaSeconds)

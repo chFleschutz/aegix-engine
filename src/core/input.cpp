@@ -21,12 +21,12 @@ void Input::initialize(GLFWwindow* window)
 		});
 }
 
-bool Input::keyPressed(int key)
+bool Input::keyPressed(Key key)
 {
 	return glfwGetKey(m_window, key) == GLFW_PRESS;
 }
 
-bool Input::mouseButtonPressed(int button)
+bool Input::mouseButtonPressed(MouseButton button)
 {
 	return glfwGetMouseButton(m_window, button) == GLFW_PRESS;
 }
