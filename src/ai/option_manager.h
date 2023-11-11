@@ -2,8 +2,8 @@
 
 #include "ai/options/option.h"
 
-#include <memory>
 #include <deque>
+#include <memory>
 
 namespace VEAI
 {
@@ -14,16 +14,20 @@ namespace VEAI
 		OptionManager() = default;
 		~OptionManager() = default;
 
-		/// @brief Updates the current option 
+		OptionManager(const OptionManager&) = delete;
+		OptionManager& operator=(const OptionManager&) = delete;
+
+		/// @brief Updates the currently active option and starts the next one after it has finished
 		void update(float deltaSeconds);
 
 		/// @brief Pushes an option to the back of the queue
 		/// @param option The option to push
 		/// @note The option only starts after all other options have finished
 		template<typename T, typename... Args>
-		void emplaceQueued(Args&&... args)
+		void emplaceQueued(Args&&... initArgs)
 		{
-			m_options.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+			m_options.emplace_back(std::make_unique<T>());
+			m_options.back()->initialize(std::forward<Args>(initArgs)...);
 
 			if (m_options.size() == 1)
 				m_options.front()->start();
@@ -38,17 +42,23 @@ namespace VEAI
 			if (!m_options.empty())
 				m_options.front()->pause();
 
-			m_options.emplace_front(std::make_unique<T>(std::forward<Args>(args)...));
+			m_options.emplace_front(std::make_unique<T>());
+			m_options.front()->initialize(std::forward<Args>(args)...);
+
 			m_options.front()->start();
 		}
 
-		/// @brief Cancels the currently active option and starts the next one
+		/// @brief Stops the currently active option and starts the next one
 		void cancelFirst();
 
 		/// @brief Returns the currently active option
-		Option* currentOption() const { return m_options.empty() ? nullptr : m_options.front().get(); }
+		/// @return The currently active option or nullptr if there is none
+		Option* activeOption() const { return m_options.empty() ? nullptr : m_options.front().get(); }
 
 	private:
+		/// @brief Removes the first option from the queue and starts the next one
+		void removeFirstOption();
+
 		std::deque<std::unique_ptr<Option>> m_options;
 	};
 

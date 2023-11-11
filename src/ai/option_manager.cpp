@@ -10,7 +10,7 @@ namespace VEAI
 		m_options.front()->update(deltaSeconds);
 
 		if (m_options.front()->isFinished())
-			cancelFirst();
+			removeFirstOption();
 	}
 
 	void OptionManager::cancelFirst()
@@ -19,6 +19,14 @@ namespace VEAI
 			return;
 
 		m_options.front()->stop();
+
+		removeFirstOption();
+	}
+
+	void OptionManager::removeFirstOption()
+	{
+		assert(!m_options.empty());
+
 		m_options.pop_front();
 
 		if (!m_options.empty())
