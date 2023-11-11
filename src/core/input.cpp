@@ -13,6 +13,12 @@ void Input::initialize(GLFWwindow* window)
 
 	if (glfwRawMouseMotionSupported())
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+	// Set up key callback
+	glfwSetKeyCallback(m_window, [](GLFWwindow*, int key, int scancode, int action, int mods)
+		{
+			instance().glfwKeyCallback(key, scancode, static_cast<KeyEvent>(action), static_cast<Modifier>(mods));
+		});
 }
 
 bool Input::keyPressed(int key)
@@ -35,4 +41,13 @@ Vector2 Input::cursorPosition()
 void Input::setInputMode(int mode, int value)
 {
 	glfwSetInputMode(m_window, mode, value);
+}
+
+void Input::glfwKeyCallback(int key, int scancode, KeyEvent action, Modifier mods)
+{
+	for (const auto& binding : m_keyBindings[key])
+	{
+		if (binding.event == action and binding.mods == mods)
+			binding.function();
+	}
 }

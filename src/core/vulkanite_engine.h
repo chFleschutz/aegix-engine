@@ -35,7 +35,6 @@ namespace Vulkanite
 		void loadScene()
 		{
 			m_scene = std::make_unique<T>(m_device);
-			m_scene->initialize();
 		}
 
 	private:

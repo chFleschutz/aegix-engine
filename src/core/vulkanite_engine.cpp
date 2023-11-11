@@ -61,12 +61,15 @@ namespace Vulkanite
 		VEGraphics::SimpleRenderSystem simpleRenderSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 		VEGraphics::PointLightSystem pointLightSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
 
+		// Init Input
+		Input::instance().initialize(m_window.glfwWindow());
+
+		// Init Scene
+		m_scene->initialize();
+
 		// Init Camera
 		auto& camera = m_scene->camera().getComponent<VEComponent::Camera>().camera;
 		auto& cameraTransform = m_scene->camera().getComponent<VEComponent::Transform>();
-
-		// Init Input
-		Input::instance().initialize(m_window.glfwWindow());
 
 		// Init Entity Components
 		m_scene->runtimeBegin();
