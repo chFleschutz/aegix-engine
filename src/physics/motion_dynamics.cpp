@@ -31,8 +31,8 @@ namespace VEPhysics
 		m_angularVelocity += m_accumulatedAngularForce / m_properties.mass * deltaSeconds;
 		
 		// Limit velocities
-		m_velocity *= std::min(1.0f, m_properties.maxLinearSpeed / m_velocity.length());
-		m_angularVelocity *= std::min(1.0f, m_properties.maxAngularSpeed / m_angularVelocity.length());
+		m_velocity *= std::min(1.0f, m_properties.maxLinearSpeed / speed());
+		m_angularVelocity *= std::min(1.0f, m_properties.maxAngularSpeed / angularSpeed());
 
 		// Reset accumulated forces
 		m_accumulatedForce = Vector3{ 0.0f };

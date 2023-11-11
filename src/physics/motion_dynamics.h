@@ -16,8 +16,8 @@ namespace VEPhysics
 			float linearDamping = 0.0f;
 			float angularDamping = 0.0f;
 
-			float maxLinearSpeed = 10.0f;
-			float maxAngularSpeed = 10.0f;
+			float maxLinearSpeed = 5.0f;
+			float maxAngularSpeed = 5.0f;
 		};
 
 		/// @brief Adds a directional force to the object.
