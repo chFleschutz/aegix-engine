@@ -15,8 +15,8 @@ namespace VEAI
 	public:
 		struct Limits
 		{
-			float maxLinearForce = 3.0f;
-			float maxAngularForce = 3.0f;
+			float maxLinearForce = 20.0f;
+			float maxAngularForce = 20.0f;
 		};
 
 		struct SteeringForce
@@ -38,8 +38,6 @@ namespace VEAI
 			auto force = computeForce();
 			dynamics.addForce(force.linear);
 			dynamics.addAngularForce(force.angular);
-
-			std::cout << name << " force: " << force.linear << std::endl;
 		}
 
 		virtual SteeringForce computeForce() = 0;
