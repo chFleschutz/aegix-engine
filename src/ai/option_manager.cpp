@@ -13,7 +13,7 @@ namespace VEAI
 			removeFirstOption();
 	}
 
-	void OptionManager::cancelFirst()
+	void OptionManager::cancelActive()
 	{
 		if (m_options.empty())
 			return;

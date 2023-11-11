@@ -53,15 +53,15 @@ namespace VEAI
 			m_options.front()->start();
 		}
 
-		/// @brief Stops the currently active option and starts the next one
-		void cancelFirst();
+		/// @brief Stops and removes the currently active option and starts the next one
+		void cancelActive();
 
 		/// @brief Returns the currently active option
 		/// @return The currently active option or nullptr if there is none
 		Option* activeOption() const { return m_options.empty() ? nullptr : m_options.front().get(); }
 
 	private:
-		/// @brief Removes the first option from the queue and starts the next one
+		/// @brief Removes the first option and starts the next one
 		void removeFirstOption();
 
 		std::deque<std::unique_ptr<Option>> m_options;
