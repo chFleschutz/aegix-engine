@@ -3,6 +3,7 @@
 #include "scene/scene.h"
 #include "scene/entity.h"
 #include "scripting/movement/dynamic_movement_controller.h"
+#include "scripting/movement/world_border.h"
 #include "utils/random.h"
 
 class AIScene : public VEScene::Scene
@@ -27,6 +28,7 @@ public:
 			player.addComponent<VEComponent::Mesh>(arrowModel, Color::blue());
 			player.addComponent<VEPhysics::MotionDynamics>();
 			player.addComponent<VEScripting::DynamicMovementController>();
+			player.addComponent<VEScripting::WorldBorder>(Vector3{10.0f});
 
 			// Spawn NPCs at random locations
 			int npcCount = 10; 
@@ -37,6 +39,7 @@ public:
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::orange());
 				npc.addComponent<VEPhysics::MotionDynamics>();
 				npc.addComponent<VEAI::AIComponent>(player);
+				npc.addComponent<VEScripting::WorldBorder>(Vector3{ 10.0f });
 			}
 		}
 		{ // Lights
