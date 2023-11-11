@@ -1,5 +1,23 @@
 #include "math_utils.h"
 
+#include <iostream>
+
+// Overload the << operator for Vectors to make printing them easier
+std::ostream& operator<<(std::ostream& os, const Vector2& vec) 
+{
+	return os << "{ " << vec.x << ", " << vec.y  << " }";;
+}
+
+std::ostream& operator<<(std::ostream& os, const Vector3& vec)
+{
+	return os << "{ " << vec.x << ", " << vec.y << ", " << vec.z << " }";;
+}
+
+std::ostream& operator<<(std::ostream& os, const Vector4& vec)
+{
+	return os << "{ " << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << " }";;
+}
+
 
 float MathLib::percentage(float value, float min, float max)
 {

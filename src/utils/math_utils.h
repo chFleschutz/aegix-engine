@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <iostream>
+
 
 // Aliases for glm types
 using Vector2 = glm::vec2;
@@ -13,6 +15,12 @@ using Vector4 = glm::vec4;
 using Matrix2 = glm::mat2;
 using Matrix3 = glm::mat3;
 using Matrix4 = glm::mat4;
+
+// Overloads to print glm types
+std::ostream& operator<<(std::ostream& os, const Vector2& vec);
+std::ostream& operator<<(std::ostream& os, const Vector3& vec);
+std::ostream& operator<<(std::ostream& os, const Vector4& vec);
+
 
 /// @brief MathLib contains some useful math functions
 class MathLib
