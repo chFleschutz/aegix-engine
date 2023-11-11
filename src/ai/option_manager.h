@@ -4,6 +4,7 @@
 
 #include <deque>
 #include <memory>
+#include <type_traits>
 
 namespace VEAI
 {
@@ -26,6 +27,8 @@ namespace VEAI
 		template<typename T, typename... Args>
 		void emplaceQueued(Args&&... initArgs)
 		{
+			static_assert(std::is_base_of_v<Option, T>, "T must be derived from Option");
+
 			m_options.emplace_back(std::make_unique<T>());
 			m_options.back()->initialize(std::forward<Args>(initArgs)...);
 
@@ -39,6 +42,8 @@ namespace VEAI
 		template<typename T, typename... Args>
 		void emplacePrioritized(Args&&... args)
 		{
+			static_assert(std::is_base_of_v<Option, T>, "T must be derived from Option");
+
 			if (!m_options.empty())
 				m_options.front()->pause();
 
