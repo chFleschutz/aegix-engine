@@ -1,9 +1,7 @@
 #pragma once
 
+#include "ai/option_manager.h"
 #include "scripting/script_base.h"
-#include "ai/options/option.h"
-
-#include <memory>
 
 namespace VEAI
 {
@@ -16,7 +14,9 @@ namespace VEAI
         void update(float deltaSeconds) override;
 
     private:
-        std::unique_ptr<Option> m_option;
+        void handleInput();
+
+        OptionManager m_optionManager;
     };
 
 } // namespace VEAI

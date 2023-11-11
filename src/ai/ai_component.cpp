@@ -7,29 +7,39 @@ namespace VEAI
 {
     AIComponent::AIComponent()
     {
-        m_option = std::make_unique<OptionTextOutput>();
-        m_option->initialize(this, 5.0f, 2.0f);
+        m_optionManager.emplaceQueued<OptionTextOutput>(this, 5.0f, 2.0f);
     }
 
     void AIComponent::update(float deltaSeconds)
     {
+        handleInput();
+
+        m_optionManager.update(deltaSeconds);
+    }
+
+    void AIComponent::handleInput()
+    {
         // Check for key press (compare to lastFrame to trigger only once)
         static bool lastFramePressed = false;
         bool keyPressed = Input::instance().keyPressed(GLFW_KEY_SPACE);
+        
         if (keyPressed and !lastFramePressed)
         {
-            if (m_option->isActive())
+            auto activeOption = m_optionManager.activeOption();
+            if (!activeOption)
+                return;
+
+            if (activeOption->isActive())
             {
-                m_option->pause();
+                activeOption->pause();
             }
             else
             {
-                m_option->start();
+                activeOption->start();
             }
         }
-        lastFramePressed = keyPressed;
 
-        m_option->update(deltaSeconds);
+        lastFramePressed = keyPressed;
     }
 
 } // namespace VEAI
