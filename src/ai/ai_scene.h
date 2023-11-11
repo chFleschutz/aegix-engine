@@ -33,8 +33,10 @@ public:
 			for (int i = 0; i < npcCount; i++)
 			{
 				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
-				auto arrow = createEntity("NPC " + std::to_string(i), randomLocation);
-				arrow.addComponent<VEComponent::Mesh>(arrowModel, Color::orange());
+				auto npc = createEntity("NPC " + std::to_string(i), randomLocation);
+				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::orange());
+				npc.addComponent<VEPhysics::MotionDynamics>();
+				npc.addComponent<VEAI::AIComponent>(player);
 			}
 		}
 		{ // Lights

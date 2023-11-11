@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ai/option_manager.h"
+#include "scene/entity.h"
 #include "scripting/script_base.h"
 
 namespace VEAI
@@ -8,15 +9,20 @@ namespace VEAI
     class AIComponent : public VEScripting::ScriptBase
     {
     public:
-        AIComponent();
+        AIComponent(VEScene::Entity m_player);
         ~AIComponent() = default;
 
         void update(float deltaSeconds) override;
 
-    private:
-        void handleInput();
+        // Key callbacks
+        void startPauseOption();
+        void stopOption();
+        void seekPlayer();
 
+    private:
         OptionManager m_optionManager;
+
+        VEScene::Entity m_player;
     };
 
 } // namespace VEAI
