@@ -15,8 +15,8 @@ namespace VEAI
 	public:
 		struct Limits
 		{
-			float maxLinearForce = 20.0f;
-			float maxAngularForce = 20.0f;
+			float maxLinearForce = 10.0f;
+			float maxAngularForce = 10.0f;
 		};
 
 		struct SteeringForce
@@ -33,10 +33,9 @@ namespace VEAI
 			assert(m_aiComponent->hasComponent<VEPhysics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
 			
 			auto& dynamics = m_aiComponent->getComponent<VEPhysics::MotionDynamics>();
-			auto& name = m_aiComponent->getComponent<VEComponent::Name>().name;
 
 			auto force = computeForce();
-			dynamics.addForce(force.linear);
+			dynamics.addLinearForce(force.linear);
 			dynamics.addAngularForce(force.angular);
 		}
 

@@ -19,6 +19,7 @@ namespace VEAI
         void stopOption();
         void seekPlayer();
         void fleeFromPlayer();
+        void arriveAtPlayer();
 
     private:
         OptionManager m_optionManager;
