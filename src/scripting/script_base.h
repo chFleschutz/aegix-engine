@@ -8,13 +8,16 @@ namespace VEScripting
 	class ScriptBase
 	{
 	public:
+		/// @brief Constructor
+		/// @note When overriding, dont't use member functions (m_entity is not initialized yet)
+		ScriptBase() = default;
 		virtual ~ScriptBase() {}
 
-		/// @brief Called once at the beginning of the scene
+		/// @brief Called once at the first frame just before update
 		virtual void begin() {}
 		/// @brief Called every frame with the delta of the last two frames in seconds
 		virtual void update(float deltaSeconds) {}
-		/// @brief Called once at the end of the scene
+		/// @brief Called once at the end of the last frame
 		virtual void end() {}
 
 		/// @brief Returns true if the entity has all components of type T...

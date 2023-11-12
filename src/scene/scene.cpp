@@ -30,35 +30,6 @@ namespace VEScene
 		return { group.front(), this };
 	}
 
-	void Scene::runtimeBegin()
-	{
-		for (auto& script : m_scripts)
-		{
-			script->begin();
-		}
-	}
-
-	void Scene::update(float deltaSeconds)
-	{
-		for (auto& script : m_scripts)
-		{
-			script->update(deltaSeconds);
-		}
-	}
-
-	void Scene::runtimeEnd()
-	{
-		for (auto& script : m_scripts)
-		{
-			script->end();
-		}
-	}
-
-	void Scene::addScript(VEScripting::ScriptBase* script)
-	{
-		m_scripts.push_back(script);
-	}
-
 	Entity Scene::createEntity(const std::string& name, const Vector3& location)
 	{
 		Entity entity = { m_registry.create(), this };

@@ -2,6 +2,7 @@
 
 #include "graphics/device.h"
 #include "graphics/model.h"
+#include "scripting/script_manager.h"
 
 #include <entt/entt.hpp>
 
@@ -41,14 +42,14 @@ namespace VEScene
 		/// @brief Returns the camera
 		Entity camera();
 
-		/// @brief Initialized script components and calls the begin() function
-		void runtimeBegin();
-		/// @brief Calls the update function on all script components
-		void update(float deltaSeconds);
-		/// @brief Calls the end function on all script components
-		void runtimeEnd();
+		/// @brief Adds tracking for a script component to call its virtual functions
+		void addScript(VEScripting::ScriptBase* script) { m_scriptManager.addScript(script); }
 
-		void addScript(VEScripting::ScriptBase* script);
+		/// @brief Calls the update function on all script components
+		void update(float deltaSeconds) { m_scriptManager.update(deltaSeconds); }
+
+		/// @brief Calls the end function on all script components
+		void runtimeEnd() { m_scriptManager.runtimeEnd(); }
 
 	protected:
 		/// @brief Loads a model frome the given path
@@ -65,7 +66,7 @@ namespace VEScene
 		VEGraphics::VulkanDevice& m_device;
 		entt::registry m_registry;
 
-		std::vector<VEScripting::ScriptBase*> m_scripts;
+		VEScripting::ScriptManager m_scriptManager;
 
 		friend class Entity;
 	};

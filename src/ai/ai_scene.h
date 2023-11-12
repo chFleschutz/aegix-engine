@@ -14,7 +14,7 @@ public:
 	void initialize() override
 	{
 		{ 
-			// Models
+			// Load Models
 			auto planeModel = loadModel("models/plane.obj");
 			auto arrowModel = loadModel("models/arrow.obj");
 
@@ -28,9 +28,9 @@ public:
 			player.addComponent<VEComponent::Mesh>(arrowModel, Color::blue());
 			player.addComponent<VEPhysics::MotionDynamics>();
 			player.addComponent<VEScripting::DynamicMovementController>();
-			player.addComponent<VEScripting::WorldBorder>(Vector3{10.0f});
+			player.addComponent<VEScripting::WorldBorder>(Vector3{ 10.0f });
 
-			// Spawn NPCs at random locations
+			// NPCs at random locations
 			int npcCount = 10; 
 			for (int i = 0; i < npcCount; i++)
 			{
@@ -42,17 +42,18 @@ public:
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ 10.0f });
 			}
 		}
-		{ // Lights
+		{ 
+			// Lights
 			auto light1 = createEntity("Light 1", {10.0f, -10.0f, -10.0f});
 			light1.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 
 			auto light2 = createEntity("Light 2", {-10.0f, -10.0f, -10.0f});
 			light2.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 
-			auto light3 = createEntity("Light 2", { -10.0f, -10.0f, 10.0f });
+			auto light3 = createEntity("Light 3", { -10.0f, -10.0f, 10.0f });
 			light3.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 
-			auto light4 = createEntity("Light 2", { 10.0f, -10.0f, 10.0f });
+			auto light4 = createEntity("Light 4", { 10.0f, -10.0f, 10.0f });
 			light4.addComponent<VEComponent::PointLight>(Color::white(), 100.0f);
 		}
 	}

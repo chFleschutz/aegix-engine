@@ -71,9 +71,6 @@ namespace Vulkanite
 		auto& camera = m_scene->camera().getComponent<VEComponent::Camera>().camera;
 		auto& cameraTransform = m_scene->camera().getComponent<VEComponent::Transform>();
 
-		// Init Entity Components
-		m_scene->runtimeBegin();
-
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// ***********
