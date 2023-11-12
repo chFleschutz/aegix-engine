@@ -21,8 +21,8 @@ namespace VEScripting
 	private:
 		KeyMappings m_keys{};
 
-		float m_dragFactor = 2.0f;
-		float m_acceleration = 2.0f;
+		float m_linearforce = 20.0f;
+		float m_angularforce = 20.0f;
 	};
 
 } // namespace VEScripting
