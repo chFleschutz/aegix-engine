@@ -33,16 +33,20 @@ namespace VEAI
         if (activeOption->isActive())
         {
             activeOption->pause();
+            std::cout << getComponent<VEComponent::Name>().name << ": Paused option" << std::endl;
         }
         else
         {
             activeOption->start();
+            std::cout << getComponent<VEComponent::Name>().name << ": Started option" << std::endl;
         }
     }
 
     void AIComponent::stopOption()
     {
         m_optionManager.cancelActive();
+
+        std::cout << getComponent<VEComponent::Name>().name << ": Stopping option" << std::endl;
     }
 
     void AIComponent::seekPlayer()
@@ -50,6 +54,8 @@ namespace VEAI
         m_optionManager.cancelActive();
         auto& seekOption = m_optionManager.emplacePrioritized<SteeringBehaviourSeek>(this);
         seekOption.setTarget(EntityKnowledge{ m_player });
+
+        std::cout << getComponent<VEComponent::Name>().name << ": Seeking player" << std::endl;
     }
 
     void AIComponent::fleeFromPlayer()
@@ -57,6 +63,8 @@ namespace VEAI
         m_optionManager.cancelActive();
 		auto& fleeOption = m_optionManager.emplacePrioritized<SteeringBehaviourFlee>(this);
 		fleeOption.setTarget(EntityKnowledge{ m_player });
+
+        std::cout << getComponent<VEComponent::Name>().name << ": Fleeing from player" << std::endl;
     }
 
     void AIComponent::arriveAtPlayer()
@@ -64,6 +72,8 @@ namespace VEAI
         m_optionManager.cancelActive();
 		auto& arriveOption = m_optionManager.emplacePrioritized<SteeringBehaviourArrive>(this);
         arriveOption.setTarget(EntityKnowledge{ m_player });
+
+        std::cout << getComponent<VEComponent::Name>().name << ": Arriving at player" << std::endl;
     }
 
 } // namespace VEAI
