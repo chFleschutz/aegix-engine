@@ -13,15 +13,15 @@ namespace VEAI
 		}
 
 	protected:
-		virtual SteeringForce computeForce() override
+		virtual VEPhysics::Force computeForce() override
 		{
 			if (!m_target.has_value())
-				return SteeringForce{};
+				return VEPhysics::Force{};
 
 			auto& transform = m_aiComponent->getComponent<VEComponent::Transform>();
 			auto& playerTransform = m_target.value().entity.getComponent<VEComponent::Transform>();
 
-			SteeringForce force{};
+			VEPhysics::Force force{};
 			force.linear = glm::normalize(transform.location - playerTransform.location) * m_limits.maxLinearForce;
 			return force;
 		}

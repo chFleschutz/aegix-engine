@@ -5,6 +5,28 @@
 
 namespace VEPhysics
 {
+	/// @brief Represents a directional and angular force.
+	struct Force
+	{
+		Vector3 linear = Vector3{ 0.0f };
+		Vector3 angular = Vector3{ 0.0f };
+
+		Force operator+(const Force& other) const { return { linear + other.linear, angular + other.angular }; }
+		Force operator-(const Force& other) const { return { linear - other.linear, angular - other.angular }; }
+		Force operator*(const Force& other) const { return { linear * other.linear, angular * other.angular }; }
+		Force operator/(const Force& other) const { return { linear / other.linear, angular / other.angular }; }
+		Force operator*(float scalar) const { return { linear * scalar, angular * scalar }; }
+		Force operator/(float scalar) const { return { linear / scalar, angular / scalar }; }
+
+		Force& operator+=(const Force& other);
+		Force& operator-=(const Force& other);
+		Force& operator*=(const Force& other);
+		Force& operator/=(const Force& other);
+		Force& operator*=(float scalar);
+		Force& operator/=(float scalar);
+	};
+
+
 	/// @brief Adds motion dynamics to an object to update its position and rotation each frame.
 	class MotionDynamics : public VEScripting::ScriptBase
 	{

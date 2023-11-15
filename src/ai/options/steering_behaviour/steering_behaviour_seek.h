@@ -12,16 +12,15 @@ namespace VEAI
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
 	protected:
-		virtual SteeringForce computeForce() override
+		virtual VEPhysics::Force computeForce() override
 		{
-			SteeringForce force{};
-
 			if (!m_target.has_value())
-				return force;
+				return VEPhysics::Force{};
 
 			auto& transform = m_aiComponent->getComponent<VEComponent::Transform>();
 			auto& playerTransform = m_target.value().entity.getComponent<VEComponent::Transform>();
 
+			VEPhysics::Force force{};
 			force.linear = glm::normalize(playerTransform.location - transform.location) * m_limits.maxLinearForce;
 			return force;
 		}

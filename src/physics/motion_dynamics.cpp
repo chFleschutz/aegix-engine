@@ -4,6 +4,49 @@
 
 namespace VEPhysics
 {
+	Force& Force::operator+=(const Force& other)
+	{
+		linear += other.linear;
+		angular += other.angular;
+		return *this;
+	}
+
+	Force& Force::operator-=(const Force& other)
+	{
+		linear -= other.linear;
+		angular -= other.angular;
+		return *this;
+	}
+
+	Force& Force::operator*=(const Force& other)
+	{
+		linear *= other.linear;
+		angular *= other.angular;
+		return *this;
+	}
+
+	Force& Force::operator/=(const Force& other)
+	{
+		linear /= other.linear;
+		angular /= other.angular;
+		return *this;
+	}
+
+	Force& Force::operator*=(float scalar)
+	{
+		linear *= scalar;
+		angular *= scalar;
+		return *this;
+	}
+
+	Force& Force::operator/=(float scalar)
+	{
+		linear /= scalar;
+		angular /= scalar;
+		return *this;
+	}
+
+
 	void MotionDynamics::addLinearForce(const Vector3& force)
 	{
 		m_accumulatedLinearForce += force;
@@ -63,5 +106,7 @@ namespace VEPhysics
 		addLinearForce(-m_linearVelocity * m_properties.linearFriction);
 		addAngularForce(-m_angularVelocity * m_properties.angularFriction);
 	}
+
+
 
 } // namespace VEPhysics

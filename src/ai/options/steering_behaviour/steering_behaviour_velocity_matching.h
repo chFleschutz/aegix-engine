@@ -17,7 +17,7 @@ namespace VEAI
 		}
 		
 	protected:
-		virtual void computeForce() override
+		virtual VEPhysics::Force computeForce() override
 		{
 			if (m_entities.empty())
 				return;
@@ -39,7 +39,7 @@ namespace VEAI
 					averageVelocity += dynamics.velocity;
 			}
 
-			return SteeringForce{ averageVelocity / m_entities.size(), 0.0f};
+			return VEPhysics::Force{ averageVelocity / m_entities.size(), 0.0f};
 		}
 
 	private:

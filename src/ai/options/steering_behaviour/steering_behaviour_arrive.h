@@ -16,10 +16,10 @@ namespace VEAI
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
 	protected:
-		virtual SteeringForce computeForce() override
+		virtual VEPhysics::Force computeForce() override
 		{
 			if (!m_target.has_value())
-				return SteeringForce{};
+				return VEPhysics::Force{};
 
 			auto& transform = m_aiComponent->getComponent<VEComponent::Transform>();
 			auto& playerTransform = m_target.value().entity.getComponent<VEComponent::Transform>();
@@ -33,7 +33,7 @@ namespace VEAI
 			{
 				dynamics.haltMotion();
 				stop();
-				return SteeringForce{}; 
+				return VEPhysics::Force{};
 			}
 
 			const auto maxSpeed = dynamics.properties().maxLinearSpeed;
@@ -45,7 +45,7 @@ namespace VEAI
 				desiredSpeed *= distance / brakeDistance;
 
 			// Compute force
-			SteeringForce force{};
+			VEPhysics::Force force{};
 			const auto desiredVelocity = glm::normalize(playerDirection) * desiredSpeed;
 			force.linear = glm::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
 

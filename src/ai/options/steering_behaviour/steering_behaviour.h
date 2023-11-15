@@ -22,13 +22,6 @@ namespace VEAI
 			float maxAngularSpeed = 10.0f;
 		};
 
-		struct SteeringForce
-		{
-			Vector3 linear = Vector3{ 0.0f };
-			Vector3 angular = Vector3{ 0.0f };
-		};
-
-
 		SteeringBehaviour() = default;
 		virtual ~SteeringBehaviour() override = default;
 
@@ -46,7 +39,7 @@ namespace VEAI
 			dynamics.addAngularForce(force.angular);
 		}
 
-		virtual SteeringForce computeForce() = 0;
+		virtual VEPhysics::Force computeForce() = 0;
 
 		Limits m_limits;
 	};
