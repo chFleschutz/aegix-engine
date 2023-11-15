@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ai/options/steering_behaviour/steering_behaviour.h"
+#include "scene/components.h"
 
 #include <optional>
 
@@ -9,6 +10,9 @@ namespace VEAI
 	class SteeringBehaviourArrive : public SteeringBehaviour
 	{
 	public:
+		SteeringBehaviourArrive() = default;
+		virtual ~SteeringBehaviourArrive() override = default;
+
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
 	protected:

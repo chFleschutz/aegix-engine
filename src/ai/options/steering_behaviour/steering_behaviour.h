@@ -17,6 +17,9 @@ namespace VEAI
 		{
 			float maxLinearForce = 10.0f;
 			float maxAngularForce = 10.0f;
+
+			float maxLinearSpeed = 10.0f;
+			float maxAngularSpeed = 10.0f;
 		};
 
 		struct SteeringForce
@@ -24,6 +27,10 @@ namespace VEAI
 			Vector3 linear = Vector3{ 0.0f };
 			Vector3 angular = Vector3{ 0.0f };
 		};
+
+
+		SteeringBehaviour() = default;
+		virtual ~SteeringBehaviour() override = default;
 
 		void setLimits(const Limits& limits) { m_limits = limits; }
 
