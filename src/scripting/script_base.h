@@ -11,7 +11,7 @@ namespace VEScripting
 		/// @brief Constructor
 		/// @note When overriding, dont't use member functions (m_entity is not initialized yet)
 		ScriptBase() = default;
-		virtual ~ScriptBase() {}
+		virtual ~ScriptBase() = default;
 
 		/// @brief Called once at the first frame just before update
 		virtual void begin() {}

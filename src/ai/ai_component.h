@@ -8,9 +8,6 @@ namespace VEAI
     class AIComponent : public VEScripting::ScriptBase
     {
     public:
-        AIComponent() = default;
-        ~AIComponent() = default;
-
         void update(float deltaSeconds) override
         {
             m_optionManager.update(deltaSeconds);

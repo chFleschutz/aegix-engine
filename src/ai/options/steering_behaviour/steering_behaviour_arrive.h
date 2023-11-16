@@ -10,8 +10,12 @@ namespace VEAI
 	class SteeringBehaviourArrive : public SteeringBehaviour
 	{
 	public:
+		// TODO: Remove this constructor
 		explicit SteeringBehaviourArrive(AIComponent* aiComponent)
 			: SteeringBehaviour(aiComponent) {}
+
+		SteeringBehaviourArrive(AIComponent* aiComponent, const EntityKnowledge& target)
+			: SteeringBehaviour(aiComponent), m_target(target) {}
 
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
