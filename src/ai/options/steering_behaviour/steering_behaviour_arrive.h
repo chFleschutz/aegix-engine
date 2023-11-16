@@ -10,12 +10,11 @@ namespace VEAI
 	class SteeringBehaviourArrive : public SteeringBehaviour
 	{
 	public:
-		SteeringBehaviourArrive() = default;
-		virtual ~SteeringBehaviourArrive() override = default;
+		explicit SteeringBehaviourArrive(AIComponent* aiComponent)
+			: SteeringBehaviour(aiComponent) {}
 
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
-	protected:
 		virtual VEPhysics::Force computeForce() override
 		{
 			if (!m_target.has_value())
@@ -46,8 +45,8 @@ namespace VEAI
 
 			// Compute force
 			VEPhysics::Force force{};
-			const auto desiredVelocity = glm::normalize(playerDirection) * desiredSpeed;
-			force.linear = glm::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
+			const auto desiredVelocity = MathLib::normalize(playerDirection) * desiredSpeed;
+			force.linear = MathLib::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
 
 			return force;
 		}

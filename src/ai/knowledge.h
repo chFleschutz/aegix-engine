@@ -23,4 +23,11 @@ namespace VEAI
 		explicit EntityKnowledge(VEScene::Entity entity) : entity(entity) {}
 	};
 
+	struct EntityGroupKnowledge : public Knowledge
+	{
+		std::vector<VEScene::Entity>& entities; // TODO: ensure reference is valid (e.g. by using a shared_ptr)
+
+		explicit EntityGroupKnowledge(std::vector<VEScene::Entity>& entities) : entities(entities) {}
+	};
+
 } // namespace VEAI

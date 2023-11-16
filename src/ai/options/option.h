@@ -9,7 +9,8 @@ namespace VEAI
     class Option
     {
     public:
-        Option() = default;
+        Option(AIComponent* aiComponent) 
+            : m_aiComponent(aiComponent) {}
         virtual ~Option() = default;    
 
         /// @brief Initializes the option with the AIComponent, duration and cooldown

@@ -22,26 +22,67 @@ namespace VEAI
 			float maxAngularSpeed = 10.0f;
 		};
 
-		SteeringBehaviour() = default;
-		virtual ~SteeringBehaviour() override = default;
+		SteeringBehaviour(AIComponent* aiComponent) 
+			: Option(aiComponent) {}
 
 		void setLimits(const Limits& limits) { m_limits = limits; }
+
+		virtual VEPhysics::Force computeForce() = 0;
 
 	protected:
 		virtual void updateOption(float deltaSeconds) override
 		{
 			assert(m_aiComponent->hasComponent<VEPhysics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
-			
 			auto& dynamics = m_aiComponent->getComponent<VEPhysics::MotionDynamics>();
-
-			auto force = computeForce();
-			dynamics.addLinearForce(force.linear);
-			dynamics.addAngularForce(force.angular);
+			
+			dynamics.addForce(computeForce());
 		}
-
-		virtual VEPhysics::Force computeForce() = 0;
 
 		Limits m_limits;
 	};
+
+
+	class SteeringBehaviourBlend : public Option
+	{
+	public:
+		explicit SteeringBehaviourBlend(AIComponent* aiComponent) 
+			: Option(aiComponent) {}
+
+		void add(std::unique_ptr<SteeringBehaviour> behaviour, float weight = 1.0f)
+		{
+			m_weightedBehaviours.push_back({ std::move(behaviour), weight });
+		} 
+
+		template<typename T, typename... Args>
+		void add(float weight, Args&&... args)
+		{
+			m_weightedBehaviours.push_back({ std::make_unique<T>(std::forward<Args>(args)...), weight });
+		}
+
+	protected:
+		virtual void updateOption(float deltaSeconds) override
+		{
+			assert(m_aiComponent->hasComponent<VEPhysics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
+			auto& dynamics = m_aiComponent->getComponent<VEPhysics::MotionDynamics>();
+
+			VEPhysics::Force force{};
+			for (auto& weightedBehaviour : m_weightedBehaviours)
+			{
+				force += weightedBehaviour.behaviour->computeForce() * weightedBehaviour.weight;
+			}
+
+			dynamics.addForce(force);
+		}
+
+	private:
+		struct WeightedBehaviour
+		{
+			std::unique_ptr<SteeringBehaviour> behaviour;
+			float weight;
+		};
+
+		std::vector<WeightedBehaviour> m_weightedBehaviours;
+	};
+
 
 } // namespace VEAI

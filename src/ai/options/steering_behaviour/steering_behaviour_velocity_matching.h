@@ -11,21 +11,18 @@ namespace VEAI
 	class SteeringBehaviourVelocityMatching : public SteeringBehaviour
 	{
 	public:
-		void setEnitites(const std::vector<VEScene::Entity>& entities)
-		{
-			m_entities = entities;
-		}
-		
-	protected:
+		SteeringBehaviourVelocityMatching(AIComponent* aiComponent, const EntityGroupKnowledge& group)
+			: SteeringBehaviour(aiComponent), m_group(group) {}
+
 		virtual VEPhysics::Force computeForce() override
 		{
-			if (m_entities.empty())
-				return;
+			if (m_group.entities.empty())
+				return VEPhysics::Force{};
 
 			auto& thisTransform = m_aiComponent->getComponent<VEComponent::Transform>();
 
 			Vector3 averageVelocity{ 0.0f };
-			for (const auto& entity : m_entities)
+			for (const auto& entity : m_group.entities)
 			{
 				// TODO: check if entity is the same as this entity
 
@@ -36,14 +33,17 @@ namespace VEAI
 				auto distance = direction.length();
 
 				if (distance < m_activationRadius)
-					averageVelocity += dynamics.velocity;
+					averageVelocity += dynamics.linearVelocity();
 			}
 
-			return VEPhysics::Force{ averageVelocity / m_entities.size(), 0.0f};
+			VEPhysics::Force force{};
+			force.linear = averageVelocity / static_cast<float>(m_group.entities.size());
+			return force;
 		}
 
 	private:
-		std::vector<VEScene::Entity> m_entities;
+		EntityGroupKnowledge m_group;
+
 		float m_activationRadius = 1.0f;
 	};
 }

@@ -7,12 +7,14 @@ namespace VEAI
 	class SteeringBehaviourFlee : public SteeringBehaviour
 	{
 	public:
+		explicit SteeringBehaviourFlee(AIComponent* aiComponent)
+			: SteeringBehaviour(aiComponent) {}
+
 		void setTarget(const EntityKnowledge& target)
 		{
 			m_target = target;
 		}
 
-	protected:
 		virtual VEPhysics::Force computeForce() override
 		{
 			if (!m_target.has_value())
@@ -22,7 +24,7 @@ namespace VEAI
 			auto& playerTransform = m_target.value().entity.getComponent<VEComponent::Transform>();
 
 			VEPhysics::Force force{};
-			force.linear = glm::normalize(transform.location - playerTransform.location) * m_limits.maxLinearForce;
+			force.linear = MathLib::normalize(transform.location - playerTransform.location) * m_limits.maxLinearForce;
 			return force;
 		}
 

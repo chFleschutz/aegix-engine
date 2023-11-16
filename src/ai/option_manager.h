@@ -28,8 +28,7 @@ namespace VEAI
 		T& emplaceQueued(Args&&... initArgs)
 		{
 			static_assert(std::is_base_of_v<Option, T>, "T must be derived from Option");
-			auto& option = m_options.emplace_back(std::make_unique<T>());
-			option->initialize(std::forward<Args>(initArgs)...);
+			auto& option = m_options.emplace_back(std::make_unique<T>(std::forward<Args>(initArgs)...));
 
 			if (m_options.size() == 1)
 				m_options.front()->start();
@@ -47,8 +46,7 @@ namespace VEAI
 			if (!m_options.empty())
 				m_options.front()->pause();
 
-			auto& option = m_options.emplace_front(std::make_unique<T>());
-			option->initialize(std::forward<Args>(args)...);
+			auto& option = m_options.emplace_front(std::make_unique<T>(std::forward<Args>(args)...));
 
 			m_options.front()->start();
 			return static_cast<T&>(*option);
