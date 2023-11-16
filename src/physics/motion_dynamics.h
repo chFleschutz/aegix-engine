@@ -42,6 +42,10 @@ namespace VEPhysics
 			float maxAngularSpeed = 5.0f;
 		};
 
+		/// @brief Adds a force to the object.
+		/// @param force Directional and angular force to add.
+		void addForce(const Force& force);
+
 		/// @brief Adds a directional force to the object.
 		/// @param force Directional force to add.
 		void addLinearForce(const Vector3& force);

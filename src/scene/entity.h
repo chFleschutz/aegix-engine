@@ -18,6 +18,11 @@ namespace VEScene
 		Entity(entt::entity entityHandle, Scene* scene)
 			: m_entityHandle{ entityHandle }, m_scene{ scene } {}
 
+		bool operator==(const Entity& other) const
+		{
+			return m_entityHandle == other.m_entityHandle && m_scene == other.m_scene;
+		}
+
 		/// @brief Checks if the entity has all components of type T...
 		/// @tparam ...T Type of the components to check
 		/// @return True if the entity has all components of type T... otherwise false

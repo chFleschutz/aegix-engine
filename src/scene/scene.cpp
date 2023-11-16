@@ -19,8 +19,8 @@ namespace VEScene
 		camera.addComponent<VEComponent::Camera>();
 		camera.addComponent<VEScripting::KinematcMovementController>();
 		auto& cameraTransform = camera.getComponent<VEComponent::Transform>();
-		cameraTransform.location = { 0.0f, -15.0f, -15.0f };
-		cameraTransform.rotation = { -0.9f, 0.0f, 0.0f };
+		cameraTransform.location = { 0.0f, -40.0f, -30.0f };
+		cameraTransform.rotation = { -1.03f, 0.0f, 0.0f };
 	}
 
 	Entity Scene::camera()

@@ -35,8 +35,8 @@ namespace VEGraphics
 	{
 		assert(glm::abs(glm::length(direction) - std::numeric_limits<float>::epsilon()) > 0.0f);
 
-		const Vector3 w{glm::normalize(direction)};
-		const Vector3 u{glm::normalize(glm::cross(w, up))};
+		const Vector3 w{MathLib::normalize(direction)};
+		const Vector3 u{MathLib::normalize(glm::cross(w, up))};
 		const Vector3 v{glm::cross(w, u)};
 
 		m_viewMatrix = Matrix4{ 1.f };

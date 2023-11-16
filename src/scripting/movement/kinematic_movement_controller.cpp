@@ -29,7 +29,7 @@ namespace VEScripting
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 		{
-			transform.rotation += m_lookSpeed * glm::normalize(rotate) * deltaSeconds;
+			transform.rotation += m_lookSpeed * MathLib::normalize(rotate) * deltaSeconds;
 		}
 
 		// Mouse input rotation
@@ -75,7 +75,7 @@ namespace VEScripting
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 		{ 
-			transform.location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
+			transform.location += m_moveSpeed * MathLib::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement
@@ -89,7 +89,7 @@ namespace VEScripting
 
 			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 			{
-				transform.location += m_mouseSensitivity * glm::normalize(moveDir) * deltaSeconds;
+				transform.location += m_mouseSensitivity * MathLib::normalize(moveDir) * deltaSeconds;
 			}
 		}
 	}

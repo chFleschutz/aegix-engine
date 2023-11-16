@@ -47,6 +47,13 @@ namespace VEPhysics
 	}
 
 
+	void MotionDynamics::addForce(const Force& force)
+	{
+		// TODO: use force instead of linear and angular
+		addLinearForce(force.linear);
+		addAngularForce(force.angular);
+	}
+
 	void MotionDynamics::addLinearForce(const Vector3& force)
 	{
 		m_accumulatedLinearForce += force;
@@ -66,13 +73,13 @@ namespace VEPhysics
 	Vector3 MotionDynamics::moveDirection() const
 	{
 		assert(linearSpeed() > 0.0f && "Direction of zero-vector is undefined");
-		return glm::normalize(m_linearVelocity);
+		return MathLib::normalize(m_linearVelocity);
 	}
 
 	Vector3 MotionDynamics::angularDirection() const
 	{
 		assert(angularSpeed() > 0.0f && "Direction of zero-vector is undefined");
-		return glm::normalize(m_angularVelocity);
+		return MathLib::normalize(m_angularVelocity);
 	}
 
 	void MotionDynamics::update(float deltaSeconds)

@@ -42,6 +42,9 @@ namespace VEScripting
 			return m_entity.addComponent<T>(std::forward<Args>(args)...);
 		}
 
+		/// @brief Returns the entity
+		VEScene::Entity entity() const { return m_entity; }
+
 	private:
 		VEScene::Entity m_entity;
 
