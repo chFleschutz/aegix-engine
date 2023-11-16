@@ -1,4 +1,4 @@
-#include "ai_component.h"
+#include "test_ai_component.h"
 
 #include "ai/knowledge.h"
 #include "ai/options/steering_behaviour/steering_behaviour_arrive.h"
@@ -13,26 +13,21 @@
 
 namespace VEAI
 {
-    AIComponent::AIComponent(VEScene::Entity player, std::vector<VEScene::Entity> npcs)
-		: m_player(player),
+    TestAIComponent::TestAIComponent(VEScene::Entity player, std::vector<VEScene::Entity> npcs)
+        : m_player(player),
         m_npcs(npcs)
-	{
-        auto& input = Input::instance();
-        input.bind(this, &AIComponent::seekPlayer, Input::One);
-        input.bind(this, &AIComponent::fleeFromPlayer, Input::Two);
-        input.bind(this, &AIComponent::arriveAtPlayer, Input::Three);
-        input.bind(this, &AIComponent::flockingWander, Input::Four);
-        input.bind(this, &AIComponent::flockingSeek, Input::Five);
-        input.bind(this, &AIComponent::startPauseOption, Input::Space);
-        input.bind(this, &AIComponent::stopOption, Input::Escape);
-	}
-
-    void AIComponent::update(float deltaSeconds)
     {
-        m_optionManager.update(deltaSeconds);
+        auto& input = Input::instance();
+        input.bind(this, &TestAIComponent::seekPlayer, Input::One);
+        input.bind(this, &TestAIComponent::fleeFromPlayer, Input::Two);
+        input.bind(this, &TestAIComponent::arriveAtPlayer, Input::Three);
+        input.bind(this, &TestAIComponent::flockingWander, Input::Four);
+        input.bind(this, &TestAIComponent::flockingSeek, Input::Five);
+        input.bind(this, &TestAIComponent::startPauseOption, Input::Space);
+        input.bind(this, &TestAIComponent::stopOption, Input::Escape);
     }
 
-    void AIComponent::startPauseOption()
+    void TestAIComponent::startPauseOption()
     {
         auto activeOption = m_optionManager.activeOption();
         if (!activeOption)
@@ -50,14 +45,14 @@ namespace VEAI
         }
     }
 
-    void AIComponent::stopOption()
+    void TestAIComponent::stopOption()
     {
         m_optionManager.cancelActive();
 
         std::cout << getComponent<VEComponent::Name>().name << ": Stopping option" << std::endl;
     }
 
-    void AIComponent::seekPlayer()
+    void TestAIComponent::seekPlayer()
     {
         m_optionManager.cancelActive();
         auto& seekOption = m_optionManager.emplacePrioritized<SteeringBehaviourSeek>(this, EntityKnowledge{ m_player });
@@ -65,25 +60,25 @@ namespace VEAI
         std::cout << getComponent<VEComponent::Name>().name << ": Seeking player" << std::endl;
     }
 
-    void AIComponent::fleeFromPlayer()
+    void TestAIComponent::fleeFromPlayer()
     {
         m_optionManager.cancelActive();
-		auto& fleeOption = m_optionManager.emplacePrioritized<SteeringBehaviourFlee>(this);
-		fleeOption.setTarget(EntityKnowledge{ m_player });
+        auto& fleeOption = m_optionManager.emplacePrioritized<SteeringBehaviourFlee>(this);
+        fleeOption.setTarget(EntityKnowledge{ m_player });
 
         std::cout << getComponent<VEComponent::Name>().name << ": Fleeing from player" << std::endl;
     }
 
-    void AIComponent::arriveAtPlayer()
+    void TestAIComponent::arriveAtPlayer()
     {
         m_optionManager.cancelActive();
-		auto& arriveOption = m_optionManager.emplacePrioritized<SteeringBehaviourArrive>(this);
+        auto& arriveOption = m_optionManager.emplacePrioritized<SteeringBehaviourArrive>(this);
         arriveOption.setTarget(EntityKnowledge{ m_player });
 
         std::cout << getComponent<VEComponent::Name>().name << ": Arriving at player" << std::endl;
     }
 
-    void AIComponent::flockingWander()
+    void TestAIComponent::flockingWander()
     {
         m_optionManager.cancelActive();
 
@@ -94,7 +89,7 @@ namespace VEAI
         std::cout << getComponent<VEComponent::Name>().name << ": Flocking wander" << std::endl;
     }
 
-    void AIComponent::flockingSeek()
+    void TestAIComponent::flockingSeek()
     {
         m_optionManager.cancelActive();
         auto& blendOption = m_optionManager.emplacePrioritized<SteeringBehaviourBlend>(this);

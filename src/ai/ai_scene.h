@@ -1,4 +1,4 @@
-#include "ai/ai_component.h"
+#include "ai/test_ai_component.h"
 #include "physics/motion_dynamics.h"
 #include "scene/scene.h"
 #include "scene/entity.h"
@@ -47,7 +47,7 @@ public:
 			{
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
 				npc.addComponent<VEPhysics::MotionDynamics>();
-				npc.addComponent<VEAI::AIComponent>(player, npcs);
+				npc.addComponent<VEAI::TestAIComponent>(player, npcs);
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 			}
 		}
