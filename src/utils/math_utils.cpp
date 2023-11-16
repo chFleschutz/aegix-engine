@@ -1,5 +1,7 @@
 #include "math_utils.h"
 
+#include <glm/gtx/vector_angle.hpp>
+
 #include <iostream>
 
 // Overload the << operator for Vectors to make printing them easier
@@ -132,4 +134,15 @@ Vector3 MathLib::up(const Vector3& rotation)
 	const float sz = glm::sin(rotation.z);
 
 	return { -cz * sx * sy + cx * sz, -cx * cz - sx * sy * sz, -cy * sx };
+}
+
+Vector3 MathLib::normalize(const Vector3& vec)
+{
+	assert(vec.length() > 0.0f && "Can't normalize vector of length 0");
+	return glm::normalize(vec);
+}
+
+bool MathLib::inFOV(const Vector3& viewDirection, const Vector3& targetDirection, float fov)
+{
+	return glm::angle(viewDirection, targetDirection) < 0.5f * fov;
 }

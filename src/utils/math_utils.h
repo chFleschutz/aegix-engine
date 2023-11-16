@@ -44,7 +44,6 @@ public:
 	/// @return Returns x transformed by the tanh function between [0, 1]
 	static float tanh01(float x);
 
-
 	/// @brief Composes a transformation matrix from location, rotation and scale
 	/// @return Composed transformation matrix
 	static Matrix4 tranformationMatrix(const Vector3& location, const Vector3& rotation, const Vector3& scale);
@@ -76,4 +75,16 @@ public:
 	/// @param rotation Rotation in euler angles
 	/// @return Up direction of the rotation
 	static Vector3 up(const Vector3& rotation);
+
+	/// @brief Normalizes a vector
+	/// @param vec Non zero vector to normalize (length > 0)
+	/// @return Returns the normalized vector
+	static Vector3 normalize(const Vector3& vec);
+
+	/// @brief Checks if the target is in the field of view of the view direction
+	/// @param viewDirection Vector pointing in the direction of the view
+	/// @param targetDirection Vector pointing in the direction of the target
+	/// @param fov Field of view in radians
+	/// @return Returns true if the target is in the field of view otherwise false
+	static bool inFOV(const Vector3& viewDirection, const Vector3& targetDirection, float fov);
 };
