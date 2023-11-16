@@ -1,5 +1,11 @@
 #include "swarm_ai.h"
 
+#include "ai/options/steering_behaviour/steering_behaviour.h"
+#include "ai/options/steering_behaviour/steering_behaviour_arrive.h"
+#include "ai/options/steering_behaviour/steering_behaviour_flocking.h"
+#include "ai/options/steering_behaviour/steering_behaviour_wander.h"
+#include "utils/random.h"
+
 SwarmAIComponent::SwarmAIComponent(std::vector<VEScene::Entity> food, std::vector<VEScene::Entity> group)
 	: m_food(food), m_swarm(group)
 {
@@ -35,7 +41,9 @@ void SwarmAIComponent::wander()
 	wandering = true;
 
 	m_optionManager.cancelActive();
-	m_optionManager.emplaceQueued<VEAI::SteeringBehaviourWander>(this);
+	auto& blendOption = m_optionManager.emplacePrioritized<VEAI::SteeringBehaviourBlend>(this);
+	blendOption.add<VEAI::SteeringBehaviourWander>(1.0f, this);
+	blendOption.add<VEAI::SteeringBehaviourFlocking>(1.0f, this, VEAI::EntityGroupKnowledge{ m_swarm });
 }
 
 

@@ -24,7 +24,8 @@ namespace VEAI
 			Vector3 averageVelocity{ 0.0f };
 			for (const auto& entity : m_group.entities)
 			{
-				// TODO: check if entity is the same as this entity
+				if (entity == m_aiComponent->entity())
+					continue;
 
 				auto& otherTransform = entity.getComponent<VEComponent::Transform>();
 				auto& dynamics = entity.getComponent<VEPhysics::MotionDynamics>();

@@ -2,10 +2,6 @@
 
 #include "ai/ai_component.h"
 #include "ai/options/option.h"
-#include "ai/options/steering_behaviour/steering_behaviour_arrive.h"
-#include "ai/options/steering_behaviour/steering_behaviour_wander.h"
-#include "ai/knowledge.h"
-#include "utils/random.h"
 
 
 class EatFood;

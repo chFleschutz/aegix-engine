@@ -28,19 +28,19 @@ public:
 			plane.getComponent<VEComponent::Transform>().scale = Vector3{ worldSize / 10.0f };
 
 			// Food
-			int foodCount = 3;
+			int foodCount = 10;
 			std::vector<VEScene::Entity> food;
 			for (int i = 0; i < foodCount; i++)
 			{
-				float x = Random::uniformFloat(-worldSize / 2.0f, worldSize / 2.0f);
-				float z = Random::uniformFloat(-worldSize / 2.0f, worldSize / 2.0f);
+				float x = Random::normalFloatRange(-worldSize / 2.0f, worldSize / 2.0f);
+				float z = Random::normalFloatRange(-worldSize / 2.0f, worldSize / 2.0f);
 				auto foodEntity = createEntity("Food " + std::to_string(i), { x, 0.0f, z });
 				foodEntity.addComponent<VEComponent::Mesh>(teapotModel, Color::green());
 				food.emplace_back(foodEntity);
 			}
 
 			// NPCs at random locations
-			int npcCount = 20;
+			int npcCount = 50;
 			std::vector<VEScene::Entity> npcs;
 			for (int i = 0; i < npcCount; i++)
 			{
