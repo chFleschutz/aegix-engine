@@ -30,4 +30,9 @@ namespace VEAI
 		explicit EntityGroupKnowledge(std::vector<VEScene::Entity>& entities) : entities(entities) {}
 	};
 
+	struct PathKnowledge : public Knowledge
+	{
+		std::vector<Vector3> path;
+	};
+
 } // namespace VEAI

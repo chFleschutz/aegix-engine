@@ -15,7 +15,7 @@ public:
 
 	void initialize() override
 	{
-		{ 
+		{
 			const float worldSize = 50.0f;
 
 			// Load Models

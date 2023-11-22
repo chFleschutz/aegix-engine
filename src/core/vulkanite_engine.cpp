@@ -146,6 +146,9 @@ namespace Vulkanite
 
 	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime)
 	{
+		// FPS
+		//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - frameBeginTime) << std::endl;
+
 		if (MAX_FPS <= 0)
 			return;
 

@@ -20,6 +20,7 @@ namespace VEAI
         void arriveAtPlayer();
         void flockingWander();
         void flockingSeek();
+        void followPath();
 
     private:
         VEScene::Entity m_player;

@@ -2,13 +2,14 @@
 
 #include "ai/knowledge.h"
 #include "ai/options/steering_behaviour/steering_behaviour_arrive.h"
-#include "ai/options/steering_behaviour/steering_behaviour_flee.h"
-#include "ai/options/steering_behaviour/steering_behaviour_seek.h"
-#include "ai/options/steering_behaviour/steering_behaviour_wander.h"
-#include "ai/options/steering_behaviour/steering_behaviour_separation.h"
 #include "ai/options/steering_behaviour/steering_behaviour_cohesion.h"
-#include "ai/options/steering_behaviour/steering_behaviour_velocity_matching.h"
+#include "ai/options/steering_behaviour/steering_behaviour_flee.h"
 #include "ai/options/steering_behaviour/steering_behaviour_flocking.h"
+#include "ai/options/steering_behaviour/steering_behaviour_grappling_hooks.h"
+#include "ai/options/steering_behaviour/steering_behaviour_seek.h"
+#include "ai/options/steering_behaviour/steering_behaviour_separation.h"
+#include "ai/options/steering_behaviour/steering_behaviour_velocity_matching.h"
+#include "ai/options/steering_behaviour/steering_behaviour_wander.h"
 #include "core/input.h"
 
 namespace VEAI
@@ -23,6 +24,7 @@ namespace VEAI
         input.bind(this, &TestAIComponent::arriveAtPlayer, Input::Three);
         input.bind(this, &TestAIComponent::flockingWander, Input::Four);
         input.bind(this, &TestAIComponent::flockingSeek, Input::Five);
+        input.bind(this, &TestAIComponent::followPath, Input::Six);
         input.bind(this, &TestAIComponent::startPauseOption, Input::Space);
         input.bind(this, &TestAIComponent::stopOption, Input::Escape);
     }
@@ -97,6 +99,17 @@ namespace VEAI
         blendOption.add<SteeringBehaviourFlocking>(1.0f, this, EntityGroupKnowledge{ m_npcs });
 
         std::cout << getComponent<VEComponent::Name>().name << ": Flocking seek" << std::endl;
+    }
+
+    void TestAIComponent::followPath()
+    {
+        m_optionManager.cancelActive();
+        PathKnowledge path{};
+        path.path.emplace_back(Vector3{ 10.0f, 0.0f, 10.0f });
+        path.path.emplace_back(Vector3{ -10.0f, 0.0f, 10.0f });
+        path.path.emplace_back(Vector3{ -10.0f, 0.0f, -10.0f });
+        path.path.emplace_back(Vector3{ 10.0f, 0.0f, -10.0f });
+        m_optionManager.emplacePrioritized<SteeringBehaviourGrapplingHooks>(this, path);
     }
 
 } // namespace VEAI

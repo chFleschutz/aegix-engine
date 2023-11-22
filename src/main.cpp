@@ -10,7 +10,7 @@ auto main() -> int
 	try
 	{
 		Vulkanite::Engine engine{};
-		engine.loadScene<SwarmScene>();
+		engine.loadScene<AIScene>();
 		engine.run();
 	}
 	catch (const std::exception& e)
