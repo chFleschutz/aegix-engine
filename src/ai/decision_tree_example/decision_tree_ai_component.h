@@ -44,6 +44,7 @@ namespace VEAI
         DecisionTreeAiComponent(Blackboard& blackboard);
 
         void evalutate();
+        void updateTime(float delta);
         void toggleWar();
 
         void update(float delta) override;

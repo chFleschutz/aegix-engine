@@ -22,6 +22,17 @@ namespace VEAI
 		void update(float deltaSeconds);
 
 		/// @brief Pushes an option to the back of the queue
+		Option* emplaceQueued(std::unique_ptr<Option> option)
+		{
+			auto& op = m_options.emplace_back(std::move(option));
+
+			if (m_options.size() == 1)
+				m_options.front()->start();
+
+			return op.get();
+		}
+
+		/// @brief Pushes an option to the back of the queue
 		/// @param option The option to push
 		/// @note The option only starts after all other options have finished
 		template<typename T, typename... Args>
@@ -34,6 +45,17 @@ namespace VEAI
 				m_options.front()->start();
 
 			return static_cast<T&>(*option);
+		}
+
+		Option* emplacePrioritized(std::unique_ptr<Option> option)
+		{
+			if (!m_options.empty())
+				m_options.front()->pause();
+
+			auto& op = m_options.emplace_front(std::move(option));
+
+			m_options.front()->start();
+			return op.get();
 		}
 
 		/// @brief Pushes an option to the front of the queue

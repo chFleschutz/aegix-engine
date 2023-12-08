@@ -31,7 +31,7 @@ namespace VEAI
 				auto& dynamics = entity.getComponent<VEPhysics::MotionDynamics>();
 
 				auto direction = otherTransform.location - thisTransform.location;
-				auto distance = direction.length();
+				auto distance = glm::length(direction);
 
 				if (distance < m_activationRadius)
 					averageVelocity += dynamics.linearVelocity();

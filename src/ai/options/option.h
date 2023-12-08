@@ -9,8 +9,7 @@ namespace VEAI
     class Option
     {
     public:
-        Option(AIComponent* aiComponent) 
-            : m_aiComponent(aiComponent) {}
+        Option(AIComponent* aiComponent) : m_aiComponent(aiComponent) {}
         virtual ~Option() = default;    
 
         /// @brief Initializes the option with the AIComponent, duration and cooldown
@@ -53,7 +52,7 @@ namespace VEAI
         /// @brief Function is called once per frame only if the option is active
         /// @param deltaSeconds Seconds between frames
         /// @note Override this function to implement custom behaviour
-        virtual void updateOption(float deltaSeconds) = 0;
+        virtual void updateOption(float deltaSeconds) {};
 
         AIComponent* m_aiComponent = nullptr;
 
