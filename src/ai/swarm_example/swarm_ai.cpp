@@ -6,9 +6,12 @@
 #include "ai/options/steering_behaviour/steering_behaviour_wander.h"
 #include "utils/random.h"
 
-SwarmAIComponent::SwarmAIComponent(std::vector<VEScene::Entity> food, std::vector<VEScene::Entity> group)
-	: m_food(food), m_swarm(group)
+SwarmAIComponent::SwarmAIComponent(VEAI::Blackboard& blackboard) : VEAI::AIComponent(blackboard)
 {
+	m_food = m_blackboard.get<VEAI::EntityGroupKnowledge>("food");
+	m_swarm = m_blackboard.get<VEAI::EntityGroupKnowledge>("swarm");
+	assert(m_food && m_swarm && "Food and Swarm have not been set (check blackboard)");
+
 	m_energy = Random::normalFloatRange(0.0f, m_maxEnergy);
 	wander();
 }
@@ -31,7 +34,7 @@ void SwarmAIComponent::eatFood()
 	wandering = false;
 
 	m_optionManager.cancelActive();
-	auto food = m_food[Random::uniformInt(0, m_food.size() - 1)];
+	auto& food = m_food->entities[Random::uniformInt(0, static_cast<int>(m_food->entities.size()) - 1)];
 	m_optionManager.emplaceQueued<VEAI::SteeringBehaviourArrive>(this, VEAI::EntityKnowledge(food));
 	m_optionManager.emplaceQueued<EatFood>(this);
 }
@@ -43,7 +46,7 @@ void SwarmAIComponent::wander()
 	m_optionManager.cancelActive();
 	auto& blendOption = m_optionManager.emplacePrioritized<VEAI::SteeringBehaviourBlend>(this);
 	blendOption.add<VEAI::SteeringBehaviourWander>(1.0f, this);
-	blendOption.add<VEAI::SteeringBehaviourFlocking>(1.0f, this, VEAI::EntityGroupKnowledge{ m_swarm });
+	blendOption.add<VEAI::SteeringBehaviourFlocking>(1.0f, this, VEAI::EntityGroupKnowledge{ m_swarm->entities });
 }
 
 

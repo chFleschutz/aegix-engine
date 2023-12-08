@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ai/knowledge.h"
 #include "ai/ai_component.h"
 #include "ai/option_manager.h"
 #include "scene/entity.h"
@@ -10,7 +11,7 @@ namespace VEAI
     class TestAIComponent : public AIComponent
     {
     public:
-        TestAIComponent(VEScene::Entity player, std::vector<VEScene::Entity> npcs);
+        TestAIComponent(Blackboard& blackboardBloard);
 
         // Key callbacks
         void startPauseOption();
@@ -23,8 +24,8 @@ namespace VEAI
         void followPath();
 
     private:
-        VEScene::Entity m_player;
-        std::vector<VEScene::Entity> m_npcs; // Referenced by EntityGroupKnowledge
+        EntityKnowledge* m_player = nullptr;
+        EntityGroupKnowledge* m_npcs = nullptr; 
     };
 
 } // namespace VEAI

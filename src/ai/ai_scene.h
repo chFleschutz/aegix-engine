@@ -34,6 +34,9 @@ public:
 			player.addComponent<VEScripting::DynamicMovementController>();
 			player.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 
+			auto blackboardEntity = createEntity("Blackboard");
+			auto& blackboard = blackboardEntity.addComponent<VEAI::Blackboard>();
+
 			// NPCs at random locations
 			int npcCount = 10; 
 			std::vector<VEScene::Entity> npcs;
@@ -47,9 +50,13 @@ public:
 			{
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
 				npc.addComponent<VEPhysics::MotionDynamics>();
-				npc.addComponent<VEAI::TestAIComponent>(player, npcs);
+				npc.addComponent<VEAI::TestAIComponent>(blackboard);
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 			}
+
+			// Fill blackboard
+			blackboard.set<VEAI::EntityKnowledge>("Player", player);
+			blackboard.set<VEAI::EntityGroupKnowledge>("NPCs", npcs);
 		}
 		{ 
 			// Lights

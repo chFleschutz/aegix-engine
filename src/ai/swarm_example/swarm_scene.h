@@ -39,6 +39,9 @@ public:
 				food.emplace_back(foodEntity);
 			}
 
+			auto blackBoardEntity = createEntity("Blackboard");
+			auto& blackboard = blackBoardEntity.addComponent<VEAI::Blackboard>();
+
 			// NPCs at random locations
 			int npcCount = 50;
 			std::vector<VEScene::Entity> npcs;
@@ -53,9 +56,13 @@ public:
 			{
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
 				npc.addComponent<VEPhysics::MotionDynamics>();
-				npc.addComponent<SwarmAIComponent>(food, npcs);
+				npc.addComponent<SwarmAIComponent>(blackboard);
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 			}
+
+			// Fill blackboard
+			blackboard.set<VEAI::EntityGroupKnowledge>("NPCs", npcs);
+			blackboard.set<VEAI::EntityGroupKnowledge>("Food", food);
 		}
 		{
 			// Lights

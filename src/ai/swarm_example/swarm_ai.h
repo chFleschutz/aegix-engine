@@ -2,14 +2,14 @@
 
 #include "ai/ai_component.h"
 #include "ai/options/option.h"
-
+#include "ai/knowledge.h"
 
 class EatFood;
 
 class SwarmAIComponent : public VEAI::AIComponent
 {
 public:
-	SwarmAIComponent(std::vector<VEScene::Entity> food, std::vector<VEScene::Entity> group);
+	SwarmAIComponent(VEAI::Blackboard& blackboard);
 
 	void addEnergy(float energy) { m_energy += energy; }
 	float energy() const { return m_energy; }
@@ -27,8 +27,8 @@ private:
 
 	bool wandering = true;
 
-	std::vector<VEScene::Entity> m_food;
-	std::vector<VEScene::Entity> m_swarm;
+	VEAI::EntityGroupKnowledge* m_food = nullptr;
+	VEAI::EntityGroupKnowledge* m_swarm = nullptr;
 };
 
 
