@@ -2,77 +2,113 @@
 
 #include "ai/considerations/consideration.h"
 #include "ai/options/option.h"
+#include "utils/factory.h"
 
 #include <memory>
-#include <type_traits>
 
 namespace VEAI
 {
-	class DecisionTreeNode
+	class TreeNode
 	{
 	public:
-		DecisionTreeNode() = default;
-		~DecisionTreeNode() = default;
+		virtual TreeNode* next() const { return nullptr; }
+		virtual std::unique_ptr<Option> createOption() const { return nullptr; }
 
-		template<typename T, typename... Args>
-		DecisionTreeNode* addTrue(Args&&... args)
+	protected:
+		std::unique_ptr<TreeNode> m_true;
+		std::unique_ptr<TreeNode> m_false;
+
+		friend class DecisionTree;
+	};
+
+	template <typename T>
+	class DecisionNode : public TreeNode
+	{
+	public:
+		template <typename... Args>
+		DecisionNode(Args&&... args) : m_decision(std::make_unique<T>(std::forward<Args>(args)...)) {}
+
+		virtual TreeNode* next() const override
 		{
-			return DecisionTreeNode::addNode<T>(m_true, std::forward<Args>(args)...);
+			return m_decision->evaluate() ? m_true.get() : m_false.get();
 		}
-
-		template<typename T, typename... Args>
-		DecisionTreeNode* addFalse(Args&&... args)
-		{
-			return DecisionTreeNode::addNode<T>(m_false, std::forward<Args>(args)...);
-		}
-
-		template<typename T, typename... Args>
-		static std::enable_if_t<std::is_base_of_v<Option, T>, DecisionTreeNode*>
-		addNode(std::unique_ptr<DecisionTreeNode>& node, Args&&... args)
-		{
-			node = std::make_unique<DecisionTreeNode>();
-			node->m_option = std::make_unique<T>(std::forward<Args>(args)...);
-			return node.get();
-		}
-
-		template<typename T, typename... Args>
-		static std::enable_if_t<std::is_base_of_v<Consideration, T>, DecisionTreeNode*>
-		addNode(std::unique_ptr<DecisionTreeNode>& node, Args&&... args)
-		{
-			node = std::make_unique<DecisionTreeNode>();
-			node->m_consideration = std::make_unique<T>(std::forward<Args>(args)...);
-			return node.get();
-		}
-
-		DecisionTreeNode* next() const;
-
-		Option* option() const { return m_option.get(); }
-		Consideration* consideration() const { return m_consideration.get(); }
 
 	private:
-		std::unique_ptr<DecisionTreeNode> m_true;
-		std::unique_ptr<DecisionTreeNode> m_false;
+		std::unique_ptr<T> m_decision;
+	};
 
-		std::unique_ptr<Option> m_option;
-		std::unique_ptr<Consideration> m_consideration;
+	template <typename T>
+	class OptionNode : public TreeNode
+	{
+	public:
+		template <typename... Args>
+		OptionNode(Args&&... args) : factory(std::forward<Args>(args)...) {}
+
+		virtual std::unique_ptr<Option> createOption() const override
+		{
+			return factory.create();
+		}
+
+	private:
+		Factory<T> factory;
 	};
 
 	class DecisionTree
 	{
 	public:
 		DecisionTree() = default;
-		~DecisionTree() = default;
 
-		template<typename T, typename... Args>
-		DecisionTreeNode* addRoot(Args&&... args)
+		template <typename T, typename... Args>
+		TreeNode* addRoot(Args&&... args)
 		{
-			return DecisionTreeNode::addNode<T>(m_root, std::forward<Args>(args)...);
+			return addNode<T>(m_root, std::forward<Args>(args)...);
 		}
 
-		Option* evaluate() const;
+		template <typename T, typename... Args>
+		static TreeNode* addTrue(TreeNode* node, Args&&... args)
+		{
+			return addNode<T>(node->m_true, std::forward<Args>(args)...);
+		}
+
+		template <typename T, typename... Args>
+		static TreeNode* addFalse(TreeNode* node, Args&&... args)
+		{
+			return addNode<T>(node->m_false, std::forward<Args>(args)...);
+		}
+
+		std::unique_ptr<Option> evaluate() const 
+		{
+			auto node = m_root.get();
+			auto next = node;
+
+			while (next)
+			{
+				node = next;
+				next = node->next();
+			}
+
+			if (node)
+				return node->createOption();
+
+			return nullptr;
+		}
 
 	private:
-		std::unique_ptr<DecisionTreeNode> m_root;
+		template <typename T, typename... Args>
+		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<VEAI::Option, T>, TreeNode*>
+		{
+			node = std::make_unique<OptionNode<T>>(std::forward<Args>(args)...);
+			return node.get();
+		}
+
+		template <typename T, typename... Args>
+		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<VEAI::Consideration, T>, TreeNode*>
+		{
+			node = std::make_unique<DecisionNode<T>>(std::forward<Args>(args)...);
+			return node.get();
+		}
+
+		std::unique_ptr<TreeNode> m_root;
 	};
 
 } // namespace VEAI

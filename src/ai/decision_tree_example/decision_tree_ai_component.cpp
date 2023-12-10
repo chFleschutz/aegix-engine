@@ -1,49 +1,17 @@
 #include "decision_tree_ai_component.h"
 
+#include "ai/decision_tree_example/example_options.h"
+#include "ai/considerations/consideration.h"
 #include "core/input.h"
+
 
 namespace VEAI
 {
-    void SleepOption::start()
-    {
-        Option::start();
-        std::cout << "Sleeping... zZz ZzZ zZz" << std::endl;
-    }
-
-    void PatrolOption::start()
-    {
-        Option::start();
-        std::cout << "Patrolling..." << std::endl;
-    }
-
-    void GreetOption::start()
-    {
-        Option::start();
-        std::cout << "Greetings my friend" << std::endl;
-    }
-
-    void MurderOption::start()
-    {
-        Option::start();
-        std::cout << "Murdering... Muhahahaaa" << std::endl;
-    }
-
     DecisionTreeAiComponent::DecisionTreeAiComponent(Blackboard& blackboard)
-        : AIComponent(blackboard)
+        : AIComponent(blackboard), m_decisionTree(blackboard)
     {
         auto& input = Input::instance();
         input.bind(this, &DecisionTreeAiComponent::toggleWar, Input::One);
-
-        auto playerNearNode = m_decisionTree.addRoot<EntityDistanceConsideration>(m_blackboard, "Player", "NPC", 10.0f);
-
-        auto timeNode = playerNearNode->addFalse<ThresholdConsideration>(m_blackboard, "Time", 0.5f);
-        auto atWarNode = playerNearNode->addTrue<BoolConsideration>(m_blackboard, "AtWar");
-
-        timeNode->addFalse<SleepOption>(this);
-        timeNode->addTrue<PatrolOption>(this);
-
-        atWarNode->addFalse<GreetOption>(this);
-        atWarNode->addTrue<MurderOption>(this);
     }
 
     void DecisionTreeAiComponent::evalutate()
@@ -53,7 +21,7 @@ namespace VEAI
         if (option == nullptr)
             return;
 
-        option->start();
+        m_optionManager.emplacePrioritized(std::move(option));
     }
 
     void DecisionTreeAiComponent::updateTime(float delta)
@@ -78,9 +46,7 @@ namespace VEAI
     void DecisionTreeAiComponent::update(float delta)
     {
         updateTime(delta);
-
         evalutate();
     }
-
 
 } // namespace VEAI

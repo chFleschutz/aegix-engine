@@ -1,43 +1,10 @@
 #pragma once
 
 #include "ai/ai_component.h"
-#include "ai/blackboard.h"
-#include "ai/considerations/consideration.h"
-#include "ai/options/option.h"
-#include "ai/reasoners/decision_tree.h"
-#include "scene/entity.h"
-#include "scripting/script_base.h"
+#include "ai/decision_tree_example/my_decision_tree.h"
 
 namespace VEAI
 {
-    class SleepOption : public Option
-	{
-    public:
-        SleepOption(AIComponent* ai) : Option(ai) {}
-        void start() override;
-	};
-    
-    class PatrolOption : public Option
-    {
-    public:
-        PatrolOption(AIComponent* ai) : Option(ai) {}
-        void start() override;
-    };
-    
-    class GreetOption : public Option
-    {
-    public:
-        GreetOption(AIComponent* ai) : Option(ai) {}
-        void start() override;
-    };
-
-    class MurderOption : public Option
-	{
-    public:
-        MurderOption(AIComponent* ai) : Option(ai) {}
-        void start() override;
-	};
-
     class DecisionTreeAiComponent : public AIComponent
     {
     public:
@@ -50,7 +17,7 @@ namespace VEAI
         void update(float delta) override;
 
     private:
-        DecisionTree m_decisionTree;
+        MyDecisionTree m_decisionTree;
     };
 
 } // namespace VEAI
