@@ -1,11 +1,14 @@
 #pragma once
 
+#define ENGINE_DIR PROJECT_DIR "/"
+#define SHADER_DIR ENGINE_DIR "shaders/"
+#define MODELS_DIR ENGINE_DIR "models/"
+#define TEXTURES_DIR ENGINE_DIR "textures/"
+
 #include "window.h"
 
 #include <string>
 #include <vector>
-
-#define ENGINE_DIR "../../"
 
 namespace VEGraphics
 {

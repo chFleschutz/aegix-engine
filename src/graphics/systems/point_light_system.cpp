@@ -108,10 +108,13 @@ namespace VEGraphics
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
+		std::string vertShaderPath = SHADER_DIR "point_light.vert.spv";
+		std::string fragShaderPath = SHADER_DIR "point_light.frag.spv";
+
 		mPipeline = std::make_unique<Pipeline>(
 			m_device,
-			"shaders/point_light.vert.spv",
-			"shaders/point_light.frag.spv",
+			vertShaderPath,
+			fragShaderPath,
 			pipelineConfig);
 	}
 

@@ -92,10 +92,13 @@ namespace VEGraphics
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = mPipelineLayout;
 
+		std::string vertShaderPath = SHADER_DIR "simple_shader.vert.spv";
+		std::string fragShaderPath = SHADER_DIR "simple_shader.frag.spv";
+
 		mPipeline = std::make_unique<Pipeline>(
 			m_device,
-			"shaders/simple_shader.vert.spv",
-			"shaders/simple_shader.frag.spv",
+			vertShaderPath,
+			fragShaderPath,
 			pipelineConfig);
 	}
 
