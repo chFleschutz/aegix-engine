@@ -1,71 +1,82 @@
 #pragma once
 
-#include "core/math_utilities.h"
-#include "renderer/model.h"
-#include "renderer/camera.h"
+#include "graphics/camera.h"
+#include "graphics/model.h"
+#include "utils/color.h"
+#include "utils/math_utils.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
-namespace vre
+namespace VEScripting
+{
+	class ScriptBase;
+}
+
+namespace VEComponent
 {
 	/// @brief Gives a name to the entity
-	struct NameComponent
+	struct Name
 	{
 		std::string name;
 
-		NameComponent() = default;
-		NameComponent(const NameComponent&) = default;
-		NameComponent(const std::string& entityName)
+		Name() = default;
+		Name(const Name&) = default;
+		Name(const std::string& entityName)
 			: name(entityName) {}
 	};
 
 	/// @brief Stores the transformation of the entity
-	struct TransformComponent
+	struct Transform
 	{
-		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+		Vector3 location = { 0.0f, 0.0f, 0.0f };
+		Vector3 rotation = { 0.0f, 0.0f, 0.0f };
+		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& entityLocation)
+		Transform() = default;
+		Transform(const Transform&) = default;
+		Transform(const Vector3& entityLocation)
 			: location(entityLocation) {}
 
-		glm::mat4 mat4();
-		glm::mat3 normalMatrix();
+		Vector3 forward() const { return MathLib::forward(rotation); }
+		Vector3 right() const { return MathLib::right(rotation);  }
+		Vector3 up() const { return MathLib::up(rotation); }
 	};
 
 	/// @brief Holds a pointer to a model
-	struct MeshComponent
+	struct Mesh
 	{
-		std::shared_ptr<Model> model;
-		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		std::shared_ptr<VEGraphics::Model> model;
+		Color color;
 
-		MeshComponent() = default;
-		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(std::shared_ptr<Model> entityModel, glm::vec3 baseColor = glm::vec3{ 1.0f })
+		Mesh() = default;
+		Mesh(const Mesh&) = default;
+		Mesh(std::shared_ptr<VEGraphics::Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
 	};
 
 	/// @brief Creates a light 
-	struct PointLightComponent
+	struct PointLight
 	{
-		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		Color color;
 		float intensity = 0.2f;
+
+		PointLight() = default;
+		PointLight(const PointLight&) = default;
+		PointLight(const Color& lightColor, float lightIntensity = 0.2f)
+			: color(lightColor), intensity(lightIntensity) {}
 	};
 
 	/// @brief Holds a camera to view the scene
-	struct CameraComponent
+	struct Camera
 	{
-		Camera camera{};
+		VEGraphics::Camera camera{};
 	};
 
-	class ScriptComponentBase;
 	/// @brief Stores a custom script
-	struct ScriptComponent
+	struct Script
 	{
-		ScriptComponentBase* script = nullptr;
+		std::unique_ptr<VEScripting::ScriptBase> script;
 	};
 
 } // namespace vre

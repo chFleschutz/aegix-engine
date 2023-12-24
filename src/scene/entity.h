@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-namespace vre
+namespace VEScene
 {
 	/// @brief An entity represents any object in a scene
 	/// @note This class is ment to be passed by value since its just an id
@@ -18,32 +18,16 @@ namespace vre
 		Entity(entt::entity entityHandle, Scene* scene)
 			: m_entityHandle{ entityHandle }, m_scene{ scene } {}
 
-		/// @brief Adds a component of type T to the entity
-		/// @tparam T Type of the component to add
-		/// @param ...args Arguments for the constructor of T
-		/// @return A refrence to the new component
-		/// @note When adding a custom script ScriptComponent is added as its container
-		template<typename T, typename... Args>
-		T& addComponent(Args&&... args)
+		bool operator==(const Entity& other) const
 		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			return m_entityHandle == other.m_entityHandle && m_scene == other.m_scene;
 		}
 
-		template<typename T, typename... Args>
-		ScriptComponent& addScript(Args&&... args)
-		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& script = m_scene->m_registry.emplace<ScriptComponent>(m_entityHandle);
-			script.script = new T(std::forward<Args>(args)...);
-			return script;
-		}
-
-		/// @brief Checks if the entity has a component of type T
-		/// @tparam ...T Type of the component
-		/// @return True if the entity has a component of type T otherwise false
+		/// @brief Checks if the entity has all components of type T...
+		/// @tparam ...T Type of the components to check
+		/// @return True if the entity has all components of type T... otherwise false
 		template<typename... T>
-		bool hasComponent()
+		bool hasComponent() const
 		{
 			return m_scene->m_registry.all_of<T...>(m_entityHandle);
 		}
@@ -52,10 +36,33 @@ namespace vre
 		/// @tparam T Type of the component
 		/// @return A reference to the component 
 		template<typename T>
-		T& getComponent()
+		T& getComponent() const
 		{
 			assert(hasComponent<T>() && "Entity does not have the component");
 			return m_scene->m_registry.get<T>(m_entityHandle);
+		}
+
+		/// @brief Adds a component of type T to the entity
+		/// @tparam T Type of the component to add
+		/// @param ...args Arguments for the constructor of T
+		/// @return A refrence to the new component
+		/// @note When adding a custom script ScriptComponent is added as its container
+		template<typename T, typename... Args>
+		auto addComponent(Args&&... args) -> typename std::enable_if<!std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+		}
+
+		/// @brief Adds a script derived from VEScripting::ScriptBase to the entity
+		template<typename T, typename... Args>
+		auto addComponent(Args&&... args) -> typename std::enable_if<std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			auto& script = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			script.m_entity = *this;
+			m_scene->addScript(&script);
+			return script;
 		}
 
 	private:
@@ -63,4 +70,4 @@ namespace vre
 		Scene* m_scene = nullptr;
 	};
 
-} // namespace vre
+} // namespace VEScene

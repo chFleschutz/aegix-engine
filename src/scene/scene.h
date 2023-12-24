@@ -1,13 +1,19 @@
 #pragma once
 
-#include "renderer/device.h"
-#include "renderer/model.h"
+#include "graphics/device.h"
+#include "graphics/model.h"
+#include "scripting/script_manager.h"
 
 #include <entt/entt.hpp>
 
 #include <filesystem>
 
-namespace vre
+namespace VEScripting
+{
+	class ScriptBase;
+}
+
+namespace VEScene
 {
 	class Entity;
 
@@ -18,7 +24,7 @@ namespace vre
 	{
 	public:
 		// Todo: remove device parameter
-		Scene(VulkanDevice& device); 
+		Scene(VEGraphics::VulkanDevice& device);
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -36,29 +42,33 @@ namespace vre
 		/// @brief Returns the camera
 		Entity camera();
 
-		/// @brief Initialized script components and calls the begin() function
-		void runtimeBegin();
+		/// @brief Adds tracking for a script component to call its virtual functions
+		void addScript(VEScripting::ScriptBase* script) { m_scriptManager.addScript(script); }
+
 		/// @brief Calls the update function on all script components
-		void update(float deltaSeconds);
+		void update(float deltaSeconds) { m_scriptManager.update(deltaSeconds); }
+
 		/// @brief Calls the end function on all script components
-		void runtimeEnd();
+		void runtimeEnd() { m_scriptManager.runtimeEnd(); }
 
 	protected:
 		/// @brief Loads a model frome the given path
 		/// @param modelPath Path to the model 
 		/// @return A shared pointer with the loaded model
 		/// @note The shared pointer can be used multiple times
-		std::shared_ptr<Model> loadModel(const std::filesystem::path& modelPath);
+		std::shared_ptr<VEGraphics::Model> loadModel(const std::filesystem::path& modelPath);
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
-		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
+		Entity createEntity(const std::string& name = std::string(), const Vector3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
-		VulkanDevice& m_device;
+		VEGraphics::VulkanDevice& m_device;
 		entt::registry m_registry;
+
+		VEScripting::ScriptManager m_scriptManager;
 
 		friend class Entity;
 	};
 
-} // namespace vre
+} // namespace VEScene
