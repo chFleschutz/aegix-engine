@@ -114,10 +114,10 @@ It's recommended to use a try-catch block because exceptions are used in some ca
 
 ### Custom Scripts:
 
-1. Create a subclass of `vre::ScriptComponentBase`
+1. Create a subclass of `vre::ScriptBase`
 
    ```cpp
-   #include "scene/script_component_base.h"
+   #include "scripting/script_base.h"
    
    class ExampleScript : public vre::ScriptComponentBase
    {
@@ -136,7 +136,7 @@ It's recommended to use a try-catch block because exceptions are used in some ca
 4. Add the script to an entity in your `Scene::initialize` method
 
    ```cpp
-    myEntity.addScript<ExampleScript>();
+    myEntity.addComponent<ExampleScript>();
    ```
 
 View [default_scene.h](src/scene/default_scene.h) for an example
