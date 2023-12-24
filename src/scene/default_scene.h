@@ -1,9 +1,9 @@
 #pragma once
 
 #include "scene/components.h"
-#include "scene/script_component_base.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
+#include "scripting/script_base.h"
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
@@ -30,18 +30,18 @@ public:
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<VEComponent::Mesh>(teapotModel, Color::red());
-			teapot.addScript<Rotator>();
+			teapot.addComponent<Rotator>();
 			
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
 			plane.addComponent<VEComponent::Mesh>(planeModel, Color::white());
 		}
 		{ // Lights
-			auto light1 = createEntity("Light 1", { -1.0f, -1.0f, -1.0f });
-			light1.addComponent<VEComponent::PointLight>();
+			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });
+			light1.addComponent<VEComponent::PointLight>(Color::white(), 10.0f);
 
-			auto light2 = createEntity("Light 2", { 0.0f, -1.0f, -1.0f });
-			light2.addComponent<VEComponent::PointLight>();
+			auto light2 = createEntity("Light 2", { 0.0f, -5.0f, 5.0f });
+			light2.addComponent<VEComponent::PointLight>(Color::white(), 10.0f);
 		}
 	}
 };
