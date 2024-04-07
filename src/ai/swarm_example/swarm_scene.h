@@ -49,20 +49,17 @@ public:
 			{
 				float x = Random::uniformFloat(-worldSize / 2.0f, worldSize / 2.0f);
 				float z = Random::uniformFloat(-worldSize / 2.0f, worldSize / 2.0f);
-				npcs.emplace_back(createEntity("NPC " + std::to_string(i), { x, 0.0f, z }));
-			}
-
-			for (auto& npc : npcs)
-			{
+				auto npc = createEntity("NPC " + std::to_string(i), { x, 0.0f, z });
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
 				npc.addComponent<VEPhysics::MotionDynamics>();
 				npc.addComponent<SwarmAIComponent>(blackboard);
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+				npcs.emplace_back(npc);
 			}
 
 			// Fill blackboard
-			blackboard.set<VEAI::EntityGroupKnowledge>("NPCs", npcs);
-			blackboard.set<VEAI::EntityGroupKnowledge>("Food", food);
+			blackboard.set<VEAI::EntityGroupKnowledge>("swarm", npcs);
+			blackboard.set<VEAI::EntityGroupKnowledge>("food", food);
 		}
 		{
 			// Lights

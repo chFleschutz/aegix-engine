@@ -8,11 +8,17 @@
 
 SwarmAIComponent::SwarmAIComponent(VEAI::Blackboard& blackboard) : VEAI::AIComponent(blackboard)
 {
+	m_energy = Random::normalFloatRange(0.0f, m_maxEnergy);
+}
+
+void SwarmAIComponent::begin()
+{
 	m_food = m_blackboard.get<VEAI::EntityGroupKnowledge>("food");
 	m_swarm = m_blackboard.get<VEAI::EntityGroupKnowledge>("swarm");
-	assert(m_food && m_swarm && "Food and Swarm have not been set (check blackboard)");
 
-	m_energy = Random::normalFloatRange(0.0f, m_maxEnergy);
+	assert(m_food && "Food is not set correctly (check blackboard)");
+	assert(m_swarm && "Swarm is not set correctly (check blackboard)");
+
 	wander();
 }
 
@@ -46,7 +52,7 @@ void SwarmAIComponent::wander()
 	m_optionManager.cancelActive();
 	auto& blendOption = m_optionManager.emplacePrioritized<VEAI::SteeringBehaviourBlend>(this);
 	blendOption.add<VEAI::SteeringBehaviourWander>(1.0f, this);
-	blendOption.add<VEAI::SteeringBehaviourFlocking>(1.0f, this, VEAI::EntityGroupKnowledge{ m_swarm->entities });
+	blendOption.add<VEAI::SteeringBehaviourFlocking>(1.0f, this, *m_swarm);
 }
 
 

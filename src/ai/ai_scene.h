@@ -38,20 +38,17 @@ public:
 			auto& blackboard = blackboardEntity.addComponent<VEAI::Blackboard>();
 
 			// NPCs at random locations
-			int npcCount = 10; 
+			int npcCount = 1; 
 			std::vector<VEScene::Entity> npcs;
 			for (int i = 0; i < npcCount; i++)
 			{
 				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
-				npcs.emplace_back(createEntity("NPC " + std::to_string(i), randomLocation));
-			}
-
-			for (auto& npc : npcs)
-			{
+				auto npc = createEntity("NPC " + std::to_string(i), randomLocation);
 				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
 				npc.addComponent<VEPhysics::MotionDynamics>();
 				npc.addComponent<VEAI::TestAIComponent>(blackboard);
 				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+				npcs.emplace_back(npc);
 			}
 
 			// Fill blackboard
