@@ -13,6 +13,8 @@ namespace VEAI
     public:
         TestAIComponent(Blackboard& blackboardBloard);
 
+        void begin() override;
+
         // Key callbacks
         void startPauseOption();
         void stopOption();

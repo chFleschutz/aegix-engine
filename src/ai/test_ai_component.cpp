@@ -16,12 +16,6 @@ namespace VEAI
 {
     TestAIComponent::TestAIComponent(Blackboard& blackboard) : AIComponent(blackboard)
     {
-        m_player = m_blackboard.get<EntityKnowledge>("Player");
-        m_npcs = m_blackboard.get<EntityGroupKnowledge>("NPCs");
-
-        assert(m_player && "Player is not set correctly (check blackboard)");
-        assert(m_npcs && "NPCs are not set correctly (check blackboard)");
-
         auto& input = Input::instance();
         input.bind(this, &TestAIComponent::seekPlayer, Input::One);
         input.bind(this, &TestAIComponent::fleeFromPlayer, Input::Two);
@@ -31,6 +25,15 @@ namespace VEAI
         input.bind(this, &TestAIComponent::followPath, Input::Six);
         input.bind(this, &TestAIComponent::startPauseOption, Input::Space);
         input.bind(this, &TestAIComponent::stopOption, Input::Escape);
+    }
+
+    void TestAIComponent::begin()
+    {
+        m_player = m_blackboard.get<EntityKnowledge>("Player");
+        m_npcs = m_blackboard.get<EntityGroupKnowledge>("NPCs");
+
+        assert(m_player && "Player is not set correctly (check blackboard)");
+        assert(m_npcs && "NPCs are not set correctly (check blackboard)");
     }
 
     void TestAIComponent::startPauseOption()
@@ -90,7 +93,7 @@ namespace VEAI
 
         auto& blendOption = m_optionManager.emplacePrioritized<SteeringBehaviourBlend>(this);
         blendOption.add<SteeringBehaviourWander>(1.0f, this);
-        blendOption.add<SteeringBehaviourFlocking>(1.0f, this, EntityGroupKnowledge{ *m_npcs });
+		blendOption.add<SteeringBehaviourFlocking>(1.0f, this, *m_npcs);
 
         std::cout << getComponent<VEComponent::Name>().name << ": Flocking wander" << std::endl;
     }
@@ -99,8 +102,8 @@ namespace VEAI
     {
         m_optionManager.cancelActive();
         auto& blendOption = m_optionManager.emplacePrioritized<SteeringBehaviourBlend>(this);
-        blendOption.add<SteeringBehaviourSeek>(1.0f, this, EntityKnowledge{ *m_player });
-        blendOption.add<SteeringBehaviourFlocking>(1.0f, this, EntityGroupKnowledge{ *m_npcs });
+        blendOption.add<SteeringBehaviourSeek>(1.0f, this, *m_player);
+        blendOption.add<SteeringBehaviourFlocking>(1.0f, this, *m_npcs);
 
         std::cout << getComponent<VEComponent::Name>().name << ": Flocking seek" << std::endl;
     }

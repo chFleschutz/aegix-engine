@@ -15,6 +15,8 @@ public:
 	float energy() const { return m_energy; }
 	float maxEnergy() const { return m_maxEnergy; }
 
+	void begin() override;
+
 	void update(float deltaSeconds) override;
 
 private:
