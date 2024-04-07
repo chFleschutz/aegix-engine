@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/device.h"
+#include "graphics/render_system.h"
 #include "graphics/swap_chain.h"
 #include "graphics/window.h"
 
@@ -39,6 +40,8 @@ namespace VEGraphics
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
+		void renderFrame();
+
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
@@ -52,6 +55,8 @@ namespace VEGraphics
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
+
+		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
 
 } // namespace vre

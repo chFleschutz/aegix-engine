@@ -65,6 +65,14 @@ namespace VEScene
 			return script;
 		}
 
+		template<typename T, typename... Args>
+		void addMaterial(Args&&... args)
+		{
+			assert(!hasComponent<T>() && "Entity already has the component");
+			auto& material = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			// TODO: Initialize material so RenderSystem is added to the scene
+		}
+
 	private:
 		entt::entity m_entityHandle = { entt::null };
 		Scene* m_scene = nullptr;

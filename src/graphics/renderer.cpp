@@ -106,6 +106,15 @@ namespace VEGraphics
 
 	}
 
+	void Renderer::renderFrame()
+	{
+		for (auto& renderSystem : m_renderSystems)
+		{
+			// TODO:
+			renderSystem->render();
+		}
+	}
+
 	void Renderer::createCommandBuffers()
 	{
 		m_commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
