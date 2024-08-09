@@ -2,7 +2,7 @@
 
 #include "graphics/device.h"
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	/// @brief Encapsulates a vulkan buffer
 	class Buffer
@@ -97,5 +97,4 @@ namespace VEGraphics
 		VkBufferUsageFlags m_usageFlags;
 		VkMemoryPropertyFlags m_memoryPropertyFlags;
 	};
-
-}  // namespace vre
+}

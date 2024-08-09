@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class SteeringBehaviourArrive : public SteeringBehaviour
 	{
@@ -19,14 +19,14 @@ namespace VEAI
 
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
-		virtual VEPhysics::Force computeForce() override
+		virtual Aegix::Physics::Force computeForce() override
 		{
 			if (!m_target.has_value())
-				return VEPhysics::Force{};
+				return Aegix::Physics::Force{};
 
-			auto& transform = m_aiComponent->getComponent<VEComponent::Transform>();
-			auto& playerTransform = m_target.value().entity.getComponent<VEComponent::Transform>();
-			auto& dynamics = m_aiComponent->getComponent<VEPhysics::MotionDynamics>();
+			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
+			auto& playerTransform = m_target.value().entity.getComponent<Aegix::Component::Transform>();
+			auto& dynamics = m_aiComponent->getComponent<Aegix::Physics::MotionDynamics>();
 
 			const auto playerDirection = playerTransform.location - transform.location;
 			const auto distance = glm::length(playerDirection);
@@ -36,7 +36,7 @@ namespace VEAI
 			{
 				dynamics.haltMotion();
 				stop();
-				return VEPhysics::Force{};
+				return Aegix::Physics::Force{};
 			}
 
 			const auto maxSpeed = dynamics.properties().maxLinearSpeed;
@@ -48,9 +48,9 @@ namespace VEAI
 				desiredSpeed *= distance / brakeDistance;
 
 			// Compute force
-			VEPhysics::Force force{};
-			const auto desiredVelocity = MathLib::normalize(playerDirection) * desiredSpeed;
-			force.linear = MathLib::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
+			Aegix::Physics::Force force{};
+			const auto desiredVelocity = Aegix::MathLib::normalize(playerDirection) * desiredSpeed;
+			force.linear = Aegix::MathLib::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
 
 			return force;
 		}
@@ -61,5 +61,4 @@ namespace VEAI
 
 		std::optional<EntityKnowledge> m_target;
 	};
-
-} // namespace VEAI
+}

@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	/// @brief Combines the cohesion, separation and velocity matching behaviours into the flocking steering behaviour.
 	class SteeringBehaviourFlocking : public SteeringBehaviour
@@ -29,9 +29,9 @@ namespace VEAI
 			m_velocityMatchingWeight = velocityMatching;
 		}
 
-		virtual VEPhysics::Force computeForce() override
+		virtual Aegix::Physics::Force computeForce() override
 		{
-			VEPhysics::Force force{};
+			Aegix::Physics::Force force{};
 			force += m_cohesion.computeForce() * m_cohesionWeight;
 			force += m_separation.computeForce() * m_separationWeight;
 			force += m_velocityMatching.computeForce() * m_velocityMatchingWeight;
@@ -47,5 +47,4 @@ namespace VEAI
 		SteeringBehaviourSeparation m_separation;
 		SteeringBehaviourVelocityMatching m_velocityMatching;
 	};
-
-} // namespace VEAI
+}

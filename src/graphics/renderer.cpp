@@ -3,7 +3,7 @@
 #include <array>
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	Renderer::Renderer(Window& window, VulkanDevice& device) : m_window{ window }, m_device{ device }
 	{
@@ -155,5 +155,4 @@ namespace VEGraphics
 
 		// Todo
 	}
-
-} // namespace vre
+}

@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
     class DescriptorSetLayout
     {
@@ -101,5 +101,4 @@ namespace VEGraphics
         DescriptorPool& m_pool;
         std::vector<VkWriteDescriptorSet> m_writes;
     };
-
-}  // namespace vre
+}

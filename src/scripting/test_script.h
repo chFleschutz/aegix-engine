@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class TestScript : public ScriptBase
 	{
@@ -20,7 +20,7 @@ namespace VEScripting
 		/// @brief Acces protected methods and other components here.
 		virtual void begin() override
 		{
-			auto& name = getComponent<VEComponent::Name>();
+			auto& name = getComponent<Aegix::Component::Name>();
 			std::cout << "TestScript::begin() " << name.name << " " << m_x << std::endl;
 		}
 
@@ -40,5 +40,4 @@ namespace VEScripting
 	private:
 		int m_x;
 	};
-
-} // namespace VEScripting
+}

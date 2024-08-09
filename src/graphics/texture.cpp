@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	Texture::Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo)
 		: m_device{ device }
@@ -116,5 +116,4 @@ namespace VEGraphics
 		if (vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture sampler");
 	}
-
-} // namespace vre
+}

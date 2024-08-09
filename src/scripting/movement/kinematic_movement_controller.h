@@ -4,7 +4,7 @@
 #include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class KinematcMovementController : public ScriptBase
 	{
@@ -55,7 +55,4 @@ namespace VEScripting
 		bool m_mouseRotateEnabled{ false };
 		bool m_mousePanEnabled{ false };
 	};
-
-} // namespace VEScripting
-
-
+}

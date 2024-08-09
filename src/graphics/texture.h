@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class Texture
 	{
@@ -36,5 +36,4 @@ namespace VEGraphics
 		VkImageView m_textureImageView;
 		VkSampler m_textureSampler;
 	};
-
-} // namespace vre
+}

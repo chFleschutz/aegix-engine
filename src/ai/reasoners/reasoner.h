@@ -1,6 +1,6 @@
 #pragma once
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class Reasoner
 	{
@@ -9,5 +9,4 @@ namespace VEAI
 	private:
 
 	};
-
-} // namespace VEAI
+}

@@ -7,21 +7,21 @@
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
-class Rotator : public VEScripting::ScriptBase
+class Rotator : public Aegix::Scripting::ScriptBase
 {
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<VEComponent::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
 	}
 };
 
 /// @brief Scene with a teapot on a plane
 /// @note Example of a custom scene
-class DefaultScene : public VEScene::Scene
+class DefaultScene : public Aegix::Scene::Scene
 {
 public:
-	using VEScene::Scene::Scene;
+	using Aegix::Scene::Scene::Scene;
 
 	/// @brief All objects in a scene are created here
 	void initialize() override
@@ -29,19 +29,19 @@ public:
 		{ // Models 
 			auto teapotModel = loadModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
-			teapot.addComponent<VEComponent::Mesh>(teapotModel, Color::red());
+			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
 			teapot.addComponent<Rotator>();
 			
 			auto planeModel = loadModel("models/plane.obj");
 			auto plane = createEntity("Plane");
-			plane.addComponent<VEComponent::Mesh>(planeModel, Color::white());
+			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
 		}
 		{ // Lights
 			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });
-			light1.addComponent<VEComponent::PointLight>(Color::white(), 10.0f);
+			light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 10.0f);
 
 			auto light2 = createEntity("Light 2", { 0.0f, -5.0f, 5.0f });
-			light2.addComponent<VEComponent::PointLight>(Color::white(), 10.0f);
+			light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 10.0f);
 		}
 	}
 };

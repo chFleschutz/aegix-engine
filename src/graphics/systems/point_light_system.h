@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class PointLightSystem
 	{
@@ -30,5 +30,4 @@ namespace VEGraphics
 		std::unique_ptr<Pipeline> mPipeline;
 		VkPipelineLayout mPipelineLayout;
 	};
-
-} // namespace VEGraphics
+} 

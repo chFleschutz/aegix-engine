@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class Blackboard
 	{
@@ -52,5 +52,4 @@ namespace VEAI
 	private:
 		std::unordered_map<std::string, std::unique_ptr<Knowledge>> m_knowledgeBase;
 	};
-
-} // namespace VEAI
+}

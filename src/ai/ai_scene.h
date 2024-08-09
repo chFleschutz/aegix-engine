@@ -8,10 +8,10 @@
 
 #include <vector>
 
-class AIScene : public VEScene::Scene
+class AIScene : public Aegix::Scene::Scene
 {
 public:
-	using VEScene::Scene::Scene;
+	using Aegix::Scene::Scene::Scene;
 
 	void initialize() override
 	{
@@ -24,50 +24,50 @@ public:
 
 			// Floor
 			auto plane = createEntity("Plane");
-			plane.addComponent<VEComponent::Mesh>(planeModel, Color::gray());
-			plane.getComponent<VEComponent::Transform>().scale = Vector3{ worldSize / 10.0f };
+			plane.addComponent<Aegix::Component::Mesh>(planeModel, Color::gray());
+			plane.getComponent<Aegix::Component::Transform>().scale = Vector3{ worldSize / 10.0f };
 			
 			// Player
 			auto player = createEntity("Player");
-			player.addComponent<VEComponent::Mesh>(arrowModel, Color::blue());
-			player.addComponent<VEPhysics::MotionDynamics>();
-			player.addComponent<VEScripting::DynamicMovementController>();
-			player.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+			player.addComponent<Aegix::Component::Mesh>(arrowModel, Color::blue());
+			player.addComponent<Aegix::Physics::MotionDynamics>();
+			player.addComponent<Aegix::Scripting::DynamicMovementController>();
+			player.addComponent<Aegix::Scripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 
 			auto blackboardEntity = createEntity("Blackboard");
-			auto& blackboard = blackboardEntity.addComponent<VEAI::Blackboard>();
+			auto& blackboard = blackboardEntity.addComponent<Aegix::AI::Blackboard>();
 
 			// NPCs at random locations
 			int npcCount = 1; 
-			std::vector<VEScene::Entity> npcs;
+			std::vector<Aegix::Scene::Entity> npcs;
 			for (int i = 0; i < npcCount; i++)
 			{
 				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto npc = createEntity("NPC " + std::to_string(i), randomLocation);
-				npc.addComponent<VEComponent::Mesh>(arrowModel, Color::red());
-				npc.addComponent<VEPhysics::MotionDynamics>();
-				npc.addComponent<VEAI::TestAIComponent>(blackboard);
-				npc.addComponent<VEScripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+				npc.addComponent<Aegix::Component::Mesh>(arrowModel, Color::red());
+				npc.addComponent<Aegix::Physics::MotionDynamics>();
+				npc.addComponent<Aegix::AI::TestAIComponent>(blackboard);
+				npc.addComponent<Aegix::Scripting::WorldBorder>(Vector3{ worldSize / 2.0f });
 				npcs.emplace_back(npc);
 			}
 
 			// Fill blackboard
-			blackboard.set<VEAI::EntityKnowledge>("Player", player);
-			blackboard.set<VEAI::EntityGroupKnowledge>("NPCs", npcs);
+			blackboard.set<Aegix::AI::EntityKnowledge>("Player", player);
+			blackboard.set<Aegix::AI::EntityGroupKnowledge>("NPCs", npcs);
 		}
 		{ 
 			// Lights
 			auto light1 = createEntity("Light 1", {20.0f, -20.0f, -20.0f});
-			light1.addComponent<VEComponent::PointLight>(Color::white(), 400.0f);
+			light1.addComponent<Aegix::Component::PointLight>(Color::white(), 400.0f);
 
 			auto light2 = createEntity("Light 2", {-20.0f, -20.0f, -20.0f});
-			light2.addComponent<VEComponent::PointLight>(Color::white(), 400.0f);
+			light2.addComponent<Aegix::Component::PointLight>(Color::white(), 400.0f);
 
 			auto light3 = createEntity("Light 3", { -20.0f, -20.0f, 20.0f });
-			light3.addComponent<VEComponent::PointLight>(Color::white(), 400.0f);
+			light3.addComponent<Aegix::Component::PointLight>(Color::white(), 400.0f);
 
 			auto light4 = createEntity("Light 4", { 20.0f, -20.0f, 20.0f });
-			light4.addComponent<VEComponent::PointLight>(Color::white(), 400.0f);
+			light4.addComponent<Aegix::Component::PointLight>(Color::white(), 400.0f);
 		}
 	}
 };

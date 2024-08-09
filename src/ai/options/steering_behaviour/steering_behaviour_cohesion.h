@@ -3,7 +3,7 @@
 #include "ai/options/steering_behaviour/steering_behaviour.h"
 #include "ai/knowledge.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class SteeringBehaviourCohesion : public SteeringBehaviour
 	{
@@ -11,12 +11,12 @@ namespace VEAI
 		SteeringBehaviourCohesion(AIComponent* aiComponent, const EntityGroupKnowledge& group)
 			: SteeringBehaviour(aiComponent), m_group(group) {}
 
-		virtual VEPhysics::Force computeForce() override
+		virtual Aegix::Physics::Force computeForce() override
 		{
 			if (m_group.entities.empty())
-				return VEPhysics::Force{};
+				return Aegix::Physics::Force{};
 
-			auto& transform = m_aiComponent->getComponent<VEComponent::Transform>();
+			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
 
 			Vector3 centerOfMass{ 0.0f };
 			int relevantEntities = 0;
@@ -25,7 +25,7 @@ namespace VEAI
 				if (entity == m_aiComponent->entity())
 					continue;
 
-				auto& otherTransform = entity.getComponent<VEComponent::Transform>();
+				auto& otherTransform = entity.getComponent<Aegix::Component::Transform>();
 
 				auto direction = transform.location - otherTransform.location;
 				float distance = glm::length(direction);
@@ -38,12 +38,12 @@ namespace VEAI
 			}
 
 			if (relevantEntities == 0)
-				return VEPhysics::Force{};
+				return Aegix::Physics::Force{};
 				
-			VEPhysics::Force force{};
+			Aegix::Physics::Force force{};
 			centerOfMass /= relevantEntities;
 			auto dir = centerOfMass - transform.location;
-			force.linear = MathLib::normalize(dir) * (glm::length(dir) / m_activationRadius);
+			force.linear = Aegix::MathLib::normalize(dir) * (glm::length(dir) / m_activationRadius);
 
 			return force;
 		}
@@ -53,5 +53,4 @@ namespace VEAI
 
 		EntityGroupKnowledge m_group;
 	};
-
-} // namespace VEAI
+}

@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	struct SimplePushConstantData
 	{	// max 128 bytes
@@ -40,14 +40,14 @@ namespace VEGraphics
 			0, nullptr
 		);
 
-		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::Mesh>().each())
+		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::Mesh>().each())
 		{
 			// TODO: transfer color as uniform
-			Matrix4 colorNormalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
+			Matrix4 colorNormalMatrix = Aegix::MathLib::normalMatrix(transform.rotation, transform.scale);
 			colorNormalMatrix[3] = mesh.color.rgba();
 
 			SimplePushConstantData push{};
-			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
+			push.modelMatrix = Aegix::MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
 			push.normalMatrix = colorNormalMatrix;
 
 			vkCmdPushConstants(
@@ -101,5 +101,4 @@ namespace VEGraphics
 			fragShaderPath,
 			pipelineConfig);
 	}
-
-} // namespace VEGraphics
+}

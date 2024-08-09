@@ -1,6 +1,6 @@
 #include "option_manager.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 	void OptionManager::update(float deltaSeconds)
 	{
@@ -32,5 +32,4 @@ namespace VEAI
 		if (!m_options.empty())
 			m_options.front()->start();
 	}
-
-} // namespace VEAI
+}

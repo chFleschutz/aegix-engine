@@ -2,7 +2,7 @@
 
 #include "ai/options/option.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     class SleepOption : public Option
     {
@@ -47,5 +47,4 @@ namespace VEAI
             std::cout << "Murdering... Muhahahaaa" << std::endl;
         }
     };
-
-} // namespace VEAI
+} 

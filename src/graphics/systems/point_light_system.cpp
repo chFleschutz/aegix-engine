@@ -8,7 +8,7 @@
 #include <map>
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	struct PointLightPushConstants
 	{
@@ -32,7 +32,7 @@ namespace VEGraphics
 	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
 	{
 		int lighIndex = 0;
-		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::PointLight>().each())
+		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>().each())
 		{
 			assert(lighIndex < MAX_LIGHTS && "Point lights exceed maximum number of point lights");
 			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
@@ -55,8 +55,8 @@ namespace VEGraphics
 			0, nullptr
 		);
 
-		auto view = frameInfo.scene->viewEntitiesByType<VEComponent::Transform, VEComponent::PointLight>();
-		view.use<VEComponent::Transform>(); // Sort because of Transparency
+		auto view = frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		view.use<Aegix::Component::Transform>(); // Sort because of Transparency
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{};
@@ -117,5 +117,4 @@ namespace VEGraphics
 			fragShaderPath,
 			pipelineConfig);
 	}
-
-} // namespace VEGraphics
+} 

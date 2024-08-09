@@ -3,7 +3,7 @@
 #include "ai/options/steering_behaviour/steering_behaviour.h"
 #include "utils/math_utils.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class SteeringBehaviourSeparation : public SteeringBehaviour
 	{
@@ -11,18 +11,18 @@ namespace VEAI
 		SteeringBehaviourSeparation(AIComponent* aiComponent, const EntityGroupKnowledge& group)
 			: SteeringBehaviour(aiComponent), m_group(group) {}
 
-		virtual VEPhysics::Force computeForce() override
+		virtual Aegix::Physics::Force computeForce() override
 		{
 			if (m_group.entities.empty())
-				return VEPhysics::Force{};
+				return Aegix::Physics::Force{};
 
-			auto& tranform = m_aiComponent->getComponent<VEComponent::Transform>();
-			auto& dynamics = m_aiComponent->getComponent<VEPhysics::MotionDynamics>();
+			auto& tranform = m_aiComponent->getComponent<Aegix::Component::Transform>();
+			auto& dynamics = m_aiComponent->getComponent<Aegix::Physics::MotionDynamics>();
 
-			VEPhysics::Force force{};
+			Aegix::Physics::Force force{};
 			for (const auto& entity : m_group.entities)
 			{
-				auto& otherTransform = entity.getComponent<VEComponent::Transform>();
+				auto& otherTransform = entity.getComponent<Aegix::Component::Transform>();
 
 				auto OtherDirection = otherTransform.location - tranform.location;
 				auto distance = glm::length(OtherDirection);
@@ -30,10 +30,10 @@ namespace VEAI
 				if (distance == 0.0f)
 					continue;
 
-				if (distance < m_activationRadius and MathLib::inFOV(dynamics.linearVelocity(), OtherDirection, m_fov))
+				if (distance < m_activationRadius and Aegix::MathLib::inFOV(dynamics.linearVelocity(), OtherDirection, m_fov))
 				{
 					auto strength = m_limits.maxLinearForce * (m_activationRadius - distance) / m_activationRadius;
-					force.linear += MathLib::normalize(-OtherDirection) * strength;
+					force.linear += Aegix::MathLib::normalize(-OtherDirection) * strength;
 				}
 			}
 
@@ -46,5 +46,4 @@ namespace VEAI
 
 		EntityGroupKnowledge m_group;
 	};
-
-} // namespace VEAI
+}

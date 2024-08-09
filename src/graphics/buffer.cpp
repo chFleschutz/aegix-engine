@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
     VkDeviceSize Buffer::getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment)
     {
@@ -119,5 +119,4 @@ namespace VEGraphics
     {
         return invalidate(m_alignmentSize, index * m_alignmentSize);
     }
-
-}  // namespace vre
+}

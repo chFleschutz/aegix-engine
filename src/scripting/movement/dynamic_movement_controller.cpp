@@ -5,12 +5,12 @@
 
 #include <iostream>
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	void DynamicMovementController::update(float deltaSeconds)
 	{
-		auto& transform = getComponent<VEComponent::Transform>();
-		auto& dynamics = getComponent<VEPhysics::MotionDynamics>();
+		auto& transform = getComponent<Aegix::Component::Transform>();
+		auto& dynamics = getComponent<Aegix::Physics::MotionDynamics>();
 
 		bool forwardPressed = Input::instance().keyPressed(m_keys.moveForward);
 		bool backwardPressed = Input::instance().keyPressed(m_keys.moveBackward);
@@ -42,5 +42,4 @@ namespace VEScripting
 		dynamics.addLinearForce(move);
 		dynamics.addAngularForce(rotation);
 	}
-
-} // namespace VEScripting
+}

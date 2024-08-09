@@ -12,11 +12,11 @@
 #include "ai/options/steering_behaviour/steering_behaviour_wander.h"
 #include "core/input.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     TestAIComponent::TestAIComponent(Blackboard& blackboard) : AIComponent(blackboard)
     {
-        auto& input = Input::instance();
+        auto& input = Aegix::Input::instance();
         input.bind(this, &TestAIComponent::seekPlayer, Input::One);
         input.bind(this, &TestAIComponent::fleeFromPlayer, Input::Two);
         input.bind(this, &TestAIComponent::arriveAtPlayer, Input::Three);
@@ -45,12 +45,12 @@ namespace VEAI
         if (activeOption->isActive())
         {
             activeOption->pause();
-            std::cout << getComponent<VEComponent::Name>().name << ": Paused option" << std::endl;
+            std::cout << getComponent<Aegix::Component::Name>().name << ": Paused option" << std::endl;
         }
         else
         {
             activeOption->start();
-            std::cout << getComponent<VEComponent::Name>().name << ": Started option" << std::endl;
+            std::cout << getComponent<Aegix::Component::Name>().name << ": Started option" << std::endl;
         }
     }
 
@@ -58,7 +58,7 @@ namespace VEAI
     {
         m_optionManager.cancelActive();
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Stopping option" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Stopping option" << std::endl;
     }
 
     void TestAIComponent::seekPlayer()
@@ -66,7 +66,7 @@ namespace VEAI
         m_optionManager.cancelActive();
         auto& seekOption = m_optionManager.emplacePrioritized<SteeringBehaviourSeek>(this, EntityKnowledge{ *m_player });
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Seeking player" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Seeking player" << std::endl;
     }
 
     void TestAIComponent::fleeFromPlayer()
@@ -75,7 +75,7 @@ namespace VEAI
         auto& fleeOption = m_optionManager.emplacePrioritized<SteeringBehaviourFlee>(this);
         fleeOption.setTarget(EntityKnowledge{ *m_player });
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Fleeing from player" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Fleeing from player" << std::endl;
     }
 
     void TestAIComponent::arriveAtPlayer()
@@ -84,7 +84,7 @@ namespace VEAI
         auto& arriveOption = m_optionManager.emplacePrioritized<SteeringBehaviourArrive>(this);
         arriveOption.setTarget(EntityKnowledge{ *m_player });
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Arriving at player" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Arriving at player" << std::endl;
     }
 
     void TestAIComponent::flockingWander()
@@ -95,7 +95,7 @@ namespace VEAI
         blendOption.add<SteeringBehaviourWander>(1.0f, this);
 		blendOption.add<SteeringBehaviourFlocking>(1.0f, this, *m_npcs);
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Flocking wander" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Flocking wander" << std::endl;
     }
 
     void TestAIComponent::flockingSeek()
@@ -105,7 +105,7 @@ namespace VEAI
         blendOption.add<SteeringBehaviourSeek>(1.0f, this, *m_player);
         blendOption.add<SteeringBehaviourFlocking>(1.0f, this, *m_npcs);
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Flocking seek" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Flocking seek" << std::endl;
     }
 
     void TestAIComponent::followPath()
@@ -119,7 +119,6 @@ namespace VEAI
         path.path.emplace_back(Vector3{ 10.0f, 0.0f, -10.0f });
         m_optionManager.emplacePrioritized<SteeringBehaviourGrapplingHooks>(this, path);
 
-        std::cout << getComponent<VEComponent::Name>().name << ": Flollow path" << std::endl;
+        std::cout << getComponent<Aegix::Component::Name>().name << ": Flollow path" << std::endl;
     }
-
-} // namespace VEAI
+}

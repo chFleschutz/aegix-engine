@@ -10,7 +10,8 @@
 #include <type_traits>
 #include <vector>
 
-namespace Vulkanite
+
+namespace Aegix
 {
 	class Engine
 	{
@@ -31,7 +32,7 @@ namespace Vulkanite
 		/// @brief Creates a scene of T 
 		/// @tparam T Subclass of Scene which should be loaded
 		/// @note T has to be a subclass of Scene otherwise compile will fail
-		template<class T, class = std::enable_if_t<std::is_base_of_v<VEScene::Scene, T>>>
+		template<class T, class = std::enable_if_t<std::is_base_of_v<Aegix::Scene::Scene, T>>>
 		void loadScene()
 		{
 			m_scene = std::make_unique<T>(m_device);
@@ -40,12 +41,11 @@ namespace Vulkanite
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
 
-		VEGraphics::Window m_window{ WIDTH, HEIGHT, "Vulkanite" };
-		VEGraphics::VulkanDevice m_device{ m_window };
-		VEGraphics::Renderer m_renderer{ m_window, m_device };
+		Aegix::Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
+		Aegix::Graphics::VulkanDevice m_device{ m_window };
+		Aegix::Graphics::Renderer m_renderer{ m_window, m_device };
 
-		std::unique_ptr<VEGraphics::DescriptorPool> m_globalPool{};
-		std::unique_ptr<VEScene::Scene> m_scene;
+		std::unique_ptr<Aegix::Graphics::DescriptorPool> m_globalPool{};
+		std::unique_ptr<Aegix::Scene::Scene> m_scene;
 	};
-
-} // namespace vre
+}

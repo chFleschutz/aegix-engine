@@ -8,7 +8,7 @@
 #include <set>
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
 		: m_device{ deviceRef }, m_windowExtent{ windowExtent }
@@ -421,5 +421,4 @@ namespace VEGraphics
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}
-
-} // namespace vre
+}

@@ -4,29 +4,29 @@
 #include "ai/considerations/consideration.h"
 #include "ai/decision_tree_example/example_options.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 	class MyDecisionTree
 	{
 	public:
-		MyDecisionTree(VEAI::Blackboard& blackboard) 
+		MyDecisionTree(Aegix::AI::Blackboard& blackboard) 
 		{
-			blackboard.set<VEAI::BoolKnowledge>("PlayerNear", true);
-			blackboard.set<VEAI::BoolKnowledge>("AtWar", false);
-			blackboard.set<VEAI::FloatKnowledge>("Time", 0.6f);
+			blackboard.set<Aegix::AI::BoolKnowledge>("PlayerNear", true);
+			blackboard.set<Aegix::AI::BoolKnowledge>("AtWar", false);
+			blackboard.set<Aegix::AI::FloatKnowledge>("Time", 0.6f);
 
-			auto comp = new VEAI::AIComponent(blackboard);
+			auto comp = new Aegix::AI::AIComponent(blackboard);
 
-			auto playerNearNode = m_tree.addRoot<VEAI::EntityDistanceConsideration>(blackboard, "Player", "NPC", 10.0f);
+			auto playerNearNode = m_tree.addRoot<Aegix::AI::EntityDistanceConsideration>(blackboard, "Player", "NPC", 10.0f);
 
-			auto atWarNode = VEAI::DecisionTree::addTrue<VEAI::BoolConsideration>(playerNearNode, blackboard, "AtWar");
-			auto timeNode = VEAI::DecisionTree::addFalse<VEAI::ThresholdConsideration>(playerNearNode, blackboard, "Time", 0.5f);
+			auto atWarNode = Aegix::AI::DecisionTree::addTrue<Aegix::AI::BoolConsideration>(playerNearNode, blackboard, "AtWar");
+			auto timeNode = Aegix::AI::DecisionTree::addFalse<Aegix::AI::ThresholdConsideration>(playerNearNode, blackboard, "Time", 0.5f);
 
-			VEAI::DecisionTree::addTrue<VEAI::PatrolOption>(timeNode, comp);
-			VEAI::DecisionTree::addFalse<VEAI::SleepOption>(timeNode, comp);
+			Aegix::AI::DecisionTree::addTrue<Aegix::AI::PatrolOption>(timeNode, comp);
+			Aegix::AI::DecisionTree::addFalse<Aegix::AI::SleepOption>(timeNode, comp);
 
-			VEAI::DecisionTree::addTrue<VEAI::MurderOption>(atWarNode, comp);
-			VEAI::DecisionTree::addFalse<VEAI::GreetOption>(atWarNode, comp);
+			Aegix::AI::DecisionTree::addTrue<Aegix::AI::MurderOption>(atWarNode, comp);
+			Aegix::AI::DecisionTree::addFalse<Aegix::AI::GreetOption>(atWarNode, comp);
 		}
 
 		std::unique_ptr<Option> evaluate() const

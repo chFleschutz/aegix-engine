@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class ScriptBase;
 
@@ -26,5 +26,4 @@ namespace VEScripting
 		std::vector<ScriptBase*> m_scripts;
 		std::vector<ScriptBase*> m_newScripts;
 	};
-
-} // namespace VEScripting
+}

@@ -4,9 +4,9 @@
 #include "ai/option_manager.h"
 #include "scripting/script_base.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
-    class AIComponent : public VEScripting::ScriptBase
+    class AIComponent : public Aegix::Scripting::ScriptBase
     {
     public:
         AIComponent(Blackboard& blackboard) : m_blackboard(blackboard) {}
@@ -21,5 +21,4 @@ namespace VEAI
 
         OptionManager m_optionManager;
     };
-
-} // namespace VEAI
+}

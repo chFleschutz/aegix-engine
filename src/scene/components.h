@@ -8,12 +8,12 @@
 #include <memory>
 #include <string>
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class ScriptBase;
 }
 
-namespace VEComponent
+namespace Aegix::Component
 {
 	/// @brief Gives a name to the entity
 	struct Name
@@ -38,20 +38,20 @@ namespace VEComponent
 		Transform(const Vector3& entityLocation)
 			: location(entityLocation) {}
 
-		Vector3 forward() const { return MathLib::forward(rotation); }
-		Vector3 right() const { return MathLib::right(rotation);  }
-		Vector3 up() const { return MathLib::up(rotation); }
+		Vector3 forward() const { return Aegix::MathLib::forward(rotation); }
+		Vector3 right() const { return Aegix::MathLib::right(rotation);  }
+		Vector3 up() const { return Aegix::MathLib::up(rotation); }
 	};
 
 	/// @brief Holds a pointer to a model
 	struct Mesh
 	{
-		std::shared_ptr<VEGraphics::Model> model;
+		std::shared_ptr<Graphics::Model> model;
 		Color color;
 
 		Mesh() = default;
 		Mesh(const Mesh&) = default;
-		Mesh(std::shared_ptr<VEGraphics::Model> entityModel, const Color& baseColor = Color())
+		Mesh(std::shared_ptr<Graphics::Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
 	};
 
@@ -70,13 +70,12 @@ namespace VEComponent
 	/// @brief Holds a camera to view the scene
 	struct Camera
 	{
-		VEGraphics::Camera camera{};
+		Graphics::Camera camera{};
 	};
 
 	/// @brief Stores a custom script
 	struct Script
 	{
-		std::unique_ptr<VEScripting::ScriptBase> script;
+		std::unique_ptr<Aegix::Scripting::ScriptBase> script;
 	};
-
-} // namespace vre
+}

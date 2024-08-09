@@ -14,19 +14,19 @@
 namespace std
 {
 	template <>
-	struct hash<VEGraphics::Model::Vertex>
+	struct hash<Aegix::Graphics::Model::Vertex>
 	{
-		size_t operator()(VEGraphics::Model::Vertex const& vertex) const
+		size_t operator()(Aegix::Graphics::Model::Vertex const& vertex) const
 		{
 			size_t seed = 0;
-			VEUtils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			Aegix::Utils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
 			return seed;
 		}
 	};
+}
 
-} // namespace std
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_device{ device }
 	{
@@ -211,5 +211,4 @@ namespace VEGraphics
 			}
 		}
 	}
-
-} // namespace vre
+}

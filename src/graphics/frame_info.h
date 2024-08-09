@@ -5,9 +5,9 @@
 
 #include <vulkan/vulkan.h>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
-#define MAX_LIGHTS 10
+#define MAX_LIGHTS 10 // TODO: Remove define
 
 	struct PointLight
 	{
@@ -32,7 +32,6 @@ namespace VEGraphics
 		VkCommandBuffer commandBuffer;
 		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		VEScene::Scene* scene;
+		Aegix::Scene::Scene* scene;
 	};
-
-} // namespace VEGraphics
+}

@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-namespace VEScene
+namespace Aegix::Scene
 {
 	/// @brief An entity represents any object in a scene
 	/// @note This class is ment to be passed by value since its just an id
@@ -48,15 +48,15 @@ namespace VEScene
 		/// @return A refrence to the new component
 		/// @note When adding a custom script ScriptComponent is added as its container
 		template<typename T, typename... Args>
-		auto addComponent(Args&&... args) -> typename std::enable_if<!std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		auto addComponent(Args&&... args) -> typename std::enable_if<!std::is_base_of<Aegix::Scripting::ScriptBase, T>::value, T&>::type
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
 		}
 
-		/// @brief Adds a script derived from VEScripting::ScriptBase to the entity
+		/// @brief Adds a script derived from Aegix::Scripting::ScriptBase to the entity
 		template<typename T, typename... Args>
-		auto addComponent(Args&&... args) -> typename std::enable_if<std::is_base_of<VEScripting::ScriptBase, T>::value, T&>::type
+		auto addComponent(Args&&... args) -> typename std::enable_if<std::is_base_of<Aegix::Scripting::ScriptBase, T>::value, T&>::type
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			auto& script = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
@@ -69,5 +69,4 @@ namespace VEScene
 		entt::entity m_entityHandle = { entt::null };
 		Scene* m_scene = nullptr;
 	};
-
-} // namespace VEScene
+}

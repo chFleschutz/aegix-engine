@@ -6,7 +6,7 @@
 #include "scene/entity.h"
 #include "scripting/script_base.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     class TestAIComponent : public AIComponent
     {
@@ -29,5 +29,4 @@ namespace VEAI
         EntityKnowledge* m_player = nullptr;
         EntityGroupKnowledge* m_npcs = nullptr; 
     };
-
-} // namespace VEAI
+}

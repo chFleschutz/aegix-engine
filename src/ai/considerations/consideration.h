@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	///@brief Base class for all considerations
 	class Consideration
@@ -63,5 +63,4 @@ namespace VEAI
 		std::string m_entityKeyB;
 		float m_distance;
 	};
-
-} // namespace VEAI
+}

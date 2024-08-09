@@ -3,7 +3,7 @@
 #include "core/input.h"
 
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	void KinematcMovementController::begin()
 	{
@@ -18,7 +18,7 @@ namespace VEScripting
 
 	void KinematcMovementController::applyRotation(float deltaSeconds)
 	{
-		auto& transform = getComponent<VEComponent::Transform>();
+		auto& transform = getComponent<Aegix::Component::Transform>();
 
 		// Key input rotation
 		Vector3 rotate{0.0f};
@@ -29,7 +29,7 @@ namespace VEScripting
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
 		{
-			transform.rotation += m_lookSpeed * MathLib::normalize(rotate) * deltaSeconds;
+			transform.rotation += m_lookSpeed * Aegix::MathLib::normalize(rotate) * deltaSeconds;
 		}
 
 		// Mouse input rotation
@@ -53,7 +53,7 @@ namespace VEScripting
 
 	void KinematcMovementController::applyMovement(float deltaSeconds)
 	{
-		auto& transform = getComponent<VEComponent::Transform>();
+		auto& transform = getComponent<Aegix::Component::Transform>();
 
 		// Key input movement
 		float yaw = transform.rotation.y;
@@ -75,7 +75,7 @@ namespace VEScripting
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 		{ 
-			transform.location += m_moveSpeed * MathLib::normalize(moveDir) * deltaSeconds;
+			transform.location += m_moveSpeed * Aegix::MathLib::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement
@@ -89,7 +89,7 @@ namespace VEScripting
 
 			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 			{
-				transform.location += m_mouseSensitivity * MathLib::normalize(moveDir) * deltaSeconds;
+				transform.location += m_mouseSensitivity * Aegix::MathLib::normalize(moveDir) * deltaSeconds;
 			}
 		}
 	}
@@ -129,5 +129,4 @@ namespace VEScripting
 			m_mousePanEnabled = false;
 		}
 	}
-
-} // namespace VEScripting
+}

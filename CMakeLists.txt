@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(NAME Vulkanite)
+set(NAME Aegix-Engine)
 project(${NAME})
 
 # Set C++ standard

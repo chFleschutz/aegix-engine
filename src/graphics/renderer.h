@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class Renderer
 	{
@@ -53,5 +53,4 @@ namespace VEGraphics
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 	};
-
-} // namespace vre
+}
