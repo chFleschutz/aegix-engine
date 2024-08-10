@@ -37,10 +37,6 @@ namespace Aegix
 			"\n\n";
 	}
 
-	Engine::~Engine()
-	{
-	}
-
 	void Engine::run()
 	{
 		// ****
@@ -141,8 +137,8 @@ namespace Aegix
 
 			applyFrameBrake(frameBeginTime);
 		}
-		vkDeviceWaitIdle(m_device.device());
 
+		m_renderer.shutdown();
 		m_scene->runtimeEnd();
 	}
 

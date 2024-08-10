@@ -18,11 +18,10 @@ namespace Aegix
 	public:
 		static constexpr int WIDTH = 1080;
 		static constexpr int HEIGHT = 720;
-
 		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
 
 		Engine();
-		~Engine();
+		~Engine() = default;
 
 		Engine(const Engine&) = delete;
 		Engine& operator=(const Engine&) = delete;

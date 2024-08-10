@@ -42,6 +42,8 @@ namespace Aegix::Graphics
 
 		void renderFrame();
 
+		void shutdown();
+
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
