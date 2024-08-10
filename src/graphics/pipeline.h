@@ -52,7 +52,9 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 		VkPipeline m_graphicsPipeline;
-		VkShaderModule m_vertShaderModule;
+
+		// TODO: Not necessary to store shader modules as member variables
+		VkShaderModule m_vertShaderModule; 
 		VkShaderModule m_fragShaderModule;
 	};
 }

@@ -103,7 +103,6 @@ namespace Aegix::Graphics
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
 
 		vkCmdEndRenderPass(commandBuffer);
-
 	}
 
 	void Renderer::renderFrame()
