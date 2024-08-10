@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class Window
 	{
@@ -36,5 +36,4 @@ namespace VEGraphics
 		std::string m_windowTitle;
 		GLFWwindow* m_window = nullptr;
 	};
-
-} // namespace vre
+}

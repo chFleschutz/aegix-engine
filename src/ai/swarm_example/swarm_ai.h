@@ -6,10 +6,10 @@
 
 class EatFood;
 
-class SwarmAIComponent : public VEAI::AIComponent
+class SwarmAIComponent : public Aegix::AI::AIComponent
 {
 public:
-	SwarmAIComponent(VEAI::Blackboard& blackboard);
+	SwarmAIComponent(Aegix::AI::Blackboard& blackboard);
 
 	void addEnergy(float energy) { m_energy += energy; }
 	float energy() const { return m_energy; }
@@ -29,12 +29,12 @@ private:
 
 	bool wandering = true;
 
-	VEAI::EntityGroupKnowledge* m_food = nullptr;
-	VEAI::EntityGroupKnowledge* m_swarm = nullptr;
+	Aegix::AI::EntityGroupKnowledge* m_food = nullptr;
+	Aegix::AI::EntityGroupKnowledge* m_swarm = nullptr;
 };
 
 
-class EatFood : public VEAI::Option
+class EatFood : public Aegix::AI::Option
 {
 public:
 	EatFood(SwarmAIComponent* swarmAIComponent);

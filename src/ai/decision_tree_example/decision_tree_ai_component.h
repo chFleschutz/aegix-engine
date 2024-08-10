@@ -3,7 +3,7 @@
 #include "ai/ai_component.h"
 #include "ai/decision_tree_example/my_decision_tree.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     class DecisionTreeAiComponent : public AIComponent
     {
@@ -19,5 +19,4 @@ namespace VEAI
     private:
         MyDecisionTree m_decisionTree;
     };
-
-} // namespace VEAI
+} 

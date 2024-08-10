@@ -6,7 +6,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	/// @brief Manages options in a deque and updates the currently active option
 	class OptionManager
@@ -87,5 +87,4 @@ namespace VEAI
 
 		std::deque<std::unique_ptr<Option>> m_options;
 	};
-
-} // namespace VEAI
+}

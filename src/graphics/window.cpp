@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	Window::Window(int width, int height, std::string title) : m_width(width), m_height(height), m_windowTitle(std::move(title))
 	{
@@ -39,5 +39,4 @@ namespace VEGraphics
 		glfwSetWindowUserPointer(m_window, this);
 		glfwSetWindowSizeCallback(m_window, framebufferResizeCallback);
 	}
-
-} // namespace vre
+}

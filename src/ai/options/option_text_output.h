@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace VEAI
+namespace Aegix::AI
 {
 	/// @brief Debug option that prints to the console
 	class OptionTextOutput : public Option
@@ -40,5 +40,4 @@ namespace VEAI
 			std::cout << "Option active for " << elapsedTime() << " seconds" << std::endl;
 		}
 	};
-
-} // namespace VEAI
+}

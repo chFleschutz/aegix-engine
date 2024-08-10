@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	struct PipelineConfigInfo
 	{
@@ -55,6 +55,4 @@ namespace VEGraphics
 		VkShaderModule m_vertShaderModule;
 		VkShaderModule m_fragShaderModule;
 	};
-
-} // namespace vre
-
+}

@@ -5,13 +5,13 @@
 #include "core/input.h"
 
 
-namespace VEAI
+namespace Aegix::AI
 {
     DecisionTreeAiComponent::DecisionTreeAiComponent(Blackboard& blackboard)
         : AIComponent(blackboard), m_decisionTree(blackboard)
     {
-        auto& input = Input::instance();
-        input.bind(this, &DecisionTreeAiComponent::toggleWar, Input::One);
+        auto& input = Aegix::Input::instance();
+        input.bind(this, &DecisionTreeAiComponent::toggleWar, Aegix::Input::One);
     }
 
     void DecisionTreeAiComponent::evalutate()
@@ -48,5 +48,4 @@ namespace VEAI
         updateTime(delta);
         evalutate();
     }
-
-} // namespace VEAI
+}

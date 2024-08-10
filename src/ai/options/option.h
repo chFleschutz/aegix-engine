@@ -2,7 +2,7 @@
 
 #include "ai/knowledge.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     class AIComponent;
 
@@ -67,5 +67,4 @@ namespace VEAI
         float m_cooldownTime = 0.0f;
         bool m_onCooldown = false;
     };
-    
-} // namespace VEAI
+}

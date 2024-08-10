@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class Renderer
 	{
@@ -58,5 +58,4 @@ namespace VEGraphics
 
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
-
-} // namespace vre
+}

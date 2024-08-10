@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	class Model
 	{
@@ -61,5 +61,4 @@ namespace VEGraphics
 		std::unique_ptr<Buffer> m_indexBuffer;
 		uint32_t m_indexCount;
 	};
-
-} // namespace vre
+}

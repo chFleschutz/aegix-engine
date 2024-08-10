@@ -2,7 +2,7 @@
 
 #include "ai/reasoners/reasoner.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 
 	class DecisionTreeReasoner : public Reasoner
@@ -12,5 +12,4 @@ namespace VEAI
 	private:
 		DecisionTree m_tree;
 	};
-
-} // namespace VEAI
+}

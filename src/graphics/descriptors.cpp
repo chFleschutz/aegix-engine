@@ -3,7 +3,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
     // *************** Descriptor Set Layout Builder *********************
 
@@ -211,5 +211,4 @@ namespace VEGraphics
             0, 
             nullptr);
     }
-
-}  // namespace vre
+}

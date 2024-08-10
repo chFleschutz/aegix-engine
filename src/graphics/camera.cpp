@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
@@ -35,8 +35,8 @@ namespace VEGraphics
 	{
 		assert(glm::abs(glm::length(direction) - std::numeric_limits<float>::epsilon()) > 0.0f);
 
-		const Vector3 w{MathLib::normalize(direction)};
-		const Vector3 u{MathLib::normalize(glm::cross(w, up))};
+		const Vector3 w{Aegix::MathLib::normalize(direction)};
+		const Vector3 u{Aegix::MathLib::normalize(glm::cross(w, up))};
 		const Vector3 v{glm::cross(w, u)};
 
 		m_viewMatrix = Matrix4{ 1.f };
@@ -112,5 +112,4 @@ namespace VEGraphics
 		m_inverseViewMatrix[3][1] = position.y;
 		m_inverseViewMatrix[3][2] = position.z;
 	}
-
-} // namespace vre
+}

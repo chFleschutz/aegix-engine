@@ -6,7 +6,7 @@
 #include <cassert>
 
 
-namespace VEAI
+namespace Aegix::AI
 {
 	BoolConsideration::BoolConsideration(Blackboard& blackboard, std::string key)
 		: Consideration(blackboard), 
@@ -51,9 +51,8 @@ namespace VEAI
 		auto entityB = m_blackboard.get<EntityKnowledge>(m_entityKeyB);
 		assert(entityA && entityB && "Entity key does not exist in blackboard");
 
-		auto& positionA = entityA->entity.getComponent<VEComponent::Transform>().location;
-		auto& positionB = entityB->entity.getComponent<VEComponent::Transform>().location;
+		auto& positionA = entityA->entity.getComponent<Aegix::Component::Transform>().location;
+		auto& positionB = entityB->entity.getComponent<Aegix::Component::Transform>().location;
 		return glm::distance(positionA, positionB) < m_distance;
 	}
-
-} // namespace VEAI
+}

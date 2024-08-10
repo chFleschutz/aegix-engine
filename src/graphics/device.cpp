@@ -5,7 +5,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	// local callback functions
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -83,9 +83,9 @@ namespace VEGraphics
 
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Vulkanite Render Engine";
+		appInfo.pApplicationName = "Aegix App";
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "No Engine";
+		appInfo.pEngineName = "Aegix Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_0; 
 
@@ -647,5 +647,4 @@ namespace VEGraphics
 
 		endSingleTimeCommands(commandBuffer);
 	}
-
-} // namespace lve
+}

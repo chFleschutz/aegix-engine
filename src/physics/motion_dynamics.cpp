@@ -2,7 +2,7 @@
 
 #include "scene/components.h"
 
-namespace VEPhysics
+namespace Aegix::Physics
 {
 	Force& Force::operator+=(const Force& other)
 	{
@@ -73,13 +73,13 @@ namespace VEPhysics
 	Vector3 MotionDynamics::moveDirection() const
 	{
 		assert(linearSpeed() > 0.0f && "Direction of zero-vector is undefined");
-		return MathLib::normalize(m_linearVelocity);
+		return Aegix::MathLib::normalize(m_linearVelocity);
 	}
 
 	Vector3 MotionDynamics::angularDirection() const
 	{
 		assert(angularSpeed() > 0.0f && "Direction of zero-vector is undefined");
-		return MathLib::normalize(m_angularVelocity);
+		return Aegix::MathLib::normalize(m_angularVelocity);
 	}
 
 	void MotionDynamics::update(float deltaSeconds)
@@ -88,7 +88,7 @@ namespace VEPhysics
 
 		applyForces(deltaSeconds);
 		// Update transform
-		auto& transform = getComponent<VEComponent::Transform>();
+		auto& transform = getComponent<Aegix::Component::Transform>();
 		transform.location += m_linearVelocity * deltaSeconds;
 		transform.rotation += m_angularVelocity * deltaSeconds;
 	}
@@ -113,7 +113,4 @@ namespace VEPhysics
 		addLinearForce(-m_linearVelocity * m_properties.linearFriction);
 		addAngularForce(-m_angularVelocity * m_properties.angularFriction);
 	}
-
-
-
-} // namespace VEPhysics
+}

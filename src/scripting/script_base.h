@@ -3,7 +3,7 @@
 #include "scene/entity.h"
 #include "scene/components.h"
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class ScriptBase
 	{
@@ -43,12 +43,11 @@ namespace VEScripting
 		}
 
 		/// @brief Returns the entity
-		VEScene::Entity entity() const { return m_entity; }
+		Aegix::Scene::Entity entity() const { return m_entity; }
 
 	private:
-		VEScene::Entity m_entity;
+		Aegix::Scene::Entity m_entity;
 
-		friend class VEScene::Entity;
+		friend class Aegix::Scene::Entity;
 	};
-
-} // namespace VEScripting
+}

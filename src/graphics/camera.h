@@ -2,7 +2,7 @@
 
 #include "utils/math_utils.h"
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
 	/// @brief Representation of a camera
 	/// @note A Camera is created by default when creating a Scene
@@ -47,6 +47,4 @@ namespace VEGraphics
 		Matrix4 m_viewMatrix{ 1.0f };
 		Matrix4 m_inverseViewMatrix{ 1.0f };
 	};
-
-} // namespace vre
-
+}

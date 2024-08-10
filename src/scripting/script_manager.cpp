@@ -2,7 +2,7 @@
 
 #include "scripting/script_base.h"
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	void ScriptManager::addScript(ScriptBase* script)
 	{
@@ -38,5 +38,4 @@ namespace VEScripting
 		}
 		m_newScripts.clear();
 	}
-
-} // namespace VEScripting
+}

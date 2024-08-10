@@ -3,7 +3,7 @@
 #include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
-namespace VEPhysics
+namespace Aegix::Physics
 {
 	/// @brief Represents a directional and angular force.
 	struct Force
@@ -28,7 +28,7 @@ namespace VEPhysics
 
 
 	/// @brief Adds motion dynamics to an object to update its position and rotation each frame.
-	class MotionDynamics : public VEScripting::ScriptBase
+	class MotionDynamics : public Aegix::Scripting::ScriptBase
 	{
 	public:
 		struct Properties
@@ -97,5 +97,4 @@ namespace VEPhysics
 		Vector3 m_accumulatedLinearForce{ 0.0f };
 		Vector3 m_accumulatedAngularForce{ 0.0f };
 	};
-
-} // namespace VEPhysics
+}

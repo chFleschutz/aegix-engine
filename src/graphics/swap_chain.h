@@ -8,9 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace VEGraphics
+namespace Aegix::Graphics
 {
-
 	class SwapChain
 	{
 	public:
@@ -83,5 +82,4 @@ namespace VEGraphics
 		std::vector<VkFence> m_imagesInFlight;
 		size_t m_currentFrame = 0;
 	};
-
-} // namespace vre
+}

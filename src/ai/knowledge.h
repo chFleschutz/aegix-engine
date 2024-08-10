@@ -3,7 +3,7 @@
 #include "scene/entity.h"
 #include "utils/math_utils.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
 	struct Knowledge
 	{
@@ -37,17 +37,17 @@ namespace VEAI
 
 	struct EntityKnowledge : public Knowledge
 	{
-		VEScene::Entity entity;
+		Aegix::Scene::Entity entity;
 
 		EntityKnowledge() = default;
-		explicit EntityKnowledge(VEScene::Entity entity) : entity(entity) {}
+		explicit EntityKnowledge(Aegix::Scene::Entity entity) : entity(entity) {}
 	};
 
 	struct EntityGroupKnowledge : public Knowledge
 	{
-		std::vector<VEScene::Entity>& entities; // TODO: ensure reference is valid (e.g. by using a shared_ptr or make a copy and store on blackboard <-!)
+		std::vector<Aegix::Scene::Entity>& entities; // TODO: ensure reference is valid (e.g. by using a shared_ptr or make a copy and store on blackboard <-!)
 
-		explicit EntityGroupKnowledge(std::vector<VEScene::Entity>& entities) : entities(entities) {}
+		explicit EntityGroupKnowledge(std::vector<Aegix::Scene::Entity>& entities) : entities(entities) {}
 	};
 
 	struct PathKnowledge : public Knowledge
@@ -57,5 +57,4 @@ namespace VEAI
 		PathKnowledge() = default;
 		explicit PathKnowledge(std::vector<Vector3> path) : path(path) {}
 	};
-
-} // namespace VEAI
+}

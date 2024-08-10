@@ -1,6 +1,6 @@
 #include "option.h"
 
-namespace VEAI
+namespace Aegix::AI
 {
     void Option::initialize(AIComponent* aiComponent, float duration, float cooldown)
     {
@@ -71,5 +71,4 @@ namespace VEAI
             }
         }
     }
-
-} // namespace VEAI
+}

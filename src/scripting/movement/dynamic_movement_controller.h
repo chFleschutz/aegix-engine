@@ -3,7 +3,7 @@
 #include "core/input.h"
 #include "scripting/script_base.h"
 
-namespace VEScripting
+namespace Aegix::Scripting
 {
 	class DynamicMovementController : public ScriptBase
 	{
@@ -24,5 +24,4 @@ namespace VEScripting
 		float m_linearforce = 20.0f;
 		float m_angularforce = 20.0f;
 	};
-
-} // namespace VEScripting
+}
