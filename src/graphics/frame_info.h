@@ -7,7 +7,10 @@
 
 namespace Aegix::Graphics
 {
-#define MAX_LIGHTS 10 // TODO: Remove define
+	struct GlobalLimits
+	{
+		static constexpr int MAX_LIGHTS = 10;
+	};
 
 	struct PointLight
 	{
@@ -21,7 +24,7 @@ namespace Aegix::Graphics
 		Matrix4 view{1.0f};
 		Matrix4 inverseView{1.0f};
 		Vector4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
-		PointLight pointLights[MAX_LIGHTS];
+		PointLight pointLights[GlobalLimits::MAX_LIGHTS];
 		int numLights;
 	};
 

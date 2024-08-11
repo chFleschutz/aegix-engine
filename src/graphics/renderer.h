@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-		void renderFrame(float frametime, Scene::Scene& scene, Camera& camera);
+		void renderFrame(float frametime, Scene::Scene& scene);
 
 		void shutdown();
 

@@ -38,9 +38,6 @@ namespace Aegix
 
 		m_scene->initialize();
 
-		auto& camera = m_scene->camera().getComponent<Aegix::Component::Camera>().camera;
-		auto& cameraTransform = m_scene->camera().getComponent<Aegix::Component::Transform>();
-
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// Main Update loop
@@ -56,12 +53,8 @@ namespace Aegix
 			// Update all components
 			m_scene->update(frameTimeSec);
 
-			float aspect = m_renderer.aspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-			camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
-
 			// Rendering
-			m_renderer.renderFrame(frameTimeSec, *m_scene, camera);
+			m_renderer.renderFrame(frameTimeSec, *m_scene);
 
 			applyFrameBrake(frameBeginTime);
 		}

@@ -2,6 +2,7 @@
 
 #include "graphics/buffer.h"
 #include "graphics/descriptors.h"
+#include "graphics/frame_info.h"
 #include "graphics/material.h"
 #include "graphics/pipeline.h"
 #include "graphics/swap_chain.h"
@@ -23,7 +24,7 @@ namespace Aegix::Graphics
 		}
 
 		virtual void initialize(Scene::Scene& scene, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) = 0;
-		virtual void render(VkCommandBuffer commandBuffer, Scene::Scene& scene) = 0;
+		virtual void render(const FrameInfo& frameInfo) = 0;
 
 	protected:
 		VulkanDevice& m_device;
@@ -79,32 +80,40 @@ namespace Aegix::Graphics
 
 		virtual void initialize(Scene::Scene& scene, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) override
 		{
-			auto view = scene.viewEntitiesByType<Component::Material>();
-			
-			createDescriptorPool(view.size());
 			createDescriptorSetLayouts();
 			createPipelineLayout(globalSetLayout);
 			createPipeline(renderPass);
 
 			// Create materials
+			auto view = scene.viewEntitiesByType<Component::Material>();
+			createDescriptorPool(view.size());
 			for (auto&& [entity, material] : view.each())
 			{
 				assert(material.material);
 
 				material.material->initialize(*m_descriptorSetLayout, *m_descriptorPool);
 			}
-
 		}
 
-		virtual void render(VkCommandBuffer commandBuffer, Scene::Scene& scene) override
+		virtual void render(const FrameInfo& frameInfo) override
 		{
-			m_pipeline->bind(commandBuffer);
+			m_pipeline->bind(frameInfo.commandBuffer);
+
+			vkCmdBindDescriptorSets(
+				frameInfo.commandBuffer,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				m_pipelineLayout,
+				0, 1,
+				&frameInfo.globalDescriptorSet,
+				0, nullptr
+			);
 
 			// Iterate over entities with material
-			for (auto&& [entity, transform, mesh, material] : scene.viewEntitiesByType<Component::Transform, Component::Mesh, Component::Material>().each())
+			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, Component::Material>();
+			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
 				auto descriptorSet = material.material->descriptorSet(0);
-				vkCmdBindDescriptorSets(commandBuffer,
+				vkCmdBindDescriptorSets(frameInfo.commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
 					m_pipelineLayout,
 					0, 1,
@@ -128,15 +137,15 @@ namespace Aegix::Graphics
 				push.normalMatrix = colorNormalMatrix;
 
 				vkCmdPushConstants(
-					commandBuffer,
+					frameInfo.commandBuffer,
 					m_pipelineLayout,
 					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 					0,
 					sizeof(SimplePushConstantData),
 					&push);
 
-				mesh.model->bind(commandBuffer);
-				mesh.model->draw(commandBuffer);
+				mesh.model->bind(frameInfo.commandBuffer);
+				mesh.model->draw(frameInfo.commandBuffer);
 			}
 		}
 
@@ -181,8 +190,8 @@ namespace Aegix::Graphics
 			pipelineConfig.renderPass = renderPass;
 			pipelineConfig.pipelineLayout = m_pipelineLayout;
 
-			std::string vertShaderPath = SHADER_DIR "simple_shader.vert.spv";
-			std::string fragShaderPath = SHADER_DIR "simple_shader.frag.spv";
+			std::string vertShaderPath = SHADER_DIR "example.vert.spv";
+			std::string fragShaderPath = SHADER_DIR "example.frag.spv";
 
 			m_pipeline = std::make_unique<Pipeline>(m_device, vertShaderPath, fragShaderPath, pipelineConfig);
 		}

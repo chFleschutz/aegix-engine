@@ -37,6 +37,9 @@ namespace Aegix::Graphics
 
 		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
 		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
+
+		// TODO
+		//m_renderSystems.push_back(std::make_unique<ExampleRenderSystem>(m_device));
 	}
 
 	Renderer::~Renderer()
@@ -145,11 +148,16 @@ namespace Aegix::Graphics
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void Renderer::renderFrame(float frametime, Scene::Scene& scene, Camera& camera)
+	void Renderer::renderFrame(float frametime, Scene::Scene& scene)
 	{
 		auto commandBuffer = beginFrame();
 		if (!commandBuffer)
 			return;
+
+		auto& camera = scene.camera().getComponent<Aegix::Component::Camera>().camera;
+		auto& cameraTransform = scene.camera().getComponent<Aegix::Component::Transform>();
+		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
+		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
 		FrameInfo frameInfo{
 			m_currentFrameIndex,
@@ -173,6 +181,11 @@ namespace Aegix::Graphics
 
 		// render
 		beginSwapChainRenderPass(commandBuffer);
+
+		//for (auto&& system : m_renderSystems)
+		//{
+		//	system->render(frameInfo);
+		//}
 
 		m_simpleRenderSystem->renderGameObjects(frameInfo);
 		m_pointLightSystem->render(frameInfo);

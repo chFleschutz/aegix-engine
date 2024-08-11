@@ -39,12 +39,11 @@ namespace Aegix::Graphics
 #endif
 
 		VulkanDevice(Window& window);
+		VulkanDevice(const VulkanDevice&) = delete;
+		VulkanDevice(VulkanDevice&&) = delete;
 		~VulkanDevice();
 
-		// Not copyable or movable
-		VulkanDevice(const VulkanDevice&) = delete;
-		void operator=(const VulkanDevice&) = delete;
-		VulkanDevice(VulkanDevice&&) = delete;
+		VulkanDevice& operator=(const VulkanDevice&) = delete;
 		VulkanDevice& operator=(VulkanDevice&&) = delete;
 
 		VkCommandPool commandPool() { return m_commandPool; }
@@ -58,13 +57,7 @@ namespace Aegix::Graphics
 		QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(m_physicalDevice); }
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-		// Buffer Helper Functions
-		void createBuffer(
-			VkDeviceSize size, 
-			VkBufferUsageFlags usage, 
-			VkMemoryPropertyFlags properties, 
-			VkBuffer& buffer, 
-			VkDeviceMemory& bufferMemory);
+		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 		VkCommandBuffer beginSingleTimeCommands();
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -84,7 +77,6 @@ namespace Aegix::Graphics
 		void createLogicalDevice();
 		void createCommandPool();
 
-		// helper functions
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		std::vector<const char*> getRequiredExtensions();
 		bool checkValidationLayerSupport();
