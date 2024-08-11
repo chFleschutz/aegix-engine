@@ -40,10 +40,10 @@ namespace Aegix
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
 
-		Aegix::Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
-		Aegix::Graphics::VulkanDevice m_device{ m_window };
-		Aegix::Graphics::Renderer m_renderer{ m_window, m_device };
+		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
+		Graphics::VulkanDevice m_device{ m_window };
+		Graphics::Renderer m_renderer{ m_window, m_device };
 
-		std::unique_ptr<Aegix::Scene::Scene> m_scene;
+		std::unique_ptr<Scene::Scene> m_scene;
 	};
 }

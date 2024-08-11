@@ -44,6 +44,18 @@ namespace Aegix::Graphics
 		freeCommandBuffers();
 	}
 
+	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
+	{
+		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
+		return m_commandBuffers[m_currentFrameIndex];
+	}
+
+	int Graphics::Renderer::frameIndex() const
+	{
+		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
+		return m_currentFrameIndex;
+	}
+
 	VkCommandBuffer Renderer::beginFrame()
 	{
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
@@ -135,12 +147,6 @@ namespace Aegix::Graphics
 
 	void Renderer::renderFrame(float frametime, Scene::Scene& scene, Camera& camera)
 	{
-		//for (auto& renderSystem : m_renderSystems)
-		//{
-		//	// TODO:
-		//	renderSystem->render();
-		//}
-
 		auto commandBuffer = beginFrame();
 		if (!commandBuffer)
 			return;
@@ -155,7 +161,7 @@ namespace Aegix::Graphics
 		};
 
 		// update
-		Aegix::Graphics::GlobalUbo ubo{};
+		GlobalUbo ubo{};
 		ubo.projection = camera.projectionMatrix();
 		ubo.view = camera.viewMatrix();
 		ubo.inverseView = camera.inverseViewMatrix();

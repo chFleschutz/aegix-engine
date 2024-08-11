@@ -34,20 +34,16 @@ namespace Aegix
 
 	void Engine::run()
 	{
-		// Init Input
 		Input::instance().initialize(m_window.glfwWindow());
 
-		// Init Scene
 		m_scene->initialize();
 
-		// Init Camera
 		auto& camera = m_scene->camera().getComponent<Aegix::Component::Camera>().camera;
 		auto& cameraTransform = m_scene->camera().getComponent<Aegix::Component::Transform>();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
-		// ***********
-		// update loop
+		// Main Update loop
 		while (!m_window.shouldClose())
 		{
 			// Calculate time
@@ -64,7 +60,7 @@ namespace Aegix
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 			camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
-			// RENDERING
+			// Rendering
 			m_renderer.renderFrame(frameTimeSec, *m_scene, camera);
 
 			applyFrameBrake(frameBeginTime);
