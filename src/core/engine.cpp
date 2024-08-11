@@ -18,11 +18,6 @@ namespace Aegix
 {
 	Engine::Engine()
 	{
-		m_globalPool = Aegix::Graphics::DescriptorPool::Builder(m_device)
-			.setMaxSets(Aegix::Graphics::SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, Aegix::Graphics::SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.build();
-
 		std::cout << "Engine Initialized!\n";
 
 		std::cout <<
@@ -39,37 +34,6 @@ namespace Aegix
 
 	void Engine::run()
 	{
-		// ****
-		// Init
-		std::vector<std::unique_ptr<Aegix::Graphics::Buffer>> uboBuffers(Aegix::Graphics::SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (int i = 0; i < uboBuffers.size(); i++)
-		{
-			uboBuffers[i] = std::make_unique<Aegix::Graphics::Buffer>(
-				m_device,
-				sizeof(Aegix::Graphics::GlobalUbo),
-				1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-			);
-			uboBuffers[i]->map();
-		}
-
-		auto globalSetLayout = Aegix::Graphics::DescriptorSetLayout::Builder(m_device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.build();
-
-		std::vector<VkDescriptorSet> globalDescriptorSets(Aegix::Graphics::SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (int i = 0; i < globalDescriptorSets.size(); i++)
-		{
-			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			Aegix::Graphics::DescriptorWriter(*globalSetLayout, *m_globalPool)
-				.writeBuffer(0, &bufferInfo)
-				.build(globalDescriptorSets[i]);
-		}
-
-		Aegix::Graphics::SimpleRenderSystem simpleRenderSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
-		Aegix::Graphics::PointLightSystem pointLightSystem{ m_device, m_renderer.swapChainRenderPass(), globalSetLayout->descriptorSetLayout() };
-
 		// Init Input
 		Input::instance().initialize(m_window.glfwWindow());
 
@@ -101,39 +65,7 @@ namespace Aegix
 			camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
 			// RENDERING
-			if (auto commandBuffer = m_renderer.beginFrame())
-			{
-				int frameIndex = m_renderer.frameIndex();
-				Aegix::Graphics::FrameInfo frameInfo{
-					frameIndex,
-					frameTimeSec,
-					commandBuffer,
-					&camera,
-					globalDescriptorSets[frameIndex],
-					m_scene.get()
-				};
-
-				// update
-				Aegix::Graphics::GlobalUbo ubo{};
-				ubo.projection = camera.projectionMatrix();
-				ubo.view = camera.viewMatrix();
-				ubo.inverseView = camera.inverseViewMatrix();
-
-				pointLightSystem.update(frameInfo, ubo);
-
-				uboBuffers[frameIndex]->writeToBuffer(&ubo);
-				uboBuffers[frameIndex]->flush();
-
-				// render
-				m_renderer.beginSwapChainRenderPass(commandBuffer);
-
-				// render solid objects first
-				simpleRenderSystem.renderGameObjects(frameInfo);
-				pointLightSystem.render(frameInfo);
-
-				m_renderer.endSwapChainRenderPass(commandBuffer);
-				m_renderer.endFrame();
-			}
+			m_renderer.renderFrame(frameTimeSec, *m_scene, camera);
 
 			applyFrameBrake(frameBeginTime);
 		}

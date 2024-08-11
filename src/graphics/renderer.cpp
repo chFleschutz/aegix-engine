@@ -1,5 +1,7 @@
 #include "renderer.h"
 
+#include "graphics/frame_info.h"
+
 #include <array>
 #include <stdexcept>
 
@@ -9,6 +11,32 @@ namespace Aegix::Graphics
 	{
 		recreateSwapChain();
 		createCommandBuffers();
+
+		m_globalPool = DescriptorPool::Builder(m_device)
+			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
+
+		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.build();
+
+		m_globalUniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		m_globalDescriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_globalUniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(GlobalUbo), 1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			m_globalUniformBuffers[i]->map();
+
+			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
+			DescriptorWriter(*globalSetLayout, *m_globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(m_globalDescriptorSets[i]);
+		}
+
+		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
+		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
 	}
 
 	Renderer::~Renderer()
@@ -105,13 +133,46 @@ namespace Aegix::Graphics
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void Renderer::renderFrame()
+	void Renderer::renderFrame(float frametime, Scene::Scene& scene, Camera& camera)
 	{
 		//for (auto& renderSystem : m_renderSystems)
 		//{
 		//	// TODO:
 		//	renderSystem->render();
 		//}
+
+		auto commandBuffer = beginFrame();
+		if (!commandBuffer)
+			return;
+
+		FrameInfo frameInfo{
+			m_currentFrameIndex,
+			frametime,
+			commandBuffer,
+			&camera,
+			m_globalDescriptorSets[m_currentFrameIndex],
+			&scene
+		};
+
+		// update
+		Aegix::Graphics::GlobalUbo ubo{};
+		ubo.projection = camera.projectionMatrix();
+		ubo.view = camera.viewMatrix();
+		ubo.inverseView = camera.inverseViewMatrix();
+
+		m_pointLightSystem->update(frameInfo, ubo);
+
+		m_globalUniformBuffers[m_currentFrameIndex]->writeToBuffer(&ubo);
+		m_globalUniformBuffers[m_currentFrameIndex]->flush();
+
+		// render
+		beginSwapChainRenderPass(commandBuffer);
+
+		m_simpleRenderSystem->renderGameObjects(frameInfo);
+		m_pointLightSystem->render(frameInfo);
+
+		endSwapChainRenderPass(commandBuffer);
+		endFrame();
 	}
 
 	void Graphics::Renderer::shutdown()

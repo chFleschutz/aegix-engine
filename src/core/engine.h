@@ -44,7 +44,6 @@ namespace Aegix
 		Aegix::Graphics::VulkanDevice m_device{ m_window };
 		Aegix::Graphics::Renderer m_renderer{ m_window, m_device };
 
-		std::unique_ptr<Aegix::Graphics::DescriptorPool> m_globalPool{};
 		std::unique_ptr<Aegix::Scene::Scene> m_scene;
 	};
 }

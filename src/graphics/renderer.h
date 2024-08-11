@@ -3,6 +3,8 @@
 #include "graphics/device.h"
 #include "graphics/render_system.h"
 #include "graphics/swap_chain.h"
+#include "graphics/systems/point_light_system.h"
+#include "graphics/systems/simple_render_system.h"
 #include "graphics/window.h"
 
 #include <cassert>
@@ -35,12 +37,15 @@ namespace Aegix::Graphics
 			return m_currentFrameIndex;
 		}
 
+		//TODO: remove
+		DescriptorPool& globalPool() { return *m_globalPool; }
+
 		VkCommandBuffer beginFrame();
 		void endFrame();
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-		void renderFrame();
+		void renderFrame(float frametime, Scene::Scene& scene, Camera& camera);
 
 		void shutdown();
 
@@ -58,6 +63,12 @@ namespace Aegix::Graphics
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 
+		std::unique_ptr<Aegix::Graphics::DescriptorPool> m_globalPool;
+		std::vector<std::unique_ptr<Buffer>> m_globalUniformBuffers;
+		std::vector<VkDescriptorSet> m_globalDescriptorSets;
+
+		std::unique_ptr<SimpleRenderSystem> m_simpleRenderSystem;
+		std::unique_ptr<PointLightSystem> m_pointLightSystem;
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
 }
