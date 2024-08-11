@@ -2,6 +2,7 @@
 
 #include "graphics/camera.h"
 #include "graphics/model.h"
+#include "graphics/material.h"
 #include "utils/color.h"
 #include "utils/math_utils.h"
 
@@ -53,6 +54,12 @@ namespace Aegix::Component
 		Mesh(const Mesh&) = default;
 		Mesh(std::shared_ptr<Graphics::Model> entityModel, const Color& baseColor = Color())
 			: model(entityModel), color(baseColor) {}
+	};
+
+	/// @brief Holds a material
+	struct Material
+	{
+		std::shared_ptr<Graphics::BaseMaterial> material;
 	};
 
 	/// @brief Creates a light 

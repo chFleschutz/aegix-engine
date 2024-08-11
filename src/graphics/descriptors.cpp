@@ -67,12 +67,12 @@ namespace Aegix::Graphics
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(
-        VkDescriptorPoolCreateFlags flags)
+    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags)
     {
         m_poolFlags = flags;
         return *this;
     }
+
     DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count)
     {
         m_maxSets = count;

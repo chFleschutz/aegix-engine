@@ -107,11 +107,11 @@ namespace Aegix::Graphics
 
 	void Renderer::renderFrame()
 	{
-		for (auto& renderSystem : m_renderSystems)
-		{
-			// TODO:
-			renderSystem->render();
-		}
+		//for (auto& renderSystem : m_renderSystems)
+		//{
+		//	// TODO:
+		//	renderSystem->render();
+		//}
 	}
 
 	void Graphics::Renderer::shutdown()
