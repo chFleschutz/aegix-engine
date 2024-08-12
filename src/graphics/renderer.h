@@ -37,23 +37,21 @@ namespace Aegix::Graphics
 		template<typename T>
 		std::unique_ptr<T>& addRenderSystem()
 		{
-			// TODO: Cant include rendersystem here -> cant create it
-			//auto it = m_renderSystemMap.find(typeid(T));
-			//if (it != m_renderSystemMap.end())
-			//	return std::static_pointer_cast<T>(it->second);
+			auto it = m_renderSystemMap.find(typeid(T));
+			if (it != m_renderSystemMap.end())
+				return std::static_pointer_cast<T>(it->second);
 
-			//auto pair = m_renderSystemMap.emplace(typeid(T), std::make_unique<T>(m_device));
-			//return std::static_pointer_cast<T>(pair.first->second);
-
-			return nullptr;
+			auto pair = m_renderSystemMap.emplace(typeid(T), std::make_unique<T>(m_device));
+			return std::static_pointer_cast<T>(pair.first->second);
 		}
 
+		VulkanDevice& device() { return m_device; }
+		DescriptorPool& globalPool() { return *m_globalPool; }
 		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }
 		VkCommandBuffer currentCommandBuffer() const;
 		int frameIndex() const;
-		DescriptorPool& globalPool() { return *m_globalPool; }
 
 		VkCommandBuffer beginFrame();
 		void endFrame();

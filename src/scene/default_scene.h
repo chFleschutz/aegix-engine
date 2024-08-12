@@ -4,6 +4,7 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 #include "scripting/script_base.h"
+#include "core/asset_manager.h"
 
 #include "graphics/systems/example_render_system.h"
 
@@ -28,14 +29,16 @@ public:
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
+		auto& assetManager = Aegix::AssetManager::instance();
+
 		{ // Models 
-			auto teapotModel = loadModel("models/teapot.obj");
+			auto teapotModel = assetManager.createModel("models/teapot.obj");
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
 			teapot.addComponent<Rotator>();
 			
-			auto planeModel = loadModel("models/plane.obj");
-			auto material = createMaterial<Aegix::Graphics::ExampleMaterial>();
+			auto planeModel = assetManager.createModel("models/plane.obj");
+			auto material = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
 		}

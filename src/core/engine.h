@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/asset_manager.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/renderer.h"
@@ -35,7 +36,7 @@ namespace Aegix
 		void loadScene()
 		{
 			static_assert(std::is_base_of_v<Scene::Scene, T>, "T has to be a subclass of Scene");
-			m_scene = std::make_unique<T>(m_device, m_renderer);
+			m_scene = std::make_unique<T>();
 		}
 
 	private:
@@ -44,6 +45,8 @@ namespace Aegix
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
+
+		AssetManagerGuard m_assetManager{ m_renderer };
 
 		std::unique_ptr<Scene::Scene> m_scene;
 	};
