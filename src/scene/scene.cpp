@@ -13,7 +13,8 @@ namespace Aegix::Scene
 		return Graphics::Model::createModelFromFile(m_device, modelPath);
 	}
 
-	Scene::Scene(Graphics::VulkanDevice& device) : m_device{ device }
+	Scene::Scene(Graphics::VulkanDevice& device, Graphics::Renderer& renderer) 
+		: m_device{ device }, m_renderer{ renderer }
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<Component::Camera>();

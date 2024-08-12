@@ -5,6 +5,8 @@
 #include "scene/scene.h"
 #include "scripting/script_base.h"
 
+#include "graphics/systems/example_render_system.h"
+
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
 class Rotator : public Aegix::Scripting::ScriptBase
@@ -33,6 +35,7 @@ public:
 			teapot.addComponent<Rotator>();
 			
 			auto planeModel = loadModel("models/plane.obj");
+			auto material = createMaterial<Aegix::Graphics::ExampleMaterial>();
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
 		}

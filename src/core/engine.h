@@ -35,7 +35,7 @@ namespace Aegix
 		void loadScene()
 		{
 			static_assert(std::is_base_of_v<Scene::Scene, T>, "T has to be a subclass of Scene");
-			m_scene = std::make_unique<T>(m_device);
+			m_scene = std::make_unique<T>(m_device, m_renderer);
 		}
 
 	private:

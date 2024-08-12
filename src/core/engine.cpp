@@ -54,7 +54,7 @@ namespace Aegix
 			m_scene->update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(frameTimeSec, *m_scene);
+			m_renderer.renderFrame(frameTimeSec, m_scene.get());
 
 			applyFrameBrake(frameBeginTime);
 		}

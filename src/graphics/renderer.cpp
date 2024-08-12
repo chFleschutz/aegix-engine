@@ -1,8 +1,12 @@
 #include "renderer.h"
 
 #include "graphics/frame_info.h"
+#include "graphics/render_system.h"
+#include "graphics/systems/point_light_system.h"
+#include "graphics/systems/simple_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
+#include "scene/scene.h"
 
 #include <array>
 #include <cassert>
@@ -52,14 +56,16 @@ namespace Aegix::Graphics
 
 		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
 		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
-
-		// TODO
-		//m_renderSystems.push_back(std::make_unique<ExampleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout()));
 	}
 
 	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
+
+		m_simpleRenderSystem.reset();
+		m_pointLightSystem.reset();
+
+		m_renderSystems.clear();
 	}
 
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
@@ -163,14 +169,16 @@ namespace Aegix::Graphics
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void Renderer::renderFrame(float frametime, Scene::Scene& scene)
+	void Renderer::renderFrame(float frametime, Scene::Scene* scene)
 	{
+		assert(scene != nullptr && "Rendering requires a valid scene");
+
 		auto commandBuffer = beginFrame();
 		if (!commandBuffer)
 			return;
 
-		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
-		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
+		auto& camera = scene->camera().getComponent<Component::Camera>().camera;
+		auto& cameraTransform = scene->camera().getComponent<Component::Transform>();
 		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
 		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
@@ -180,7 +188,7 @@ namespace Aegix::Graphics
 			commandBuffer,
 			&camera,
 			m_globalDescriptorSets[m_currentFrameIndex],
-			&scene
+			scene
 		};
 
 		// update

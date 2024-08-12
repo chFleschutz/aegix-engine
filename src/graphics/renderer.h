@@ -1,17 +1,31 @@
 #pragma once
 
+#include "graphics/buffer.h"
+#include "graphics/descriptors.h"
 #include "graphics/device.h"
-#include "graphics/render_system.h"
 #include "graphics/swap_chain.h"
-#include "graphics/systems/point_light_system.h"
-#include "graphics/systems/simple_render_system.h"
 #include "graphics/window.h"
 
 #include <memory>
 #include <vector>
+#include <unordered_map>
+#include <typeindex>
+
+namespace Aegix::Scene
+{
+	class Scene;
+}
 
 namespace Aegix::Graphics
 {
+	class RenderSystem;
+
+	class PointLightSystem;
+	class SimpleRenderSystem;
+
+	template<typename T>
+	struct RenderSystemRef;
+
 	class Renderer
 	{
 	public:
@@ -20,19 +34,34 @@ namespace Aegix::Graphics
 		Renderer& operator=(const Renderer&) = delete;
 		~Renderer();
 
+		template<typename T>
+		std::unique_ptr<T>& addRenderSystem()
+		{
+			// TODO: Cant include rendersystem here -> cant create it
+			//auto it = m_renderSystemMap.find(typeid(T));
+			//if (it != m_renderSystemMap.end())
+			//	return std::static_pointer_cast<T>(it->second);
+
+			//auto pair = m_renderSystemMap.emplace(typeid(T), std::make_unique<T>(m_device));
+			//return std::static_pointer_cast<T>(pair.first->second);
+
+			return nullptr;
+		}
+
 		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }
 		VkCommandBuffer currentCommandBuffer() const;
 		int frameIndex() const;
-		
+		DescriptorPool& globalPool() { return *m_globalPool; }
+
 		VkCommandBuffer beginFrame();
 		void endFrame();
 		
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-		void renderFrame(float frametime, Scene::Scene& scene);
+		void renderFrame(float frametime, Scene::Scene* scene);
 
 		void shutdown();
 
@@ -57,5 +86,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<SimpleRenderSystem> m_simpleRenderSystem;
 		std::unique_ptr<PointLightSystem> m_pointLightSystem;
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
+		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystemMap;
 	};
 }

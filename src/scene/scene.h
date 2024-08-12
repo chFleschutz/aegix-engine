@@ -2,6 +2,7 @@
 
 #include "graphics/device.h"
 #include "graphics/model.h"
+#include "graphics/renderer.h"
 #include "scripting/script_manager.h"
 
 #include <entt/entt.hpp>
@@ -26,7 +27,7 @@ namespace Aegix::Scene
 	{
 	public:
 		// Todo: remove device parameter
-		Scene(Graphics::VulkanDevice& device);
+		Scene(Graphics::VulkanDevice& device, Graphics::Renderer& renderer);
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;
@@ -60,20 +61,16 @@ namespace Aegix::Scene
 		/// @note The shared pointer can be used multiple times
 		std::shared_ptr<Graphics::Model> loadModel(const std::filesystem::path& modelPath);
 
-		template<typename T, typename... Args>
-		std::shared_ptr<T> createMaterial(Args&&... args)
+		template<typename T>
+		std::shared_ptr<T> createMaterial()
 		{
-			// TODO: error on static_assert should not be here
-			//static_assert(std::is_base_of_v<Graphics::BaseMaterial, T>, "T must derive from BaseMaterial");
+			//static_assert(std::is_base_of_v<Aegix::Graphics::BaseMaterial, T>, "T must derive from BaseMaterial");
 
+			// TODO: Cyclic dependency prevents this from working
 			//using SystemType = typename Graphics::RenderSystemRef<T>::type;
-			
-			// TODO: insert into renderer
-			//auto renderSystem = m_renderer.renderSystem<SystemType>();
-
-			//auto setLayout = renderSystem.descriptorSetLayout();
-			//auto pool = m_renderer.descriptorPool();
-			//return std::make_shared<T>(m_device, setLayout, pool, std::forward<Args>(args)...);
+			//auto renderSystem = m_renderer.addRenderSystem<SystemType>();
+			//return std::make_shared<T>(m_device, renderSystem->descriptorSetLayout(), m_renderer.globalPool());
+			return nullptr;
 		}
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
@@ -82,6 +79,7 @@ namespace Aegix::Scene
 
 	private:
 		Graphics::VulkanDevice& m_device;
+		Graphics::Renderer& m_renderer;
 
 		entt::registry m_registry;
 

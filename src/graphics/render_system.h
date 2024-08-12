@@ -12,6 +12,10 @@ namespace Aegix::Graphics
 	{
 	public:
 		RenderSystem(VulkanDevice& device) : m_device{ device } {}
+
+		RenderSystem(const RenderSystem&) = delete;
+		RenderSystem& operator=(const RenderSystem&) = delete;
+
 		virtual ~RenderSystem()
 		{
 			// TODO: Wrap this in own class
@@ -19,18 +23,15 @@ namespace Aegix::Graphics
 				vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
 		}
 
+		DescriptorSetLayout& descriptorSetLayout() { return *m_descriptorSetLayout; }
+
 		virtual void render(const FrameInfo& frameInfo) = 0;
 
 	protected:
 		VulkanDevice& m_device;
 
-		std::unique_ptr<DescriptorPool> m_descriptorPool;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		VkPipelineLayout m_pipelineLayout = nullptr;
 		std::unique_ptr<Pipeline> m_pipeline;
 	};
-
-
-	template<typename T>
-	struct RenderSystemRef;
 }
