@@ -38,9 +38,10 @@ public:
 			teapot.addComponent<Rotator>();
 			
 			auto planeModel = assetManager.createModel("models/plane.obj");
-			auto material = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
+			auto exampleMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
+			plane.addComponent<Aegix::Component::Material>(exampleMat);
 		}
 		{ // Lights
 			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });

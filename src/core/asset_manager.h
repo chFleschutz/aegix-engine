@@ -1,13 +1,14 @@
 #pragma once
 
 #include "graphics/material.h"
-#include "graphics/renderer.h"
 #include "graphics/model.h"
+#include "graphics/renderer.h"
+#include "graphics/render_system.h"
 
-#include <memory>
-#include <filesystem>
-#include <type_traits>
 #include <cassert>
+#include <filesystem>
+#include <memory>
+#include <type_traits>
 
 namespace Aegix
 {
@@ -28,10 +29,10 @@ namespace Aegix
 		{
 			static_assert(std::is_base_of<Graphics::BaseMaterial, T>::value, "T must derive from BaseMaterial");
 
-			//using SystemType = typename RenderSystemRef<T>::type;
-			//auto system = m_renderer.addRenderSystem<SystemType>();
-			//return std::make_shared<T>(m_renderer.device(), system->descriptorSetLayout(), m_renderer.descriptorPool());
-			return nullptr;
+			using SystemType = typename Graphics::RenderSystemRef<T>::type;
+			auto& system = m_renderer.addRenderSystem<SystemType>();
+			//return std::make_shared<T>(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool());
+			return std::shared_ptr<T>(new T(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool()));
 		}
 
 		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);

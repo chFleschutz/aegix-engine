@@ -4,6 +4,9 @@
 
 namespace Aegix::Graphics
 {
+	template<typename T>
+	struct RenderSystemRef;
+
 	class BaseMaterial
 	{
 	public:
@@ -17,8 +20,4 @@ namespace Aegix::Graphics
 
 		std::vector<VkDescriptorSet> m_descriptorSets;
 	};
-
-
-	template<typename T>
-	struct RenderSystemRef;
 }

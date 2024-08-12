@@ -43,6 +43,13 @@ namespace Aegix::Graphics
 	class ExampleRenderSystem : public RenderSystem
 	{
 	public:
+		// TODO: remove later
+		struct SimplePushConstantData
+		{	// max 128 bytes
+			Matrix4 modelMatrix{ 1.0f };
+			Matrix4 normalMatrix{ 1.0f };
+		};
+
 		ExampleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 			: RenderSystem(device)
 		{
@@ -77,13 +84,6 @@ namespace Aegix::Graphics
 					0, nullptr
 				);
 
-				// TODO: remove later
-				struct SimplePushConstantData
-				{	// max 128 bytes
-					Matrix4 modelMatrix{ 1.0f };
-					Matrix4 normalMatrix{ 1.0f };
-				};
-
 				// TODO: transfer color as uniform
 				Matrix4 colorNormalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
 				colorNormalMatrix[3] = mesh.color.rgba();
@@ -115,16 +115,22 @@ namespace Aegix::Graphics
 
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 		{
-			std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout, m_descriptorSetLayout->descriptorSetLayout() };
+			std::vector<VkDescriptorSetLayout> descriptorSetLayouts {
+				globalSetLayout, 
+				m_descriptorSetLayout->descriptorSetLayout() 
+			};
+
+			VkPushConstantRange pushConstantRange{};
+			pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+			pushConstantRange.offset = 0;
+			pushConstantRange.size = sizeof(SimplePushConstantData);
 
 			VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 			pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
 			pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-
-			// TODO: Add push constants
-			pipelineLayoutInfo.pushConstantRangeCount = 0;
-			pipelineLayoutInfo.pPushConstantRanges = nullptr;
+			pipelineLayoutInfo.pushConstantRangeCount = 1;
+			pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 			if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
 				throw std::runtime_error("failed to create pipeline layout");

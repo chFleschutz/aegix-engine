@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,		500)
 			.build();
 
-		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
+		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
@@ -49,13 +49,13 @@ namespace Aegix::Graphics
 			m_globalUniformBuffers[i]->map();
 
 			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
-			DescriptorWriter(*globalSetLayout, *m_globalPool)
+			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
 				.writeBuffer(0, &bufferInfo)
 				.build(m_globalDescriptorSets[i]);
 		}
 
-		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
-		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
+		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
+		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
 	}
 
 	Renderer::~Renderer()
