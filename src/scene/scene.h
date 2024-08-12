@@ -60,12 +60,29 @@ namespace Aegix::Scene
 		/// @note The shared pointer can be used multiple times
 		std::shared_ptr<Graphics::Model> loadModel(const std::filesystem::path& modelPath);
 
+		template<typename T, typename... Args>
+		std::shared_ptr<T> createMaterial(Args&&... args)
+		{
+			// TODO: error on static_assert should not be here
+			//static_assert(std::is_base_of_v<Graphics::BaseMaterial, T>, "T must derive from BaseMaterial");
+
+			//using SystemType = typename Graphics::RenderSystemRef<T>::type;
+			
+			// TODO: insert into renderer
+			//auto renderSystem = m_renderer.renderSystem<SystemType>();
+
+			//auto setLayout = renderSystem.descriptorSetLayout();
+			//auto pool = m_renderer.descriptorPool();
+			//return std::make_shared<T>(m_device, setLayout, pool, std::forward<Args>(args)...);
+		}
+
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
 		Entity createEntity(const std::string& name = std::string(), const Vector3& location = { 0.0f, 0.0f, 0.0f });
 
 	private:
 		Graphics::VulkanDevice& m_device;
+
 		entt::registry m_registry;
 
 		Aegix::Scripting::ScriptManager m_scriptManager;

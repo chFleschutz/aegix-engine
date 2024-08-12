@@ -31,9 +31,10 @@ namespace Aegix
 		/// @brief Creates a scene of T 
 		/// @tparam T Subclass of Scene which should be loaded
 		/// @note T has to be a subclass of Scene otherwise compile will fail
-		template<class T, class = std::enable_if_t<std::is_base_of_v<Aegix::Scene::Scene, T>>>
+		template<typename T>
 		void loadScene()
 		{
+			static_assert(std::is_base_of_v<Scene::Scene, T>, "T has to be a subclass of Scene");
 			m_scene = std::make_unique<T>(m_device);
 		}
 

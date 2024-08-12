@@ -1,8 +1,11 @@
 #include "renderer.h"
 
 #include "graphics/frame_info.h"
+#include "scene/components.h"
+#include "scene/entity.h"
 
 #include <array>
+#include <cassert>
 #include <stdexcept>
 
 namespace Aegix::Graphics
@@ -12,9 +15,21 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 
+		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
 		m_globalPool = DescriptorPool::Builder(m_device)
-			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.setMaxSets(1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER,				500)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,			4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,			1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,	1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,	1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,			2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,		500)
 			.build();
 
 		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
@@ -39,7 +54,7 @@ namespace Aegix::Graphics
 		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout());
 
 		// TODO
-		//m_renderSystems.push_back(std::make_unique<ExampleRenderSystem>(m_device));
+		//m_renderSystems.push_back(std::make_unique<ExampleRenderSystem>(m_device, swapChainRenderPass(), globalSetLayout->descriptorSetLayout()));
 	}
 
 	Renderer::~Renderer()
@@ -154,8 +169,8 @@ namespace Aegix::Graphics
 		if (!commandBuffer)
 			return;
 
-		auto& camera = scene.camera().getComponent<Aegix::Component::Camera>().camera;
-		auto& cameraTransform = scene.camera().getComponent<Aegix::Component::Transform>();
+		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
+		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
 		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
 		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 

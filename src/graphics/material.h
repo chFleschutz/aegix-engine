@@ -7,10 +7,8 @@ namespace Aegix::Graphics
 	class BaseMaterial
 	{
 	public:
-		BaseMaterial(VulkanDevice& device) : m_device{ device } {}
+		BaseMaterial(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool) : m_device{ device } {}
 		virtual ~BaseMaterial() = default;
-
-		virtual void initialize(DescriptorSetLayout& setLayout, DescriptorPool& pool) = 0;
 
 		VkDescriptorSet descriptorSet(int index) { return m_descriptorSets[index]; }
 

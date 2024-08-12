@@ -7,7 +7,6 @@
 #include "graphics/systems/simple_render_system.h"
 #include "graphics/window.h"
 
-#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -51,7 +50,7 @@ namespace Aegix::Graphics
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 
-		std::unique_ptr<Aegix::Graphics::DescriptorPool> m_globalPool;
+		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::vector<std::unique_ptr<Buffer>> m_globalUniformBuffers;
 		std::vector<VkDescriptorSet> m_globalDescriptorSets;
 

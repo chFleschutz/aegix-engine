@@ -35,6 +35,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer commandBuffer;
 		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		Aegix::Scene::Scene* scene;
+		Scene::Scene* scene;
 	};
 }

@@ -48,7 +48,8 @@ namespace Aegix::Scene
 		/// @return A refrence to the new component
 		/// @note When adding a custom script ScriptComponent is added as its container
 		template<typename T, typename... Args>
-		auto addComponent(Args&&... args) -> typename std::enable_if<!std::is_base_of<Aegix::Scripting::ScriptBase, T>::value, T&>::type
+		typename std::enable_if_t<!std::is_base_of_v<Scripting::ScriptBase, T>, T&>
+			addComponent(Args&&... args)
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
@@ -56,21 +57,14 @@ namespace Aegix::Scene
 
 		/// @brief Adds a script derived from Aegix::Scripting::ScriptBase to the entity
 		template<typename T, typename... Args>
-		auto addComponent(Args&&... args) -> typename std::enable_if<std::is_base_of<Aegix::Scripting::ScriptBase, T>::value, T&>::type
+		typename std::enable_if_t<std::is_base_of_v<Scripting::ScriptBase, T>, T&>
+			addComponent(Args&&... args)
 		{
 			assert(!hasComponent<T>() && "Entity already has the component");
 			auto& script = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
 			script.m_entity = *this;
 			m_scene->addScript(&script);
 			return script;
-		}
-
-		template<typename T, typename... Args>
-		void addMaterial(Args&&... args)
-		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& material = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
-			// TODO: Initialize material so RenderSystem is added to the scene
 		}
 
 	private:
