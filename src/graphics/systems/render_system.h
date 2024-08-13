@@ -7,6 +7,14 @@
 
 namespace Aegix::Graphics
 {
+	/// @brief Forward declaration of RenderSystemRef. This is used to link a material to a render system
+	/// @tparam T Type of the material
+	/// @note See default_render_system.h for an example
+	template<typename T>
+	struct RenderSystemRef;
+
+
+	/// @brief Base class for all render systems
 	class RenderSystem
 	{
 	public:
