@@ -22,10 +22,14 @@ namespace Aegix
 		AssetManager(const AssetManager&) = delete;
 		AssetManager& operator=(const AssetManager&) = delete;
 
+		/// @brief Returns the instance of the AssetManager
 		static AssetManager& instance();
 
+		/// @brief Creates a material instance 
+		/// @tparam T Type of the material to create
+		/// @return Instance of the material
 		template<typename T>
-		std::shared_ptr<T> createMaterial()
+		std::shared_ptr<T> createMaterialInstance()
 		{
 			static_assert(std::is_base_of<Graphics::BaseMaterial, T>::value, "T must derive from BaseMaterial");
 
@@ -34,6 +38,10 @@ namespace Aegix
 			return std::make_shared<T>(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool());
 		}
 
+		/// @brief Creates a model from a file
+		/// @param modelPath Path to the model file
+		/// @return Model with the data from the file
+		/// @note Currently only supports .obj files
 		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);
 
 	private:

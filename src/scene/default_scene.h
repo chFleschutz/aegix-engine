@@ -34,10 +34,10 @@ public:
 			auto teapotModel = assetManager.createModel("models/teapot.obj");
 			auto planeModel = assetManager.createModel("models/plane.obj");
 
-			auto whiteMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterialInstance>();
+			auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterialInstance>();
 			whiteMat->setData({ { 1.0f, 1.0f, 1.0f, 1.0f } });
 
-			auto redMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterialInstance>();
+			auto redMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterialInstance>();
 			redMat->setData({ { 1.0f, 0.0f, 0.0f, 1.0f } });
 
 			auto teapot = createEntity("Teapot");
