@@ -1,12 +1,11 @@
 #pragma once
 
+#include "core/asset_manager.h"
+#include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
 #include "scripting/script_base.h"
-#include "core/asset_manager.h"
-
-#include "graphics/systems/default_render_system.h"
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
@@ -37,18 +36,18 @@ public:
 				.color = { 1.0f, 1.0f, 1.0f, 1.0f } 
 				});
 
-			auto redMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
-			redMat->setData({ 
-				.color = { 0.0f, 1.0f, 1.0f, 1.0f } 
+			auto colorfulMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
+			colorfulMat->setData({ 
+				.color = { 0.1f, 0.5f, 1.0f, 1.0f } 
 				});
 
 			auto teapot = createEntity("Teapot");
-			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
-			teapot.addComponent<Aegix::Graphics::DefaultMaterial>(redMat);
+			teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
+			teapot.addComponent<Aegix::Graphics::DefaultMaterial>(colorfulMat);
 			teapot.addComponent<Rotator>();
 
 			auto plane = createEntity("Plane");
-			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
+			plane.addComponent<Aegix::Component::Mesh>(planeModel);
 			plane.addComponent<Aegix::Graphics::DefaultMaterial>(whiteMat);
 		}
 		{

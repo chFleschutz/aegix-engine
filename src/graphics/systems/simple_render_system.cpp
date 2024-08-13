@@ -42,13 +42,9 @@ namespace Aegix::Graphics
 
 		for (auto&& [entity, transform, mesh] : frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::Mesh>().each())
 		{
-			// TODO: transfer color as uniform
-			Matrix4 colorNormalMatrix = Aegix::MathLib::normalMatrix(transform.rotation, transform.scale);
-			colorNormalMatrix[3] = mesh.color.rgba();
-
 			SimplePushConstantData push{};
 			push.modelMatrix = Aegix::MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
-			push.normalMatrix = colorNormalMatrix;
+			push.normalMatrix = Aegix::MathLib::normalMatrix(transform.rotation, transform.scale);
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
