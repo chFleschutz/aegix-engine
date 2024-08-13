@@ -8,6 +8,65 @@
 
 namespace Aegix::Graphics
 {
+	// *************** PipelineLayout::Builder *********************
+
+	PipelineLayout::Builder::Builder(VulkanDevice& device)
+		: m_device{ device }
+	{
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+	{
+		m_descriptorSetLayouts.push_back(descriptorSetLayout);
+		return *this;
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkPushConstantRange pushConstantRange)
+	{
+		m_pushConstantRanges.push_back(pushConstantRange);
+		return *this;
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset)
+	{
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = stageFlags;
+		pushConstantRange.size = size;
+		pushConstantRange.offset = offset;
+		m_pushConstantRanges.push_back(pushConstantRange);
+
+		return *this;
+	}
+
+	std::unique_ptr<PipelineLayout> PipelineLayout::Builder::build()
+	{
+		return std::make_unique<PipelineLayout>(m_device, m_descriptorSetLayouts, m_pushConstantRanges);
+	}
+
+
+	// *************** PipelineLayout *********************
+
+	Graphics::PipelineLayout::PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
+		const std::vector<VkPushConstantRange>& pushConstants)
+		: m_device{ device }
+	{
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = setLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+		pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+
+		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+			throw std::runtime_error("failed to create pipeline layout");
+	}
+
+	Graphics::PipelineLayout::~PipelineLayout()
+	{
+		vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
+	}
+
+
 	// *************** Pipeline::Builder *********************
 
 	Pipeline::Builder::Builder(VulkanDevice& device)
@@ -88,9 +147,10 @@ namespace Aegix::Graphics
 		return std::make_unique<Pipeline>(m_device, m_configInfo);
 	}
 
+
 	// *************** Pipeline *********************
 
-	Pipeline::Pipeline(VulkanDevice& device, const PipelineConfigInfo& configInfo)
+	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::Config& configInfo)
 		: m_device{ device }
 	{
 		createGraphicsPipeline(configInfo);
@@ -106,7 +166,7 @@ namespace Aegix::Graphics
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 	}
 
-	void Pipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
+	void Pipeline::defaultPipelineConfigInfo(Pipeline::Config& configInfo)
 	{
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -178,7 +238,7 @@ namespace Aegix::Graphics
 		configInfo.attributeDescriptions = Model::Vertex::attributeDescriptions();
 	}
 
-	void Pipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)
+	void Pipeline::enableAlphaBlending(Pipeline::Config& configInfo)
 	{
 		configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
 		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -190,7 +250,7 @@ namespace Aegix::Graphics
 		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 
-	void Pipeline::createGraphicsPipeline(const PipelineConfigInfo& configInfo)
+	void Pipeline::createGraphicsPipeline(const Pipeline::Config& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");

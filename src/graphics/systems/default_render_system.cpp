@@ -23,15 +23,15 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
-			globalSetLayout,
-			m_descriptorSetLayout->descriptorSetLayout(),
-		};
-		createPipelineLayout(descriptorSetLayouts, sizeof(PushConstantData));
+		m_pipelineLayout = PipelineLayout::Builder(m_device)
+			.addDescriptorSetLayout(globalSetLayout)
+			.addDescriptorSetLayout(m_descriptorSetLayout->descriptorSetLayout())
+			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
+			.build();
 
 		m_pipeline = Pipeline::Builder(m_device)
 			.setRenderPass(renderPass)
-			.setPipelineLayout(m_pipelineLayout)
+			.setPipelineLayout(m_pipelineLayout->pipelineLayout())
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "example.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "example.frag.spv")
 			.build();
@@ -44,7 +44,7 @@ namespace Aegix::Graphics
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			m_pipelineLayout,
+			m_pipelineLayout->pipelineLayout(),
 			0, 1,
 			&frameInfo.globalDescriptorSet,
 			0, nullptr
@@ -56,7 +56,7 @@ namespace Aegix::Graphics
 			// Descriptor Set
 			vkCmdBindDescriptorSets(frameInfo.commandBuffer,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_pipelineLayout,
+				m_pipelineLayout->pipelineLayout(),
 				1, 1,
 				&material.instance->m_descriptorSets[frameInfo.frameIndex],
 				0, nullptr
@@ -68,7 +68,7 @@ namespace Aegix::Graphics
 			push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
 
 			vkCmdPushConstants(frameInfo.commandBuffer,
-				m_pipelineLayout,
+				m_pipelineLayout->pipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(push),
