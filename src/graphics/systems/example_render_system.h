@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/material.h"
 #include "graphics/render_system.h"
 #include "graphics/uniform_buffer.h"
 

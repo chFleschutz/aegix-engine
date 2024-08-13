@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/material.h"
 #include "graphics/model.h"
 #include "graphics/renderer.h"
 #include "graphics/render_system.h"
