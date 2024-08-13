@@ -5,15 +5,31 @@
 
 namespace Aegix::Graphics
 {
-	class ExampleMaterial : public BaseMaterial
+	class ExampleMaterialInstance;
+	class ExampleRenderSystem;
+
+	template<>
+	struct RenderSystemRef<ExampleMaterialInstance>
+	{
+		using type = ExampleRenderSystem;
+	};
+
+
+	struct ExampleMaterial
+	{
+		std::shared_ptr<ExampleMaterialInstance> material;
+	};
+
+
+	class ExampleMaterialInstance : public BaseMaterial
 	{
 	public:
 		struct Data
 		{
 			glm::vec4 color;
-		} data;
+		};
 
-		ExampleMaterial(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
+		ExampleMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
 			: BaseMaterial(device, setLayout, pool)
 		{
 			m_uniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -22,7 +38,7 @@ namespace Aegix::Graphics
 			for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 			{
 				// Create uniform buffer
-				m_uniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(ExampleMaterial::Data), 1,
+				m_uniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(ExampleMaterialInstance::Data), 1,
 					VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 				m_uniformBuffers[i]->map();
 
@@ -42,7 +58,6 @@ namespace Aegix::Graphics
 			}
 		}
 	};
-
 
 
 	class ExampleRenderSystem : public RenderSystem
@@ -77,7 +92,7 @@ namespace Aegix::Graphics
 			);
 
 			// Iterate over entities with material
-			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, Component::Material>();
+			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, ExampleMaterial>();
 			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
 				auto descriptorSet = material.material->descriptorSet(frameInfo.frameIndex);
@@ -153,13 +168,5 @@ namespace Aegix::Graphics
 
 			m_pipeline = std::make_unique<Pipeline>(m_device, vertShaderPath, fragShaderPath, pipelineConfig);
 		}
-	};
-
-
-
-	template<>
-	struct RenderSystemRef<ExampleMaterial>
-	{
-		using type = ExampleRenderSystem;
 	};
 }

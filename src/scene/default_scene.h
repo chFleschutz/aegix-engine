@@ -34,17 +34,20 @@ public:
 			auto teapotModel = assetManager.createModel("models/teapot.obj");
 			auto planeModel = assetManager.createModel("models/plane.obj");
 
-			auto whiteMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
+			auto whiteMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterialInstance>();
 			whiteMat->setData({ { 1.0f, 1.0f, 1.0f, 1.0f } });
+
+			auto redMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterialInstance>();
+			redMat->setData({ { 1.0f, 0.0f, 0.0f, 1.0f } });
 
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
-			teapot.addComponent<Aegix::Component::Material>(whiteMat);
+			teapot.addComponent<Aegix::Graphics::ExampleMaterial>(redMat);
 			teapot.addComponent<Rotator>();
 
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
-			plane.addComponent<Aegix::Component::Material>(whiteMat);
+			plane.addComponent<Aegix::Graphics::ExampleMaterial>(whiteMat);
 		}
 		{
 			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });
