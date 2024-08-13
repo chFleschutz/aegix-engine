@@ -1,29 +1,91 @@
 #include "pipeline.h"
 
-#include "model.h"
+#include "graphics/model.h"
+#include "utils/file_utils.h"
 
-#include <array>
 #include <cassert>
-#include <fstream>
-#include <iostream>
 #include <stdexcept>
 
 namespace Aegix::Graphics
 {
-	Pipeline::Pipeline(
-		VulkanDevice& device, 
-		const std::string& vertShaderPath, 
-		const std::string& fragShaderPath, 
-		const PipelineConfigInfo& configInfo)
+	// *************** Pipeline::Builder *********************
+
+	Pipeline::Builder::Builder(VulkanDevice& device)
 		: m_device{ device }
 	{
-		createGraphicsPipeline(vertShaderPath, fragShaderPath, configInfo);
+		Pipeline::defaultPipelineConfigInfo(m_configInfo);
+	}
+
+	Pipeline::Builder::~Builder()
+	{
+		for (auto& shaderStage : m_configInfo.shaderStges)
+		{
+			vkDestroyShaderModule(m_device.device(), shaderStage.module, nullptr);
+		}
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setRenderPass(VkRenderPass renderPass)
+	{
+		m_configInfo.renderPass = renderPass;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setPipelineLayout(VkPipelineLayout pipelineLayout)
+	{
+		m_configInfo.pipelineLayout = pipelineLayout;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
+	{
+		auto shaderCode = FileUtils::readBinaryFile(shaderPath);
+
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = shaderCode.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
+
+		VkShaderModule shaderModule = nullptr;
+		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+			throw std::runtime_error("failed to create shader module");
+
+		VkPipelineShaderStageCreateInfo shaderStage{};
+		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage.stage = stage;
+		shaderStage.module = shaderModule;
+		shaderStage.pName = "main";
+		shaderStage.flags = 0;
+		shaderStage.pNext = nullptr;
+		shaderStage.pSpecializationInfo = nullptr;
+		m_configInfo.shaderStges.push_back(shaderStage);
+
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::enableAlphaBlending()
+	{
+		Pipeline::enableAlphaBlending(m_configInfo);
+		return *this;
+	}
+
+	std::unique_ptr<Pipeline> Pipeline::Builder::build()
+	{
+		assert(m_configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
+		assert(m_configInfo.renderPass != VK_NULL_HANDLE && "Cannot create pipeline: no renderPass provided");
+
+		return std::make_unique<Pipeline>(m_device, m_configInfo);
+	}
+
+	// *************** Pipeline *********************
+
+	Pipeline::Pipeline(VulkanDevice& device, const PipelineConfigInfo& configInfo)
+		: m_device{ device }
+	{
+		createGraphicsPipeline(configInfo);
 	}
 
 	Pipeline::~Pipeline()
 	{
-		vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
-		vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
 		vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
 	}
 
@@ -116,48 +178,10 @@ namespace Aegix::Graphics
 		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 
-	std::vector<char> Pipeline::readFile(const std::string& filePath)
-	{
-		std::ifstream file{filePath, std::ios::ate | std::ios::binary};
-		if (!(file.is_open()))
-			throw std::runtime_error("failed to open file: " + filePath);
-
-		size_t fileSize = static_cast<size_t>(file.tellg());
-		std::vector<char> buffer(fileSize);
-
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
-
-		file.close();
-		return buffer;
-	}
-
-	void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo)
+	void Pipeline::createGraphicsPipeline(const PipelineConfigInfo& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
-
-		auto vertCode = readFile(vertShaderPath);
-		auto fragCode = readFile(fragShaderPath);
-		createShaderModule(vertCode, &m_vertShaderModule);
-		createShaderModule(fragCode, &m_fragShaderModule);
-
-		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
-		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shaderStages[0].module = m_vertShaderModule;
-		shaderStages[0].pName = "main";
-		shaderStages[0].flags = 0;
-		shaderStages[0].pNext = nullptr;
-		shaderStages[0].pSpecializationInfo = nullptr;
-
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = m_fragShaderModule;
-		shaderStages[1].pName = "main";
-		shaderStages[1].flags = 0;
-		shaderStages[1].pNext = nullptr;
-		shaderStages[1].pSpecializationInfo = nullptr;
 
 		auto& bindingDescriptions = configInfo.bindingDescriptions;
 		auto& attributeDescriptions = configInfo.attributeDescriptions;
@@ -170,8 +194,8 @@ namespace Aegix::Graphics
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-		pipelineInfo.pStages = shaderStages.data();
+		pipelineInfo.stageCount = static_cast<uint32_t>(configInfo.shaderStges.size());
+		pipelineInfo.pStages = configInfo.shaderStges.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
 		pipelineInfo.pViewportState = &configInfo.viewportInfo;
@@ -188,16 +212,5 @@ namespace Aegix::Graphics
 
 		if (vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
 			throw std::runtime_error("failed to create graphics pipeline");
-	}
-
-	void Pipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
-	{
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = code.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
-			throw std::runtime_error("failed to create shader module");
 	}
 }

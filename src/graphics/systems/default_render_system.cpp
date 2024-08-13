@@ -29,9 +29,12 @@ namespace Aegix::Graphics
 		};
 		createPipelineLayout(descriptorSetLayouts, sizeof(PushConstantData));
 
-		std::string vertShaderPath = SHADER_DIR "example.vert.spv";
-		std::string fragShaderPath = SHADER_DIR "example.frag.spv";
-		createPipeline(renderPass, vertShaderPath, fragShaderPath);
+		m_pipeline = Pipeline::Builder(m_device)
+			.setRenderPass(renderPass)
+			.setPipelineLayout(m_pipelineLayout)
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "example.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "example.frag.spv")
+			.build();
 	}
 
 	void DefaultRenderSystem::render(const FrameInfo& frameInfo)

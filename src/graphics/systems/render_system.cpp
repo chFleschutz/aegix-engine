@@ -40,6 +40,7 @@ namespace Aegix::Graphics
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = m_pipelineLayout;
 
-		m_pipeline = std::make_unique<Pipeline>(m_device, vertexShader, fragmentShader, pipelineConfig);
+		// TODO
+		//m_pipeline = std::make_unique<Pipeline>(m_device, vertexShader, fragmentShader, pipelineConfig);
 	}
 }

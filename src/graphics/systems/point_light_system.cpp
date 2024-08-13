@@ -16,9 +16,12 @@ namespace Aegix::Graphics
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
 		createPipelineLayout(descriptorSetLayouts, sizeof(PointLightPushConstants));
 
-		std::string vertShaderPath = SHADER_DIR "point_light.vert.spv";
-		std::string fragShaderPath = SHADER_DIR "point_light.frag.spv";
-		createPipeline(renderPass, vertShaderPath, fragShaderPath);
+		m_pipeline = Pipeline::Builder(m_device)
+			.setRenderPass(renderPass)
+			.setPipelineLayout(m_pipelineLayout)
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.frag.spv")
+			.build();
 	}
 
 	void PointLightSystem::render(const FrameInfo& frameInfo)

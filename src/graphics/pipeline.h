@@ -2,7 +2,7 @@
 
 #include "graphics/device.h"
 
-#include <string>
+#include <filesystem>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -15,15 +15,17 @@ namespace Aegix::Graphics
 
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-		VkPipelineViewportStateCreateInfo viewportInfo;
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
-		VkPipelineMultisampleStateCreateInfo multisampleInfo;
-		VkPipelineColorBlendAttachmentState colorBlendAttachment;
-		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
-		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-		std::vector<VkDynamicState> dynamicStateEnables;
-		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+		std::vector<VkPipelineShaderStageCreateInfo> shaderStges{};
+
+		VkPipelineViewportStateCreateInfo viewportInfo{};
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+		VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
+		VkPipelineMultisampleStateCreateInfo multisampleInfo{};
+		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+		VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
+		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+		std::vector<VkDynamicState> dynamicStateEnables{};
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkRenderPass renderPass = nullptr;
 		uint32_t subpass = 0;
@@ -32,11 +34,28 @@ namespace Aegix::Graphics
 	class Pipeline
 	{
 	public:
-		Pipeline(VulkanDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
-		~Pipeline();
+		class Builder
+		{
+		public:
+			Builder(VulkanDevice& device);
+			~Builder();
 
+			Builder& setRenderPass(VkRenderPass renderPass);
+			Builder& setPipelineLayout(VkPipelineLayout pipelineLayout);
+			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
+			Builder& enableAlphaBlending();
+
+			std::unique_ptr<Pipeline> build();
+
+		private:
+			VulkanDevice& m_device;
+			PipelineConfigInfo m_configInfo;
+		};
+
+		Pipeline(VulkanDevice& device, const PipelineConfigInfo& configInfo);
 		Pipeline(const Pipeline&) = delete;
 		Pipeline operator=(const Pipeline&) = delete;
+		~Pipeline();
 
 		void bind(VkCommandBuffer commandBuffer);
 
@@ -44,17 +63,9 @@ namespace Aegix::Graphics
 		static void enableAlphaBlending(PipelineConfigInfo& configInfo);
 
 	private:
-		static std::vector<char> readFile(const std::string& filePath);
-
-		void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
-
-		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		void createGraphicsPipeline(const PipelineConfigInfo& configInfo);
 
 		VulkanDevice& m_device;
 		VkPipeline m_graphicsPipeline;
-
-		// TODO: Not necessary to store shader modules as member variables
-		VkShaderModule m_vertShaderModule; 
-		VkShaderModule m_fragShaderModule;
 	};
 }

@@ -81,20 +81,11 @@ namespace Aegix::Graphics
 
 	void SimpleRenderSystem::createPipeline(VkRenderPass renderPass)
 	{
-		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
-
-		PipelineConfigInfo pipelineConfig{};
-		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = renderPass;
-		pipelineConfig.pipelineLayout = mPipelineLayout;
-
-		std::string vertShaderPath = SHADER_DIR "simple_shader.vert.spv";
-		std::string fragShaderPath = SHADER_DIR "simple_shader.frag.spv";
-
-		mPipeline = std::make_unique<Pipeline>(
-			m_device,
-			vertShaderPath,
-			fragShaderPath,
-			pipelineConfig);
+		mPipeline = Pipeline::Builder(m_device)
+			.setRenderPass(renderPass)
+			.setPipelineLayout(mPipelineLayout)
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "simple_shader.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "simple_shader.frag.spv")
+			.build();
 	}
 }
