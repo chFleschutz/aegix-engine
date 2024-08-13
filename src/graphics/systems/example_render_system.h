@@ -2,6 +2,7 @@
 
 #include "graphics/material.h"
 #include "graphics/render_system.h"
+#include "graphics/uniform_buffer.h"
 
 namespace Aegix::Graphics
 {
@@ -22,42 +23,32 @@ namespace Aegix::Graphics
 			glm::vec4 color;
 		};
 
-		class Instance : public BaseMaterial
+		class Instance
 		{
 		public:
 			Instance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
-				: BaseMaterial(device, setLayout, pool)
+				: m_uniformBuffer(device, setLayout, pool) 
 			{
-				m_uniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-				m_descriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-
 				for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 				{
-					// Create uniform buffer
-					m_uniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(ExampleMaterial::Data), 1,
-						VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-					m_uniformBuffers[i]->map();
-
-					// Allocate and write descriptor set
-					auto bufferInfo = m_uniformBuffers[i]->descriptorInfo();
+					auto bufferInfo = m_uniformBuffer.descriptorInfo(i);
 					DescriptorWriter(setLayout, pool)
 						.writeBuffer(0, &bufferInfo)
 						.build(m_descriptorSets[i]);
 				}
 			}
 
-			void setData(const Data& data)
-			{
-				for (auto& buffer : m_uniformBuffers)
-				{
-					buffer->writeToBuffer(&data);
-				}
-			}
+			void setData(const ExampleMaterial::Data& data) { m_uniformBuffer.setData(data); }
+
+		private:
+			UniformBuffer<ExampleMaterial::Data> m_uniformBuffer;
+			std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;
+
+			friend ExampleRenderSystem;
 		};
 
 		std::shared_ptr<ExampleMaterial::Instance> material;
 	};
-
 
 
 
@@ -96,7 +87,7 @@ namespace Aegix::Graphics
 			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, ExampleMaterial>();
 			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
-				auto descriptorSet = material.material->descriptorSet(frameInfo.frameIndex);
+				auto descriptorSet = material.material->m_descriptorSets[frameInfo.frameIndex];
 				vkCmdBindDescriptorSets(frameInfo.commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
 					m_pipelineLayout,
