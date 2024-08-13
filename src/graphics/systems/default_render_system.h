@@ -5,20 +5,20 @@
 
 namespace Aegix::Graphics
 {
-	class ExampleMaterial;
-	class ExampleRenderSystem;
+	struct DefaultMaterial;
+	class DefaultRenderSystem;
 
 
 
 	// Example Material
 
 	template<>
-	struct RenderSystemRef<ExampleMaterial>
+	struct RenderSystemRef<DefaultMaterial>
 	{
-		using type = ExampleRenderSystem;
+		using type = DefaultRenderSystem;
 	};
 
-	struct ExampleMaterial
+	struct DefaultMaterial
 	{
 		struct Data
 		{
@@ -40,23 +40,23 @@ namespace Aegix::Graphics
 				}
 			}
 
-			void setData(const ExampleMaterial::Data& data) { m_uniformBuffer.setData(data); }
+			void setData(const DefaultMaterial::Data& data) { m_uniformBuffer.setData(data); }
 
 		private:
-			UniformBuffer<ExampleMaterial::Data> m_uniformBuffer;
+			UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
 			std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;
 
-			friend ExampleRenderSystem;
+			friend DefaultRenderSystem;
 		};
 
-		std::shared_ptr<ExampleMaterial::Instance> material;
+		std::shared_ptr<DefaultMaterial::Instance> material;
 	};
 
 
 
 	// Example Render System
 
-	class ExampleRenderSystem : public RenderSystem
+	class DefaultRenderSystem : public RenderSystem
 	{
 	public:
 		struct PushConstantData // max 128 bytes
@@ -65,7 +65,7 @@ namespace Aegix::Graphics
 			Matrix4 normalMatrix{ 1.0f };
 		};
 
-		ExampleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		DefaultRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 			: RenderSystem(device)
 		{
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
@@ -96,7 +96,7 @@ namespace Aegix::Graphics
 				0, nullptr
 			);
 
-			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, ExampleMaterial>();
+			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, DefaultMaterial>();
 			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
 				// Descriptor Set
