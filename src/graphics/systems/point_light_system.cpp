@@ -1,12 +1,7 @@
 #include "point_light_system.h"
 
-#include "graphics/camera.h"
 #include "scene/components.h"
 #include "utils/math_utils.h"
-
-#include <array>
-#include <map>
-#include <stdexcept>
 
 namespace Aegix::Graphics
 {
@@ -23,8 +18,8 @@ namespace Aegix::Graphics
 			.setPipelineLayout(m_pipelineLayout->pipelineLayout())
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.frag.spv")
-			.setVertexBindingDescriptions({}) 
-			.setVertexAttributeDescriptions({})
+			.setVertexBindingDescriptions({}) // Clear default vertex binding
+			.setVertexAttributeDescriptions({}) // Clear default vertex attributes
 			.enableAlphaBlending()
 			.build();
 	}
@@ -42,7 +37,7 @@ namespace Aegix::Graphics
 			0, nullptr
 		);
 
-		auto view = frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 		view.use<Aegix::Component::Transform>(); // Sort because of Transparency
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
@@ -57,7 +52,8 @@ namespace Aegix::Graphics
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(PointLightPushConstants),
-				&push);
+				&push
+			);
 
 			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
 		}

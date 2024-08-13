@@ -4,8 +4,6 @@
 #include "graphics/lights.h"
 #include "scene/scene.h"
 
-#include <vulkan/vulkan.h>
-
 namespace Aegix::Graphics
 {
 	struct GlobalLimits

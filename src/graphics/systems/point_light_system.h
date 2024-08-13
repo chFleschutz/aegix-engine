@@ -2,9 +2,6 @@
 
 #include "graphics/systems/render_system.h"
 
-#include <memory>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	/// @brief Render system for rendering point lights

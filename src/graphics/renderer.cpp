@@ -1,8 +1,5 @@
 #include "renderer.h"
 
-#include "graphics/systems/point_light_system.h"
-#include "graphics/systems/render_system.h"
-#include "graphics/systems/simple_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
@@ -258,7 +255,7 @@ namespace Aegix::Graphics
 		ubo.inverseView = frameInfo.camera->inverseViewMatrix();
 
 		int lighIndex = 0;
-		auto view = frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");

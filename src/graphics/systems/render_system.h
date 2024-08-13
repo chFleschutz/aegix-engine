@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/frame_info.h"
 #include "graphics/pipeline.h"

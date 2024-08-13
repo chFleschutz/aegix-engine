@@ -50,7 +50,7 @@ namespace Aegix::Graphics
 			0, nullptr
 		);
 
-		auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, DefaultMaterial>();
+		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			// Descriptor Set

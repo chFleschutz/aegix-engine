@@ -5,9 +5,6 @@
 
 #include <entt/entt.hpp>
 
-#include <filesystem>
-
-
 namespace Aegix::Scripting
 {
 	class ScriptBase;
@@ -32,7 +29,7 @@ namespace Aegix::Scene
 		/// @tparam ...T The components of the entities
 		/// @return A view containing all entities with the given component types
 		template<typename... T>
-		auto viewEntitiesByType()
+		auto viewEntities()
 		{
 			return m_registry.view<T...>();
 		}
