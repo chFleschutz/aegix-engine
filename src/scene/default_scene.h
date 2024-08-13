@@ -24,8 +24,6 @@ protected:
 class DefaultScene : public Aegix::Scene::Scene
 {
 public:
-	using Aegix::Scene::Scene::Scene;
-
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
@@ -34,11 +32,15 @@ public:
 			auto teapotModel = assetManager.createModel("models/teapot.obj");
 			auto planeModel = assetManager.createModel("models/plane.obj");
 
-			auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterialInstance>();
-			whiteMat->setData({ { 1.0f, 1.0f, 1.0f, 1.0f } });
+			auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterial>();
+			whiteMat->setData({ 
+				.color = { 1.0f, 1.0f, 1.0f, 1.0f } 
+				});
 
-			auto redMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterialInstance>();
-			redMat->setData({ { 1.0f, 0.0f, 0.0f, 1.0f } });
+			auto redMat = assetManager.createMaterialInstance<Aegix::Graphics::ExampleMaterial>();
+			redMat->setData({ 
+				.color = { 1.0f, 0.0f, 0.0f, 1.0f } 
+				});
 
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());

@@ -25,17 +25,16 @@ namespace Aegix
 		/// @brief Returns the instance of the AssetManager
 		static AssetManager& instance();
 
-		/// @brief Creates a material instance 
-		/// @tparam T Type of the material to create
+		/// @brief Creates a material instance for the given material type
+		/// @tparam T Type of the material for which to create an instance
 		/// @return Instance of the material
-		template<typename T>
-		std::shared_ptr<T> createMaterialInstance()
+		template<typename T, typename... Args>
+		std::shared_ptr<typename T::Instance> createMaterialInstance(Args&&... args)
 		{
-			static_assert(std::is_base_of<Graphics::BaseMaterial, T>::value, "T must derive from BaseMaterial");
-
 			using SystemType = typename Graphics::RenderSystemRef<T>::type;
 			auto& system = m_renderer.addRenderSystem<SystemType>();
-			return std::make_shared<T>(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool());
+			return std::make_shared<typename T::Instance>(m_renderer.device(), system.descriptorSetLayout(), 
+				m_renderer.globalPool(), std::forward<Args>(args)...);
 		}
 
 		/// @brief Creates a model from a file

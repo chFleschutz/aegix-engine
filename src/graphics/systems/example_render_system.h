@@ -5,11 +5,11 @@
 
 namespace Aegix::Graphics
 {
-	class ExampleMaterialInstance;
+	class ExampleMaterial;
 	class ExampleRenderSystem;
 
 	template<>
-	struct RenderSystemRef<ExampleMaterialInstance>
+	struct RenderSystemRef<ExampleMaterial>
 	{
 		using type = ExampleRenderSystem;
 	};
@@ -17,47 +17,48 @@ namespace Aegix::Graphics
 
 	struct ExampleMaterial
 	{
-		std::shared_ptr<ExampleMaterialInstance> material;
-	};
-
-
-	class ExampleMaterialInstance : public BaseMaterial
-	{
-	public:
 		struct Data
 		{
 			glm::vec4 color;
 		};
 
-		ExampleMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
-			: BaseMaterial(device, setLayout, pool)
+		class Instance : public BaseMaterial
 		{
-			m_uniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-			m_descriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-
-			for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		public:
+			Instance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
+				: BaseMaterial(device, setLayout, pool)
 			{
-				// Create uniform buffer
-				m_uniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(ExampleMaterialInstance::Data), 1,
-					VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-				m_uniformBuffers[i]->map();
+				m_uniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+				m_descriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
 
-				// Allocate and write descriptor set
-				auto bufferInfo = m_uniformBuffers[i]->descriptorInfo();
-				DescriptorWriter(setLayout, pool)
-					.writeBuffer(0, &bufferInfo)
-					.build(m_descriptorSets[i]);
+				for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+				{
+					// Create uniform buffer
+					m_uniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(ExampleMaterial::Data), 1,
+						VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+					m_uniformBuffers[i]->map();
+
+					// Allocate and write descriptor set
+					auto bufferInfo = m_uniformBuffers[i]->descriptorInfo();
+					DescriptorWriter(setLayout, pool)
+						.writeBuffer(0, &bufferInfo)
+						.build(m_descriptorSets[i]);
+				}
 			}
-		}
 
-		void setData(const Data& data)
-		{
-			for (auto& buffer : m_uniformBuffers)
+			void setData(const Data& data)
 			{
-				buffer->writeToBuffer(&data);
+				for (auto& buffer : m_uniformBuffers)
+				{
+					buffer->writeToBuffer(&data);
+				}
 			}
-		}
+		};
+
+		std::shared_ptr<ExampleMaterial::Instance> material;
 	};
+
+
 
 
 	class ExampleRenderSystem : public RenderSystem
