@@ -1,6 +1,11 @@
 #include "renderer.h"
 
+#include "scene/components.h"
+#include "scene/entity.h"
+#include "scene/scene.h"
+
 #include <array>
+#include <cassert>
 #include <stdexcept>
 
 namespace Aegix::Graphics
@@ -9,11 +14,58 @@ namespace Aegix::Graphics
 	{
 		recreateSwapChain();
 		createCommandBuffers();
+
+		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
+		m_globalPool = DescriptorPool::Builder(m_device)
+			.setMaxSets(1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER,				500)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,			4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,			1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,	1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,	1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,			2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,		500)
+			.build();
+
+		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.build();
+
+		m_globalUniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		m_globalDescriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_globalUniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(GlobalUbo), 1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			m_globalUniformBuffers[i]->map();
+
+			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
+			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(m_globalDescriptorSets[i]);
+		}
 	}
 
 	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
+	}
+
+	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
+	{
+		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
+		return m_commandBuffers[m_currentFrameIndex];
+	}
+
+	int Graphics::Renderer::frameIndex() const
+	{
+		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
+		return m_currentFrameIndex;
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
@@ -103,7 +155,46 @@ namespace Aegix::Graphics
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
 
 		vkCmdEndRenderPass(commandBuffer);
+	}
 
+	void Renderer::renderFrame(float frametime, Scene::Scene& scene)
+	{
+		auto commandBuffer = beginFrame();
+		if (!commandBuffer)
+			return;
+
+		// TODO: Move this to a script
+		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
+		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
+		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
+		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
+
+		FrameInfo frameInfo{
+			m_currentFrameIndex,
+			frametime,
+			commandBuffer,
+			&camera,
+			m_globalDescriptorSets[m_currentFrameIndex],
+			&scene
+		};
+
+		updateGlobalUBO(frameInfo);
+
+		beginSwapChainRenderPass(commandBuffer);
+		{
+			for (auto&& [_, system] : m_renderSystems)
+			{
+				system->render(frameInfo);
+			}
+		}
+		endSwapChainRenderPass(commandBuffer);
+
+		endFrame();
+	}
+
+	void Graphics::Renderer::shutdown()
+	{
+		vkDeviceWaitIdle(m_device.device());
 	}
 
 	void Renderer::createCommandBuffers()
@@ -154,5 +245,27 @@ namespace Aegix::Graphics
 		}
 
 		// Todo
+	}
+
+	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
+	{
+		GlobalUbo ubo{};
+		ubo.projection = frameInfo.camera->projectionMatrix();
+		ubo.view = frameInfo.camera->viewMatrix();
+		ubo.inverseView = frameInfo.camera->inverseViewMatrix();
+
+		int lighIndex = 0;
+		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		for (auto&& [entity, transform, pointLight] : view.each())
+		{
+			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
+			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = Vector4(pointLight.color.rgb(), pointLight.intensity);
+			lighIndex++;
+		}
+		ubo.numLights = lighIndex;
+
+		m_globalUniformBuffers[m_currentFrameIndex]->writeToBuffer(&ubo);
+		m_globalUniformBuffers[m_currentFrameIndex]->flush();
 	}
 }

@@ -1,19 +1,14 @@
 #include "Scene.h"
 
-#include "components.h"
-#include "entity.h"
+#include "scene/components.h"
+#include "scene/entity.h"
 #include "scripting/movement/kinematic_movement_controller.h"
 
 #include <cassert>
 
 namespace Aegix::Scene
 {
-	std::shared_ptr<Graphics::Model> Scene::loadModel(const std::filesystem::path& modelPath)
-	{
-		return Graphics::Model::createModelFromFile(m_device, modelPath);
-	}
-
-	Scene::Scene(Graphics::VulkanDevice& device) : m_device{ device }
+	Scene::Scene() 
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<Component::Camera>();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/descriptors.h"
+#include "core/asset_manager.h"
 #include "graphics/device.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -8,8 +8,6 @@
 
 #include <memory>
 #include <type_traits>
-#include <vector>
-
 
 namespace Aegix
 {
@@ -18,11 +16,10 @@ namespace Aegix
 	public:
 		static constexpr int WIDTH = 1080;
 		static constexpr int HEIGHT = 720;
-
 		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
 
 		Engine();
-		~Engine();
+		~Engine() = default;
 
 		Engine(const Engine&) = delete;
 		Engine& operator=(const Engine&) = delete;
@@ -32,20 +29,22 @@ namespace Aegix
 		/// @brief Creates a scene of T 
 		/// @tparam T Subclass of Scene which should be loaded
 		/// @note T has to be a subclass of Scene otherwise compile will fail
-		template<class T, class = std::enable_if_t<std::is_base_of_v<Aegix::Scene::Scene, T>>>
+		template<typename T>
 		void loadScene()
 		{
-			m_scene = std::make_unique<T>(m_device);
+			static_assert(std::is_base_of_v<Scene::Scene, T>, "T has to be a subclass of Scene");
+			m_scene = std::make_unique<T>();
 		}
 
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
 
-		Aegix::Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
-		Aegix::Graphics::VulkanDevice m_device{ m_window };
-		Aegix::Graphics::Renderer m_renderer{ m_window, m_device };
+		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
+		Graphics::VulkanDevice m_device{ m_window };
+		Graphics::Renderer m_renderer{ m_window, m_device };
+		
+		AssetManager m_assetManager{ m_renderer };
 
-		std::unique_ptr<Aegix::Graphics::DescriptorPool> m_globalPool{};
-		std::unique_ptr<Aegix::Scene::Scene> m_scene;
+		std::unique_ptr<Scene::Scene> m_scene;
 	};
 }

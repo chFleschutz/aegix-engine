@@ -43,6 +43,8 @@ namespace Aegix::Graphics
         friend class DescriptorWriter;
     };
 
+
+
     class DescriptorPool
     {
     public:
@@ -63,11 +65,8 @@ namespace Aegix::Graphics
             VkDescriptorPoolCreateFlags m_poolFlags = 0;
         };
 
-        DescriptorPool(
-            VulkanDevice& lveDevice,
-            uint32_t m_maxSets,
-            VkDescriptorPoolCreateFlags m_poolFlags,
-            const std::vector<VkDescriptorPoolSize>& m_poolSizes);
+        DescriptorPool(VulkanDevice& device, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags, 
+            const std::vector<VkDescriptorPoolSize>& poolSizes);
         ~DescriptorPool();
         DescriptorPool(const DescriptorPool&) = delete;
         DescriptorPool& operator=(const DescriptorPool&) = delete;
@@ -84,6 +83,8 @@ namespace Aegix::Graphics
 
         friend class DescriptorWriter;
     };
+
+
 
     class DescriptorWriter
     {

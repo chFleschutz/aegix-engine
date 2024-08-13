@@ -1,5 +1,8 @@
 #pragma once
 
+#include "core/asset_manager.h"
+#include "graphics/systems/default_render_system.h"
+#include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
@@ -12,7 +15,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } *deltaSeconds;
 	}
 };
 
@@ -21,27 +24,41 @@ protected:
 class DefaultScene : public Aegix::Scene::Scene
 {
 public:
-	using Aegix::Scene::Scene::Scene;
-
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
-		{ // Models 
-			auto teapotModel = loadModel("models/teapot.obj");
-			auto teapot = createEntity("Teapot");
-			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
-			teapot.addComponent<Rotator>();
-			
-			auto planeModel = loadModel("models/plane.obj");
-			auto plane = createEntity("Plane");
-			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
-		}
-		{ // Lights
-			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });
-			light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 10.0f);
+		{
+			auto& assetManager = Aegix::AssetManager::instance();
+			auto teapotModel = assetManager.createModel("models/teapot.obj");
+			auto planeModel = assetManager.createModel("models/plane.obj");
 
-			auto light2 = createEntity("Light 2", { 0.0f, -5.0f, 5.0f });
-			light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 10.0f);
+			auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
+			whiteMat->setData({ 
+				.color = { 1.0f, 1.0f, 1.0f, 1.0f } 
+				});
+
+			auto colorfulMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
+			colorfulMat->setData({ 
+				.color = { 0.1f, 0.5f, 1.0f, 1.0f } 
+				});
+
+			assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
+
+			auto teapot = createEntity("Teapot");
+			teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
+			teapot.addComponent<Aegix::Graphics::DefaultMaterial>(colorfulMat);
+			teapot.addComponent<Rotator>();
+
+			auto plane = createEntity("Plane");
+			plane.addComponent<Aegix::Component::Mesh>(planeModel);
+			plane.addComponent<Aegix::Graphics::DefaultMaterial>(whiteMat);
+		}
+		{
+			auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 0.0f });
+			light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 10.0f);
+
+			auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
+			light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::green(), 10.0f);
 		}
 	}
 };

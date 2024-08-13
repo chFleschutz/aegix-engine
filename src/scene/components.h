@@ -19,11 +19,6 @@ namespace Aegix::Component
 	struct Name
 	{
 		std::string name;
-
-		Name() = default;
-		Name(const Name&) = default;
-		Name(const std::string& entityName)
-			: name(entityName) {}
 	};
 
 	/// @brief Stores the transformation of the entity
@@ -47,24 +42,13 @@ namespace Aegix::Component
 	struct Mesh
 	{
 		std::shared_ptr<Graphics::Model> model;
-		Color color;
-
-		Mesh() = default;
-		Mesh(const Mesh&) = default;
-		Mesh(std::shared_ptr<Graphics::Model> entityModel, const Color& baseColor = Color())
-			: model(entityModel), color(baseColor) {}
 	};
 
 	/// @brief Creates a light 
 	struct PointLight
 	{
 		Color color;
-		float intensity = 0.2f;
-
-		PointLight() = default;
-		PointLight(const PointLight&) = default;
-		PointLight(const Color& lightColor, float lightIntensity = 0.2f)
-			: color(lightColor), intensity(lightIntensity) {}
+		float intensity = 0.1f;
 	};
 
 	/// @brief Holds a camera to view the scene

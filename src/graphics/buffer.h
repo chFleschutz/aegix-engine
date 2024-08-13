@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 		/// @param data Pointer to the data to copy
 		/// @param size (Optional) Size of the data to copy. Pass VK_WHOLE_SIZE to flush the complete buffer range.
 		/// @param offset (Optional) Byte offset from beginning of mapped region
-		void writeToBuffer(void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+		void writeToBuffer(const void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		/// @brief Flush a memory range of the buffer to make it visible to the device
 		/// @note Only required for non-coherent memory
 		/// @param size (Optional) Size of the memory range to flush (Pass VK_WHOLE_SIZE to flush the complete buffer range)
@@ -54,7 +54,7 @@ namespace Aegix::Graphics
 		/// @brief Copies "instanceSize" bytes of data to the mapped buffer at an offset of index alignmentSize
 		/// @param data Pointer to the data to copy
 		/// @param index Used in offset calculation
-		void writeToIndex(void* data, int index);
+		void writeToIndex(const void* data, int index);
 		/// @brief Flush the memory range at index * alignmentSize of the buffer to make it visible to the device
 		/// @param index index Used in offset calculation
 		/// @return VkResult of the flush call

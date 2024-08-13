@@ -2,57 +2,110 @@
 
 #include "graphics/device.h"
 
-#include <string>
+#include <filesystem>
 #include <vector>
 
 namespace Aegix::Graphics
 {
-	struct PipelineConfigInfo
+	class PipelineLayout
 	{
-		PipelineConfigInfo() = default;
-		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
-		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+	public:
+		class Builder
+		{
+		public:
+			Builder(VulkanDevice& device);
+			~Builder() = default;
 
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-		VkPipelineViewportStateCreateInfo viewportInfo;
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
-		VkPipelineMultisampleStateCreateInfo multisampleInfo;
-		VkPipelineColorBlendAttachmentState colorBlendAttachment;
-		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
-		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-		std::vector<VkDynamicState> dynamicStateEnables;
-		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
-		VkPipelineLayout pipelineLayout = nullptr;
-		VkRenderPass renderPass = nullptr;
-		uint32_t subpass = 0;
+			Builder& addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+			Builder& addPushConstantRange(VkPushConstantRange pushConstantRange);
+			Builder& addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset = 0);
+
+			std::unique_ptr<PipelineLayout> build();
+
+		private:
+			VulkanDevice& m_device;
+			std::vector<VkDescriptorSetLayout> m_descriptorSetLayouts;
+			std::vector<VkPushConstantRange> m_pushConstantRanges;
+		};
+
+		PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
+			const std::vector<VkPushConstantRange>& pushConstants);
+		PipelineLayout(const PipelineLayout&) = delete;
+		PipelineLayout operator=(const PipelineLayout&) = delete;
+		~PipelineLayout();
+
+		VkPipelineLayout pipelineLayout() const { return m_pipelineLayout; }
+
+	private:
+		VulkanDevice& m_device;
+		VkPipelineLayout m_pipelineLayout;
 	};
+
+
 
 	class Pipeline
 	{
 	public:
-		Pipeline(VulkanDevice& device, const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
-		~Pipeline();
+		struct Config
+		{
+			Config() = default;
+			Config(const Config&) = delete;
+			Config& operator=(const Config&) = delete;
 
+			std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+			std::vector<VkPipelineShaderStageCreateInfo> shaderStges{};
+
+			VkPipelineViewportStateCreateInfo viewportInfo{};
+			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+			VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
+			VkPipelineMultisampleStateCreateInfo multisampleInfo{};
+			VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+			VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
+			VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+			std::vector<VkDynamicState> dynamicStateEnables{};
+			VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
+			VkPipelineLayout pipelineLayout = nullptr;
+			VkRenderPass renderPass = nullptr;
+			uint32_t subpass = 0;
+		};
+
+		class Builder
+		{
+		public:
+			Builder(VulkanDevice& device);
+			~Builder();
+
+			Builder& setRenderPass(VkRenderPass renderPass);
+			Builder& setPipelineLayout(VkPipelineLayout pipelineLayout);
+			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
+			Builder& enableAlphaBlending();
+			Builder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
+			Builder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
+
+			std::unique_ptr<Pipeline> build();
+
+		private:
+			VulkanDevice& m_device;
+			Pipeline::Config m_configInfo;
+		};
+
+		Pipeline(VulkanDevice& device, const Pipeline::Config& configInfo);
 		Pipeline(const Pipeline&) = delete;
 		Pipeline operator=(const Pipeline&) = delete;
+		~Pipeline();
+
+		VkPipeline pipeline() const { return m_graphicsPipeline; }
 
 		void bind(VkCommandBuffer commandBuffer);
 
-		static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
-		static void enableAlphaBlending(PipelineConfigInfo& configInfo);
+		static void defaultPipelineConfigInfo(Pipeline::Config& configInfo);
+		static void enableAlphaBlending(Pipeline::Config& configInfo);
 
 	private:
-		static std::vector<char> readFile(const std::string& filePath);
-
-		void createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo);
-
-		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		void createGraphicsPipeline(const Pipeline::Config& configInfo);
 
 		VulkanDevice& m_device;
 		VkPipeline m_graphicsPipeline;
-		VkShaderModule m_vertShaderModule;
-		VkShaderModule m_fragShaderModule;
 	};
 }

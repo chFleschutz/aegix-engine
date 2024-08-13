@@ -1,29 +1,163 @@
 #include "pipeline.h"
 
-#include "model.h"
+#include "graphics/model.h"
+#include "utils/file_utils.h"
 
-#include <array>
 #include <cassert>
-#include <fstream>
-#include <iostream>
 #include <stdexcept>
 
 namespace Aegix::Graphics
 {
-	Pipeline::Pipeline(
-		VulkanDevice& device, 
-		const std::string& vertShaderPath, 
-		const std::string& fragShaderPath, 
-		const PipelineConfigInfo& configInfo)
+	// *************** PipelineLayout::Builder *********************
+
+	PipelineLayout::Builder::Builder(VulkanDevice& device)
 		: m_device{ device }
 	{
-		createGraphicsPipeline(vertShaderPath, fragShaderPath, configInfo);
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+	{
+		m_descriptorSetLayouts.push_back(descriptorSetLayout);
+		return *this;
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkPushConstantRange pushConstantRange)
+	{
+		m_pushConstantRanges.push_back(pushConstantRange);
+		return *this;
+	}
+
+	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset)
+	{
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = stageFlags;
+		pushConstantRange.size = size;
+		pushConstantRange.offset = offset;
+		m_pushConstantRanges.push_back(pushConstantRange);
+
+		return *this;
+	}
+
+	std::unique_ptr<PipelineLayout> PipelineLayout::Builder::build()
+	{
+		return std::make_unique<PipelineLayout>(m_device, m_descriptorSetLayouts, m_pushConstantRanges);
+	}
+
+
+	// *************** PipelineLayout *********************
+
+	Graphics::PipelineLayout::PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
+		const std::vector<VkPushConstantRange>& pushConstants)
+		: m_device{ device }
+	{
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = setLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+		pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+
+		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
+			throw std::runtime_error("failed to create pipeline layout");
+	}
+
+	Graphics::PipelineLayout::~PipelineLayout()
+	{
+		vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
+	}
+
+
+	// *************** Pipeline::Builder *********************
+
+	Pipeline::Builder::Builder(VulkanDevice& device)
+		: m_device{ device }
+	{
+		Pipeline::defaultPipelineConfigInfo(m_configInfo);
+	}
+
+	Pipeline::Builder::~Builder()
+	{
+		for (auto& shaderStage : m_configInfo.shaderStges)
+		{
+			vkDestroyShaderModule(m_device.device(), shaderStage.module, nullptr);
+		}
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setRenderPass(VkRenderPass renderPass)
+	{
+		m_configInfo.renderPass = renderPass;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setPipelineLayout(VkPipelineLayout pipelineLayout)
+	{
+		m_configInfo.pipelineLayout = pipelineLayout;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
+	{
+		auto shaderCode = FileUtils::readBinaryFile(shaderPath);
+
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = shaderCode.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
+
+		VkShaderModule shaderModule = nullptr;
+		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+			throw std::runtime_error("failed to create shader module");
+
+		VkPipelineShaderStageCreateInfo shaderStage{};
+		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage.stage = stage;
+		shaderStage.module = shaderModule;
+		shaderStage.pName = "main";
+		shaderStage.flags = 0;
+		shaderStage.pNext = nullptr;
+		shaderStage.pSpecializationInfo = nullptr;
+		m_configInfo.shaderStges.push_back(shaderStage);
+
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::enableAlphaBlending()
+	{
+		Pipeline::enableAlphaBlending(m_configInfo);
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
+	{
+		m_configInfo.bindingDescriptions = bindingDescriptions;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
+	{
+		m_configInfo.attributeDescriptions = attributeDescriptions;
+		return *this;
+	}
+
+	std::unique_ptr<Pipeline> Pipeline::Builder::build()
+	{
+		assert(m_configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
+		assert(m_configInfo.renderPass != VK_NULL_HANDLE && "Cannot create pipeline: no renderPass provided");
+
+		return std::make_unique<Pipeline>(m_device, m_configInfo);
+	}
+
+
+	// *************** Pipeline *********************
+
+	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::Config& configInfo)
+		: m_device{ device }
+	{
+		createGraphicsPipeline(configInfo);
 	}
 
 	Pipeline::~Pipeline()
 	{
-		vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
-		vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
 		vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
 	}
 
@@ -32,7 +166,7 @@ namespace Aegix::Graphics
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 	}
 
-	void Pipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
+	void Pipeline::defaultPipelineConfigInfo(Pipeline::Config& configInfo)
 	{
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -104,7 +238,7 @@ namespace Aegix::Graphics
 		configInfo.attributeDescriptions = Model::Vertex::attributeDescriptions();
 	}
 
-	void Pipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)
+	void Pipeline::enableAlphaBlending(Pipeline::Config& configInfo)
 	{
 		configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
 		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -116,48 +250,10 @@ namespace Aegix::Graphics
 		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 
-	std::vector<char> Pipeline::readFile(const std::string& filePath)
-	{
-		std::ifstream file{filePath, std::ios::ate | std::ios::binary};
-		if (!(file.is_open()))
-			throw std::runtime_error("failed to open file: " + filePath);
-
-		size_t fileSize = static_cast<size_t>(file.tellg());
-		std::vector<char> buffer(fileSize);
-
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
-
-		file.close();
-		return buffer;
-	}
-
-	void Pipeline::createGraphicsPipeline(const std::string& vertShaderPath, const std::string& fragShaderPath, const PipelineConfigInfo& configInfo)
+	void Pipeline::createGraphicsPipeline(const Pipeline::Config& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
-
-		auto vertCode = readFile(vertShaderPath);
-		auto fragCode = readFile(fragShaderPath);
-		createShaderModule(vertCode, &m_vertShaderModule);
-		createShaderModule(fragCode, &m_fragShaderModule);
-
-		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
-		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		shaderStages[0].module = m_vertShaderModule;
-		shaderStages[0].pName = "main";
-		shaderStages[0].flags = 0;
-		shaderStages[0].pNext = nullptr;
-		shaderStages[0].pSpecializationInfo = nullptr;
-
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = m_fragShaderModule;
-		shaderStages[1].pName = "main";
-		shaderStages[1].flags = 0;
-		shaderStages[1].pNext = nullptr;
-		shaderStages[1].pSpecializationInfo = nullptr;
 
 		auto& bindingDescriptions = configInfo.bindingDescriptions;
 		auto& attributeDescriptions = configInfo.attributeDescriptions;
@@ -170,8 +266,8 @@ namespace Aegix::Graphics
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-		pipelineInfo.pStages = shaderStages.data();
+		pipelineInfo.stageCount = static_cast<uint32_t>(configInfo.shaderStges.size());
+		pipelineInfo.pStages = configInfo.shaderStges.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
 		pipelineInfo.pViewportState = &configInfo.viewportInfo;
@@ -188,16 +284,5 @@ namespace Aegix::Graphics
 
 		if (vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
 			throw std::runtime_error("failed to create graphics pipeline");
-	}
-
-	void Pipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
-	{
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = code.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
-			throw std::runtime_error("failed to create shader module");
 	}
 }

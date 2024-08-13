@@ -1,33 +1,23 @@
 #pragma once
 
-#include "graphics/device.h"
-#include "graphics/frame_info.h"
-#include "graphics/pipeline.h"
-
-#include <memory>
-#include <vector>
+#include "graphics/systems/render_system.h"
 
 namespace Aegix::Graphics
 {
-	class PointLightSystem
+	/// @brief Render system for rendering point lights
+	/// @note This system only renders a representation of the lights, lighting can be done without this system
+	class PointLightSystem : public RenderSystem
 	{
 	public:
+		struct PointLightPushConstants // max 128 bytes
+		{
+			Vector4 position{};
+			Vector4 color{};
+			float radius;
+		};
+
 		PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-		~PointLightSystem();
 
-		PointLightSystem(const PointLightSystem&) = delete;
-		PointLightSystem& operator=(const PointLightSystem&) = delete;
-
-		void update(FrameInfo& frameInfo, GlobalUbo& ubo);
-		void render(FrameInfo& frameInfo);
-
-	private:
-		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
-		void createPipeline(VkRenderPass renderPass);
-
-		VulkanDevice& m_device;
-
-		std::unique_ptr<Pipeline> mPipeline;
-		VkPipelineLayout mPipelineLayout;
+		virtual void render(const FrameInfo& frameInfo) override;
 	};
 } 

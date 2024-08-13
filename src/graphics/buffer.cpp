@@ -55,7 +55,7 @@ namespace Aegix::Graphics
         }
     }
 
-    void Buffer::writeToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset)
+    void Buffer::writeToBuffer(const void* data, VkDeviceSize size, VkDeviceSize offset)
     {
         assert(m_mapped && "Cannot copy to unmapped buffer");
 
@@ -100,7 +100,7 @@ namespace Aegix::Graphics
         };
     }
 
-    void Buffer::writeToIndex(void* data, int index)
+    void Buffer::writeToIndex(const void* data, int index)
     {
         writeToBuffer(data, m_instanceSize, index * m_alignmentSize);
     }

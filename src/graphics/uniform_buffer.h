@@ -1,0 +1,53 @@
+#pragma once
+
+#include "graphics/buffer.h"
+#include "graphics/descriptors.h"
+#include "graphics/swap_chain.h"
+
+#include <array>
+
+namespace Aegix::Graphics
+{
+	/// @brief Manages buffers for uniforms
+	/// @tparam T Type of data to be stored in the buffer
+	template<typename T>
+	class UniformBuffer
+	{
+	public:
+		UniformBuffer(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool, uint32_t binding = 0)
+		{
+			for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+			{
+				// Create uniform buffer
+				m_buffers[i] = std::make_unique<Buffer>(device, sizeof(T), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+				m_buffers[i]->map();
+			}
+		}
+
+		VkDescriptorBufferInfo descriptorInfo(int index) { return m_buffers[index]->descriptorInfo(); }
+
+		/// @brief Sets the data in the buffer for all frames
+		/// @param data The new data
+		/// @note This function should not be called once rendering has started (call setData(data, index) instead)
+		void setData(const T& data)
+		{
+			for (auto& buffer : m_buffers)
+			{
+				buffer->writeToBuffer(&data);
+			}
+		}
+
+		/// @brief Sets the data in the buffer for the specified frame index
+		/// @param data The new data
+		/// @param index The index of the currently active frame
+		/// @note This function can be savely called during rendering
+		void setData(const T& data, int index)
+		{
+			m_buffers[index]->writeToBuffer(&data);
+		}
+
+	private:
+		std::array<std::unique_ptr<Buffer>, SwapChain::MAX_FRAMES_IN_FLIGHT> m_buffers;
+	};
+}

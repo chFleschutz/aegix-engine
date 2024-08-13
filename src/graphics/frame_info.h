@@ -1,18 +1,14 @@
 #pragma once
 
-#include "camera.h"
+#include "graphics/camera.h"
+#include "graphics/lights.h"
 #include "scene/scene.h"
-
-#include <vulkan/vulkan.h>
 
 namespace Aegix::Graphics
 {
-#define MAX_LIGHTS 10 // TODO: Remove define
-
-	struct PointLight
+	struct GlobalLimits
 	{
-		Vector4 position{}; // ignore w
-		Vector4 color{};	// w is intensity
+		static constexpr int MAX_LIGHTS = 10;
 	};
 
 	struct GlobalUbo
@@ -21,7 +17,7 @@ namespace Aegix::Graphics
 		Matrix4 view{1.0f};
 		Matrix4 inverseView{1.0f};
 		Vector4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
-		PointLight pointLights[MAX_LIGHTS];
+		PointLight pointLights[GlobalLimits::MAX_LIGHTS];
 		int numLights;
 	};
 
@@ -32,6 +28,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer commandBuffer;
 		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
-		Aegix::Scene::Scene* scene;
+		Scene::Scene* scene;
 	};
 }

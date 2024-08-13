@@ -7,19 +7,18 @@ namespace Aegix::Graphics
 {
     // *************** Descriptor Set Layout Builder *********************
 
-    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(
-        uint32_t binding,
-        VkDescriptorType descriptorType,
-        VkShaderStageFlags stageFlags,
-        uint32_t count)
+    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType descriptorType,
+        VkShaderStageFlags stageFlags, uint32_t count)
     {
         assert(m_bindings.count(binding) == 0 && "Binding already in use");
+
         VkDescriptorSetLayoutBinding layoutBinding{};
         layoutBinding.binding = binding;
         layoutBinding.descriptorType = descriptorType;
         layoutBinding.descriptorCount = count;
         layoutBinding.stageFlags = stageFlags;
         m_bindings[binding] = layoutBinding;
+
         return *this;
     }
 
@@ -44,14 +43,8 @@ namespace Aegix::Graphics
         descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
-        if (vkCreateDescriptorSetLayout(
-            device.device(),
-            &descriptorSetLayoutInfo,
-            nullptr,
-            &m_descriptorSetLayout) != VK_SUCCESS)
-        {
+        if (vkCreateDescriptorSetLayout(device.device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
             throw std::runtime_error("failed to create descriptor set layout!");
-        }
     }
 
     DescriptorSetLayout::~DescriptorSetLayout()
@@ -67,12 +60,12 @@ namespace Aegix::Graphics
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(
-        VkDescriptorPoolCreateFlags flags)
+    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags)
     {
         m_poolFlags = flags;
         return *this;
     }
+
     DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count)
     {
         m_maxSets = count;
@@ -86,25 +79,19 @@ namespace Aegix::Graphics
 
     // *************** Descriptor Pool *********************
 
-    DescriptorPool::DescriptorPool(
-        VulkanDevice& device,
-        uint32_t m_maxSets,
-        VkDescriptorPoolCreateFlags m_poolFlags,
-        const std::vector<VkDescriptorPoolSize>& m_poolSizes)
+    DescriptorPool::DescriptorPool(VulkanDevice& device, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
+        const std::vector<VkDescriptorPoolSize>& poolSizes)
         : m_device{ device }
     {
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
         descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(m_poolSizes.size());
-        descriptorPoolInfo.pPoolSizes = m_poolSizes.data();
-        descriptorPoolInfo.maxSets = m_maxSets;
-        descriptorPoolInfo.flags = m_poolFlags;
+        descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+        descriptorPoolInfo.pPoolSizes = poolSizes.data();
+        descriptorPoolInfo.maxSets = maxSets;
+        descriptorPoolInfo.flags = poolFlags;
 
-        if (vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &m_descriptorPool) !=
-            VK_SUCCESS)
-        {
+        if (vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
             throw std::runtime_error("failed to create descriptor pool!");
-        }
     }
 
     DescriptorPool::~DescriptorPool()
@@ -130,11 +117,7 @@ namespace Aegix::Graphics
 
     void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
     {
-        vkFreeDescriptorSets(
-            m_device.device(),
-            m_descriptorPool,
-            static_cast<uint32_t>(descriptors.size()),
-            descriptors.data());
+        vkFreeDescriptorSets(m_device.device(), m_descriptorPool, static_cast<uint32_t>(descriptors.size()), descriptors.data());
     }
 
     void DescriptorPool::resetPool()
@@ -174,9 +157,7 @@ namespace Aegix::Graphics
 
         auto& bindingDescription = m_setLayout.m_bindings[binding];
 
-        assert(
-            bindingDescription.descriptorCount == 1 &&
-            "Binding single descriptor info, but binding expects multiple");
+        assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -204,11 +185,7 @@ namespace Aegix::Graphics
         {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(
-            m_pool.m_device.device(), 
-            static_cast<uint32_t>(m_writes.size()), 
-            m_writes.data(), 
-            0, 
-            nullptr);
+
+        vkUpdateDescriptorSets(m_pool.m_device.device(), static_cast<uint32_t>(m_writes.size()), m_writes.data(), 0, nullptr);
     }
 }

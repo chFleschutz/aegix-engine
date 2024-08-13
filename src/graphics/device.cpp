@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
 	{
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "Vulkan Validation: " << pCallbackData->pMessage << "\n\n";
 		return VK_FALSE;
 	}
 
@@ -105,6 +105,7 @@ namespace Aegix::Graphics
 
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+			std::cout << "Vulkan Validation Layer enabled\n";
 		}
 		else
 		{

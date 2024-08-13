@@ -1,11 +1,18 @@
 #pragma once
 
+#include "graphics/buffer.h"
+#include "graphics/descriptors.h"
 #include "graphics/device.h"
+#include "graphics/frame_info.h"
 #include "graphics/swap_chain.h"
+#include "graphics/systems/render_system.h"
 #include "graphics/window.h"
+#include "scene/scene.h"
 
-#include <cassert>
 #include <memory>
+#include <type_traits>
+#include <typeindex>
+#include <unordered_map>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -14,35 +21,46 @@ namespace Aegix::Graphics
 	{
 	public:
 		Renderer(Window& window, VulkanDevice& device);
-		~Renderer();
-
 		Renderer(const Renderer&) = delete;
 		Renderer& operator=(const Renderer&) = delete;
+		~Renderer();
 
+		template<typename T>
+		RenderSystem& addRenderSystem()
+		{
+			static_assert(std::is_base_of_v<RenderSystem, T>, "T has to be a subclass of RenderSystem");
+			auto it = m_renderSystems.find(typeid(T));
+			if (it != m_renderSystems.end())
+				return *it->second;
+
+			auto newSystem = std::make_unique<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
+			return *m_renderSystems.emplace(typeid(T), std::move(newSystem)).first->second;
+		}
+
+		VulkanDevice& device() { return m_device; }
+		DescriptorPool& globalPool() { return *m_globalPool; }
 		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }
-		VkCommandBuffer currentCommandBuffer() const
-		{
-			assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
-			return m_commandBuffers[m_currentFrameIndex];
-		}
-
-		int frameIndex() const 
-		{
-			assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
-			return m_currentFrameIndex;
-		}
+		VkCommandBuffer currentCommandBuffer() const;
+		int frameIndex() const;
 
 		VkCommandBuffer beginFrame();
 		void endFrame();
+		
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+		void renderFrame(float frametime, Scene::Scene& scene);
+
+		void shutdown();
 
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
 		void recreateSwapChain();
+
+		void updateGlobalUBO(const FrameInfo& frameInfo);
 
 		Window& m_window;
 		VulkanDevice& m_device;
@@ -52,5 +70,12 @@ namespace Aegix::Graphics
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
+
+		std::unique_ptr<DescriptorPool> m_globalPool;
+		std::vector<std::unique_ptr<Buffer>> m_globalUniformBuffers;
+		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
+		std::vector<VkDescriptorSet> m_globalDescriptorSets;
+
+		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
 }
