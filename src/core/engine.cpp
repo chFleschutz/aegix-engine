@@ -1,18 +1,9 @@
 #include "engine.h"
 
 #include "core/input.h"
-#include "graphics/buffer.h"
-#include "graphics/systems/point_light_system.h"
-#include "graphics/systems/simple_render_system.h"
-#include "scene/components.h"
-#include "scene/entity.h"
-#include "scripting/script_base.h"
-#include "utils/math_utils.h"
 
-#include <array>
 #include <chrono>
 #include <iostream>
-#include <stdexcept>
 
 namespace Aegix
 {

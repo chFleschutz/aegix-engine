@@ -4,20 +4,16 @@
 #include "graphics/renderer.h"
 #include "graphics/systems/render_system.h"
 
-#include <cassert>
 #include <filesystem>
 #include <memory>
-#include <type_traits>
 
 namespace Aegix
 {
-	class AssetManagerGuard;
-
+	/// @brief Used to create Assets like materials and models
 	class AssetManager
 	{
 	public:
-		AssetManager(Graphics::Renderer& renderer) : m_renderer{ renderer } {}
-		~AssetManager() = default;
+		~AssetManager();
 		AssetManager(const AssetManager&) = delete;
 		AssetManager& operator=(const AssetManager&) = delete;
 
@@ -43,22 +39,12 @@ namespace Aegix
 		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);
 
 	private:
+		AssetManager(Graphics::Renderer& renderer);
+
+		static AssetManager* s_assetManager;
+
 		Graphics::Renderer& m_renderer;
 
-		friend class AssetManagerGuard;
-	};
-
-	inline AssetManager* g_assetManager = nullptr;
-
-
-	/// @brief RAII class to ensure that the AssetManager gets properly initialized and destroyed
-	class AssetManagerGuard
-	{
-	public:
-		AssetManagerGuard(Graphics::Renderer& renderer);
-		~AssetManagerGuard();
-
-	private:
-		std::unique_ptr<AssetManager> m_assetManager;
+		friend class Engine;
 	};
 }

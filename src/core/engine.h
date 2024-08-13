@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/asset_manager.h"
-#include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -9,8 +8,6 @@
 
 #include <memory>
 #include <type_traits>
-#include <vector>
-
 
 namespace Aegix
 {
@@ -45,8 +42,8 @@ namespace Aegix
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
-
-		AssetManagerGuard m_assetManager{ m_renderer };
+		
+		AssetManager m_assetManager{ m_renderer };
 
 		std::unique_ptr<Scene::Scene> m_scene;
 	};
