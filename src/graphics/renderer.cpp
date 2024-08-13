@@ -205,13 +205,13 @@ namespace Aegix::Graphics
 		// render
 		beginSwapChainRenderPass(commandBuffer);
 
-		//for (auto&& system : m_renderSystems)
-		//{
-		//	system->render(frameInfo);
-		//}
+		for (auto&& [type, system] : m_renderSystems)
+		{
+			system->render(frameInfo);
+		}
 
-		m_simpleRenderSystem->renderGameObjects(frameInfo);
-		m_pointLightSystem->render(frameInfo);
+		//m_simpleRenderSystem->renderGameObjects(frameInfo);
+		//m_pointLightSystem->render(frameInfo);
 
 		endSwapChainRenderPass(commandBuffer);
 		endFrame();

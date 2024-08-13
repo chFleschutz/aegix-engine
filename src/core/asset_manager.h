@@ -31,8 +31,7 @@ namespace Aegix
 
 			using SystemType = typename Graphics::RenderSystemRef<T>::type;
 			auto& system = m_renderer.addRenderSystem<SystemType>();
-			//return std::make_shared<T>(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool());
-			return std::shared_ptr<T>(new T(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool()));
+			return std::make_shared<T>(m_renderer.device(), system.descriptorSetLayout(), m_renderer.globalPool());
 		}
 
 		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);

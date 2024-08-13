@@ -15,7 +15,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } * deltaSeconds;
+		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } *deltaSeconds;
 	}
 };
 
@@ -29,21 +29,24 @@ public:
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
-		auto& assetManager = Aegix::AssetManager::instance();
-
-		{ // Models 
+		{
+			auto& assetManager = Aegix::AssetManager::instance();
 			auto teapotModel = assetManager.createModel("models/teapot.obj");
+			auto planeModel = assetManager.createModel("models/plane.obj");
+
+			auto whiteMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
+			whiteMat->setData({ { 1.0f, 1.0f, 1.0f, 1.0f } });
+
 			auto teapot = createEntity("Teapot");
 			teapot.addComponent<Aegix::Component::Mesh>(teapotModel, Aegix::Color::red());
+			teapot.addComponent<Aegix::Component::Material>(whiteMat);
 			teapot.addComponent<Rotator>();
-			
-			auto planeModel = assetManager.createModel("models/plane.obj");
-			auto exampleMat = assetManager.createMaterial<Aegix::Graphics::ExampleMaterial>();
+
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Aegix::Color::white());
-			plane.addComponent<Aegix::Component::Material>(exampleMat);
+			plane.addComponent<Aegix::Component::Material>(whiteMat);
 		}
-		{ // Lights
+		{
 			auto light1 = createEntity("Light 1", { -5.0f, -5.0f, 0.0f });
 			light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 10.0f);
 

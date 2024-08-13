@@ -10,8 +10,8 @@ namespace Aegix::Graphics
 	public:
 		struct Data
 		{
-			glm::mat4 model;
-		};
+			glm::vec4 color;
+		} data;
 
 		ExampleMaterial(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
 			: BaseMaterial(device, setLayout, pool)
@@ -34,8 +34,13 @@ namespace Aegix::Graphics
 			}
 		}
 
-	private:
-		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
+		void setData(const Data& data)
+		{
+			for (auto& buffer : m_uniformBuffers)
+			{
+				buffer->writeToBuffer(&data);
+			}
+		}
 	};
 
 
@@ -75,11 +80,11 @@ namespace Aegix::Graphics
 			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, Component::Material>();
 			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
-				auto descriptorSet = material.material->descriptorSet(0);
+				auto descriptorSet = material.material->descriptorSet(frameInfo.frameIndex);
 				vkCmdBindDescriptorSets(frameInfo.commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
 					m_pipelineLayout,
-					0, 1,
+					1, 1,
 					&descriptorSet,
 					0, nullptr
 				);
@@ -92,13 +97,13 @@ namespace Aegix::Graphics
 				push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
 				push.normalMatrix = colorNormalMatrix;
 
-				vkCmdPushConstants(
-					frameInfo.commandBuffer,
+				vkCmdPushConstants(frameInfo.commandBuffer,
 					m_pipelineLayout,
 					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 					0,
 					sizeof(SimplePushConstantData),
-					&push);
+					&push
+				);
 
 				mesh.model->bind(frameInfo.commandBuffer);
 				mesh.model->draw(frameInfo.commandBuffer);
@@ -117,7 +122,7 @@ namespace Aegix::Graphics
 		{
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts {
 				globalSetLayout, 
-				m_descriptorSetLayout->descriptorSetLayout() 
+				m_descriptorSetLayout->descriptorSetLayout(), 
 			};
 
 			VkPushConstantRange pushConstantRange{};

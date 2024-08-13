@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
 	{
-		std::cerr << "Vulkan Validation: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "Vulkan Validation: " << pCallbackData->pMessage << "\n\n";
 		return VK_FALSE;
 	}
 

@@ -22,6 +22,11 @@ layout(set = 0, binding = 0) uniform Global
     int numLights;
 } global;
 
+layout(set = 1, binding = 0) uniform Material 
+{
+	vec4 color;
+} material;
+
 layout(push_constant) uniform Push 
 {
     mat4 modelMatrix; 

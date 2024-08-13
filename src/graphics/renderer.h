@@ -37,12 +37,12 @@ namespace Aegix::Graphics
 		template<typename T>
 		RenderSystem& addRenderSystem()
 		{
-			auto it = m_renderSystemMap.find(typeid(T));
-			if (it != m_renderSystemMap.end())
+			auto it = m_renderSystems.find(typeid(T));
+			if (it != m_renderSystems.end())
 				return *it->second;
 
 			auto newSystem = std::make_unique<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
-			return *m_renderSystemMap.emplace(typeid(T), std::move(newSystem)).first->second;
+			return *m_renderSystems.emplace(typeid(T), std::move(newSystem)).first->second;
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -84,7 +84,6 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<SimpleRenderSystem> m_simpleRenderSystem;
 		std::unique_ptr<PointLightSystem> m_pointLightSystem;
-		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
-		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystemMap;
+		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
 }

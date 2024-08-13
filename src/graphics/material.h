@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
@@ -18,6 +19,7 @@ namespace Aegix::Graphics
 	protected:
 		VulkanDevice& m_device;
 
+		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 		std::vector<VkDescriptorSet> m_descriptorSets;
 	};
 }
