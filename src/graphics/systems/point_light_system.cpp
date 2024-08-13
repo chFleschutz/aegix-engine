@@ -26,6 +26,8 @@ namespace Aegix::Graphics
 
 	void PointLightSystem::render(const FrameInfo& frameInfo)
 	{
+		const float pointLightScale = 0.05f;
+
 		m_pipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
@@ -44,7 +46,7 @@ namespace Aegix::Graphics
 			PointLightPushConstants push{};
 			push.position = Vector4(transform.location, 1.0f);
 			push.color = Vector4(pointLight.color.rgb(), 1.0f);
-			push.radius = transform.scale.x;
+			push.radius = pointLight.intensity * pointLightScale;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,

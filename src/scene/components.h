@@ -48,7 +48,7 @@ namespace Aegix::Component
 	struct PointLight
 	{
 		Color color;
-		float intensity = 0.2f;
+		float intensity = 0.1f;
 	};
 
 	/// @brief Holds a camera to view the scene
