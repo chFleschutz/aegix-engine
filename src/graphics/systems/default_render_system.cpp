@@ -32,8 +32,8 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::Builder(m_device)
 			.setRenderPass(renderPass)
 			.setPipelineLayout(m_pipelineLayout->pipelineLayout())
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "example.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "example.frag.spv")
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default.frag.spv")
 			.build();
 	}
 
