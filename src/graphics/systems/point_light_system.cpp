@@ -10,46 +10,25 @@
 
 namespace Aegix::Graphics
 {
-	struct PointLightPushConstants
+	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		: RenderSystem(device)
 	{
-		Vector4 position{};
-		Vector4 color{};
-		float radius;
-	};
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+		createPipelineLayout(descriptorSetLayouts, sizeof(PointLightPushConstants));
 
-	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
-		: m_device{ device }
-	{
-		createPipelineLayout(globalSetLayout);
-		createPipeline(renderPass);
+		std::string vertShaderPath = SHADER_DIR "point_light.vert.spv";
+		std::string fragShaderPath = SHADER_DIR "point_light.frag.spv";
+		createPipeline(renderPass, vertShaderPath, fragShaderPath);
 	}
 
-	PointLightSystem::~PointLightSystem()
+	void PointLightSystem::render(const FrameInfo& frameInfo)
 	{
-		vkDestroyPipelineLayout(m_device.device(), mPipelineLayout, nullptr);
-	}
-
-	void PointLightSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo)
-	{
-		int lighIndex = 0;
-		for (auto&& [entity, transform, pointLight] : frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>().each())
-		{
-			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = Vector4(pointLight.color.rgb(), pointLight.intensity);
-			lighIndex++;
-		}
-		ubo.numLights = lighIndex;
-	}
-
-	void PointLightSystem::render(FrameInfo& frameInfo)
-	{
-		mPipeline->bind(frameInfo.commandBuffer);
+		m_pipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			mPipelineLayout,
+			m_pipelineLayout,
 			0, 1,
 			&frameInfo.globalDescriptorSet,
 			0, nullptr
@@ -66,7 +45,7 @@ namespace Aegix::Graphics
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
-				mPipelineLayout,
+				m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(PointLightPushConstants),
@@ -76,45 +55,45 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
-	{
-		VkPushConstantRange pushConstantRange{};
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(PointLightPushConstants);
+	//void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
+	//{
+	//	VkPushConstantRange pushConstantRange{};
+	//	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	//	pushConstantRange.offset = 0;
+	//	pushConstantRange.size = sizeof(PointLightPushConstants);
 
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{globalSetLayout};
+	//	std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+	//	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+	//	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	//	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+	//	pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+	//	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	//	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
-			throw std::runtime_error("failed to create pipeline layout");
-	}
+	//	if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &mPipelineLayout) != VK_SUCCESS)
+	//		throw std::runtime_error("failed to create pipeline layout");
+	//}
 
-	void PointLightSystem::createPipeline(VkRenderPass renderPass)
-	{
-		assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+	//void PointLightSystem::createPipeline(VkRenderPass renderPass)
+	//{
+	//	assert(mPipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
-		PipelineConfigInfo pipelineConfig{};
-		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
-		Pipeline::enableAlphaBlending(pipelineConfig);
-		pipelineConfig.bindingDescriptions.clear();
-		pipelineConfig.attributeDescriptions.clear();
-		pipelineConfig.renderPass = renderPass;
-		pipelineConfig.pipelineLayout = mPipelineLayout;
+	//	PipelineConfigInfo pipelineConfig{};
+	//	Pipeline::defaultPipelineConfigInfo(pipelineConfig);
+	//	Pipeline::enableAlphaBlending(pipelineConfig);
+	//	pipelineConfig.bindingDescriptions.clear();
+	//	pipelineConfig.attributeDescriptions.clear();
+	//	pipelineConfig.renderPass = renderPass;
+	//	pipelineConfig.pipelineLayout = mPipelineLayout;
 
-		std::string vertShaderPath = SHADER_DIR "point_light.vert.spv";
-		std::string fragShaderPath = SHADER_DIR "point_light.frag.spv";
+	//	std::string vertShaderPath = SHADER_DIR "point_light.vert.spv";
+	//	std::string fragShaderPath = SHADER_DIR "point_light.frag.spv";
 
-		mPipeline = std::make_unique<Pipeline>(
-			m_device,
-			vertShaderPath,
-			fragShaderPath,
-			pipelineConfig);
-	}
-} 
+	//	mPipeline = std::make_unique<Pipeline>(
+	//		m_device,
+	//		vertShaderPath,
+	//		fragShaderPath,
+	//		pipelineConfig);
+	//}
+}

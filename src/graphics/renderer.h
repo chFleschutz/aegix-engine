@@ -10,6 +10,7 @@
 #include "scene/scene.h"
 
 #include <memory>
+#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -27,6 +28,7 @@ namespace Aegix::Graphics
 		template<typename T>
 		RenderSystem& addRenderSystem()
 		{
+			static_assert(std::is_base_of_v<RenderSystem, T>, "T has to be a subclass of RenderSystem");
 			auto it = m_renderSystems.find(typeid(T));
 			if (it != m_renderSystems.end())
 				return *it->second;
