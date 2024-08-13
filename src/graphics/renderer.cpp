@@ -1,8 +1,8 @@
 #include "renderer.h"
 
 #include "graphics/frame_info.h"
-#include "graphics/render_system.h"
 #include "graphics/systems/point_light_system.h"
+#include "graphics/systems/render_system.h"
 #include "graphics/systems/simple_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
