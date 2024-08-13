@@ -34,6 +34,8 @@ namespace Aegix
 
 	void Engine::run()
 	{
+		assert(m_scene != nullptr && "Cannot run engine without a scene");
+
 		Input::instance().initialize(m_window.glfwWindow());
 
 		m_scene->initialize();
@@ -54,7 +56,7 @@ namespace Aegix
 			m_scene->update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(frameTimeSec, m_scene.get());
+			m_renderer.renderFrame(frameTimeSec, *m_scene);
 
 			applyFrameBrake(frameBeginTime);
 		}

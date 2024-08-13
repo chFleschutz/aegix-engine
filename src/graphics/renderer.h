@@ -3,29 +3,19 @@
 #include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
+#include "graphics/frame_info.h"
 #include "graphics/swap_chain.h"
+#include "graphics/systems/render_system.h"
 #include "graphics/window.h"
+#include "scene/scene.h"
 
 #include <memory>
-#include <vector>
-#include <unordered_map>
 #include <typeindex>
-
-namespace Aegix::Scene
-{
-	class Scene;
-}
+#include <unordered_map>
+#include <vector>
 
 namespace Aegix::Graphics
 {
-	class RenderSystem;
-
-	class PointLightSystem;
-	class SimpleRenderSystem;
-
-	template<typename T>
-	struct RenderSystemRef;
-
 	class Renderer
 	{
 	public:
@@ -59,7 +49,7 @@ namespace Aegix::Graphics
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-		void renderFrame(float frametime, Scene::Scene* scene);
+		void renderFrame(float frametime, Scene::Scene& scene);
 
 		void shutdown();
 
@@ -67,6 +57,8 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void freeCommandBuffers();
 		void recreateSwapChain();
+
+		void updateGlobalUBO(const FrameInfo& frameInfo);
 
 		Window& m_window;
 		VulkanDevice& m_device;
@@ -82,8 +74,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
 		std::vector<VkDescriptorSet> m_globalDescriptorSets;
 
-		std::unique_ptr<SimpleRenderSystem> m_simpleRenderSystem;
-		std::unique_ptr<PointLightSystem> m_pointLightSystem;
 		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
 	};
 }

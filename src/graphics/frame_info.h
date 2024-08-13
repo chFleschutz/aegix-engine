@@ -1,6 +1,7 @@
 #pragma once
 
-#include "camera.h"
+#include "graphics/camera.h"
+#include "graphics/lights.h"
 #include "scene/scene.h"
 
 #include <vulkan/vulkan.h>
@@ -10,12 +11,6 @@ namespace Aegix::Graphics
 	struct GlobalLimits
 	{
 		static constexpr int MAX_LIGHTS = 10;
-	};
-
-	struct PointLight
-	{
-		Vector4 position{}; // ignore w
-		Vector4 color{};	// w is intensity
 	};
 
 	struct GlobalUbo

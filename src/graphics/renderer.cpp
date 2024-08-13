@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#include "graphics/frame_info.h"
 #include "graphics/systems/point_light_system.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/systems/simple_render_system.h"
@@ -53,19 +52,11 @@ namespace Aegix::Graphics
 				.writeBuffer(0, &bufferInfo)
 				.build(m_globalDescriptorSets[i]);
 		}
-
-		m_simpleRenderSystem = std::make_unique<SimpleRenderSystem>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
-		m_pointLightSystem = std::make_unique<PointLightSystem>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
 	}
 
 	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
-
-		m_simpleRenderSystem.reset();
-		m_pointLightSystem.reset();
-
-		m_renderSystems.clear();
 	}
 
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
@@ -169,16 +160,15 @@ namespace Aegix::Graphics
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void Renderer::renderFrame(float frametime, Scene::Scene* scene)
+	void Renderer::renderFrame(float frametime, Scene::Scene& scene)
 	{
-		assert(scene != nullptr && "Rendering requires a valid scene");
-
 		auto commandBuffer = beginFrame();
 		if (!commandBuffer)
 			return;
 
-		auto& camera = scene->camera().getComponent<Component::Camera>().camera;
-		auto& cameraTransform = scene->camera().getComponent<Component::Transform>();
+		// TODO: Move this to a script
+		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
+		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
 		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
 		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
@@ -188,32 +178,20 @@ namespace Aegix::Graphics
 			commandBuffer,
 			&camera,
 			m_globalDescriptorSets[m_currentFrameIndex],
-			scene
+			&scene
 		};
 
-		// update
-		GlobalUbo ubo{};
-		ubo.projection = camera.projectionMatrix();
-		ubo.view = camera.viewMatrix();
-		ubo.inverseView = camera.inverseViewMatrix();
+		updateGlobalUBO(frameInfo);
 
-		m_pointLightSystem->update(frameInfo, ubo);
-
-		m_globalUniformBuffers[m_currentFrameIndex]->writeToBuffer(&ubo);
-		m_globalUniformBuffers[m_currentFrameIndex]->flush();
-
-		// render
 		beginSwapChainRenderPass(commandBuffer);
-
-		for (auto&& [type, system] : m_renderSystems)
 		{
-			system->render(frameInfo);
+			for (auto&& [_, system] : m_renderSystems)
+			{
+				system->render(frameInfo);
+			}
 		}
-
-		//m_simpleRenderSystem->renderGameObjects(frameInfo);
-		//m_pointLightSystem->render(frameInfo);
-
 		endSwapChainRenderPass(commandBuffer);
+
 		endFrame();
 	}
 
@@ -270,5 +248,27 @@ namespace Aegix::Graphics
 		}
 
 		// Todo
+	}
+
+	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
+	{
+		GlobalUbo ubo{};
+		ubo.projection = frameInfo.camera->projectionMatrix();
+		ubo.view = frameInfo.camera->viewMatrix();
+		ubo.inverseView = frameInfo.camera->inverseViewMatrix();
+
+		int lighIndex = 0;
+		auto view = frameInfo.scene->viewEntitiesByType<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		for (auto&& [entity, transform, pointLight] : view.each())
+		{
+			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
+			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = Vector4(pointLight.color.rgb(), pointLight.intensity);
+			lighIndex++;
+		}
+		ubo.numLights = lighIndex;
+
+		m_globalUniformBuffers[m_currentFrameIndex]->writeToBuffer(&ubo);
+		m_globalUniformBuffers[m_currentFrameIndex]->flush();
 	}
 }
