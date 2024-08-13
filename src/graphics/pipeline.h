@@ -44,6 +44,8 @@ namespace Aegix::Graphics
 			Builder& setPipelineLayout(VkPipelineLayout pipelineLayout);
 			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
 			Builder& enableAlphaBlending();
+			Builder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
+			Builder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
 
 			std::unique_ptr<Pipeline> build();
 

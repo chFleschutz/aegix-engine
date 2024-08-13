@@ -31,7 +31,7 @@ public:
 			auto& assetManager = Aegix::AssetManager::instance();
 			auto teapotModel = assetManager.createModel("models/teapot.obj");
 			auto planeModel = assetManager.createModel("models/plane.obj");
-			//assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
+			assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 			auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
 			whiteMat->setData({ 

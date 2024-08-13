@@ -68,6 +68,18 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	Pipeline::Builder& Pipeline::Builder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
+	{
+		m_configInfo.bindingDescriptions = bindingDescriptions;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
+	{
+		m_configInfo.attributeDescriptions = attributeDescriptions;
+		return *this;
+	}
+
 	std::unique_ptr<Pipeline> Pipeline::Builder::build()
 	{
 		assert(m_configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
