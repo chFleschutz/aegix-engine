@@ -1,6 +1,5 @@
 #version 450
 
-layout(location = 0) in vec3 inColor;
 layout(location = 1) in vec3 inPosWorld;
 layout(location = 2) in vec3 inNormalWorld;
 
@@ -62,5 +61,5 @@ void main()
 		specularLight += intensity * blinnTerm;
     }
 
-    outColor = vec4(diffuseLight * inColor + specularLight * inColor, 1.0);
+    outColor = vec4(diffuseLight * material.color.rgb + specularLight * material.color.rgb, 1.0);
 }

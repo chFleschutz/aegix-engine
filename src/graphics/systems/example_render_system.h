@@ -59,9 +59,8 @@ namespace Aegix::Graphics
 	class ExampleRenderSystem : public RenderSystem
 	{
 	public:
-		// TODO: remove later
-		struct SimplePushConstantData
-		{	// max 128 bytes
+		struct PushConstantData // max 128 bytes
+		{	
 			Matrix4 modelMatrix{ 1.0f };
 			Matrix4 normalMatrix{ 1.0f };
 		};
@@ -77,7 +76,7 @@ namespace Aegix::Graphics
 				globalSetLayout,
 				m_descriptorSetLayout->descriptorSetLayout(),
 			};
-			createPipelineLayout(descriptorSetLayouts, sizeof(SimplePushConstantData));
+			createPipelineLayout(descriptorSetLayouts, sizeof(PushConstantData));
 
 			std::string vertShaderPath = SHADER_DIR "example.vert.spv";
 			std::string fragShaderPath = SHADER_DIR "example.frag.spv";
@@ -97,35 +96,32 @@ namespace Aegix::Graphics
 				0, nullptr
 			);
 
-			// Iterate over entities with material
 			auto view = frameInfo.scene->viewEntitiesByType<Component::Transform, Component::Mesh, ExampleMaterial>();
 			for (auto&& [entity, transform, mesh, material] : view.each())
 			{
-				auto descriptorSet = material.material->m_descriptorSets[frameInfo.frameIndex];
+				// Descriptor Set
 				vkCmdBindDescriptorSets(frameInfo.commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
 					m_pipelineLayout,
 					1, 1,
-					&descriptorSet,
+					&material.material->m_descriptorSets[frameInfo.frameIndex],
 					0, nullptr
 				);
 
-				// TODO: transfer color as uniform
-				Matrix4 colorNormalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
-				colorNormalMatrix[3] = mesh.color.rgba();
-
-				SimplePushConstantData push{};
+				// Push Constants
+				PushConstantData push{};
 				push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
-				push.normalMatrix = colorNormalMatrix;
+				push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
 
 				vkCmdPushConstants(frameInfo.commandBuffer,
 					m_pipelineLayout,
 					VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 					0,
-					sizeof(SimplePushConstantData),
+					sizeof(push),
 					&push
 				);
 
+				// Draw
 				mesh.model->bind(frameInfo.commandBuffer);
 				mesh.model->draw(frameInfo.commandBuffer);
 			}
