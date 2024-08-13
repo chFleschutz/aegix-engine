@@ -8,12 +8,15 @@ namespace Aegix::Graphics
 	class ExampleMaterial;
 	class ExampleRenderSystem;
 
+
+
+	// Example Material
+
 	template<>
 	struct RenderSystemRef<ExampleMaterial>
 	{
 		using type = ExampleRenderSystem;
 	};
-
 
 	struct ExampleMaterial
 	{
@@ -26,7 +29,7 @@ namespace Aegix::Graphics
 		{
 		public:
 			Instance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool)
-				: m_uniformBuffer(device, setLayout, pool) 
+				: m_uniformBuffer(device, setLayout, pool)
 			{
 				for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 				{
@@ -51,6 +54,8 @@ namespace Aegix::Graphics
 
 
 
+	// Example Render System
+
 	class ExampleRenderSystem : public RenderSystem
 	{
 	public:
@@ -64,9 +69,19 @@ namespace Aegix::Graphics
 		ExampleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 			: RenderSystem(device)
 		{
-			createDescriptorSetLayouts();
-			createPipelineLayout(globalSetLayout);
-			createPipeline(renderPass);
+			m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+				.build();
+
+			std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+				globalSetLayout,
+				m_descriptorSetLayout->descriptorSetLayout(),
+			};
+			createPipelineLayout(descriptorSetLayouts, sizeof(SimplePushConstantData));
+
+			std::string vertShaderPath = SHADER_DIR "example.vert.spv";
+			std::string fragShaderPath = SHADER_DIR "example.frag.spv";
+			createPipeline(renderPass, vertShaderPath, fragShaderPath);
 		}
 
 		virtual void render(const FrameInfo& frameInfo) override
@@ -114,50 +129,6 @@ namespace Aegix::Graphics
 				mesh.model->bind(frameInfo.commandBuffer);
 				mesh.model->draw(frameInfo.commandBuffer);
 			}
-		}
-
-	private:
-		void createDescriptorSetLayouts()
-		{
-			m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-				.build();
-		}
-
-		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
-		{
-			std::vector<VkDescriptorSetLayout> descriptorSetLayouts {
-				globalSetLayout, 
-				m_descriptorSetLayout->descriptorSetLayout(), 
-			};
-
-			VkPushConstantRange pushConstantRange{};
-			pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-			pushConstantRange.offset = 0;
-			pushConstantRange.size = sizeof(SimplePushConstantData);
-
-			VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-			pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-			pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-			pipelineLayoutInfo.pushConstantRangeCount = 1;
-			pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-
-			if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
-				throw std::runtime_error("failed to create pipeline layout");
-		}
-
-		void createPipeline(VkRenderPass renderPass)
-		{
-			PipelineConfigInfo pipelineConfig{};
-			Pipeline::defaultPipelineConfigInfo(pipelineConfig);
-			pipelineConfig.renderPass = renderPass;
-			pipelineConfig.pipelineLayout = m_pipelineLayout;
-
-			std::string vertShaderPath = SHADER_DIR "example.vert.spv";
-			std::string fragShaderPath = SHADER_DIR "example.frag.spv";
-
-			m_pipeline = std::make_unique<Pipeline>(m_device, vertShaderPath, fragShaderPath, pipelineConfig);
 		}
 	};
 }
