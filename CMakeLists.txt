@@ -36,6 +36,9 @@ message("")
 # Add project dir definition
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 
+# Add GLFW as a dependency
+set(GLFW_BUILD_DOCS OFF)
+add_subdirectory(lib/glfw)
 
 include_directories(
     src
@@ -51,7 +54,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Vulkan)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib/glfw/lib-vc2022/glfw3.lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 
 # Compile glsl shader files into SPIR-V
