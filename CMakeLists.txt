@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(Aegix-Engine)
+project(AegixEngine)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-option(COMPILE_SHADERS "Compile GLSL shaders to SPIR-V" ON)
 option(BUILD_EXAMPLES "Build example projects" ON)
+option(COMPILE_SHADERS "Compile GLSL shaders to SPIR-V" ON)
 
 
 # Find the Vulkan package
@@ -33,35 +33,24 @@ message(STATUS "Vulkan SDK ${Vulkan_VERSION}: ${Vulkan_LIBRARY}")
 message(STATUS "GLSL Compiler: ${Vulkan_GLSLC_EXECUTABLE}")
 message("")
 
-# Add project dir definition
+
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 
-# Add GLFW as a dependency
 set(GLFW_BUILD_DOCS OFF)
-add_subdirectory(lib/glfw)
+add_subdirectory("lib/glfw")
 
-include_directories(
-    src
-    lib/entt/single_include
-    lib/glfw/include
-    lib/glm
-    lib/stb
-    lib/tinyobjloader
-)
+add_subdirectory("src")
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-
-add_library(${PROJECT_NAME} ${SOURCES})
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Vulkan)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+if(BUILD_EXAMPLES)
+    add_subdirectory("examples/simple-scene")
+endif()
 
 
 # Compile glsl shader files into SPIR-V
 if(COMPILE_SHADERS)
     add_custom_target(compile_shaders)
 
-    set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)
+    set(SHADERS_DIR "${CMAKE_SOURCE_DIR}/shaders")
     file(GLOB_RECURSE SHADER_SOURCES 
         "${SHADERS_DIR}/*.glsl" 
         "${SHADERS_DIR}/*.vert"
@@ -74,7 +63,7 @@ if(COMPILE_SHADERS)
 
     foreach(GLSL ${SHADER_SOURCES})
         get_filename_component(SHADER_NAME ${GLSL} NAME)
-        set(SPIRV ${SHADERS_DIR}/${SHADER_NAME}.spv)
+        set(SPIRV "${SHADERS_DIR}/${SHADER_NAME}.spv")
 
         add_custom_command(
             TARGET compile_shaders
@@ -86,9 +75,4 @@ if(COMPILE_SHADERS)
     endforeach()
 
     add_dependencies(${PROJECT_NAME} compile_shaders)
-endif()
-
-# Add example projects
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples/simple-scene)
 endif()
