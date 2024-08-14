@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
+option(COMPILE_SHADERS "Compile GLSL shaders to SPIR-V" ON)
+option(BUILD_EXAMPLES "Build example projects" ON)
+
+
 # Find the Vulkan package
 find_package(Vulkan COMPONENTS glslc REQUIRED)
 if(NOT Vulkan_FOUND)
@@ -17,6 +21,7 @@ endif()
 
 
 # Print configuration
+message("")
 message("CMake Configuration:")
 message(STATUS "CMake Version: ${CMAKE_VERSION}")
 message(STATUS "CMake Generator: ${CMAKE_GENERATOR}")
@@ -26,7 +31,7 @@ message(STATUS "CMake binary directory: ${CMAKE_BINARY_DIR}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Vulkan SDK ${Vulkan_VERSION}: ${Vulkan_LIBRARY}")
 message(STATUS "GLSL Compiler: ${Vulkan_GLSLC_EXECUTABLE}")
-
+message("")
 
 # Add project dir definition
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
@@ -50,28 +55,37 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/lib/glfw/lib-v
 
 
 # Compile glsl shader files into SPIR-V
-set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)
-file(GLOB_RECURSE SHADER_SOURCES 
-    "${SHADERS_DIR}/*.frag" 
-    "${SHADERS_DIR}/*.vert"
-)
-add_custom_target(compile_shaders)
+if(COMPILE_SHADERS)
+    add_custom_target(compile_shaders)
 
-foreach(GLSL ${SHADER_SOURCES})
-    get_filename_component(SHADER_NAME ${GLSL} NAME)
-    set(SPIRV ${SHADERS_DIR}/${SHADER_NAME}.spv)
-    add_custom_command(
-        TARGET compile_shaders
-        COMMAND ${Vulkan_GLSLC_EXECUTABLE} ${GLSL} -o ${SPIRV}
-        DEPENDS ${GLSL}
-        VERBATIM
+    set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)
+    file(GLOB_RECURSE SHADER_SOURCES 
+        "${SHADERS_DIR}/*.glsl" 
+        "${SHADERS_DIR}/*.vert"
+        "${SHADERS_DIR}/*.tesc"
+        "${SHADERS_DIR}/*.tese"
+        "${SHADERS_DIR}/*.geom"
+        "${SHADERS_DIR}/*.frag"
+        "${SHADERS_DIR}/*.comp" 
     )
-endforeach()
-add_dependencies(${PROJECT_NAME} compile_shaders)
 
+    foreach(GLSL ${SHADER_SOURCES})
+        get_filename_component(SHADER_NAME ${GLSL} NAME)
+        set(SPIRV ${SHADERS_DIR}/${SHADER_NAME}.spv)
+
+        add_custom_command(
+            TARGET compile_shaders
+            COMMAND ${Vulkan_GLSLC_EXECUTABLE} ${GLSL} -o ${SPIRV}
+            DEPENDS ${GLSL}
+            COMMENT "Compiling Shader: ${GLSL} to ${SPIRV}"
+            VERBATIM
+        )
+    endforeach()
+
+    add_dependencies(${PROJECT_NAME} compile_shaders)
+endif()
 
 # Add example projects
-option(BUILD_EXAMPLES "Build example projects" ON)
 if(BUILD_EXAMPLES)
     add_subdirectory(examples/simple-scene)
 endif()
