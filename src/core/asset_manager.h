@@ -41,8 +41,7 @@ namespace Aegix
 		template<typename T, typename... Args>
 		std::shared_ptr<typename T::Instance> createMaterialInstance(Args&&... args)
 		{
-			using SystemType = typename Graphics::RenderSystemRef<T>::type;
-			auto& system = addRenderSystem<SystemType>();
+			auto& system = addRenderSystem<typename T::RenderSystem>();
 			return std::make_shared<typename T::Instance>(m_renderer.device(), system.descriptorSetLayout(), 
 				m_renderer.globalPool(), std::forward<Args>(args)...);
 		}

@@ -9,8 +9,10 @@ namespace Aegix::Graphics
 	class DefaultMaterialInstance;
 
 	/// @brief Component for the default material that holds the material instance
+	/// @note This struct also has to define the RenderSystem and Instance types
 	struct DefaultMaterial
 	{
+		using RenderSystem = DefaultRenderSystem;
 		using Instance = DefaultMaterialInstance;
 
 		struct Data
@@ -36,21 +38,12 @@ namespace Aegix::Graphics
 		friend DefaultRenderSystem;
 	};
 
-	/// @brief Specialization of RenderSystemRef for DefaultMaterial. This is required to link the DefaultMaterial to the DefaultRenderSystem
-	/// @note This has to be placed in the namespace Aegix::Graphics
-	template<>
-	struct RenderSystemRef<DefaultMaterial>
-	{
-		using type = DefaultRenderSystem;
-	};
-
-
 	/// @brief Render system for rendering entities with a DefaultMaterial component
 	class DefaultRenderSystem : public RenderSystem
 	{
 	public:
 		struct PushConstantData // max 128 bytes
-		{	
+		{
 			Matrix4 modelMatrix{ 1.0f };
 			Matrix4 normalMatrix{ 1.0f };
 		};
