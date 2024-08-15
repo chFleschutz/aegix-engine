@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
 
 		if (!pixels)
-			throw std::runtime_error("Failed to load texture image");
+			throw std::runtime_error("Failed to load texture image: " + filePath.string());
 
 		Buffer stagingBuffer{m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };

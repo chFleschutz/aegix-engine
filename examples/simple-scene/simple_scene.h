@@ -33,27 +33,28 @@ public:
 
 		auto teapotModel = assetManager.createModel("models/teapot.obj");
 		auto planeModel = assetManager.createModel("models/plane.obj");
-		auto paintingTexture = assetManager.createTexture("textures/painting.png");
 
-		auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
-		whiteMat->setData({
-			.color = { 1.0f, 1.0f, 1.0f, 1.0f }
+		auto paintingTexture = assetManager.createTexture("textures/painting.png");
+		auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
+		paintingMat->setData({
+			.shininess = 32.0f
 			});
 
-		auto colorfulMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
-		colorfulMat->setData({
-			.color = { 0.1f, 0.5f, 1.0f, 1.0f }
+		auto metalTexture = assetManager.createTexture("textures/brushed-metal.png");
+		auto metalMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(metalTexture);
+		metalMat->setData({
+			.shininess = 128.0f
 			});
 
 		auto teapot = createEntity("Teapot");
 		teapot.getComponent<Aegix::Component::Transform>().scale = Vector3{ 2.0f, 2.0f, 2.0f };
 		teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
-		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(colorfulMat);
+		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		teapot.addComponent<Rotator>();
 
 		auto plane = createEntity("Plane");
 		plane.addComponent<Aegix::Component::Mesh>(planeModel);
-		plane.addComponent<Aegix::Graphics::DefaultMaterial>(whiteMat);
+		plane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
 		
 		// LIGHTS
 

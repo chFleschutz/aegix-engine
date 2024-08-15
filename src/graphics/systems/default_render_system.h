@@ -18,7 +18,7 @@ namespace Aegix::Graphics
 
 		struct Data
 		{
-			glm::vec4 color;
+			float shininess = 32.0f;
 		};
 
 		std::shared_ptr<DefaultMaterialInstance> instance;

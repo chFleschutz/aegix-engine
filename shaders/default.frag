@@ -24,7 +24,7 @@ layout(set = 0, binding = 0) uniform Global
 
 layout(set = 1, binding = 0) uniform Material 
 {
-	vec4 color;
+    float shininess;
 } material;
 
 layout(set = 1, binding = 1) uniform sampler2D tex;
@@ -60,10 +60,10 @@ void main()
         vec3 halfAngle = normalize(directionToLight + viewDirection);
 		float blinnTerm = dot(surfaceNormal, halfAngle);
 		blinnTerm = clamp(blinnTerm, 0, 1);
-		blinnTerm = pow(blinnTerm, 32.0); // higher exponent gives sharper highlight
+		blinnTerm = pow(blinnTerm, material.shininess);
 		specularLight += intensity * blinnTerm;
     }
 
-    vec3 materialColor = texture(tex, inUV).rgb * material.color.rgb;
+    vec3 materialColor = texture(tex, inUV).rgb;
     outColor = vec4(diffuseLight * materialColor + specularLight * materialColor, 1.0);
 }
