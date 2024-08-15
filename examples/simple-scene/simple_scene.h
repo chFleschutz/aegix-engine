@@ -33,13 +33,14 @@ public:
 
 		auto teapotModel = assetManager.createModel("models/teapot.obj");
 		auto planeModel = assetManager.createModel("models/plane.obj");
+		auto paintingTexture = assetManager.createTexture("textures/painting.png");
 
-		auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
+		auto whiteMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
 		whiteMat->setData({
 			.color = { 1.0f, 1.0f, 1.0f, 1.0f }
 			});
 
-		auto colorfulMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>();
+		auto colorfulMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
 		colorfulMat->setData({
 			.color = { 0.1f, 0.5f, 1.0f, 1.0f }
 			});
@@ -59,9 +60,9 @@ public:
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 0.0f });
-		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 10.0f);
+		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 100.0f);
 
 		auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
-		light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::green(), 10.0f);
+		light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::green(), 100.0f);
 	}
 };

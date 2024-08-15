@@ -1,7 +1,8 @@
 #version 450
 
-layout(location = 1) in vec3 inPosWorld;
-layout(location = 2) in vec3 inNormalWorld;
+layout(location = 0) in vec3 inPosWorld;
+layout(location = 1) in vec3 inNormalWorld;
+layout(location = 2) in vec2 inUV;
 
 layout(location = 0) out vec4 outColor;
 
@@ -25,6 +26,8 @@ layout(set = 1, binding = 0) uniform Material
 {
 	vec4 color;
 } material;
+
+layout(set = 1, binding = 1) uniform sampler2D tex;
 
 layout(push_constant) uniform Push 
 {
@@ -61,5 +64,6 @@ void main()
 		specularLight += intensity * blinnTerm;
     }
 
-    outColor = vec4(diffuseLight * material.color.rgb + specularLight * material.color.rgb, 1.0);
+    vec3 materialColor = texture(tex, inUV).rgb * material.color.rgb;
+    outColor = vec4(diffuseLight * materialColor + specularLight * materialColor, 1.0);
 }

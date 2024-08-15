@@ -2,6 +2,7 @@
 
 #include "graphics/systems/render_system.h"
 #include "graphics/uniform_buffer.h"
+#include "graphics/texture.h"
 
 namespace Aegix::Graphics
 {
@@ -27,12 +28,14 @@ namespace Aegix::Graphics
 	class DefaultMaterialInstance
 	{
 	public:
-		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool);
+		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
+			std::shared_ptr<Texture> texture);
 
 		void setData(const DefaultMaterial::Data& data) { m_uniformBuffer.setData(data); }
 
 	private:
 		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
+		std::shared_ptr<Texture> m_texture;
 		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;
 
 		friend DefaultRenderSystem;
