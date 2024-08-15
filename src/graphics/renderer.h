@@ -59,6 +59,9 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void freeCommandBuffers();
 		void recreateSwapChain();
+		void initializeDescriptorPool();
+		void initializeImGui();
+		void initializeGlobalUBO();
 
 		void updateGlobalUBO(const FrameInfo& frameInfo);
 

@@ -4,56 +4,33 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 #include <array>
 #include <cassert>
 #include <stdexcept>
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Window& window, VulkanDevice& device) : m_window{ window }, m_device{ device }
+	Renderer::Renderer(Window& window, VulkanDevice& device) 
+		: m_window{ window }, m_device{ device }
 	{
 		recreateSwapChain();
 		createCommandBuffers();
-
-		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
-		m_globalPool = DescriptorPool::Builder(m_device)
-			.setMaxSets(1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER,				500)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,			4000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,			1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,	1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,	1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			2000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,			2000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,		500)
-			.build();
-
-		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.build();
-
-		m_globalUniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		m_globalDescriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_globalUniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(GlobalUbo), 1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-			m_globalUniformBuffers[i]->map();
-
-			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
-			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
-				.writeBuffer(0, &bufferInfo)
-				.build(m_globalDescriptorSets[i]);
-		}
+		initializeDescriptorPool();
+		initializeImGui();
+		initializeGlobalUBO();
 	}
 
 	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
+
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 	}
 
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
@@ -163,6 +140,13 @@ namespace Aegix::Graphics
 		if (!commandBuffer)
 			return;
 
+		// ImGui
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow(); // TODO remove
+
+
 		// TODO: Move this to a script
 		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
 		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
@@ -187,8 +171,11 @@ namespace Aegix::Graphics
 				system->render(frameInfo);
 			}
 		}
-		endSwapChainRenderPass(commandBuffer);
 
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+		endSwapChainRenderPass(commandBuffer);
 		endFrame();
 	}
 
@@ -245,6 +232,81 @@ namespace Aegix::Graphics
 		}
 
 		// Todo
+	}
+
+	void Renderer::initializeDescriptorPool()
+	{
+		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
+		m_globalPool = DescriptorPool::Builder(m_device)
+			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
+			.setMaxSets(1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 500)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 4000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
+			.build();
+	}
+
+	void Renderer::initializeImGui()
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+		ImGui_ImplGlfw_InitForVulkan(m_window.glfwWindow(), true);
+
+		ImGui_ImplVulkan_InitInfo init_info = {};
+		init_info.Instance = m_device.instance();
+		init_info.PhysicalDevice = m_device.physicalDevice();
+		init_info.Device = m_device.device();
+		init_info.QueueFamily = m_device.findPhysicalQueueFamilies().graphicsFamily;
+		init_info.Queue = m_device.graphicsQueue();
+		init_info.PipelineCache = nullptr;
+		init_info.DescriptorPool = m_globalPool->descriptorPool();
+		init_info.RenderPass = m_swapChain->renderPass();
+		init_info.Subpass = 0;
+		init_info.MinImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+		init_info.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		init_info.Allocator = nullptr;
+		init_info.CheckVkResultFn = nullptr;
+		ImGui_ImplVulkan_Init(&init_info);
+
+		ImGui_ImplVulkan_CreateFontsTexture();
+	}
+
+	void Renderer::initializeGlobalUBO()
+	{
+		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.build();
+
+		m_globalUniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		m_globalDescriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_globalUniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(GlobalUbo), 1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			m_globalUniformBuffers[i]->map();
+
+			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
+			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(m_globalDescriptorSets[i]);
+		}
 	}
 
 	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
