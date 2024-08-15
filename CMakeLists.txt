@@ -36,8 +36,11 @@ message("")
 
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 
+
 set(GLFW_BUILD_DOCS OFF)
 add_subdirectory("lib/glfw")
+
+add_subdirectory("lib/imgui")
 
 add_subdirectory("src")
 

@@ -40,4 +40,5 @@ target_include_directories(AegixEngine PUBLIC
 target_link_libraries(AegixEngine PUBLIC 
 	Vulkan::Vulkan
 	glfw
+	imgui
 )
