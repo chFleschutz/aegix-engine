@@ -1,7 +1,8 @@
 #version 450
 
-layout(location = 1) in vec3 inPosWorld;
-layout(location = 2) in vec3 inNormalWorld;
+layout(location = 0) in vec3 inPosWorld;
+layout(location = 1) in vec3 inNormalWorld;
+layout(location = 2) in vec2 inUV;
 
 layout(location = 0) out vec4 outColor;
 
@@ -23,8 +24,10 @@ layout(set = 0, binding = 0) uniform Global
 
 layout(set = 1, binding = 0) uniform Material 
 {
-	vec4 color;
+    float shininess;
 } material;
+
+layout(set = 1, binding = 1) uniform sampler2D tex;
 
 layout(push_constant) uniform Push 
 {
@@ -57,9 +60,10 @@ void main()
         vec3 halfAngle = normalize(directionToLight + viewDirection);
 		float blinnTerm = dot(surfaceNormal, halfAngle);
 		blinnTerm = clamp(blinnTerm, 0, 1);
-		blinnTerm = pow(blinnTerm, 32.0); // higher exponent gives sharper highlight
+		blinnTerm = pow(blinnTerm, material.shininess);
 		specularLight += intensity * blinnTerm;
     }
 
-    outColor = vec4(diffuseLight * material.color.rgb + specularLight * material.color.rgb, 1.0);
+    vec3 materialColor = texture(tex, inUV).rgb;
+    outColor = vec4(diffuseLight * materialColor + specularLight * materialColor, 1.0);
 }

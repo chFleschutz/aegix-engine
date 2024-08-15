@@ -8,13 +8,8 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
-		Buffer(
-			VulkanDevice& device,
-			VkDeviceSize instanceSize,
-			uint32_t instanceCount,
-			VkBufferUsageFlags usageFlags,
-			VkMemoryPropertyFlags memoryPropertyFlags,
-			VkDeviceSize minOffsetAlignment = 1);
+		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags usageFlags,
+			VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize minOffsetAlignment = 1);
 		~Buffer();
 
 		Buffer(const Buffer&) = delete;
@@ -25,6 +20,7 @@ namespace Aegix::Graphics
 		/// @param offset (Optional) Byte offset from beginning
 		/// @return VkResult of the buffer mapping call
 		VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
 		/// @brief Unmap a mapped memory range
 		/// @note Does not return a result as vkUnmapMemory can't fail
 		void unmap();
@@ -34,35 +30,42 @@ namespace Aegix::Graphics
 		/// @param size (Optional) Size of the data to copy. Pass VK_WHOLE_SIZE to flush the complete buffer range.
 		/// @param offset (Optional) Byte offset from beginning of mapped region
 		void writeToBuffer(const void* data, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
 		/// @brief Flush a memory range of the buffer to make it visible to the device
 		/// @note Only required for non-coherent memory
 		/// @param size (Optional) Size of the memory range to flush (Pass VK_WHOLE_SIZE to flush the complete buffer range)
 		/// @param offset (Optional) Byte offset from beginning
 		/// @return VkResult of the flush call
 		VkResult flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
 		/// @brief Invalidate a memory range of the buffer to make it visible to the host
 		/// @note Only required for non-coherent memory
 		/// @param size (Optional) Size of the memory range to invalidate (Pass VK_WHOLE_SIZE to invalidate the complete buffer range)
 		/// @param offset (Optional) Byte offset from beginning
 		/// @return VkResult of the invalidate call
 		VkResult invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
 		/// @brief Create a buffer info descriptor
 		/// @param size (Optional) Size of the memory range of the descriptor
 		/// @param offset (Optional) Byte offset from beginning
 		/// @return VkDescriptorBufferInfo of specified offset and range
 		VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
 		/// @brief Copies "instanceSize" bytes of data to the mapped buffer at an offset of index alignmentSize
 		/// @param data Pointer to the data to copy
 		/// @param index Used in offset calculation
 		void writeToIndex(const void* data, int index);
+
 		/// @brief Flush the memory range at index * alignmentSize of the buffer to make it visible to the device
 		/// @param index index Used in offset calculation
 		/// @return VkResult of the flush call
 		VkResult flushIndex(int index);
+
 		/// @brief Create a buffer info descriptor
 		/// @param index Specifies the region given by index * alignmentSize
 		/// @return VkDescriptorBufferInfo for instance at index
 		VkDescriptorBufferInfo descriptorInfoForIndex(int index);
+
 		/// @brief Invalidate a memory range of the buffer to make it visible to the host
 		/// @note Only required for non-coherent memory
 		/// @param index Specifies the region to invalidate: index * alignmentSize

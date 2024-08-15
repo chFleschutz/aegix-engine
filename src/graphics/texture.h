@@ -4,19 +4,21 @@
 
 #include <vulkan/vulkan.h>
 
-#include <string>
+#include <filesystem>
 
 namespace Aegix::Graphics
 {
 	class Texture
 	{
 	public:
-		struct CreateInfo
+		struct Config
 		{
-			std::string textureFilePath;
+			VkFilter magFilter = VK_FILTER_LINEAR;
+			VkFilter minFilter = VK_FILTER_LINEAR;
+			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		};
 
-		Texture(VulkanDevice& device, const Texture::CreateInfo& createInfo);
+		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config);
 		~Texture();
 
 		Texture(const Texture&) = delete;
@@ -25,9 +27,9 @@ namespace Aegix::Graphics
 		VkDescriptorImageInfo descriptorImageInfo();
 
 	private:
-		void loadTexture(const std::string& filePath);
+		void loadTexture(const std::filesystem::path& filePath);
 		void createImageView();
-		void createTextureSampler();
+		void createTextureSampler(VkSamplerAddressMode addressMode, VkFilter magFilter, VkFilter minFilter);
 
 		VulkanDevice& m_device;
 

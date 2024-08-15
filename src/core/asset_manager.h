@@ -3,6 +3,7 @@
 #include "graphics/model.h"
 #include "graphics/renderer.h"
 #include "graphics/systems/render_system.h"
+#include "graphics/texture.h"
 
 #include <filesystem>
 #include <memory>
@@ -25,6 +26,11 @@ namespace Aegix
 		/// @return Model with the data from the file
 		/// @note Currently only supports .obj files
 		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);
+
+		/// @brief Creates a texture from a file
+		/// @param texturePath Path to the texture file 
+		/// @return Texture with the data from the file
+		std::shared_ptr<Graphics::Texture> createTexture(const std::filesystem::path& texturePath, const Graphics::Texture::Config& config = {});
 
 		/// @brief Adds a render system to the renderer and returns a reference to it
 		/// @tparam T Type of the render system to add

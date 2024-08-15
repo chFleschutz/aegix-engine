@@ -156,9 +156,7 @@ namespace Aegix::Graphics
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
-		std::filesystem::path path(ASSETS_DIR);
-		path += filepath;
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.string().c_str()))
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str()))
 			throw std::runtime_error(warn + err);
 
 		vertices.clear();

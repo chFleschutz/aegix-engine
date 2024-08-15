@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 
 	void PointLightSystem::render(const FrameInfo& frameInfo)
 	{
-		const float pointLightScale = 0.05f;
+		const float pointLightScale = 0.01f;
 
 		m_pipeline->bind(frameInfo.commandBuffer);
 

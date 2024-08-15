@@ -318,7 +318,7 @@ namespace Aegix::Graphics
 			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageInfo.flags = 0;
 
-			m_device.createImageWithInfo(
+			m_device.createImage(
 				imageInfo,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				mDepthImages[i],
