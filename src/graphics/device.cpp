@@ -143,8 +143,8 @@ namespace Aegix::Graphics
 		if (m_physicalDevice == VK_NULL_HANDLE)
 			throw std::runtime_error("failed to find a suitable GPU");
 
-		vkGetPhysicalDeviceProperties(m_physicalDevice, &properties);
-		std::cout << "Physical device: " << properties.deviceName << std::endl;
+		vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
+		std::cout << "Physical device: " << m_properties.deviceName << std::endl;
 	}
 
 	void VulkanDevice::createLogicalDevice()
@@ -433,50 +433,17 @@ namespace Aegix::Graphics
 		throw std::runtime_error("failed to find supported format!");
 	}
 
-	uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
-			if ((typeFilter & (1 << i)) &&
-				(memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-			{
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & m_properties) == m_properties)
 				return i;
-			}
 		}
 
 		throw std::runtime_error("failed to find suitable memory type!");
-	}
-
-	void VulkanDevice::createBuffer(
-		VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory)
-	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		if (vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-			throw std::runtime_error("failed to create vertex buffer!");
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-			throw std::runtime_error("failed to allocate vertex buffer memory!");
-
-		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
 	}
 
 	VkCommandBuffer VulkanDevice::beginSingleTimeCommands()
@@ -513,21 +480,46 @@ namespace Aegix::Graphics
 		vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
 	}
 
+	void VulkanDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags m_properties,
+		VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+	{
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = size;
+		bufferInfo.usage = usage;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+			throw std::runtime_error("failed to create vertex buffer!");
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
+
+		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+			throw std::runtime_error("failed to allocate vertex buffer memory!");
+
+		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+	}
+
 	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 		VkBufferCopy copyRegion{};
-		copyRegion.srcOffset = 0;  // Optional
-		copyRegion.dstOffset = 0;  // Optional
+		copyRegion.srcOffset = 0;
+		copyRegion.dstOffset = 0;
 		copyRegion.size = size;
 		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::copyBufferToImage(
-		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount)
+	void VulkanDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -535,30 +527,25 @@ namespace Aegix::Graphics
 		region.bufferOffset = 0;
 		region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;
-
 		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		region.imageSubresource.mipLevel = 0;
 		region.imageSubresource.baseArrayLayer = 0;
 		region.imageSubresource.layerCount = layerCount;
-
 		region.imageOffset = { 0, 0, 0 };
 		region.imageExtent = { width, height, 1 };
 
-		vkCmdCopyBufferToImage(
-			commandBuffer,
+		vkCmdCopyBufferToImage(commandBuffer,
 			buffer,
 			image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&region);
+
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void VulkanDevice::createImageWithInfo(
-		const VkImageCreateInfo& imageInfo,
-		VkMemoryPropertyFlags properties,
-		VkImage& image,
-		VkDeviceMemory& imageMemory)
+	void VulkanDevice::createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties,
+		VkImage& image, VkDeviceMemory& imageMemory)
 	{
 		if (vkCreateImage(m_device, &imageInfo, nullptr, &image) != VK_SUCCESS)
 			throw std::runtime_error("failed to create image");
@@ -569,7 +556,7 @@ namespace Aegix::Graphics
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
 		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 			throw std::runtime_error("failed to allocate image memory");
@@ -578,7 +565,8 @@ namespace Aegix::Graphics
 			throw std::runtime_error("failed to bind image memory");
 	}
 
-	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
+	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
+		uint32_t mipLevels)
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 

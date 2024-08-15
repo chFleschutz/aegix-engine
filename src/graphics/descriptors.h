@@ -16,10 +16,7 @@ namespace Aegix::Graphics
         public:
             Builder(VulkanDevice& device) : m_device{ device } {}
 
-            Builder& addBinding(
-                uint32_t binding,
-                VkDescriptorType descriptorType,
-                VkShaderStageFlags stageFlags,
+            Builder& addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, 
                 uint32_t count = 1);
             std::unique_ptr<DescriptorSetLayout> build() const;
 
