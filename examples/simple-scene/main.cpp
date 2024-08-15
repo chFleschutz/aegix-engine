@@ -1,6 +1,6 @@
 #include "core/engine.h"
 
-#include "scene/default_scene.h"
+#include "simple_scene.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -10,7 +10,7 @@ int main()
 	try
 	{
 		Aegix::Engine engine{};
-		engine.loadScene<DefaultScene>();
+		engine.loadScene<SimpleScene>();
 		engine.run();
 	}
 	catch (const std::exception& e)
