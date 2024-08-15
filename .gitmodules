@@ -13,3 +13,6 @@
 [submodule "lib/glfw"]
 	path = lib/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "lib/imgui"]
+	path = lib/imgui
+	url = https://github.com/chFleschutz/imgui.git
