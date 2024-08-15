@@ -2,8 +2,9 @@
 
 #define ENGINE_DIR PROJECT_DIR "/"
 #define SHADER_DIR ENGINE_DIR "shaders/"
-#define MODELS_DIR ENGINE_DIR "models/"
-#define TEXTURES_DIR ENGINE_DIR "textures/"
+#define ASSETS_DIR ENGINE_DIR "assets/"
+#define MODELS_DIR ENGINE_DIR "assets/models/"
+#define TEXTURES_DIR ENGINE_DIR "assets/textures/"
 
 #include "window.h"
 
