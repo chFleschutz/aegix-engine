@@ -14,60 +14,63 @@ namespace Aegix::Scene
 	{
 	public:
 		Entity() = default;
-		Entity(entt::entity entityHandle, Scene* scene)
-			: m_entityHandle{ entityHandle }, m_scene{ scene } {}
+		Entity(entt::entity entityHandle, Scene* scene);
 
-		bool operator==(const Entity& other) const
-		{
-			return m_entityHandle == other.m_entityHandle && m_scene == other.m_scene;
-		}
+		bool operator==(const Entity& other) const;
+		bool operator!=(const Entity& other) const;
+		
+		operator bool() const { return m_entityID != entt::null; }
+		operator entt::entity() const { return m_entityID; }
+		operator uint32_t() const { return static_cast<uint32_t>(m_entityID); }
 
 		/// @brief Checks if the entity has all components of type T...
-		/// @tparam ...T Type of the components to check
-		/// @return True if the entity has all components of type T... otherwise false
 		template<typename... T>
 		bool hasComponent() const
 		{
-			return m_scene->m_registry.all_of<T...>(m_entityHandle);
+			return m_scene->m_registry.all_of<T...>(m_entityID);
 		}
 
 		/// @brief Acces to the component of type T
-		/// @tparam T Type of the component
-		/// @return A reference to the component 
 		template<typename T>
 		T& getComponent() const
 		{
-			assert(hasComponent<T>() && "Entity does not have the component");
-			return m_scene->m_registry.get<T>(m_entityHandle);
+			assert(hasComponent<T>() && "Cannot get Component: Entity does not have the component");
+			return m_scene->m_registry.get<T>(m_entityID);
 		}
 
 		/// @brief Adds a component of type T to the entity
-		/// @tparam T Type of the component to add
-		/// @param ...args Arguments for the constructor of T
 		/// @return A refrence to the new component
-		/// @note When adding a custom script ScriptComponent is added as its container
 		template<typename T, typename... Args>
 		typename std::enable_if_t<!std::is_base_of_v<Scripting::ScriptBase, T>, T&>
 			addComponent(Args&&... args)
 		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			return m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			assert(!hasComponent<T>() && "Cannot add Component: Entity already has the component");
+			return m_scene->m_registry.emplace<T>(m_entityID, std::forward<Args>(args)...);
 		}
 
-		/// @brief Adds a script derived from Aegix::Scripting::ScriptBase to the entity
+		/// @brief Overload to add a script derived from Aegix::Scripting::ScriptBase to the entity
+		/// @return A refrence to the new script
 		template<typename T, typename... Args>
 		typename std::enable_if_t<std::is_base_of_v<Scripting::ScriptBase, T>, T&>
 			addComponent(Args&&... args)
 		{
-			assert(!hasComponent<T>() && "Entity already has the component");
-			auto& script = m_scene->m_registry.emplace<T>(m_entityHandle, std::forward<Args>(args)...);
+			assert(!hasComponent<T>() && "Cannot add Component: Entity already has the component");
+			auto& script = m_scene->m_registry.emplace<T>(m_entityID, std::forward<Args>(args)...);
 			script.m_entity = *this;
 			m_scene->addScript(&script);
 			return script;
 		}
 
+		/// @brief Removes a component of type T from the entity
+		template<typename T>
+		void removeComponent()
+		{
+			assert(hasComponent<T>() && "Cannot remove Component: Entity does not have the component");
+			m_scene->m_registry.remove<T>(m_entityID);
+		}
+
 	private:
-		entt::entity m_entityHandle = { entt::null };
+		entt::entity m_entityID = { entt::null };
 		Scene* m_scene = nullptr;
 	};
 }

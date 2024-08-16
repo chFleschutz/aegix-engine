@@ -20,6 +20,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/render_system.cpp"
 	"physics/motion_dynamics.cpp"
+	"scene/entity.cpp"
 	"scene/scene.cpp"
 	"scripting/script_manager.cpp"
 	"scripting/movement/dynamic_movement_controller.cpp"
