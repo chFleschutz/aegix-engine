@@ -56,10 +56,4 @@ namespace Aegix::Component
 	{
 		Graphics::Camera camera{};
 	};
-
-	/// @brief Stores a custom script
-	struct Script
-	{
-		std::unique_ptr<Aegix::Scripting::ScriptBase> script;
-	};
 }

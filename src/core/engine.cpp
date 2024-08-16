@@ -3,7 +3,7 @@
 #include "core/input.h"
 
 #include "core/layers/demo_layer.h"
-#include "core/layers/entity_view_layer.h"
+#include "core/layers/scene_properties_layer.h"
 
 #include <chrono>
 #include <iostream>
@@ -31,7 +31,7 @@ namespace Aegix
 			"\n\n";
 
 		m_layerStack.push<DemoLayer>();
-		m_layerStack.push<EntityViewLayer>();
+		m_layerStack.push<ScenePropertiesLayer>();
 	}
 
 	Engine::~Engine()
