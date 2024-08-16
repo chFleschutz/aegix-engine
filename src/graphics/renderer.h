@@ -45,13 +45,11 @@ namespace Aegix::Graphics
 		VkCommandBuffer currentCommandBuffer() const;
 		int frameIndex() const;
 
-		VkCommandBuffer beginFrame();
-		void endFrame();
-		
-		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
-
-		void renderFrame(float frametime, Scene::Scene& scene);
+		void beginRenderFrame();
+		void renderScene(Scene::Scene& scene);
+		void beginRenderGui();
+		void endRenderGui();
+		void endRenderFrame();
 
 		void shutdown();
 
@@ -61,8 +59,13 @@ namespace Aegix::Graphics
 		void recreateSwapChain();
 		void initializeDescriptorPool();
 		void initializeImGui();
-		void initializeGlobalUBO();
 
+		VkCommandBuffer beginFrame();
+		void endFrame();
+		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+		void initializeGlobalUBO();
 		void updateGlobalUBO(const FrameInfo& frameInfo);
 
 		Window& m_window;

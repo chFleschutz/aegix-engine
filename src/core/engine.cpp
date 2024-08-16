@@ -2,6 +2,8 @@
 
 #include "core/input.h"
 
+#include "core/layers/demo_layer.h"
+
 #include <chrono>
 #include <iostream>
 
@@ -21,6 +23,8 @@ namespace Aegix
 			"\t\t\t\t ##     ## ##       ##    ##  ##   ##   ## \n"
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
+
+		m_layerStack.push<DemoLayer>();
 	}
 
 	void Engine::run()
@@ -43,11 +47,20 @@ namespace Aegix
 
 			glfwPollEvents();
 
-			// Update all components
+			// Update 
 			m_scene->update(frameTimeSec);
+			m_layerStack.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(frameTimeSec, *m_scene);
+			m_renderer.beginRenderFrame();
+			{
+				m_renderer.renderScene(*m_scene);
+
+				m_renderer.beginRenderGui();
+				m_layerStack.renderGui();
+				m_renderer.endRenderGui();
+			}
+			m_renderer.endRenderFrame();
 
 			applyFrameBrake(frameBeginTime);
 		}

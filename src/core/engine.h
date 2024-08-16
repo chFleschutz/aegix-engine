@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/asset_manager.h"
+#include "core/layers/layerstack.h"
 #include "graphics/device.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -44,6 +45,7 @@ namespace Aegix
 		Graphics::Renderer m_renderer{ m_window, m_device };
 		
 		AssetManager m_assetManager{ m_renderer };
+		LayerStack m_layerStack;
 
 		std::unique_ptr<Scene::Scene> m_scene;
 	};
