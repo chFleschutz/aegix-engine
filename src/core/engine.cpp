@@ -3,14 +3,20 @@
 #include "core/input.h"
 
 #include "core/layers/demo_layer.h"
+#include "core/layers/entity_view_layer.h"
 
 #include <chrono>
 #include <iostream>
 
 namespace Aegix
 {
+	Engine* Engine::s_instance = nullptr;
+
 	Engine::Engine()
 	{
+		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
+		s_instance = this;
+
 		std::cout << "Engine Initialized!\n";
 
 		std::cout <<
@@ -25,6 +31,18 @@ namespace Aegix
 			"\n\n";
 
 		m_layerStack.push<DemoLayer>();
+		m_layerStack.push<EntityViewLayer>();
+	}
+
+	Engine::~Engine()
+	{
+		s_instance = nullptr;
+	}
+
+	Engine& Engine::instance()
+	{
+		assert(s_instance != nullptr && "Engine instance is not created");
+		return *s_instance;
 	}
 
 	void Engine::run()

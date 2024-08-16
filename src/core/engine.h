@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/asset_manager.h"
-#include "core/layers/layerstack.h"
+#include "core/layers/layer_stack.h"
 #include "graphics/device.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -20,10 +20,21 @@ namespace Aegix
 		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
 
 		Engine();
-		~Engine() = default;
-
 		Engine(const Engine&) = delete;
+		Engine(Engine&&) = delete;
+		~Engine();
+
 		Engine& operator=(const Engine&) = delete;
+		Engine& operator=(Engine&&) = delete;
+
+		/// @brief Returns the instance of the engine
+		static Engine& instance();
+
+		Graphics::Window& window() { return m_window; }
+		Graphics::Renderer& renderer() { return m_renderer; }
+		AssetManager& assetManager() { return m_assetManager; }
+		LayerStack& layerStack() { return m_layerStack; }
+		Scene::Scene& scene() { return *m_scene; }
 
 		void run();
 
@@ -39,6 +50,8 @@ namespace Aegix
 
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
+
+		static Engine* s_instance;
 
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
