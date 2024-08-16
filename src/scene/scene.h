@@ -34,6 +34,9 @@ namespace Aegix::Scene
 			return m_registry.view<T...>();
 		}
 
+		/// @brief Returns the registry
+		entt::registry& registry() { return m_registry; }
+
 		// Todo: save camera somehow and allow multiple cameras
 		/// @brief Returns the camera
 		Entity camera();
@@ -50,6 +53,9 @@ namespace Aegix::Scene
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
 		Entity createEntity(const std::string& name = std::string(), const Vector3& location = { 0.0f, 0.0f, 0.0f });
+
+		/// @brief Removes the entity from the registry
+		void destroyEntity(Entity entity);
 
 	private:
 		entt::registry m_registry;

@@ -4,6 +4,7 @@
 #include "core/layers/layer.h"
 #include "scene/components.h"
 #include "scene/scene.h"
+#include "scene/entity.h"
 
 #include "imgui.h"
 
@@ -17,23 +18,54 @@ namespace Aegix
 			ImGui::Begin("Entity View");
 
 			auto& scene = Engine::instance().scene();
-			auto view = scene.viewEntities<Component::Name, Component::Transform>();
-			for (auto&& [entity, name, transform] : view.each())
+			scene.registry().each([&](auto entity)
+				{
+					addEntityNode(Scene::Entity(entity, &scene));
+				});
+
+			if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
+				m_selectedEntity = {};
+			
+			// Right click on window to create entity
+			if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 			{
-				addEntityNode(name.name);
+				if (ImGui::MenuItem("Create Entity"))
+					scene.createEntity("Empty Entity");
+
+				ImGui::EndPopup();
 			}
 
 			ImGui::End();
 		}
 
 	private:
-		void addEntityNode(const std::string& name)
+		void addEntityNode(Scene::Entity entity)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4 / 7.0f, 0.6f, 0.6f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4 / 7.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4 / 7.0f, 0.8f, 0.8f));
-			ImGui::Button(name.c_str());
-			ImGui::PopStyleColor(3);
+			auto& name = entity.getComponent<Component::Name>().name;
+
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // For leaf nodes
+			flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Draw Selection
+
+			ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name.c_str());
+
+			if (ImGui::IsItemClicked())
+				m_selectedEntity = entity;
+
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Delete Entity"))
+				{
+					if (m_selectedEntity == entity)
+						m_selectedEntity = {};
+
+					Engine::instance().scene().destroyEntity(entity);
+				}
+
+				ImGui::EndPopup();
+			}
 		}
+
+		Scene::Entity m_selectedEntity{};
 	};
 }
