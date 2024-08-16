@@ -68,7 +68,7 @@ namespace Aegix
 
 		drawComponent<Component::PointLight>("Pointlight", m_selectedEntity, [](Component::PointLight& pointlight)
 			{
-				//ImGui::ColorEdit3("Color", &light.color.r);
+				ImGui::ColorEdit3("Color", &pointlight.color.r);
 				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f);
 			});
 

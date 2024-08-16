@@ -333,7 +333,7 @@ namespace Aegix::Graphics
 		{
 			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
 			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = Vector4(pointLight.color.rgb(), pointLight.intensity);
+			ubo.pointLights[lighIndex].color = Vector4(pointLight.color, pointLight.intensity);
 			lighIndex++;
 		}
 		ubo.numLights = lighIndex;
