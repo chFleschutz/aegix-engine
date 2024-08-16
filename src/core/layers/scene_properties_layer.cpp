@@ -30,7 +30,7 @@ namespace Aegix
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
 		{
 			if (ImGui::MenuItem("Create Entity"))
-				scene.createEntity("Empty Entity");
+				m_selectedEntity = scene.createEntity("Empty Entity");
 
 			ImGui::EndPopup();
 		}
@@ -47,10 +47,14 @@ namespace Aegix
 			return;
 		}
 
+		ImGui::Spacing();
+
 		if (m_selectedEntity.hasComponent<Component::Name>())
 		{
 			ImGui::Text(m_selectedEntity.getComponent<Component::Name>().name.c_str());
+			ImGui::Spacing();
 			ImGui::Separator();
+			ImGui::Spacing();
 		}
 
 		drawComponent<Component::Transform>("Transform", m_selectedEntity, [](Component::Transform& transform)
@@ -125,14 +129,4 @@ namespace Aegix
 			ImGui::EndPopup();
 		}
 	}
-
-	void ScenePropertiesLayer::drawBeginComponent(const char* componentName, Scene::Entity entity)
-	{
-
-	}
-
-	void ScenePropertiesLayer::drawEndComponent()
-	{
-	}
-
 }

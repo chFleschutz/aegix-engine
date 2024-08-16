@@ -20,10 +20,7 @@ namespace Aegix
 	private:
 		void drawEntityView();
 		void drawEntityProperties();
-
 		void drawEntityNode(Scene::Entity entity);
-		void drawBeginComponent(const char* componentName, Scene::Entity entity);
-		void drawEndComponent();
 
 		template<typename T>
 		void drawComponent(const char* componentName, Scene::Entity entity, std::function<void(T&)> drawFunc)
@@ -32,11 +29,10 @@ namespace Aegix
 				return;
 
 			if (ImGui::CollapsingHeader(componentName))
-			{
 				drawFunc(entity.getComponent<T>());
-
-				ImGui::Separator();
-			}
+		
+			ImGui::Spacing();
+			ImGui::Spacing();
 		}
 
 		template<typename T>
