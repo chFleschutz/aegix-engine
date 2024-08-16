@@ -1,5 +1,7 @@
 #include "scene_properties_layer.h"
 
+#include "imgui_stdlib.h"
+
 namespace Aegix
 {
 	void ScenePropertiesLayer::onGuiRender()
@@ -47,15 +49,10 @@ namespace Aegix
 			return;
 		}
 
-		ImGui::Spacing();
-
-		if (m_selectedEntity.hasComponent<Component::Name>())
-		{
-			ImGui::Text(m_selectedEntity.getComponent<Component::Name>().name.c_str());
-			ImGui::Spacing();
-			ImGui::Separator();
-			ImGui::Spacing();
-		}
+		drawComponent<Component::Name>("Name", m_selectedEntity, [](Component::Name& name)
+			{
+				ImGui::InputText("Name", &name.name);
+			});
 
 		drawComponent<Component::Transform>("Transform", m_selectedEntity, [](Component::Transform& transform)
 			{
@@ -76,30 +73,12 @@ namespace Aegix
 				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f);
 			});
 
-
 		drawComponent<Component::Camera>("Camera", m_selectedEntity, [](Component::Camera& camera)
 			{
 				ImGui::Text("Camera Component");
 			});
 
-
-		// Add Component button
-		ImGui::Spacing();
-		float addButtonWidth = 200.0f;
-		float windowWidth = ImGui::GetWindowWidth();
-		ImGui::SetCursorPosX((windowWidth - addButtonWidth) * 0.5f);
-		if (ImGui::Button("Add Component", ImVec2(addButtonWidth, 0.0f)))
-			ImGui::OpenPopup("AddComponent");
-
-		if (ImGui::BeginPopup("AddComponent"))
-		{
-			drawAddComponentItem<Component::Name>("Name");
-			drawAddComponentItem<Component::Transform>("Transform");
-			drawAddComponentItem<Component::Mesh>("Mesh");
-			drawAddComponentItem<Component::PointLight>("Point Light");
-			drawAddComponentItem<Component::Camera>("Camera");
-			ImGui::EndPopup();
-		}
+		drawAddComponent();
 
 		ImGui::End();
 	}
@@ -126,6 +105,27 @@ namespace Aegix
 				Engine::instance().scene().destroyEntity(entity);
 			}
 
+			ImGui::EndPopup();
+		}
+	}
+
+	void ScenePropertiesLayer::drawAddComponent()
+	{
+		ImGui::Spacing();
+
+		float addButtonWidth = 200.0f;
+		float windowWidth = ImGui::GetWindowWidth();
+		ImGui::SetCursorPosX((windowWidth - addButtonWidth) * 0.5f);
+		if (ImGui::Button("Add Component", ImVec2(addButtonWidth, 0.0f)))
+			ImGui::OpenPopup("AddComponent");
+
+		if (ImGui::BeginPopup("AddComponent"))
+		{
+			drawAddComponentItem<Component::Name>("Name");
+			drawAddComponentItem<Component::Transform>("Transform");
+			drawAddComponentItem<Component::Mesh>("Mesh");
+			drawAddComponentItem<Component::PointLight>("Point Light");
+			drawAddComponentItem<Component::Camera>("Camera");
 			ImGui::EndPopup();
 		}
 	}
