@@ -1,9 +1,7 @@
 #include "engine.h"
 
 #include "core/input.h"
-
-#include "core/layers/demo_layer.h"
-#include "core/layers/scene_properties_layer.h"
+#include "core/layers/main_menu_layer.h"
 
 #include <chrono>
 #include <iostream>
@@ -30,8 +28,7 @@ namespace Aegix
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
 
-		m_layerStack.push<DemoLayer>();
-		m_layerStack.push<ScenePropertiesLayer>();
+		m_layerStack.push<MainMenuLayer>();
 	}
 
 	Engine::~Engine()

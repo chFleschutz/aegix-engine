@@ -29,7 +29,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- "core/layers/scene_properties_layer.cpp")
+ "core/layers/scene_properties_layer.cpp" "core/layers/main_menu_layer.h")
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"

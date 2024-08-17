@@ -32,17 +32,19 @@ namespace Aegix
 
 	void LayerStack::update(float deltaTime)
 	{
-		for (auto& layer : m_layers)
+		// Cant use iterator because its possible to push/pop layers during update
+		for (int i = 0; i < m_layers.size(); i++) 
 		{
-			layer->onUpdate(deltaTime);
+			m_layers[i]->onUpdate(deltaTime);
 		}
 	}
 
 	void LayerStack::renderGui()
 	{
-		for (auto& layer : m_layers)
+		// Cant use iterator because its possible to push/pop layers during update
+		for (int i = 0; i < m_layers.size(); i++)
 		{
-			layer->onGuiRender();
+			m_layers[i]->onGuiRender();
 		}
 	}
 }
