@@ -65,9 +65,9 @@ namespace Aegix
 			return;
 		}
 
-		drawComponent<Component::Name>("Name", m_selectedEntity, [](Component::Name& name)
+		drawComponent<Component::Name>("Name", m_selectedEntity, [](Component::Name& nameComponent)
 			{
-				ImGui::InputText("Name", &name.name);
+				ImGui::InputText("Entity Name", &nameComponent.name);
 			});
 
 		drawComponent<Component::Transform>("Transform", m_selectedEntity, [](Component::Transform& transform)
