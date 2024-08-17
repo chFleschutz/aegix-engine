@@ -106,13 +106,15 @@ namespace Aegix
 
 	void ScenePropertiesLayer::drawEntityNode(Scene::Entity entity)
 	{
-		auto& name = entity.getComponent<Component::Name>().name;
+		const char* name = "Entity";
+		if (entity.hasComponent<Component::Name>())
+			name = entity.getComponent<Component::Name>().name.c_str();
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // For leaf nodes
 		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Draw Selection
 
-		ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name.c_str());
+		ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
 
 		if (ImGui::IsItemClicked())
 			m_selectedEntity = entity;
@@ -120,7 +122,7 @@ namespace Aegix
 		if (ImGui::BeginPopupContextItem())
 		{
 			m_selectedEntity = entity;
-			if (ImGui::MenuItem("Delete Entity"))
+			if (ImGui::MenuItem("Destroy Selected Entity"))
 			{
 				m_selectedEntity = {};
 				Engine::instance().scene().destroyEntity(entity);

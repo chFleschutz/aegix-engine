@@ -18,7 +18,7 @@ namespace Aegix::Component
 	/// @brief Gives a name to the entity
 	struct Name
 	{
-		std::string name;
+		std::string name = "Entity";
 	};
 
 	/// @brief Stores the transformation of the entity

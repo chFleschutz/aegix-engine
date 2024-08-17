@@ -26,9 +26,13 @@ namespace Aegix
 			if (!entity.hasComponent<T>())
 				return;
 
-			if (ImGui::CollapsingHeader(componentName))
+			bool keepComponent = true;
+			if (ImGui::CollapsingHeader(componentName, &keepComponent, ImGuiTreeNodeFlags_DefaultOpen))
 				drawFunc(entity.getComponent<T>());
-		
+
+			if (!keepComponent)
+				entity.removeComponent<T>();
+
 			ImGui::Spacing();
 			ImGui::Spacing();
 		}
