@@ -73,7 +73,12 @@ namespace Aegix
 		drawComponent<Component::Transform>("Transform", m_selectedEntity, [](Component::Transform& transform)
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
-				ImGui::DragFloat3("Rotation", &transform.rotation.x, 0.1f);
+
+				// Display rotation in degrees
+				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
+				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.1f);
+				transform.rotation = glm::radians(rotationDeg);
+
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 			});
 
