@@ -1,5 +1,9 @@
 #include "scene_properties_layer.h"
 
+#include "core/engine.h"
+#include "scene/components.h"
+
+#include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
 namespace Aegix
@@ -8,13 +12,27 @@ namespace Aegix
 	{
 		drawEntityView();
 		drawEntityProperties();
+
+		// Docking
+		auto dockSpaceID = ImGui::GetID("ScenePropertyLayer");
+		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
+		{
+			ImGui::DockBuilderRemoveNode(dockSpaceID); // Clear out existing layout
+			ImGui::DockBuilderAddNode(dockSpaceID);
+			ImGui::DockBuilderSetNodeSize(dockSpaceID, ImVec2(400, 600));
+
+			ImGuiID entityDockID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Up, 0.50f, NULL, &dockSpaceID);
+			ImGuiID propDockID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Down, 0.50f, NULL, &dockSpaceID);
+
+			ImGui::DockBuilderDockWindow("Entity View", dockSpaceID);
+			ImGui::DockBuilderDockWindow("Properties", propDockID);
+			ImGui::DockBuilderFinish(dockSpaceID);
+		}
 	}
 
 	void ScenePropertiesLayer::drawEntityView()
 	{
-		ImGui::SetNextWindowPos(ImVec2(30, 30), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_Once);
-		if (!ImGui::Begin("Entity View Layer"))
+		if (!ImGui::Begin("Entity View"))
 		{
 			ImGui::End();
 			return;
@@ -41,8 +59,6 @@ namespace Aegix
 
 	void ScenePropertiesLayer::drawEntityProperties()
 	{
-		ImGui::SetNextWindowPos(ImVec2(30, 430), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_Once);
 		if (!ImGui::Begin("Properties") || !m_selectedEntity)
 		{
 			ImGui::End();

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "core/engine.h"
 #include "core/layers/layer.h"
-#include "scene/components.h"
-#include "scene/scene.h"
 #include "scene/entity.h"
 
 #include "imgui.h"
