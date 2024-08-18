@@ -32,4 +32,11 @@ namespace Aegix::Scene
 		entity.addComponent<Component::Name>(name.empty() ? "Entity" : name);
 		return entity;
 	}
+
+	void Scene::destroyEntity(Entity entity)
+	{
+		// TODO: Destroy all scripts attached to the entity
+		// TODO: Destroy mesh after rendering finished and its not used anymore
+		m_registry.destroy(entity);
+	}
 }

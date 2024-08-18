@@ -68,6 +68,8 @@ namespace Aegix::Graphics
         DescriptorPool(const DescriptorPool&) = delete;
         DescriptorPool& operator=(const DescriptorPool&) = delete;
 
+		VkDescriptorPool descriptorPool() const { return m_descriptorPool; }
+
         bool allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
 
         void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;

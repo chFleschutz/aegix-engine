@@ -47,6 +47,7 @@ namespace Aegix::Graphics
 		VulkanDevice& operator=(const VulkanDevice&) = delete;
 		VulkanDevice& operator=(VulkanDevice&&) = delete;
 
+		VkInstance instance() { return m_instance; }
 		VkCommandPool commandPool() { return m_commandPool; }
 		VkDevice device() { return m_device; }
 		VkSurfaceKHR surface() { return m_surface; }

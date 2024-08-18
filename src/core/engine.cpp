@@ -1,14 +1,20 @@
 #include "engine.h"
 
 #include "core/input.h"
+#include "core/layers/main_menu_layer.h"
 
 #include <chrono>
 #include <iostream>
 
 namespace Aegix
 {
+	Engine* Engine::s_instance = nullptr;
+
 	Engine::Engine()
 	{
+		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
+		s_instance = this;
+
 		std::cout << "Engine Initialized!\n";
 
 		std::cout <<
@@ -21,6 +27,19 @@ namespace Aegix
 			"\t\t\t\t ##     ## ##       ##    ##  ##   ##   ## \n"
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
+
+		m_layerStack.push<MainMenuLayer>();
+	}
+
+	Engine::~Engine()
+	{
+		s_instance = nullptr;
+	}
+
+	Engine& Engine::instance()
+	{
+		assert(s_instance != nullptr && "Engine instance is not created");
+		return *s_instance;
 	}
 
 	void Engine::run()
@@ -43,11 +62,20 @@ namespace Aegix
 
 			glfwPollEvents();
 
-			// Update all components
+			// Update 
 			m_scene->update(frameTimeSec);
+			m_layerStack.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(frameTimeSec, *m_scene);
+			m_renderer.beginRenderFrame();
+			{
+				m_renderer.renderScene(*m_scene);
+
+				m_renderer.beginRenderGui();
+				m_layerStack.renderGui();
+				m_renderer.endRenderGui();
+			}
+			m_renderer.endRenderFrame();
 
 			applyFrameBrake(frameBeginTime);
 		}

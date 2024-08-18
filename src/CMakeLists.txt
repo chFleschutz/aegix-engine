@@ -5,6 +5,7 @@ target_sources(AegixEngine PRIVATE
 	"core/asset_manager.cpp"
 	"core/engine.cpp"
 	"core/input.cpp"
+	"core/layers/layer_stack.cpp"
 	"graphics/buffer.cpp"
 	"graphics/camera.cpp"
 	"graphics/descriptors.cpp"
@@ -19,6 +20,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/render_system.cpp"
 	"physics/motion_dynamics.cpp"
+	"scene/entity.cpp"
 	"scene/scene.cpp"
 	"scripting/script_manager.cpp"
 	"scripting/movement/dynamic_movement_controller.cpp"
@@ -27,7 +29,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
-)
+ "core/layers/scene_properties_layer.cpp" "core/layers/main_menu_layer.h")
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"
@@ -40,4 +42,5 @@ target_include_directories(AegixEngine PUBLIC
 target_link_libraries(AegixEngine PUBLIC 
 	Vulkan::Vulkan
 	glfw
+	imgui
 )

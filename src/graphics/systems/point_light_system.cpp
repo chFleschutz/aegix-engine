@@ -45,7 +45,7 @@ namespace Aegix::Graphics
 		{
 			PointLightPushConstants push{};
 			push.position = Vector4(transform.location, 1.0f);
-			push.color = Vector4(pointLight.color.rgb(), 1.0f);
+			push.color = Vector4(pointLight.color, 1.0f);
 			push.radius = pointLight.intensity * pointLightScale;
 
 			vkCmdPushConstants(

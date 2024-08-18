@@ -18,7 +18,7 @@ namespace Aegix::Component
 	/// @brief Gives a name to the entity
 	struct Name
 	{
-		std::string name;
+		std::string name = "Entity";
 	};
 
 	/// @brief Stores the transformation of the entity
@@ -47,19 +47,13 @@ namespace Aegix::Component
 	/// @brief Creates a light 
 	struct PointLight
 	{
-		Color color;
-		float intensity = 0.1f;
+		Vector3 color = { 1.0f, 1.0f, 1.0f };
+		float intensity = 100.0f;
 	};
 
 	/// @brief Holds a camera to view the scene
 	struct Camera
 	{
 		Graphics::Camera camera{};
-	};
-
-	/// @brief Stores a custom script
-	struct Script
-	{
-		std::unique_ptr<Aegix::Scripting::ScriptBase> script;
 	};
 }
