@@ -32,6 +32,7 @@ This project uses several external libraries:
 - [entt](https://github.com/skypjack/entt): Entity Component System
 - [glfw](https://github.com/glfw/glfw): Windowing
 - [glm](https://github.com/g-truc/glm): Math Library
+- [imgui](https://github.com/ocornut/imgui): UI
 - [stb](https://github.com/nothings/stb): Image Loading
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): Loading 3D Models
 - [Vulkan](https://www.vulkan.org/): Graphics API
