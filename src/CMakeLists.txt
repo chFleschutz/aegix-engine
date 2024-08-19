@@ -6,10 +6,12 @@ target_sources(AegixEngine PRIVATE
 	"core/engine.cpp"
 	"core/input.cpp"
 	"core/layers/layer_stack.cpp"
+	"core/layers/scene_properties_layer.cpp" 
 	"graphics/buffer.cpp"
 	"graphics/camera.cpp"
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
+	"graphics/gui.cpp"
 	"graphics/model.cpp"
 	"graphics/pipeline.cpp"
 	"graphics/renderer.cpp"
@@ -29,7 +31,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- "core/layers/scene_properties_layer.cpp" "core/layers/main_menu_layer.h")
+)
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"

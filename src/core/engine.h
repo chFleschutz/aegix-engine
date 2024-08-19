@@ -3,6 +3,7 @@
 #include "core/asset_manager.h"
 #include "core/layers/layer_stack.h"
 #include "graphics/device.h"
+#include "graphics/gui.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
@@ -56,6 +57,7 @@ namespace Aegix
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
+		Graphics::GUI m_gui{ m_window, m_renderer };
 		
 		AssetManager m_assetManager{ m_renderer };
 		LayerStack m_layerStack;
