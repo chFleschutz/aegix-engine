@@ -19,6 +19,7 @@ namespace Aegix
 		void drawEntityProperties();
 		void drawEntityNode(Scene::Entity entity);
 		void drawAddComponent();
+		static void drawAssetSlot(const char* assetName, const char* description, bool assetSet = true);
 
 		template<typename T>
 		void drawComponent(const char* componentName, Scene::Entity entity, std::function<void(T&)> drawFunc)

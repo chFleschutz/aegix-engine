@@ -2,6 +2,7 @@
 
 #include "core/engine.h"
 #include "scene/components.h"
+#include "graphics/systems/default_render_system.h"
 
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
@@ -76,7 +77,7 @@ namespace Aegix
 
 				// Display rotation in degrees
 				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
-				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.1f);
+				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, 0.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
 				transform.rotation = glm::radians(rotationDeg);
 
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
@@ -84,8 +85,7 @@ namespace Aegix
 
 		drawComponent<Component::Mesh>("Mesh", m_selectedEntity, [](Component::Mesh& mesh)
 			{
-				// TODO: Display mesh somehow
-				ImGui::Text("Mesh Component");
+				drawAssetSlot("Mesh", "Mesh Asset", mesh.model != nullptr);
 			});
 
 		drawComponent<Component::PointLight>("Pointlight", m_selectedEntity, [](Component::PointLight& pointlight)
@@ -97,6 +97,20 @@ namespace Aegix
 		drawComponent<Component::Camera>("Camera", m_selectedEntity, [](Component::Camera& camera)
 			{
 				ImGui::Text("Camera Component");
+			});
+
+		drawComponent<Graphics::DefaultMaterial>("Default Material", m_selectedEntity, [](Graphics::DefaultMaterial& material)
+			{
+				bool materialSet = material.instance != nullptr;
+				drawAssetSlot("Mat", "Default Material Instance", materialSet);
+
+				if (materialSet)
+				{
+					ImGui::Spacing();
+					auto materialData = material.instance->data();
+					if (ImGui::DragFloat("Shininess", &materialData.shininess, 0.5f))
+						material.instance->setData(materialData);
+				}
 			});
 
 		drawAddComponent();
@@ -149,7 +163,28 @@ namespace Aegix
 			drawAddComponentItem<Component::Mesh>("Mesh");
 			drawAddComponentItem<Component::PointLight>("Point Light");
 			drawAddComponentItem<Component::Camera>("Camera");
+			drawAddComponentItem<Graphics::DefaultMaterial>("Default Material");
 			ImGui::EndPopup();
 		}
+	}
+
+	void ScenePropertiesLayer::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+		if (!assetSet)
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+
+		ImVec2 buttonSize = ImVec2(50, 50);
+		if (ImGui::Button(assetSet ? buttonLabel : "None", buttonSize))
+		{
+		}
+
+		if (!assetSet)
+			ImGui::PopStyleColor();
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (buttonSize.y - ImGui::GetTextLineHeightWithSpacing()) * 0.5f);
+		ImGui::Text(description);
+		ImGui::PopStyleVar();
 	}
 }
