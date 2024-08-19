@@ -1,13 +1,13 @@
 #include "scene_properties_layer.h"
 
 #include "core/engine.h"
-#include "scene/components.h"
 #include "graphics/systems/default_render_system.h"
+#include "scene/components.h"
 
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
-namespace Aegix
+namespace Aegix::Graphics
 {
 	void ScenePropertiesLayer::onGuiRender()
 	{

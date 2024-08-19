@@ -4,8 +4,9 @@
 
 #include "imgui.h"
 
-namespace Aegix
+namespace Aegix::Graphics
 {
+	/// @brief A demo layer that shows the ImGui demo window
 	class DemoLayer : public Layer
 	{
 	public:

@@ -28,7 +28,7 @@ namespace Aegix
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
 
-		m_gui.pushLayer<MainMenuLayer>();
+		m_gui.pushLayer<Graphics::MainMenuLayer>();
 	}
 
 	Engine::~Engine()
