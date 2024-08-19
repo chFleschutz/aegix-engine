@@ -1,25 +1,39 @@
 #include "input.h"
 
+#include "graphics/window.h"
+
+
+#include <cassert>
+
 namespace Aegix
 {
-	Input& Input::instance()
-	{
-		static Input instance;
-		return instance;
-	}
+	Input* Input::s_instance = nullptr;
 
-	void Input::initialize(GLFWwindow* window)
+	Input::Input(const Graphics::Window& window)
+		: m_window{ window.glfwWindow() }
 	{
-		m_window = window;
+		assert(s_instance == nullptr && "Cannot create Input: Only one instance of Input is allowed");
+		s_instance = this;
 
 		if (glfwRawMouseMotionSupported())
-			glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+			glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 		// Set up key callback
 		glfwSetKeyCallback(m_window, [](GLFWwindow*, int key, int scancode, int action, int mods)
 			{
-				instance().glfwKeyCallback(key, scancode, static_cast<KeyEvent>(action), static_cast<Modifier>(mods));
+				Input::instance().glfwKeyCallback(key, scancode, static_cast<KeyEvent>(action), static_cast<Modifier>(mods));
 			});
+	}
+
+	Input::~Input()
+	{
+		s_instance = nullptr;
+	}
+
+	Input& Input::instance()
+	{
+		assert(s_instance != nullptr && "Input instance is not created");
+		return *s_instance;
 	}
 
 	bool Input::keyPressed(Key key)
