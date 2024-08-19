@@ -8,7 +8,7 @@
 
 namespace Aegix::Graphics
 {
-	GUI::GUI(Window& window, Renderer& renderer)
+	GUI::GUI(const Window& window, Renderer& renderer)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -79,18 +79,19 @@ namespace Aegix::Graphics
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	}
 
-	void GUI::push(std::shared_ptr<Layer> layer)
+	void GUI::pushLayer(std::shared_ptr<Layer> layer)
 	{
 		assert(layer != nullptr && "Adding Layer failed: Layer is nullptr");
 		m_layers.emplace_back(layer);
 		layer->onAttach();
 	}
 
-	void GUI::pop(std::shared_ptr<Layer> layer)
+	void GUI::popLayer(std::shared_ptr<Layer> layer)
 	{
 		auto it = std::find(m_layers.begin(), m_layers.end(), layer);
 		if (it != m_layers.end())
 		{
+			(*it)->onDetach();
 			m_layers.erase(it);
 		}
 	}

@@ -8,36 +8,43 @@
 
 namespace Aegix::Graphics
 {
+	/// @brief Manages all GUI Layers for displaying ImGui elements
+	/// @note This class is a wrapper around ImGui
 	class GUI
 	{
 	public:
-		GUI(Window& window, Renderer& renderer);
+		GUI(const Window& window, Renderer& renderer);
+		GUI(const GUI&) = delete;
+		GUI(GUI&&) = delete;
 		~GUI();
 
-		/// @brief Updates all layers
+		GUI& operator=(const GUI&) = delete;
+		GUI& operator=(GUI&&) = delete;
+
+		/// @brief Updates all GUI layers
 		void update(float deltaTime);
 
 		/// @brief Renders all GUI elements
 		void renderGui(VkCommandBuffer commandBuffer);
 
 		/// @brief Pushes a layer to the stack
-		void push(std::shared_ptr<Layer> layer);
+		void pushLayer(std::shared_ptr<Layer> layer);
 
 		/// @brief Pops a layer from the stack
-		void pop(std::shared_ptr<Layer> layer);
+		void popLayer(std::shared_ptr<Layer> layer);
 
 		/// @brief Pushes a layer of type T to the stack
 		template<typename T, typename... Args>
-		std::shared_ptr<T> push(Args&&... args)
+		std::shared_ptr<T> pushLayer(Args&&... args)
 		{
 			auto layer = std::make_shared<T>(std::forward<Args>(args)...);
-			push(layer);
+			pushLayer(layer);
 			return layer;
 		}
 
 		/// @brief Pushes a layer of type T if it does not exist in the stack
 		template<typename T, typename... Args>
-		std::shared_ptr<T> pushIfNotExist(Args&&... args)
+		std::shared_ptr<T> pushLayerIfNotExist(Args&&... args)
 		{
 			for (auto& layer : m_layers)
 			{
@@ -45,18 +52,18 @@ namespace Aegix::Graphics
 					return std::dynamic_pointer_cast<T>(layer);
 			}
 
-			return push<T>(std::forward<Args>(args)...);
+			return pushLayer<T>(std::forward<Args>(args)...);
 		}
 
 		/// @brief Removes the last pushed layer of type T from the stack
 		template<typename T>
-		void pop()
+		void popLayer()
 		{
 			for (auto it = m_layers.rbegin(); it != m_layers.rend(); it++)
 			{
 				if (std::dynamic_pointer_cast<T>(*it))
 				{
-					pop(*it);
+					popLayer(*it);
 					return;
 				}
 			}

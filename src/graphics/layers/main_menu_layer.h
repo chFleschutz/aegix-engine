@@ -42,11 +42,11 @@ namespace Aegix
 			auto& gui = Engine::instance().gui();
 			if (currentlyShown)
 			{
-				gui.pop<T>();
+				gui.popLayer<T>();
 			}
 			else
 			{
-				gui.pushIfNotExist<T>();
+				gui.pushLayerIfNotExist<T>();
 			}
 			currentlyShown = !currentlyShown;
 		}
