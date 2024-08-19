@@ -21,6 +21,12 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void DefaultMaterialInstance::setData(const DefaultMaterial::Data& data)
+	{
+		m_data = data;
+		m_uniformBuffer.setData(data);
+	}
+
 	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device)
 	{
@@ -47,6 +53,7 @@ namespace Aegix::Graphics
 	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
+		// Global Descriptor Set
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -56,23 +63,31 @@ namespace Aegix::Graphics
 			0, nullptr
 		);
 
+		DefaultMaterialInstance* lastMaterial = nullptr;
 		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
-			// Descriptor Set
-			vkCmdBindDescriptorSets(frameInfo.commandBuffer,
-				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				m_pipelineLayout->pipelineLayout(),
-				1, 1,
-				&material.instance->m_descriptorSets[frameInfo.frameIndex],
-				0, nullptr
-			);
+			if (mesh.model == nullptr || material.instance == nullptr)
+				continue;
+			
+			// Material Descriptor Set
+			if (lastMaterial != material.instance.get())
+			{
+				lastMaterial = material.instance.get();
+				vkCmdBindDescriptorSets(
+					frameInfo.commandBuffer,
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					m_pipelineLayout->pipelineLayout(),
+					1, 1,
+					&material.instance->m_descriptorSets[frameInfo.frameIndex],
+					0, nullptr
+				);
+			}
 
 			// Push Constants
 			PushConstantData push{};
 			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
 			push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
-
 			vkCmdPushConstants(frameInfo.commandBuffer,
 				m_pipelineLayout->pipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,

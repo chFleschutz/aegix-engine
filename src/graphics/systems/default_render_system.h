@@ -31,9 +31,12 @@ namespace Aegix::Graphics
 		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
 			std::shared_ptr<Texture> texture);
 
-		void setData(const DefaultMaterial::Data& data) { m_uniformBuffer.setData(data); }
+		void setData(const DefaultMaterial::Data& data);
+		DefaultMaterial::Data data() const { return m_data; }
 
 	private:
+		DefaultMaterial::Data m_data;
+
 		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_texture;
 		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;
