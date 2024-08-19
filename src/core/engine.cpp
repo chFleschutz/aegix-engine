@@ -28,7 +28,7 @@ namespace Aegix
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
 
-		m_layerStack.push<MainMenuLayer>();
+		m_gui.push<MainMenuLayer>();
 	}
 
 	Engine::~Engine()
@@ -64,16 +64,13 @@ namespace Aegix
 
 			// Update 
 			m_scene->update(frameTimeSec);
-			m_layerStack.update(frameTimeSec);
+			m_gui.update(frameTimeSec);
 
 			// Rendering
 			auto commandBuffer = m_renderer.beginRenderFrame();
 			{
 				m_renderer.renderScene(commandBuffer, *m_scene);
-
-				m_gui.beginRender();
-				m_layerStack.renderGui();
-				m_gui.endRender(commandBuffer);
+				m_gui.renderGui(commandBuffer);
 			}
 			m_renderer.endRenderFrame(commandBuffer);
 

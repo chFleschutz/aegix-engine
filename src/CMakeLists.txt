@@ -16,7 +16,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/swap_chain.cpp"
 	"graphics/texture.cpp"
 	"graphics/window.cpp"
-	"graphics/layers/layer_stack.cpp"
+	
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/systems/default_render_system.cpp"
 	"graphics/systems/point_light_system.cpp"

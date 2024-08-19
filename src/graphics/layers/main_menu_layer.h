@@ -39,14 +39,14 @@ namespace Aegix
 		template<typename T>
 		void toggleLayer(bool& currentlyShown)
 		{
-			auto& layerStack = Engine::instance().layerStack();
+			auto& gui = Engine::instance().gui();
 			if (currentlyShown)
 			{
-				layerStack.pop<T>();
+				gui.pop<T>();
 			}
 			else
 			{
-				layerStack.pushIfNotExist<T>();
+				gui.pushIfNotExist<T>();
 			}
 			currentlyShown = !currentlyShown;
 		}
