@@ -166,7 +166,6 @@ namespace Aegix
 			MaxValue = GLFW_KEY_LAST
 		};
 
-		/// @brief Mouse button keycodes
 		enum MouseButton
 		{
 			Mouse1 = GLFW_MOUSE_BUTTON_1,
@@ -183,8 +182,13 @@ namespace Aegix
 			MouseMiddle = GLFW_MOUSE_BUTTON_MIDDLE
 		};
 
+		Input();
 		Input(const Input&) = delete;
-		void operator=(const Input&) = delete;
+		Input(Input&&) = delete;
+		~Input();
+
+		Input& operator=(const Input&) = delete;
+		Input& operator=(Input&&) = delete;
 
 		/// @brief Acces to the instance of Input
 		/// @return Returns a reference to the instance of Input
@@ -236,10 +240,10 @@ namespace Aegix
 			Modifier mods;
 		};
 
-		Input() = default;
-
 		/// @brief Calls the bound functions for the key
 		void glfwKeyCallback(int key, int scancode, KeyEvent action, Modifier mods);
+
+		static Input* s_instance;
 
 		GLFWwindow* m_window = nullptr;
 

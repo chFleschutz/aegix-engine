@@ -6,6 +6,7 @@
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
+#include "core/input.h"
 
 #include <memory>
 #include <type_traits>
@@ -59,6 +60,8 @@ namespace Aegix
 		Graphics::Renderer m_renderer{ m_window, m_device };
 		Graphics::GUI m_gui{ m_window, m_renderer };
 		
+		Input m_input{};
+
 		AssetManager m_assetManager{ m_renderer };
 
 		std::unique_ptr<Scene::Scene> m_scene;

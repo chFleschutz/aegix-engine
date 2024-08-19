@@ -46,7 +46,7 @@ namespace Aegix
 	{
 		assert(m_scene != nullptr && "Cannot run engine without a scene");
 
-		Input::instance().initialize(m_window.glfwWindow());
+		m_input.initialize(m_window.glfwWindow());
 
 		m_scene->initialize();
 
