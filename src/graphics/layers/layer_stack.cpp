@@ -1,6 +1,6 @@
 #include "layer_stack.h"
 
-#include "core/layers/layer.h"
+#include "graphics/layers/layer.h"
 
 #include <cassert>
 

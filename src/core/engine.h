@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/asset_manager.h"
-#include "core/layers/layer_stack.h"
 #include "graphics/device.h"
 #include "graphics/gui.h"
+#include "graphics/layers/layer_stack.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
