@@ -4,10 +4,6 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
-
 #include <array>
 #include <cassert>
 #include <stdexcept>
@@ -20,17 +16,12 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		initializeDescriptorPool();
-		initializeImGui();
 		initializeGlobalUBO();
 	}
 
 	Renderer::~Renderer()
 	{
 		freeCommandBuffers();
-
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
 	}
 
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
@@ -45,18 +36,17 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::beginRenderFrame()
+	VkCommandBuffer Renderer::beginRenderFrame()
 	{
 		auto commandBuffer = beginFrame();
 		assert(commandBuffer && "Failed to begin frame");
 
 		beginSwapChainRenderPass(commandBuffer);
+		return commandBuffer;
 	}
 
-	void Renderer::renderScene(Scene::Scene& scene)
+	void Renderer::renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene)
 	{
-		auto commandBuffer = currentCommandBuffer();
-
 		// TODO: Move this to a script
 		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
 		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
@@ -79,23 +69,8 @@ namespace Aegix::Graphics
 		}
 	}
 	
-	void Renderer::beginRenderGui()
+	void Renderer::endRenderFrame(VkCommandBuffer commandBuffer)
 	{
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-	}
-
-	void Renderer::endRenderGui()
-	{
-		auto commandBuffer = currentCommandBuffer();
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-	}
-	
-	void Renderer::endRenderFrame()
-	{
-		auto commandBuffer = currentCommandBuffer();
 		endSwapChainRenderPass(commandBuffer);
 		endFrame();
 	}
@@ -174,39 +149,6 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
 			.build();
-	}
-
-	void Renderer::initializeImGui()
-	{
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
-
-		ImGuiIO& io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-		ImGui_ImplGlfw_InitForVulkan(m_window.glfwWindow(), true);
-
-		ImGui_ImplVulkan_InitInfo init_info = {};
-		init_info.Instance = m_device.instance();
-		init_info.PhysicalDevice = m_device.physicalDevice();
-		init_info.Device = m_device.device();
-		init_info.QueueFamily = m_device.findPhysicalQueueFamilies().graphicsFamily;
-		init_info.Queue = m_device.graphicsQueue();
-		init_info.PipelineCache = nullptr;
-		init_info.DescriptorPool = m_globalPool->descriptorPool();
-		init_info.RenderPass = m_swapChain->renderPass();
-		init_info.Subpass = 0;
-		init_info.MinImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
-		init_info.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
-		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		init_info.Allocator = nullptr;
-		init_info.CheckVkResultFn = nullptr;
-		ImGui_ImplVulkan_Init(&init_info);
-
-		ImGui_ImplVulkan_CreateFontsTexture();
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

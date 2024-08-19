@@ -1,7 +1,7 @@
 #include "engine.h"
 
 #include "core/input.h"
-#include "core/layers/main_menu_layer.h"
+#include "graphics/layers/main_menu_layer.h"
 
 #include <chrono>
 #include <iostream>
@@ -28,7 +28,7 @@ namespace Aegix
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
 
-		m_layerStack.push<MainMenuLayer>();
+		m_gui.pushLayer<Graphics::MainMenuLayer>();
 	}
 
 	Engine::~Engine()
@@ -64,18 +64,15 @@ namespace Aegix
 
 			// Update 
 			m_scene->update(frameTimeSec);
-			m_layerStack.update(frameTimeSec);
+			m_gui.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.beginRenderFrame();
+			auto commandBuffer = m_renderer.beginRenderFrame();
 			{
-				m_renderer.renderScene(*m_scene);
-
-				m_renderer.beginRenderGui();
-				m_layerStack.renderGui();
-				m_renderer.endRenderGui();
+				m_renderer.renderScene(commandBuffer, *m_scene);
+				m_gui.renderGui(commandBuffer);
 			}
-			m_renderer.endRenderFrame();
+			m_renderer.endRenderFrame(commandBuffer);
 
 			applyFrameBrake(frameBeginTime);
 		}

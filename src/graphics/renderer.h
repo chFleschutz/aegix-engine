@@ -45,11 +45,9 @@ namespace Aegix::Graphics
 		VkCommandBuffer currentCommandBuffer() const;
 		int frameIndex() const;
 
-		void beginRenderFrame();
-		void renderScene(Scene::Scene& scene);
-		void beginRenderGui();
-		void endRenderGui();
-		void endRenderFrame();
+		VkCommandBuffer beginRenderFrame();
+		void renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene);
+		void endRenderFrame(VkCommandBuffer commandBuffer);
 
 		void shutdown();
 
@@ -58,7 +56,6 @@ namespace Aegix::Graphics
 		void freeCommandBuffers();
 		void recreateSwapChain();
 		void initializeDescriptorPool();
-		void initializeImGui();
 
 		VkCommandBuffer beginFrame();
 		void endFrame();

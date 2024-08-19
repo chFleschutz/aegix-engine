@@ -1,14 +1,15 @@
 #pragma once
 
 #include "core/engine.h"
-#include "core/layers/layer.h"
-#include "core/layers/scene_properties_layer.h"
-#include "core/layers/demo_layer.h"
+#include "graphics/layers/layer.h"
+#include "graphics/layers/scene_properties_layer.h"
+#include "graphics/layers/demo_layer.h"
 
 #include "imgui.h"
 
-namespace Aegix
+namespace Aegix::Graphics
 {
+	/// @brief Shows the main menu bar of the application
 	class MainMenuLayer : public Layer
 	{
 	public:
@@ -39,14 +40,14 @@ namespace Aegix
 		template<typename T>
 		void toggleLayer(bool& currentlyShown)
 		{
-			auto& layerStack = Engine::instance().layerStack();
+			auto& gui = Engine::instance().gui();
 			if (currentlyShown)
 			{
-				layerStack.pop<T>();
+				gui.popLayer<T>();
 			}
 			else
 			{
-				layerStack.pushIfNotExist<T>();
+				gui.pushLayerIfNotExist<T>();
 			}
 			currentlyShown = !currentlyShown;
 		}

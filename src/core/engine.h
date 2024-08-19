@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/asset_manager.h"
-#include "core/layers/layer_stack.h"
 #include "graphics/device.h"
+#include "graphics/gui.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
@@ -31,10 +31,11 @@ namespace Aegix
 		static Engine& instance();
 
 		Graphics::Window& window() { return m_window; }
+		Graphics::VulkanDevice& device() { return m_device; }
 		Graphics::Renderer& renderer() { return m_renderer; }
+		Graphics::GUI& gui() { return m_gui; }
 		AssetManager& assetManager() { return m_assetManager; }
-		LayerStack& layerStack() { return m_layerStack; }
-		Scene::Scene& scene() { return *m_scene; }
+		Scene::Scene& scene() { assert(m_scene);  return *m_scene; }
 
 		void run();
 
@@ -56,9 +57,9 @@ namespace Aegix
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
+		Graphics::GUI m_gui{ m_window, m_renderer };
 		
 		AssetManager m_assetManager{ m_renderer };
-		LayerStack m_layerStack;
 
 		std::unique_ptr<Scene::Scene> m_scene;
 	};
