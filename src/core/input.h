@@ -11,7 +11,77 @@ namespace Aegix
 	class Input
 	{
 	public:
-		/// @brief Key events
+		enum KeyEvent;
+		enum Modifier;
+		enum Key;
+		enum MouseButton;
+
+		Input(const Graphics::Window& window);
+		Input(const Input&) = delete;
+		Input(Input&&) = delete;
+		~Input();
+
+		Input& operator=(const Input&) = delete;
+		Input& operator=(Input&&) = delete;
+
+		/// @brief Acces to the instance of Input
+		/// @return Returns a reference to the instance of Input
+		/// @note Make sure Input was initialized 
+		static Input& instance();
+
+		/// @brief Returns the state of key
+		/// @param key Keycode of the key
+		/// @return Returns true if the key is pressed otherwise false
+		bool keyPressed(Key key);
+
+		/// @brief Returns the state of button
+		/// @param button Buttoncode of the mousebutton
+		/// @return Returns true if the button is pressed otherwise false
+		bool mouseButtonPressed(MouseButton button);
+
+		/// @brief Retrieves the mouse cursor position
+		/// @return Returns a vec2 with the cursor position
+		Vector2 cursorPosition();
+
+		/// @brief Sets the input mode
+		/// @param mode The mode to change
+		/// @param value The new value for the mode
+		void setInputMode(int mode, int value);
+
+		/// @brief Binds a function to a key
+		/// @tparam T Type of the class that contains the function
+		/// @param instance Pointer to the instance of the class
+		/// @param func Function to bind
+		/// @param key to bind the function to (A, B, C, etc)
+		/// @param event which triggers the function (press, release, etc)
+		/// @param mod Any modifier keys that should be pressed (shift, control, etc)
+		/// @note The function will be executed in glfwPollEvents
+		template<typename T>
+		void bind(T* instance, void (T::* func)(), Key key, KeyEvent event = Press, Modifier mod = None)
+		{
+			m_keyBindings[key].push_back({ std::bind(func, instance), event, mod });
+		}
+
+	private:
+		struct Binding
+		{
+			std::function<void()> function;
+			KeyEvent event;
+			Modifier mods;
+		};
+
+		/// @brief Calls the bound functions for the key
+		void glfwKeyCallback(int key, int scancode, KeyEvent action, Modifier mods);
+
+		static Input* s_instance;
+
+		GLFWwindow* m_window = nullptr;
+		std::unordered_map<int, std::vector<Binding>> m_keyBindings;
+
+
+	
+		/// Definitions of Keycodes, events and modifiers
+	public:
 		enum KeyEvent
 		{
 			Press = GLFW_PRESS,
@@ -19,7 +89,6 @@ namespace Aegix
 			Repeat = GLFW_REPEAT
 		};
 
-		/// @brief Modifier keys 
 		/// @note Can be combined with bitwise OR
 		enum Modifier
 		{
@@ -32,7 +101,22 @@ namespace Aegix
 			NumLock = GLFW_MOD_NUM_LOCK
 		};
 
-		/// @brief Keycodes
+		enum MouseButton
+		{
+			Mouse1 = GLFW_MOUSE_BUTTON_1,
+			Mouse2 = GLFW_MOUSE_BUTTON_2,
+			Mouse3 = GLFW_MOUSE_BUTTON_3,
+			Mouse4 = GLFW_MOUSE_BUTTON_4,
+			Mouse5 = GLFW_MOUSE_BUTTON_5,
+			Mouse6 = GLFW_MOUSE_BUTTON_6,
+			Mouse7 = GLFW_MOUSE_BUTTON_7,
+			Mouse8 = GLFW_MOUSE_BUTTON_8,
+			MouseLast = GLFW_MOUSE_BUTTON_LAST,
+			MouseLeft = GLFW_MOUSE_BUTTON_LEFT,
+			MouseRight = GLFW_MOUSE_BUTTON_RIGHT,
+			MouseMiddle = GLFW_MOUSE_BUTTON_MIDDLE
+		};
+
 		enum Key
 		{
 			Unknown = GLFW_KEY_UNKNOWN,
@@ -165,84 +249,5 @@ namespace Aegix
 			Menu = GLFW_KEY_MENU,
 			MaxValue = GLFW_KEY_LAST
 		};
-
-		enum MouseButton
-		{
-			Mouse1 = GLFW_MOUSE_BUTTON_1,
-			Mouse2 = GLFW_MOUSE_BUTTON_2,
-			Mouse3 = GLFW_MOUSE_BUTTON_3,
-			Mouse4 = GLFW_MOUSE_BUTTON_4,
-			Mouse5 = GLFW_MOUSE_BUTTON_5,
-			Mouse6 = GLFW_MOUSE_BUTTON_6,
-			Mouse7 = GLFW_MOUSE_BUTTON_7,
-			Mouse8 = GLFW_MOUSE_BUTTON_8,
-			MouseLast = GLFW_MOUSE_BUTTON_LAST,
-			MouseLeft = GLFW_MOUSE_BUTTON_LEFT,
-			MouseRight = GLFW_MOUSE_BUTTON_RIGHT,
-			MouseMiddle = GLFW_MOUSE_BUTTON_MIDDLE
-		};
-
-		Input(const Graphics::Window& window);
-		Input(const Input&) = delete;
-		Input(Input&&) = delete;
-		~Input();
-
-		Input& operator=(const Input&) = delete;
-		Input& operator=(Input&&) = delete;
-
-		/// @brief Acces to the instance of Input
-		/// @return Returns a reference to the instance of Input
-		/// @note Make sure Input was initialized 
-		static Input& instance();
-
-		/// @brief Returns the state of key
-		/// @param key Keycode of the key
-		/// @return Returns true if the key is pressed otherwise false
-		bool keyPressed(Key key);
-
-		/// @brief Returns the state of button
-		/// @param button Buttoncode of the mousebutton
-		/// @return Returns true if the button is pressed otherwise false
-		bool mouseButtonPressed(MouseButton button);
-
-		/// @brief Retrieves the mouse cursor position
-		/// @return Returns a vec2 with the cursor position
-		Vector2 cursorPosition();
-
-		/// @brief Sets the input mode
-		/// @param mode The mode to change
-		/// @param value The new value for the mode
-		void setInputMode(int mode, int value);
-
-		/// @brief Binds a function to a key
-		/// @tparam T Type of the class that contains the function
-		/// @param instance Pointer to the instance of the class
-		/// @param func Function to bind
-		/// @param key to bind the function to (A, B, C, etc)
-		/// @param event which triggers the function (press, release, etc)
-		/// @param mod Any modifier keys that should be pressed (shift, control, etc)
-		/// @note The function will be executed in glfwPollEvents
-		template<typename T>
-		void bind(T* instance, void (T::* func)(), Key key, KeyEvent event = Press, Modifier mod = None)
-		{
-			m_keyBindings[key].push_back({ std::bind(func, instance), event, mod });
-		}
-
-	private:
-		struct Binding
-		{
-			std::function<void()> function;
-			KeyEvent event;
-			Modifier mods;
-		};
-
-		/// @brief Calls the bound functions for the key
-		void glfwKeyCallback(int key, int scancode, KeyEvent action, Modifier mods);
-
-		static Input* s_instance;
-
-		GLFWwindow* m_window = nullptr;
-
-		std::unordered_map<int, std::vector<Binding>> m_keyBindings;
 	};
 }
