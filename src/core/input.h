@@ -182,7 +182,7 @@ namespace Aegix
 			MouseMiddle = GLFW_MOUSE_BUTTON_MIDDLE
 		};
 
-		Input();
+		Input(const Graphics::Window& window);
 		Input(const Input&) = delete;
 		Input(Input&&) = delete;
 		~Input();
@@ -194,10 +194,6 @@ namespace Aegix
 		/// @return Returns a reference to the instance of Input
 		/// @note Make sure Input was initialized 
 		static Input& instance();
-
-		/// @brief Initializes Input
-		/// @param window Pointer to the GLFW window
-		void initialize(GLFWwindow* window);
 
 		/// @brief Returns the state of key
 		/// @param key Keycode of the key

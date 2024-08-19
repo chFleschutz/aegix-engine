@@ -46,8 +46,6 @@ namespace Aegix
 	{
 		assert(m_scene != nullptr && "Cannot run engine without a scene");
 
-		m_input.initialize(m_window.glfwWindow());
-
 		m_scene->initialize();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();

@@ -9,10 +9,20 @@ namespace Aegix
 {
 	Input* Input::s_instance = nullptr;
 
-	Input::Input()
+	Input::Input(const Graphics::Window& window)
+		: m_window{ window.glfwWindow() }
 	{
 		assert(s_instance == nullptr && "Cannot create Input: Only one instance of Input is allowed");
 		s_instance = this;
+
+		if (glfwRawMouseMotionSupported())
+			glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+		// Set up key callback
+		glfwSetKeyCallback(m_window, [](GLFWwindow*, int key, int scancode, int action, int mods)
+			{
+				Input::instance().glfwKeyCallback(key, scancode, static_cast<KeyEvent>(action), static_cast<Modifier>(mods));
+			});
 	}
 
 	Input::~Input()
@@ -24,20 +34,6 @@ namespace Aegix
 	{
 		assert(s_instance != nullptr && "Input instance is not created");
 		return *s_instance;
-	}
-
-	void Input::initialize(GLFWwindow* window)
-	{
-		m_window = window;
-
-		if (glfwRawMouseMotionSupported())
-			glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-		// Set up key callback
-		glfwSetKeyCallback(m_window, [](GLFWwindow*, int key, int scancode, int action, int mods)
-			{
-				instance().glfwKeyCallback(key, scancode, static_cast<KeyEvent>(action), static_cast<Modifier>(mods));
-			});
 	}
 
 	bool Input::keyPressed(Key key)
