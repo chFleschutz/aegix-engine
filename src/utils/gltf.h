@@ -1,20 +1,21 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <map>
 #include <array>
+#include <map>
+#include <memory>
 #include <optional>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace Aegix::GLTF
 {
-	using vec3 = std::array<float, 3>;
-	using vec4 = std::array<float, 4>;
-	using quat = std::array<float, 4>;
-	using mat4 = std::array<float, 16>;
+	using Vec3 = std::array<float, 3>;
+	using Vec4 = std::array<float, 4>;
+	using Quat = std::array<float, 4>;
+	using Mat4 = std::array<float, 16>;
 
-	constexpr mat4 mat4Identity = {
+	constexpr Mat4 mat4Identity = {
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
@@ -39,13 +40,19 @@ namespace Aegix::GLTF
 
 	struct Node
 	{
+		struct TRS
+		{
+			Vec3 translation{ 0.0f, 0.0f, 0.0f };
+			Quat rotation{ 0.0f, 0.0f, 0.0f, 1.0f };
+			Vec3 scale{ 1.0f, 1.0f, 1.0f };
+		};
+
+		using Transform = std::variant<Mat4, TRS>;
+		
+		Transform transform = mat4Identity;
 		size_t camera;
 		uint32_t mesh;
 		std::vector<uint32_t> children;
-		mat4 matrix = mat4Identity;
-		quat rotation{ 0.0f, 0.0f, 0.0f, 1.0f };
-		vec3 scale{ 1.0f };
-		vec3 translation{ 0.0f };
 		std::string name;
 
 	};
