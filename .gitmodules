@@ -16,3 +16,6 @@
 [submodule "lib/imgui"]
 	path = lib/imgui
 	url = https://github.com/chFleschutz/imgui.git
+[submodule "lib/aegix-gltf"]
+	path = lib/aegix-gltf
+	url = https://github.com/chFleschutz/aegix-gltf.git
