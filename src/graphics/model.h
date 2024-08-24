@@ -10,7 +10,7 @@
 
 namespace Aegix::Graphics
 {
-	class Model
+	class StaticMesh
 	{
 	public:
 		struct Vertex
@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 			}
 		};
 
-		struct Builder
+		struct MeshInfo
 		{
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
@@ -37,13 +37,13 @@ namespace Aegix::Graphics
 			void loadModel(const std::filesystem::path& filepath);
 		};
 
-		Model(VulkanDevice& device, const Model::Builder& builder);
-		~Model();
+		StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& builder);
+		~StaticMesh();
 
-		Model(const Model&) = delete;
-		Model& operator=(const Model&) = delete;
+		StaticMesh(const StaticMesh&) = delete;
+		StaticMesh& operator=(const StaticMesh&) = delete;
 
-		static std::unique_ptr<Model> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
+		static std::unique_ptr<StaticMesh> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

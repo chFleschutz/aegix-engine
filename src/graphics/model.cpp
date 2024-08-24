@@ -14,9 +14,9 @@
 namespace std
 {
 	template <>
-	struct hash<Aegix::Graphics::Model::Vertex>
+	struct hash<Aegix::Graphics::StaticMesh::Vertex>
 	{
-		size_t operator()(Aegix::Graphics::Model::Vertex const& vertex) const
+		size_t operator()(Aegix::Graphics::StaticMesh::Vertex const& vertex) const
 		{
 			size_t seed = 0;
 			Aegix::Utils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
@@ -28,25 +28,25 @@ namespace std
 
 namespace Aegix::Graphics
 {
-	Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_device{ device }
+	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& builder) : m_device{ device }
 	{
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
 	}
 
-	Model::~Model()
+	StaticMesh::~StaticMesh()
 	{
 	}
 
-	std::unique_ptr<Model> Model::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
+	std::unique_ptr<StaticMesh> StaticMesh::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
 	{
-		Builder builder{};
-		builder.loadModel(filepath);
+		MeshInfo builder{};
+		builder.loadOBJ(filepath);
 
-		return std::make_unique<Model>(device, builder);
+		return std::make_unique<StaticMesh>(device, builder);
 	}
 
-	void Model::bind(VkCommandBuffer commandBuffer)
+	void StaticMesh::bind(VkCommandBuffer commandBuffer)
 	{
 		VkBuffer buffers[] = { m_vertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
@@ -56,7 +56,7 @@ namespace Aegix::Graphics
 			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
-	void Model::draw(VkCommandBuffer commandBuffer)
+	void StaticMesh::draw(VkCommandBuffer commandBuffer)
 	{
 		if (m_hasIndexBuffer)
 		{
@@ -68,7 +68,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void Model::createVertexBuffers(const std::vector<Vertex>& vertices)
+	void StaticMesh::createVertexBuffers(const std::vector<Vertex>& vertices)
 	{
 		m_vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(m_vertexCount >= 3 && "Vertex count must be atleast 3");
@@ -98,7 +98,7 @@ namespace Aegix::Graphics
 		m_device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
 	}
 
-	void Model::createIndexBuffers(const std::vector<uint32_t>& indices)
+	void StaticMesh::createIndexBuffers(const std::vector<uint32_t>& indices)
 	{
 		m_indexCount = static_cast<uint32_t>(indices.size());
 		m_hasIndexBuffer = m_indexCount > 0;
@@ -130,7 +130,7 @@ namespace Aegix::Graphics
 		m_device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 	}
 
-	std::vector<VkVertexInputBindingDescription> Model::Vertex::bindingDescriptions()
+	std::vector<VkVertexInputBindingDescription> StaticMesh::Vertex::bindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
@@ -139,7 +139,7 @@ namespace Aegix::Graphics
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> Model::Vertex::attributeDescriptions()
+	std::vector<VkVertexInputAttributeDescription> StaticMesh::Vertex::attributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
@@ -149,7 +149,7 @@ namespace Aegix::Graphics
 		return attributeDescriptions;
 	}
 
-	void Model::Builder::loadModel(const std::filesystem::path& filepath)
+	void StaticMesh::MeshInfo::loadOBJ(const std::filesystem::path& filepath)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -208,5 +208,10 @@ namespace Aegix::Graphics
 				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
+	}
+
+	void StaticMesh::MeshInfo::loadGLTF(const std::filesystem::path& filepath)
+	{
+
 	}
 }

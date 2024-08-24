@@ -25,7 +25,7 @@ namespace Aegix
 		/// @param modelPath Path to the model file
 		/// @return Model with the data from the file
 		/// @note Currently only supports .obj files
-		std::shared_ptr<Graphics::Model> createModel(const std::filesystem::path& modelPath);
+		std::shared_ptr<Graphics::StaticMesh> createModel(const std::filesystem::path& modelPath);
 
 		/// @brief Creates a texture from a file
 		/// @param texturePath Path to the texture file 

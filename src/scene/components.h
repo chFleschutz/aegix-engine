@@ -38,10 +38,10 @@ namespace Aegix::Component
 		Vector3 up() const { return Aegix::MathLib::up(rotation); }
 	};
 
-	/// @brief Holds a pointer to a model
+	/// @brief Holds a pointer to a static mesh
 	struct Mesh
 	{
-		std::shared_ptr<Graphics::Model> model;
+		std::shared_ptr<Graphics::StaticMesh> staticMesh;
 	};
 
 	/// @brief Creates a light 
