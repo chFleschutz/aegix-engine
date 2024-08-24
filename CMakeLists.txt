@@ -36,6 +36,7 @@ message("")
 
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
 
+add_subdirectory("lib/aegix-gltf")
 
 set(GLFW_BUILD_DOCS OFF)
 add_subdirectory("lib/glfw")
