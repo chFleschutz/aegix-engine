@@ -3,6 +3,7 @@
 #include "utils/file.h"
 
 #include "gltf.h"
+#include "gltf_utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -200,71 +201,25 @@ namespace Aegix::Graphics
 		auto gltf = GLTF::load(filepath);
 		assert(gltf.has_value() && "Failed to load GLTF file");
 
+		// TODO: Support multiple meshes and primitives
 		auto& primitive = gltf->meshes[0].primitives[0];
 
-		// Load indices
-		if (primitive.indices.has_value())
-		{
-			auto& indexAccessor = gltf->accessors[primitive.indices.value()];
-			auto& indexBufferView = gltf->bufferViews[indexAccessor.bufferView.value()];
-			auto& indexBuffer = gltf->buffers[indexBufferView.buffer];
+		GLTF::copyIndices(indices, primitive, *gltf);
+		GLTF::copyAttribute("POSITION", positions, primitive, *gltf);
+		GLTF::copyAttribute("COLOR_0", colors, primitive, *gltf);
+		GLTF::copyAttribute("NORMAL", normals, primitive, *gltf);
+		GLTF::copyAttribute("TEXCOORD_0", uvs, primitive, *gltf);
 
-			auto indexData = indexBuffer.data.data() + indexBufferView.byteOffset + indexAccessor.byteOffset;
+		// Ensure all attributes have the same size
+		assert(!positions.empty() && "Failed to load positions");
+		auto vertexCount = positions.size();
+		if (colors.size() != vertexCount)
+			colors.resize(vertexCount);
 
-			indices = GLTF::convertTo<uint32_t>(indexAccessor.componentType, indexData, indexAccessor.count);
-		}
+		if (normals.size() != vertexCount)
+			normals.resize(vertexCount);
 
-		// Load attributes
-		auto positionIt = primitive.attributes.find("POSITION");
-
-		assert(positionIt != primitive.attributes.end() && "POSITION attribute not found");
-		size_t vertexCount = gltf->accessors[positionIt->second].count;
-
-		positions.resize(vertexCount);
-		if (positionIt != primitive.attributes.end())
-		{
-			auto& accessor = gltf->accessors[positionIt->second];
-			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
-			auto& buffer = gltf->buffers[bufferView.buffer];
-
-			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-			std::memcpy(positions.data(), data, accessor.count * sizeof(glm::vec3));
-		}
-		
-		colors.resize(vertexCount);
-		auto colorIt = primitive.attributes.find("COLOR_0");
-		if (colorIt != primitive.attributes.end())
-		{
-			auto& accessor = gltf->accessors[colorIt->second];
-			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
-			auto& buffer = gltf->buffers[bufferView.buffer];
-
-			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-			std::memcpy(colors.data(), data, accessor.count * sizeof(glm::vec3));
-		}
-
-		normals.resize(vertexCount);
-		auto normalIt = primitive.attributes.find("NORMAL");
-		if (normalIt != primitive.attributes.end())
-		{
-			auto& accessor = gltf->accessors[normalIt->second];
-			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
-			auto& buffer = gltf->buffers[bufferView.buffer];
-
-			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-			std::memcpy(normals.data(), data, accessor.count * sizeof(glm::vec3));
-		}
-
-		uvs.resize(vertexCount);
-		auto uvIt = primitive.attributes.find("TEXCOORD_0");
-		if (uvIt != primitive.attributes.end())
-		{
-			auto& accessor = gltf->accessors[uvIt->second];
-			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
-			auto& buffer = gltf->buffers[bufferView.buffer];
-
-			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-			std::memcpy(uvs.data(), data, accessor.count * sizeof(glm::vec2));
-		}
+		if (uvs.size() != vertexCount)
+			uvs.resize(vertexCount);
 	}
 }
