@@ -52,13 +52,13 @@ namespace Aegix::Graphics
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
-		if (m_hasIndexBuffer)
+		if (m_indexBuffer)
 			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
 	void StaticMesh::draw(VkCommandBuffer commandBuffer)
 	{
-		if (m_hasIndexBuffer)
+		if (m_indexBuffer)
 		{
 			vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
 		}
@@ -101,8 +101,7 @@ namespace Aegix::Graphics
 	void StaticMesh::createIndexBuffers(const std::vector<uint32_t>& indices)
 	{
 		m_indexCount = static_cast<uint32_t>(indices.size());
-		m_hasIndexBuffer = m_indexCount > 0;
-		if (!m_hasIndexBuffer)
+		if (m_indexCount <= 0)
 			return;
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;

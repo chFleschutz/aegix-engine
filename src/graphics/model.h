@@ -34,7 +34,8 @@ namespace Aegix::Graphics
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
 
-			void loadModel(const std::filesystem::path& filepath);
+			void loadOBJ(const std::filesystem::path& filepath);
+			void loadGLTF(const std::filesystem::path& filepath);
 		};
 
 		StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& builder);
@@ -57,7 +58,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<Buffer> m_vertexBuffer;
 		uint32_t m_vertexCount;
 
-		bool m_hasIndexBuffer = false;
 		std::unique_ptr<Buffer> m_indexBuffer;
 		uint32_t m_indexCount;
 	};
