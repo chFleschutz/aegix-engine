@@ -34,7 +34,7 @@ namespace Aegix::Graphics
 
 		static std::vector<VkVertexInputBindingDescription> defaultBindingDescriptions();
 		static std::vector<VkVertexInputAttributeDescription> defaultAttributeDescriptions();
-		static std::unique_ptr<StaticMesh> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
+		static std::unique_ptr<StaticMesh> createFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

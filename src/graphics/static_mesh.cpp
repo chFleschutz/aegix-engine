@@ -1,5 +1,9 @@
 #include "static_mesh.h"
 
+#include "utils/file.h"
+
+#include "gltf.h"
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
@@ -63,12 +67,24 @@ namespace Aegix::Graphics
 		return attributeDescriptions;
 	}
 
-	std::unique_ptr<StaticMesh> StaticMesh::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
+	std::unique_ptr<StaticMesh> StaticMesh::createFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
 	{
-		MeshInfo builder{};
-		builder.loadOBJ(filepath);
+		MeshInfo info{};
+		
+		if (filepath.extension() == ".gltf" || filepath.extension() == ".glb")
+		{
+			info.loadGLTF(filepath);
+		}
+		else if (filepath.extension() == ".obj")
+		{
+			info.loadOBJ(filepath);
+		}
+		else
+		{
+			assert(false && "Unsupported file format");
+		}
 
-		return std::make_unique<StaticMesh>(device, builder);
+		return std::make_unique<StaticMesh>(device, info);
 	}
 
 	void StaticMesh::bind(VkCommandBuffer commandBuffer)
@@ -181,6 +197,74 @@ namespace Aegix::Graphics
 
 	void StaticMesh::MeshInfo::loadGLTF(const std::filesystem::path& filepath)
 	{
+		auto gltf = GLTF::load(filepath);
+		assert(gltf.has_value() && "Failed to load GLTF file");
 
+		auto& primitive = gltf->meshes[0].primitives[0];
+
+		// Load indices
+		if (primitive.indices.has_value())
+		{
+			auto& indexAccessor = gltf->accessors[primitive.indices.value()];
+			auto& indexBufferView = gltf->bufferViews[indexAccessor.bufferView.value()];
+			auto& indexBuffer = gltf->buffers[indexBufferView.buffer];
+
+			auto indexData = indexBuffer.data.data() + indexBufferView.byteOffset + indexAccessor.byteOffset;
+
+			indices = GLTF::convertTo<uint32_t>(indexAccessor.componentType, indexData, indexAccessor.count);
+		}
+
+		// Load attributes
+		auto positionIt = primitive.attributes.find("POSITION");
+
+		assert(positionIt != primitive.attributes.end() && "POSITION attribute not found");
+		size_t vertexCount = gltf->accessors[positionIt->second].count;
+
+		positions.resize(vertexCount);
+		if (positionIt != primitive.attributes.end())
+		{
+			auto& accessor = gltf->accessors[positionIt->second];
+			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
+			auto& buffer = gltf->buffers[bufferView.buffer];
+
+			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+			std::memcpy(positions.data(), data, accessor.count * sizeof(glm::vec3));
+		}
+		
+		colors.resize(vertexCount);
+		auto colorIt = primitive.attributes.find("COLOR_0");
+		if (colorIt != primitive.attributes.end())
+		{
+			auto& accessor = gltf->accessors[colorIt->second];
+			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
+			auto& buffer = gltf->buffers[bufferView.buffer];
+
+			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+			std::memcpy(colors.data(), data, accessor.count * sizeof(glm::vec3));
+		}
+
+		normals.resize(vertexCount);
+		auto normalIt = primitive.attributes.find("NORMAL");
+		if (normalIt != primitive.attributes.end())
+		{
+			auto& accessor = gltf->accessors[normalIt->second];
+			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
+			auto& buffer = gltf->buffers[bufferView.buffer];
+
+			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+			std::memcpy(normals.data(), data, accessor.count * sizeof(glm::vec3));
+		}
+
+		uvs.resize(vertexCount);
+		auto uvIt = primitive.attributes.find("TEXCOORD_0");
+		if (uvIt != primitive.attributes.end())
+		{
+			auto& accessor = gltf->accessors[uvIt->second];
+			auto& bufferView = gltf->bufferViews[accessor.bufferView.value()];
+			auto& buffer = gltf->buffers[bufferView.buffer];
+
+			auto data = buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+			std::memcpy(uvs.data(), data, accessor.count * sizeof(glm::vec2));
+		}
 	}
 }

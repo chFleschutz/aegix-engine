@@ -34,6 +34,18 @@ public:
 		auto teapotModel = assetManager.createModel("models/teapot.obj");
 		auto planeModel = assetManager.createModel("models/plane.obj");
 
+		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
+		auto helmetTexture = assetManager.createTexture("damaged_helmet/Default_albedo.jpg");
+		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(helmetTexture);
+		helmetMat->setData({
+			.shininess = 32.0f
+			});
+
+		auto helmet = createEntity("Helmet");
+		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
+		helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
+		helmet.getComponent<Aegix::Component::Transform>().location = { 0.0f, -5.0f, 0.0f };
+
 		auto paintingTexture = assetManager.createTexture("textures/painting.png");
 		auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
 		paintingMat->setData({
