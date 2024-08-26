@@ -1,6 +1,6 @@
 #include "pipeline.h"
 
-#include "graphics/model.h"
+#include "graphics/static_mesh.h"
 #include "utils/file_utils.h"
 
 #include <cassert>

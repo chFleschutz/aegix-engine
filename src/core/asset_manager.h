@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/model.h"
+#include "graphics/static_mesh.h"
 #include "graphics/renderer.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/texture.h"
