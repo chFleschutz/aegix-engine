@@ -2,7 +2,8 @@
 
 #include "graphics/buffer.h"
 #include "graphics/device.h"
-#include "utils/math_utils.h"
+
+#include "glm/glm.hpp"
 
 #include <filesystem>
 #include <memory>
@@ -13,22 +14,6 @@ namespace Aegix::Graphics
 	class StaticMesh
 	{
 	public:
-		struct Vertex
-		{
-			Vector3 position{};
-			Vector3 color{};
-			Vector3 normal{};
-			Vector2 uv{};
-
-			static std::vector<VkVertexInputBindingDescription> bindingDescriptions();
-			static std::vector<VkVertexInputAttributeDescription> attributeDescriptions();
-
-			bool operator==(const Vertex& other) const 
-			{
-				return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
-			}
-		};
-
 		struct MeshInfo
 		{
 			std::vector<glm::vec3> positions{};
@@ -42,11 +27,13 @@ namespace Aegix::Graphics
 		};
 
 		StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info);
-		~StaticMesh();
+		~StaticMesh() = default;
 
 		StaticMesh(const StaticMesh&) = delete;
 		StaticMesh& operator=(const StaticMesh&) = delete;
 
+		static std::vector<VkVertexInputBindingDescription> defaultBindingDescriptions();
+		static std::vector<VkVertexInputAttributeDescription> defaultAttributeDescriptions();
 		static std::unique_ptr<StaticMesh> createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath);
 
 		void bind(VkCommandBuffer commandBuffer);
@@ -71,7 +58,6 @@ namespace Aegix::Graphics
 
 			stagingBuffer.map();
 			stagingBuffer.writeToBuffer(attribute.data(), bufferSize);
-			stagingBuffer.unmap();
 
 			auto attributeBuffer = std::make_unique<Buffer>(
 				m_device,
@@ -88,7 +74,6 @@ namespace Aegix::Graphics
 			m_attributeBuffers.emplace_back(std::move(attributeBuffer));
 		}
 
-		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
 		VulkanDevice& m_device;

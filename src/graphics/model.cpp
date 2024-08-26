@@ -1,34 +1,29 @@
 #include "model.h"
 
-#include "utils/utils.h"
-
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/hash.hpp>
+#include "tiny_obj_loader.h"
 
 #include <cassert>
-#include <cstring>
-#include <unordered_map>
-
-namespace std
-{
-	template <>
-	struct hash<Aegix::Graphics::StaticMesh::Vertex>
-	{
-		size_t operator()(Aegix::Graphics::StaticMesh::Vertex const& vertex) const
-		{
-			size_t seed = 0;
-			Aegix::Utils::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
-			return seed;
-		}
-	};
-}
 
 
 namespace Aegix::Graphics
 {
-	std::vector<VkVertexInputBindingDescription> StaticMesh::Vertex::bindingDescriptions()
+	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info) : m_device{ device }
+	{
+		// Create vertex buffers (Order: Position, Color, Normal, UV)
+		m_vertexCount = static_cast<uint32_t>(info.positions.size());
+		assert(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount
+			&& "Vertex attribute count has to match");
+
+		createVertexAttributeBuffer(info.positions);
+		createVertexAttributeBuffer(info.colors);
+		createVertexAttributeBuffer(info.normals);
+		createVertexAttributeBuffer(info.uvs);
+
+		createIndexBuffers(info.indices);
+	}
+
+	std::vector<VkVertexInputBindingDescription> StaticMesh::defaultBindingDescriptions()
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(4);
 		bindingDescriptions[0].binding = 0;
@@ -46,7 +41,7 @@ namespace Aegix::Graphics
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> StaticMesh::Vertex::attributeDescriptions()
+	std::vector<VkVertexInputAttributeDescription> StaticMesh::defaultAttributeDescriptions()
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
 		attributeDescriptions[0].binding = 0;
@@ -63,30 +58,9 @@ namespace Aegix::Graphics
 		attributeDescriptions[2].offset = 0;
 		attributeDescriptions[3].binding = 3;
 		attributeDescriptions[3].location = 3;
-		attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[3].offset = 0;
 		return attributeDescriptions;
-	}
-
-
-
-	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info) : m_device{ device }
-	{
-		// Create vertex buffers (Order: Position, Color, Normal, UV)
-		m_vertexCount = static_cast<uint32_t>(info.positions.size());
-		assert(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount
-			&& "Vertex attribute count has to match");
-
-		createVertexAttributeBuffer(info.positions);
-		createVertexAttributeBuffer(info.colors);
-		createVertexAttributeBuffer(info.normals);
-		createVertexAttributeBuffer(info.uvs);
-
-		createIndexBuffers(info.indices);
-	}
-
-	StaticMesh::~StaticMesh()
-	{
 	}
 
 	std::unique_ptr<StaticMesh> StaticMesh::createModelFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
@@ -115,36 +89,6 @@ namespace Aegix::Graphics
 		{
 			vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 		}
-	}
-
-	void StaticMesh::createVertexBuffers(const std::vector<Vertex>& vertices)
-	{
-		//m_vertexCount = static_cast<uint32_t>(vertices.size());
-		//assert(m_vertexCount >= 3 && "Vertex count must be atleast 3");
-
-		//VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
-		//uint32_t vertexSize = sizeof(vertices[0]);
-
-		//Buffer stagingBuffer{
-		//	m_device,
-		//	vertexSize,
-		//	m_vertexCount,
-		//	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		//};
-
-		//stagingBuffer.map();
-		//stagingBuffer.writeToBuffer((void*)vertices.data());
-
-		//m_vertexBuffer = std::make_unique<Buffer>(
-		//	m_device,
-		//	vertexSize,
-		//	m_vertexCount,
-		//	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		//);
-
-		//m_device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
 	}
 
 	void StaticMesh::createIndexBuffers(const std::vector<uint32_t>& indices)

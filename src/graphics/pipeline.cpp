@@ -234,8 +234,8 @@ namespace Aegix::Graphics
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = StaticMesh::Vertex::bindingDescriptions();
-		configInfo.attributeDescriptions = StaticMesh::Vertex::attributeDescriptions();
+		configInfo.bindingDescriptions = StaticMesh::defaultBindingDescriptions();
+		configInfo.attributeDescriptions = StaticMesh::defaultAttributeDescriptions();
 	}
 
 	void Pipeline::enableAlphaBlending(Pipeline::Config& configInfo)
