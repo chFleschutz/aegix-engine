@@ -28,10 +28,61 @@ namespace std
 
 namespace Aegix::Graphics
 {
-	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& builder) : m_device{ device }
+	std::vector<VkVertexInputBindingDescription> StaticMesh::Vertex::bindingDescriptions()
 	{
-		createVertexBuffers(builder.vertices);
-		createIndexBuffers(builder.indices);
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(4);
+		bindingDescriptions[0].binding = 0;
+		bindingDescriptions[0].stride = sizeof(glm::vec3);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[1].binding = 1;
+		bindingDescriptions[1].stride = sizeof(glm::vec3);
+		bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[2].binding = 2;
+		bindingDescriptions[2].stride = sizeof(glm::vec3);
+		bindingDescriptions[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		bindingDescriptions[3].binding = 3;
+		bindingDescriptions[3].stride = sizeof(glm::vec2);
+		bindingDescriptions[3].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		return bindingDescriptions;
+	}
+
+	std::vector<VkVertexInputAttributeDescription> StaticMesh::Vertex::attributeDescriptions()
+	{
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[0].offset = 0;
+		attributeDescriptions[1].binding = 1;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = 0;
+		attributeDescriptions[2].binding = 2;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[2].offset = 0;
+		attributeDescriptions[3].binding = 3;
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[3].offset = 0;
+		return attributeDescriptions;
+	}
+
+
+
+	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info) : m_device{ device }
+	{
+		// Create vertex buffers (Order: Position, Color, Normal, UV)
+		m_vertexCount = static_cast<uint32_t>(info.positions.size());
+		assert(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount
+			&& "Vertex attribute count has to match");
+
+		createVertexAttributeBuffer(info.positions);
+		createVertexAttributeBuffer(info.colors);
+		createVertexAttributeBuffer(info.normals);
+		createVertexAttributeBuffer(info.uvs);
+
+		createIndexBuffers(info.indices);
 	}
 
 	StaticMesh::~StaticMesh()
@@ -48,9 +99,7 @@ namespace Aegix::Graphics
 
 	void StaticMesh::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[] = { m_vertexBuffer->buffer() };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+		vkCmdBindVertexBuffers(commandBuffer, 0, m_vkBuffers.size(), m_vkBuffers.data(), m_bufferOffsets.data());
 
 		if (m_indexBuffer)
 			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
@@ -70,32 +119,32 @@ namespace Aegix::Graphics
 
 	void StaticMesh::createVertexBuffers(const std::vector<Vertex>& vertices)
 	{
-		m_vertexCount = static_cast<uint32_t>(vertices.size());
-		assert(m_vertexCount >= 3 && "Vertex count must be atleast 3");
+		//m_vertexCount = static_cast<uint32_t>(vertices.size());
+		//assert(m_vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
-		uint32_t vertexSize = sizeof(vertices[0]);
+		//VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
+		//uint32_t vertexSize = sizeof(vertices[0]);
 
-		Buffer stagingBuffer{
-			m_device,
-			vertexSize,
-			m_vertexCount,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		};
+		//Buffer stagingBuffer{
+		//	m_device,
+		//	vertexSize,
+		//	m_vertexCount,
+		//	VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		//	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		//};
 
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer((void*)vertices.data());
+		//stagingBuffer.map();
+		//stagingBuffer.writeToBuffer((void*)vertices.data());
 
-		m_vertexBuffer = std::make_unique<Buffer>(
-			m_device,
-			vertexSize,
-			m_vertexCount,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		);
+		//m_vertexBuffer = std::make_unique<Buffer>(
+		//	m_device,
+		//	vertexSize,
+		//	m_vertexCount,
+		//	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		//);
 
-		m_device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
+		//m_device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), bufferSize);
 	}
 
 	void StaticMesh::createIndexBuffers(const std::vector<uint32_t>& indices)
@@ -129,25 +178,6 @@ namespace Aegix::Graphics
 		m_device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 	}
 
-	std::vector<VkVertexInputBindingDescription> StaticMesh::Vertex::bindingDescriptions()
-	{
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-		bindingDescriptions[0].binding = 0;
-		bindingDescriptions[0].stride = sizeof(Vertex);
-		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		return bindingDescriptions;
-	}
-
-	std::vector<VkVertexInputAttributeDescription> StaticMesh::Vertex::attributeDescriptions()
-	{
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
-		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
-		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
-		attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
-		return attributeDescriptions;
-	}
-
 	void StaticMesh::MeshInfo::loadOBJ(const std::filesystem::path& filepath)
 	{
 		tinyobj::attrib_t attrib;
@@ -158,53 +188,49 @@ namespace Aegix::Graphics
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str()))
 			throw std::runtime_error(warn + err);
 
-		vertices.clear();
+		positions.clear();
+		colors.clear();
+		normals.clear();
+		uvs.clear();
 		indices.clear();
 
-		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 		for (const auto& shape : shapes)
 		{
 			for (const auto& index : shape.mesh.indices)
 			{
-				Vertex vertex{};
+				glm::vec3 position{};
+				glm::vec3 color{};
+				glm::vec3 normal{};
+				glm::vec2 uv{};
+
 				if (index.vertex_index >= 0)
 				{
-					vertex.position = {
-						attrib.vertices[3 * index.vertex_index + 0],
-						attrib.vertices[3 * index.vertex_index + 1],
-						attrib.vertices[3 * index.vertex_index + 2],
-					};
+					position.x = attrib.vertices[3 * index.vertex_index + 0];
+					position.y = attrib.vertices[3 * index.vertex_index + 1];
+					position.z = attrib.vertices[3 * index.vertex_index + 2];
 
-					vertex.color = {
-						attrib.colors[3 * index.vertex_index + 0],
-						attrib.colors[3 * index.vertex_index + 1],
-						attrib.colors[3 * index.vertex_index + 2],
-					};
+					color.r = attrib.colors[3 * index.vertex_index + 0];
+					color.g = attrib.colors[3 * index.vertex_index + 1];
+					color.b = attrib.colors[3 * index.vertex_index + 2];
 				}
 
 				if (index.normal_index >= 0)
 				{
-					vertex.normal = {
-						attrib.normals[3 * index.normal_index + 0],
-						attrib.normals[3 * index.normal_index + 1],
-						attrib.normals[3 * index.normal_index + 2],
-					};
+					normal.x = attrib.normals[3 * index.normal_index + 0];
+					normal.y = attrib.normals[3 * index.normal_index + 1];
+					normal.z = attrib.normals[3 * index.normal_index + 2];
 				}
 
 				if (index.texcoord_index >= 0)
 				{
-					vertex.uv = {
-						attrib.texcoords[2 * index.texcoord_index + 0],
-						attrib.texcoords[2 * index.texcoord_index + 1],
-					};
+					uv.x = attrib.texcoords[2 * index.texcoord_index + 0];
+					uv.y = attrib.texcoords[2 * index.texcoord_index + 1];
 				}
 
-				if (uniqueVertices.count(vertex) == 0)
-				{
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-					vertices.push_back(vertex);
-				}
-				indices.push_back(uniqueVertices[vertex]);
+				positions.emplace_back(position);
+				colors.emplace_back(color);
+				normals.emplace_back(normal);
+				uvs.emplace_back(uv);
 			}
 		}
 	}
