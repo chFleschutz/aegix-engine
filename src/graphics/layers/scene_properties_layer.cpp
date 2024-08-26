@@ -85,7 +85,7 @@ namespace Aegix::Graphics
 
 		drawComponent<Component::Mesh>("Mesh", m_selectedEntity, [](Component::Mesh& mesh)
 			{
-				drawAssetSlot("Mesh", "Mesh Asset", mesh.model != nullptr);
+				drawAssetSlot("Mesh", "Mesh Asset", mesh.staticMesh != nullptr);
 			});
 
 		drawComponent<Component::PointLight>("Pointlight", m_selectedEntity, [](Component::PointLight& pointlight)
