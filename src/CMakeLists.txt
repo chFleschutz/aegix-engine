@@ -27,6 +27,7 @@ target_sources(AegixEngine PRIVATE
 	"scripting/movement/dynamic_movement_controller.cpp"
 	"scripting/movement/kinematic_movement_controller.cpp"
 	"utils/color.cpp"
+	"utils/file.cpp"
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"

@@ -1,7 +1,7 @@
 #include "pipeline.h"
 
 #include "graphics/static_mesh.h"
-#include "utils/file_utils.h"
+#include "utils/file.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -97,7 +97,7 @@ namespace Aegix::Graphics
 
 	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
 	{
-		auto shaderCode = FileUtils::readBinaryFile(shaderPath);
+		auto shaderCode = File::readBinary(shaderPath);
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
