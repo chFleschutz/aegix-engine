@@ -67,7 +67,7 @@ namespace Aegix::Graphics
 		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
-			if (mesh.model == nullptr || material.instance == nullptr)
+			if (mesh.staticMesh == nullptr || material.instance == nullptr)
 				continue;
 			
 			// Material Descriptor Set
@@ -97,8 +97,8 @@ namespace Aegix::Graphics
 			);
 
 			// Draw
-			mesh.model->bind(frameInfo.commandBuffer);
-			mesh.model->draw(frameInfo.commandBuffer);
+			mesh.staticMesh->bind(frameInfo.commandBuffer);
+			mesh.staticMesh->draw(frameInfo.commandBuffer);
 		}
 	}
 }

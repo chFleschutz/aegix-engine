@@ -24,9 +24,9 @@ namespace Aegix
 		return *s_assetManager;
 	}
 
-	std::shared_ptr<Graphics::Model> AssetManager::createModel(const std::filesystem::path& modelPath)
+	std::shared_ptr<Graphics::StaticMesh> AssetManager::createModel(const std::filesystem::path& modelPath)
 	{
-		return Graphics::Model::createModelFromFile(m_renderer.device(), ASSETS_DIR / modelPath);
+		return Graphics::StaticMesh::createFromFile(m_renderer.device(), ASSETS_DIR / modelPath);
 	}
 
 	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const std::filesystem::path& texturePath, const Graphics::Texture::Config& config)

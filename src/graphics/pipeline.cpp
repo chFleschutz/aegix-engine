@@ -1,7 +1,7 @@
 #include "pipeline.h"
 
-#include "graphics/model.h"
-#include "utils/file_utils.h"
+#include "graphics/static_mesh.h"
+#include "utils/file.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -97,7 +97,7 @@ namespace Aegix::Graphics
 
 	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
 	{
-		auto shaderCode = FileUtils::readBinaryFile(shaderPath);
+		auto shaderCode = File::readBinary(shaderPath);
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -234,8 +234,8 @@ namespace Aegix::Graphics
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = Model::Vertex::bindingDescriptions();
-		configInfo.attributeDescriptions = Model::Vertex::attributeDescriptions();
+		configInfo.bindingDescriptions = StaticMesh::defaultBindingDescriptions();
+		configInfo.attributeDescriptions = StaticMesh::defaultAttributeDescriptions();
 	}
 
 	void Pipeline::enableAlphaBlending(Pipeline::Config& configInfo)

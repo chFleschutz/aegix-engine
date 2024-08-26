@@ -10,9 +10,9 @@ target_sources(AegixEngine PRIVATE
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/gui.cpp"
-	"graphics/model.cpp"
 	"graphics/pipeline.cpp"
 	"graphics/renderer.cpp"
+	"graphics/static_mesh.cpp"
 	"graphics/swap_chain.cpp"
 	"graphics/texture.cpp"
 	"graphics/window.cpp"
@@ -27,6 +27,7 @@ target_sources(AegixEngine PRIVATE
 	"scripting/movement/dynamic_movement_controller.cpp"
 	"scripting/movement/kinematic_movement_controller.cpp"
 	"utils/color.cpp"
+	"utils/file.cpp"
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
@@ -44,4 +45,5 @@ target_link_libraries(AegixEngine PUBLIC
 	Vulkan::Vulkan
 	glfw
 	imgui
+	Aegix::GLTF
 )
