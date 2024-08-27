@@ -113,7 +113,7 @@ namespace Aegix
 		const float cz = glm::cos(rotation.z);
 		const float sz = glm::sin(rotation.z);
 
-		return { cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy };
+		return { sx * sy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy };
 	}
 
 	glm::vec3 MathLib::right(const glm::vec3& rotation)
@@ -135,7 +135,7 @@ namespace Aegix
 		const float cz = glm::cos(rotation.z);
 		const float sz = glm::sin(rotation.z);
 
-		return { -cz * sx * sy + cx * sz, -cx * cz - sx * sy * sz, -cy * sx };
+		return { cx * sy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy };
 	}
 
 	glm::vec3 MathLib::normalize(const glm::vec3& vec)

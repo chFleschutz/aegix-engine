@@ -54,6 +54,13 @@ namespace Aegix::Component
 	/// @brief Holds a camera to view the scene
 	struct Camera
 	{
-		Graphics::Camera camera{};
+		float fov = 45.0f;
+		float aspectRatio = 1.0f;
+		float near = 0.1f;
+		float far = 100.0f;
+
+		glm::mat4 viewMatrix = glm::mat4{ 1.0f };
+		glm::mat4 inverseViewMatrix = glm::mat4{ 1.0f };
+		glm::mat4 projectionMatrix = glm::mat4{ 1.0f };
 	};
 }

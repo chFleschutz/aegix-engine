@@ -2,6 +2,7 @@
 
 #include "graphics/camera.h"
 #include "graphics/lights.h"
+#include "scene/components.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics
@@ -25,8 +26,8 @@ namespace Aegix::Graphics
 	{
 		int frameIndex;
 		VkCommandBuffer commandBuffer;
-		Camera* camera;
 		VkDescriptorSet globalDescriptorSet;
+		Component::Camera& camera;
 		Scene::Scene* scene;
 	};
 }

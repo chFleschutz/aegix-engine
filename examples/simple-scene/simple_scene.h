@@ -44,7 +44,7 @@ public:
 		auto helmet = createEntity("Helmet");
 		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
 		helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
-		helmet.getComponent<Aegix::Component::Transform>().location = { 0.0f, -5.0f, 0.0f };
+		helmet.getComponent<Aegix::Component::Transform>().location = { 5.0f, 0.0f, 0.0f };
 
 		auto paintingTexture = assetManager.createTexture("textures/painting.png");
 		auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
@@ -67,12 +67,19 @@ public:
 		auto plane = createEntity("Plane");
 		plane.addComponent<Aegix::Component::Mesh>(planeModel);
 		plane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
+		auto& planeTransform = plane.getComponent<Aegix::Component::Transform>();
+		planeTransform.location = { 0.0f, 5.0f, 5.0f };
 		
+		auto floorPlane = createEntity("Floor Plane");
+		floorPlane.addComponent<Aegix::Component::Mesh>(planeModel);
+		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
+		floorPlane.getComponent<Aegix::Component::Transform>().rotation = { glm::radians(-90.0f), 0.0f, 0.0f };
+
 		// LIGHTS
 
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
-		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 0.0f });
+		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 5.0f });
 		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 100.0f);
 
 		auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });

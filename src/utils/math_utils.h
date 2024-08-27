@@ -20,6 +20,10 @@ namespace Aegix
 	class MathLib
 	{
 	public:
+		constexpr static glm::vec3 RIGHT = { 1.0f, 0.0f, 0.0f };
+		constexpr static glm::vec3 FORWARD = { 0.0f, 1.0f, 0.0f };
+		constexpr static glm::vec3 UP = { 0.0f, 0.0f, 1.0f };
+
 		/// @brief Returns the percentage of a value between a min and max value
 		static float percentage(float value, float min, float max);
 
