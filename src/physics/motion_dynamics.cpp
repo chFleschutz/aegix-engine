@@ -54,29 +54,29 @@ namespace Aegix::Physics
 		addAngularForce(force.angular);
 	}
 
-	void MotionDynamics::addLinearForce(const Vector3& force)
+	void MotionDynamics::addLinearForce(const glm::vec3& force)
 	{
 		m_accumulatedLinearForce += force;
 	}
 
-	void MotionDynamics::addAngularForce(const Vector3& angularForce)
+	void MotionDynamics::addAngularForce(const glm::vec3& angularForce)
 	{
 		m_accumulatedAngularForce += angularForce;
 	}
 
 	void MotionDynamics::haltMotion()
 	{
-		m_linearVelocity = Vector3{ 0.0f };
-		m_angularVelocity = Vector3{ 0.0f };
+		m_linearVelocity = glm::vec3{ 0.0f };
+		m_angularVelocity = glm::vec3{ 0.0f };
 	}
 
-	Vector3 MotionDynamics::moveDirection() const
+	glm::vec3 MotionDynamics::moveDirection() const
 	{
 		assert(linearSpeed() > 0.0f && "Direction of zero-vector is undefined");
 		return Aegix::MathLib::normalize(m_linearVelocity);
 	}
 
-	Vector3 MotionDynamics::angularDirection() const
+	glm::vec3 MotionDynamics::angularDirection() const
 	{
 		assert(angularSpeed() > 0.0f && "Direction of zero-vector is undefined");
 		return Aegix::MathLib::normalize(m_angularVelocity);
@@ -104,8 +104,8 @@ namespace Aegix::Physics
 		m_angularVelocity *= std::min(1.0f, m_properties.maxAngularSpeed / angularSpeed());
 
 		// Reset accumulated forces
-		m_accumulatedLinearForce = Vector3{ 0.0f };
-		m_accumulatedAngularForce = Vector3{ 0.0f };
+		m_accumulatedLinearForce = glm::vec3{ 0.0f };
+		m_accumulatedAngularForce = glm::vec3{ 0.0f };
 	}
 
 	void MotionDynamics::addFriction(float deltaSeconds)

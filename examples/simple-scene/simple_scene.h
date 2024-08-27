@@ -15,7 +15,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<Aegix::Component::Transform>().rotation += Vector3{ 0.0f, 1.0f, 0.0f } *deltaSeconds;
+		getComponent<Aegix::Component::Transform>().rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } *deltaSeconds;
 	}
 };
 
@@ -59,7 +59,7 @@ public:
 			});
 
 		auto teapot = createEntity("Teapot");
-		teapot.getComponent<Aegix::Component::Transform>().scale = Vector3{ 2.0f, 2.0f, 2.0f };
+		teapot.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 		teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
 		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		teapot.addComponent<Rotator>();

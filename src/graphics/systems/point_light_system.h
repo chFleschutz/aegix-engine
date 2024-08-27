@@ -11,8 +11,8 @@ namespace Aegix::Graphics
 	public:
 		struct PointLightPushConstants // max 128 bytes
 		{
-			Vector4 position{};
-			Vector4 color{};
+			glm::vec4 position{};
+			glm::vec4 color{};
 			float radius;
 		};
 

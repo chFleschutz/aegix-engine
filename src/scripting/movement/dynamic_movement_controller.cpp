@@ -21,7 +21,7 @@ namespace Aegix::Scripting
 		auto angularSpeed = dynamics.angularSpeed();
 
 		// Directional forces
-		Vector3 move{ 0.0f };
+		glm::vec3 move{ 0.0f };
 		if (forwardPressed)
 			move += transform.forward() * m_linearforce;
 		if (backwardPressed)
@@ -30,7 +30,7 @@ namespace Aegix::Scripting
 			move = -dynamics.moveDirection() * m_linearforce * speed;
 
 		// Angular forces
-		Vector3 rotation{ 0.0f };
+		glm::vec3 rotation{ 0.0f };
 		if (leftPressed)
 			rotation += transform.up() * m_angularforce;
 		if (rightPressed)

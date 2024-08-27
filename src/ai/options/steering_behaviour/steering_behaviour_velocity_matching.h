@@ -21,7 +21,7 @@ namespace Aegix::AI
 
 			auto& thisTransform = m_aiComponent->getComponent<Aegix::Component::Transform>();
 
-			Vector3 averageVelocity{ 0.0f };
+			glm::vec3 averageVelocity{ 0.0f };
 			for (const auto& entity : m_group.entities)
 			{
 				if (entity == m_aiComponent->entity())

@@ -25,14 +25,14 @@ public:
 			// Floor
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Color::gray());
-			plane.getComponent<Aegix::Component::Transform>().scale = Vector3{ worldSize / 10.0f };
+			plane.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ worldSize / 10.0f };
 			
 			// Player
 			auto player = createEntity("Player");
 			player.addComponent<Aegix::Component::Mesh>(arrowModel, Color::blue());
 			player.addComponent<Aegix::Physics::MotionDynamics>();
 			player.addComponent<Aegix::Scripting::DynamicMovementController>();
-			player.addComponent<Aegix::Scripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+			player.addComponent<Aegix::Scripting::WorldBorder>(glm::vec3{ worldSize / 2.0f });
 
 			auto blackboardEntity = createEntity("Blackboard");
 			auto& blackboard = blackboardEntity.addComponent<Aegix::AI::Blackboard>();
@@ -42,12 +42,12 @@ public:
 			std::vector<Aegix::Scene::Entity> npcs;
 			for (int i = 0; i < npcCount; i++)
 			{
-				Vector3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
+				glm::vec3 randomLocation = { Random::uniformFloat(-10.0f, 10.0f), 0.0f, Random::uniformFloat(-10.0f, 10.0f) };
 				auto npc = createEntity("NPC " + std::to_string(i), randomLocation);
 				npc.addComponent<Aegix::Component::Mesh>(arrowModel, Color::red());
 				npc.addComponent<Aegix::Physics::MotionDynamics>();
 				npc.addComponent<Aegix::AI::TestAIComponent>(blackboard);
-				npc.addComponent<Aegix::Scripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+				npc.addComponent<Aegix::Scripting::WorldBorder>(glm::vec3{ worldSize / 2.0f });
 				npcs.emplace_back(npc);
 			}
 

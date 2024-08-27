@@ -25,7 +25,7 @@ public:
 			// Floor
 			auto plane = createEntity("Plane");
 			plane.addComponent<Aegix::Component::Mesh>(planeModel, Color::blue());
-			plane.getComponent<Aegix::Component::Transform>().scale = Vector3{ worldSize / 10.0f };
+			plane.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ worldSize / 10.0f };
 
 			// Food
 			int foodCount = 10;
@@ -53,7 +53,7 @@ public:
 				npc.addComponent<Aegix::Component::Mesh>(arrowModel, Color::red());
 				npc.addComponent<Aegix::Physics::MotionDynamics>();
 				npc.addComponent<SwarmAIComponent>(blackboard);
-				npc.addComponent<Aegix::Scripting::WorldBorder>(Vector3{ worldSize / 2.0f });
+				npc.addComponent<Aegix::Scripting::WorldBorder>(glm::vec3{ worldSize / 2.0f });
 				npcs.emplace_back(npc);
 			}
 

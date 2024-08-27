@@ -274,8 +274,8 @@ namespace Aegix::Graphics
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = Vector4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = Vector4(pointLight.color, pointLight.intensity);
+			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
 			lighIndex++;
 		}
 		ubo.numLights = lighIndex;

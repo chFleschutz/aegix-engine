@@ -18,7 +18,7 @@ namespace Aegix::AI
 
 			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
 
-			Vector3 centerOfMass{ 0.0f };
+			glm::vec3 centerOfMass{ 0.0f };
 			int relevantEntities = 0;
 			for (const auto& entity : m_group.entities)
 			{

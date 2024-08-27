@@ -6,13 +6,13 @@ namespace Aegix::Graphics
 {
 	struct DirectionalLight
 	{
-		Vector4 direction{};	// w is ignored
-		Vector4 color{};		// w is intensity
+		glm::vec4 direction{};	// w is ignored
+		glm::vec4 color{};		// w is intensity
 	};
 
 	struct PointLight
 	{
-		Vector4 position{}; // w is ignored
-		Vector4 color{};	// w is intensity
+		glm::vec4 position{}; // w is ignored
+		glm::vec4 color{};	// w is intensity
 	};
 }

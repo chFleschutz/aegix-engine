@@ -25,7 +25,7 @@ namespace Aegix::Scene
 		return { group.front(), this };
 	}
 
-	Entity Scene::createEntity(const std::string& name, const Vector3& location)
+	Entity Scene::createEntity(const std::string& name, const glm::vec3& location)
 	{
 		Entity entity = { m_registry.create(), this };
 		entity.addComponent<Component::Transform>(location);

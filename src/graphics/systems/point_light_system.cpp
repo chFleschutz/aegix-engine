@@ -44,8 +44,8 @@ namespace Aegix::Graphics
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{};
-			push.position = Vector4(transform.location, 1.0f);
-			push.color = Vector4(pointLight.color, 1.0f);
+			push.position = glm::vec4(transform.location, 1.0f);
+			push.color = glm::vec4(pointLight.color, 1.0f);
 			push.radius = pointLight.intensity * pointLightScale;
 
 			vkCmdPushConstants(

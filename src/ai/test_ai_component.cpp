@@ -113,10 +113,10 @@ namespace Aegix::AI
         m_optionManager.cancelActive();
 
         PathKnowledge path{};
-        path.path.emplace_back(Vector3{ 10.0f, 0.0f, 10.0f });
-        path.path.emplace_back(Vector3{ -10.0f, 0.0f, 10.0f });
-        path.path.emplace_back(Vector3{ -10.0f, 0.0f, -10.0f });
-        path.path.emplace_back(Vector3{ 10.0f, 0.0f, -10.0f });
+        path.path.emplace_back(glm::vec3{ 10.0f, 0.0f, 10.0f });
+        path.path.emplace_back(glm::vec3{ -10.0f, 0.0f, 10.0f });
+        path.path.emplace_back(glm::vec3{ -10.0f, 0.0f, -10.0f });
+        path.path.emplace_back(glm::vec3{ 10.0f, 0.0f, -10.0f });
         m_optionManager.emplacePrioritized<SteeringBehaviourGrapplingHooks>(this, path);
 
         std::cout << getComponent<Aegix::Component::Name>().name << ": Flollow path" << std::endl;

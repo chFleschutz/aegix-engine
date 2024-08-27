@@ -41,7 +41,7 @@ namespace Aegix
 
 		/// @brief Retrieves the mouse cursor position
 		/// @return Returns a vec2 with the cursor position
-		Vector2 cursorPosition();
+		glm::vec2 cursorPosition();
 
 		/// @brief Sets the input mode
 		/// @param mode The mode to change

@@ -29,10 +29,10 @@ namespace Aegix::AI
 
 	struct PositionKnowledge : public Knowledge
 	{
-		Vector3 position;
+		glm::vec3 position;
 
 		PositionKnowledge() = default;
-		explicit PositionKnowledge(Vector3 position) : position(position) {}
+		explicit PositionKnowledge(glm::vec3 position) : position(position) {}
 	};
 
 	struct EntityKnowledge : public Knowledge
@@ -52,9 +52,9 @@ namespace Aegix::AI
 
 	struct PathKnowledge : public Knowledge
 	{
-		std::vector<Vector3> path;
+		std::vector<glm::vec3> path;
 
 		PathKnowledge() = default;
-		explicit PathKnowledge(std::vector<Vector3> path) : path(path) {}
+		explicit PathKnowledge(std::vector<glm::vec3> path) : path(path) {}
 	};
 }

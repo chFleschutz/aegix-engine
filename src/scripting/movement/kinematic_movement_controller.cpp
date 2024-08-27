@@ -21,7 +21,7 @@ namespace Aegix::Scripting
 		auto& transform = getComponent<Aegix::Component::Transform>();
 
 		// Key input rotation
-		Vector3 rotate{0.0f};
+		glm::vec3 rotate{0.0f};
 		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.y += 1.0f;
 		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.y -= 1.0f;
 		if (Input::instance().keyPressed(m_keys.lookUp)) rotate.x += 1.0f;
@@ -59,13 +59,13 @@ namespace Aegix::Scripting
 		float yaw = transform.rotation.y;
 		float pitch = transform.rotation.x;
 
-		const Vector3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
-		const Vector3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
-		const Vector3 upDir{0.0f, -1.0f, 0.0f};
+		const glm::vec3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
+		const glm::vec3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
+		const glm::vec3 upDir{0.0f, -1.0f, 0.0f};
 		// Todo: update all directions properly according to the rotation 
 		// maybe use rotation matrix see: https://en.wikipedia.org/wiki/Rotation_matrix
 
-		Vector3 moveDir{0.0f};
+		glm::vec3 moveDir{0.0f};
 		if (Input::instance().keyPressed(m_keys.moveForward)) moveDir += forwardDir;
 		if (Input::instance().keyPressed(m_keys.moveBackward)) moveDir -= forwardDir;
 		if (Input::instance().keyPressed(m_keys.moveRight)) moveDir += rightDir;

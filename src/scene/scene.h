@@ -52,7 +52,7 @@ namespace Aegix::Scene
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note The entity can be passed by value since its just an id
-		Entity createEntity(const std::string& name = std::string(), const Vector3& location = { 0.0f, 0.0f, 0.0f });
+		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
 
 		/// @brief Removes the entity from the registry
 		void destroyEntity(Entity entity);

@@ -50,7 +50,7 @@ namespace Aegix::Scripting
 		float m_moveSpeed{ 5.0f };
 		float m_lookSpeed{ 1.5f };
 		float m_mouseSensitivity{ 0.4f };
-		Vector2 m_previousCursorPos{0.0f};
+		glm::vec2 m_previousCursorPos{0.0f};
 
 		bool m_mouseRotateEnabled{ false };
 		bool m_mousePanEnabled{ false };

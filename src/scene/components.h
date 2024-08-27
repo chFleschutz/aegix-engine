@@ -24,18 +24,18 @@ namespace Aegix::Component
 	/// @brief Stores the transformation of the entity
 	struct Transform
 	{
-		Vector3 location = { 0.0f, 0.0f, 0.0f };
-		Vector3 rotation = { 0.0f, 0.0f, 0.0f };
-		Vector3 scale = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
 		Transform() = default;
 		Transform(const Transform&) = default;
-		Transform(const Vector3& entityLocation)
+		Transform(const glm::vec3& entityLocation)
 			: location(entityLocation) {}
 
-		Vector3 forward() const { return Aegix::MathLib::forward(rotation); }
-		Vector3 right() const { return Aegix::MathLib::right(rotation);  }
-		Vector3 up() const { return Aegix::MathLib::up(rotation); }
+		glm::vec3 forward() const { return Aegix::MathLib::forward(rotation); }
+		glm::vec3 right() const { return Aegix::MathLib::right(rotation);  }
+		glm::vec3 up() const { return Aegix::MathLib::up(rotation); }
 	};
 
 	/// @brief Holds a pointer to a static mesh
@@ -47,7 +47,7 @@ namespace Aegix::Component
 	/// @brief Creates a light 
 	struct PointLight
 	{
-		Vector3 color = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
 		float intensity = 100.0f;
 	};
 

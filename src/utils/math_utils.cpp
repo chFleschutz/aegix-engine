@@ -5,17 +5,17 @@
 #include <iostream>
 
 // Overload the << operator for Vectors to make printing them easier
-std::ostream& operator<<(std::ostream& os, const Vector2& vec)
+std::ostream& operator<<(std::ostream& os, const glm::vec2& vec)
 {
 	return os << "{ " << vec.x << ", " << vec.y << " }";;
 }
 
-std::ostream& operator<<(std::ostream& os, const Vector3& vec)
+std::ostream& operator<<(std::ostream& os, const glm::vec3& vec)
 {
 	return os << "{ " << vec.x << ", " << vec.y << ", " << vec.z << " }";;
 }
 
-std::ostream& operator<<(std::ostream& os, const Vector4& vec)
+std::ostream& operator<<(std::ostream& os, const glm::vec4& vec)
 {
 	return os << "{ " << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << " }";;
 }
@@ -44,7 +44,7 @@ namespace Aegix
 		return std::tanh(6.0f * x - 3.0f) / 2.0f + 0.5f;
 	}
 
-	Matrix4 MathLib::tranformationMatrix(const Vector3& location, const Vector3& rotation, const Vector3& scale)
+	glm::mat4 MathLib::tranformationMatrix(const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -52,7 +52,7 @@ namespace Aegix
 		const float s2 = glm::sin(rotation.x);
 		const float c1 = glm::cos(rotation.y);
 		const float s1 = glm::sin(rotation.y);
-		return Matrix4{
+		return glm::mat4{
 			{
 				scale.x * (c1 * c3 + s1 * s2 * s3),
 				scale.x * (c2 * s3),
@@ -76,7 +76,7 @@ namespace Aegix
 			} };
 	}
 
-	Matrix3 MathLib::normalMatrix(const Vector3& rotation, const Vector3& scale)
+	glm::mat3 MathLib::normalMatrix(const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		const float c3 = glm::cos(rotation.z);
 		const float s3 = glm::sin(rotation.z);
@@ -84,9 +84,9 @@ namespace Aegix
 		const float s2 = glm::sin(rotation.x);
 		const float c1 = glm::cos(rotation.y);
 		const float s1 = glm::sin(rotation.y);
-		const Vector3 invScale = 1.0f / scale;
+		const glm::vec3 invScale = 1.0f / scale;
 
-		return Matrix3{
+		return glm::mat3{
 			{
 				invScale.x * (c1 * c3 + s1 * s2 * s3),
 				invScale.x * (c2 * s3),
@@ -104,7 +104,7 @@ namespace Aegix
 			} };
 	}
 
-	Vector3 MathLib::forward(const Vector3& rotation)
+	glm::vec3 MathLib::forward(const glm::vec3& rotation)
 	{
 		const float sx = glm::sin(rotation.x);
 		const float cx = glm::cos(rotation.x);
@@ -116,7 +116,7 @@ namespace Aegix
 		return { cx * cz * sy + sx * sz, -cz * sx + cx * sy * sz, cx * cy };
 	}
 
-	Vector3 MathLib::right(const Vector3& rotation)
+	glm::vec3 MathLib::right(const glm::vec3& rotation)
 	{
 		const float sy = glm::sin(rotation.y);
 		const float cy = glm::cos(rotation.y);
@@ -126,7 +126,7 @@ namespace Aegix
 		return { cy * cz, cy * sz, -sy };
 	}
 
-	Vector3 MathLib::up(const Vector3& rotation)
+	glm::vec3 MathLib::up(const glm::vec3& rotation)
 	{
 		const float sx = glm::sin(rotation.x);
 		const float cx = glm::cos(rotation.x);
@@ -138,13 +138,13 @@ namespace Aegix
 		return { -cz * sx * sy + cx * sz, -cx * cz - sx * sy * sz, -cy * sx };
 	}
 
-	Vector3 MathLib::normalize(const Vector3& vec)
+	glm::vec3 MathLib::normalize(const glm::vec3& vec)
 	{
 		assert(vec.length() > 0.0f && "Can't normalize vector of length 0");
 		return glm::normalize(vec);
 	}
 
-	bool MathLib::inFOV(const Vector3& viewDirection, const Vector3& targetDirection, float fov)
+	bool MathLib::inFOV(const glm::vec3& viewDirection, const glm::vec3& targetDirection, float fov)
 	{
 		return glm::angle(viewDirection, targetDirection) < 0.5f * fov;
 	}

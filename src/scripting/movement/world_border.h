@@ -14,7 +14,7 @@ namespace Aegix::Scripting
 	public:
 		/// @brief Constructs a WorldBorder.
 		/// @param limits Positive values for the limits.
-		WorldBorder(const Vector3& limits = Vector3{ FLT_MAX })
+		WorldBorder(const glm::vec3& limits = glm::vec3{ FLT_MAX })
 			: m_limits(limits) {}
 		~WorldBorder() = default;
 
@@ -27,6 +27,6 @@ namespace Aegix::Scripting
 		}
 
 	private:
-		Vector3 m_limits;
+		glm::vec3 m_limits;
 	};
 }
