@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/camera.h"
 #include "graphics/lights.h"
 #include "scene/components.h"
 #include "scene/scene.h"

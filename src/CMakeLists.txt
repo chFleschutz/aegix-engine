@@ -8,7 +8,6 @@ target_sources(AegixEngine PRIVATE
 	"core/systems/camera_system.cpp" 
 	"core/systems/system_manager.cpp"
 	"graphics/buffer.cpp"
-	"graphics/camera.cpp"
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/gui.cpp"
