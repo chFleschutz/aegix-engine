@@ -24,6 +24,7 @@ target_sources(AegixEngine PRIVATE
 	"scene/entity.cpp"
 	"scene/scene.cpp"
 	"scripting/script_manager.cpp"
+	"scripting/movement/camera_controller.cpp"
 	"scripting/movement/dynamic_movement_controller.cpp"
 	"scripting/movement/kinematic_movement_controller.cpp"
 	"utils/color.cpp"
