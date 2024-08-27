@@ -30,8 +30,8 @@ public:
 		auto& assetManager = Aegix::AssetManager::instance();
 
 		// MODELS
-		auto teapotModel = assetManager.createModel("models/teapot.obj");
-		auto planeModel = assetManager.createModel("models/plane.obj");
+		auto teapotMesh = assetManager.createModel("models/teapot.obj");
+		auto planeMesh = assetManager.createModel("models/plane.obj");
 		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
 
 		// MATERIALS
@@ -55,18 +55,18 @@ public:
 
 		// ENTITIES
 		auto plane = createEntity("Plane");
-		plane.addComponent<Aegix::Component::Mesh>(planeModel);
+		plane.addComponent<Aegix::Component::Mesh>(planeMesh);
 		plane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
 		auto& planeTransform = plane.getComponent<Aegix::Component::Transform>();
 		planeTransform.location = { 0.0f, 5.0f, 5.0f };
-		
+		planeTransform.rotation = { glm::radians(90.0f), 0.0f, 0.0f };
+
 		auto floorPlane = createEntity("Floor Plane");
-		floorPlane.addComponent<Aegix::Component::Mesh>(planeModel);
+		floorPlane.addComponent<Aegix::Component::Mesh>(planeMesh);
 		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
-		floorPlane.getComponent<Aegix::Component::Transform>().rotation = { glm::radians(-90.0f), 0.0f, 0.0f };
 
 		auto teapot = createEntity("Teapot");
-		teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
+		teapot.addComponent<Aegix::Component::Mesh>(teapotMesh);
 		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		teapot.addComponent<Rotator>();
 		auto& teapotTransform = teapot.getComponent<Aegix::Component::Transform>();
