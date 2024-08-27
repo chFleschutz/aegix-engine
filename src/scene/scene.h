@@ -21,6 +21,7 @@ namespace Aegix::Scene
 	{
 	public:
 		Scene();
+		virtual ~Scene() = default;
 
 		/// @brief Abstract method for creating the scene in a subclass
 		virtual void initialize() = 0;

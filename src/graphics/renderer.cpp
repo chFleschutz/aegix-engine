@@ -50,15 +50,14 @@ namespace Aegix::Graphics
 
 	void Renderer::renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene)
 	{
-		// TODO: Move this to a script
-		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
-		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
+		auto& camera = scene.camera().getComponent<Component::Camera>();
+		camera.aspect = m_swapChain->extentAspectRatio();
 
 		FrameInfo frameInfo{
 			m_currentFrameIndex,
 			commandBuffer,
-			&camera,
 			m_globalDescriptorSets[m_currentFrameIndex],
+			camera,
 			&scene
 		};
 
@@ -266,9 +265,9 @@ namespace Aegix::Graphics
 	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
 	{
 		GlobalUbo ubo{};
-		ubo.projection = frameInfo.camera->projectionMatrix();
-		ubo.view = frameInfo.camera->viewMatrix();
-		ubo.inverseView = frameInfo.camera->inverseViewMatrix();
+		ubo.projection = frameInfo.camera.projectionMatrix;
+		ubo.view = frameInfo.camera.viewMatrix;
+		ubo.inverseView = frameInfo.camera.inverseViewMatrix;
 
 		int lighIndex = 0;
 		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();

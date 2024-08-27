@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/camera.h"
 #include "graphics/static_mesh.h"
 #include "utils/color.h"
 #include "utils/math_utils.h"
@@ -54,6 +53,13 @@ namespace Aegix::Component
 	/// @brief Holds a camera to view the scene
 	struct Camera
 	{
-		Graphics::Camera camera{};
+		float fov = glm::radians(45.0f);
+		float aspect = 1.0f;
+		float near = 0.1f;
+		float far = 100.0f;
+
+		glm::mat4 viewMatrix = glm::mat4{ 1.0f };
+		glm::mat4 inverseViewMatrix = glm::mat4{ 1.0f };
+		glm::mat4 projectionMatrix = glm::mat4{ 1.0f };
 	};
 }

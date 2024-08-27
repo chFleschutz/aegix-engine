@@ -22,8 +22,8 @@ namespace Aegix::Scripting
 
 		// Key input rotation
 		glm::vec3 rotate{0.0f};
-		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.y += 1.0f;
-		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.y -= 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.z -= 1.0f;
+		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.z += 1.0f;
 		if (Input::instance().keyPressed(m_keys.lookUp)) rotate.x += 1.0f;
 		if (Input::instance().keyPressed(m_keys.lookDown)) rotate.x -= 1.0f;
 
@@ -38,7 +38,7 @@ namespace Aegix::Scripting
 		{
 			auto cursorPos = Input::instance().cursorPosition();
 			rotate.x -= cursorPos.y - m_previousCursorPos.y;
-			rotate.y += cursorPos.x - m_previousCursorPos.x;
+			rotate.z -= cursorPos.x - m_previousCursorPos.x;
 			m_previousCursorPos = cursorPos;
 
 			if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
@@ -48,23 +48,17 @@ namespace Aegix::Scripting
 		}
 
 		transform.rotation.x = glm::clamp(transform.rotation.x, -1.5f, 1.5f);
-		transform.rotation.y = glm::mod(transform.rotation.y, glm::two_pi<float>());
+		transform.rotation.z = glm::mod(transform.rotation.z, glm::two_pi<float>());
 	}
 
 	void KinematcMovementController::applyMovement(float deltaSeconds)
 	{
 		auto& transform = getComponent<Aegix::Component::Transform>();
+		auto forwardDir = transform.forward();
+		auto rightDir = transform.right();
+		auto upDir = MathLib::UP;
 
 		// Key input movement
-		float yaw = transform.rotation.y;
-		float pitch = transform.rotation.x;
-
-		const glm::vec3 forwardDir{sin(yaw), 0.0f, cos(yaw)};
-		const glm::vec3 rightDir{forwardDir.z, 0.0f, -forwardDir.x};
-		const glm::vec3 upDir{0.0f, -1.0f, 0.0f};
-		// Todo: update all directions properly according to the rotation 
-		// maybe use rotation matrix see: https://en.wikipedia.org/wiki/Rotation_matrix
-
 		glm::vec3 moveDir{0.0f};
 		if (Input::instance().keyPressed(m_keys.moveForward)) moveDir += forwardDir;
 		if (Input::instance().keyPressed(m_keys.moveBackward)) moveDir -= forwardDir;

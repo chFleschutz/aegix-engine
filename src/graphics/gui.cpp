@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 		init_info.Instance = device.instance();
 		init_info.PhysicalDevice = device.physicalDevice();
 		init_info.Device = device.device();
-		init_info.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily;
+		init_info.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
 		init_info.Queue = device.graphicsQueue();
 		init_info.PipelineCache = nullptr;
 		init_info.DescriptorPool = renderer.globalPool().descriptorPool();

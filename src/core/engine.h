@@ -1,12 +1,13 @@
 #pragma once
 
 #include "core/asset_manager.h"
+#include "core/input.h"
+#include "core/systems/system_manager.h"
 #include "graphics/device.h"
 #include "graphics/gui.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
-#include "core/input.h"
 
 #include <memory>
 #include <type_traits>
@@ -36,6 +37,7 @@ namespace Aegix
 		Graphics::Renderer& renderer() { return m_renderer; }
 		Graphics::GUI& gui() { return m_gui; }
 		AssetManager& assetManager() { return m_assetManager; }
+		SystemManager& systemManager() { return m_systems; }
 		Scene::Scene& scene() { assert(m_scene);  return *m_scene; }
 
 		void run();
@@ -61,6 +63,7 @@ namespace Aegix
 		Graphics::GUI m_gui{ m_window, m_renderer };
 		Input m_input{ m_window };
 		AssetManager m_assetManager{ m_renderer };
+		SystemManager m_systems;
 
 		std::unique_ptr<Scene::Scene> m_scene;
 	};

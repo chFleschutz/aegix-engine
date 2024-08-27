@@ -2,6 +2,7 @@
 
 #include "core/input.h"
 #include "graphics/layers/main_menu_layer.h"
+#include "core/systems/camera_system.h"
 
 #include <chrono>
 #include <iostream>
@@ -29,6 +30,7 @@ namespace Aegix
 			"\n\n";
 
 		m_gui.pushLayer<Graphics::MainMenuLayer>();
+		m_systems.add<CameraSystem>();
 	}
 
 	Engine::~Engine()
@@ -62,6 +64,7 @@ namespace Aegix
 
 			// Update 
 			m_scene->update(frameTimeSec);
+			m_systems.update(frameTimeSec, *m_scene);
 			m_gui.update(frameTimeSec);
 
 			// Rendering
