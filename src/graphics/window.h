@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	private:
-		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+		static void framebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height);
 
 		void initWindow();
 

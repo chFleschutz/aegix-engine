@@ -3,6 +3,7 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scripting/movement/kinematic_movement_controller.h"
+#include "scripting/movement/camera_controller.h"
 
 #include <cassert>
 
@@ -12,6 +13,7 @@ namespace Aegix::Scene
 	{
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<Component::Camera>();
+		camera.addComponent<Aegix::Scripting::CameraController>();
 		camera.addComponent<Aegix::Scripting::KinematcMovementController>();
 		auto& cameraTransform = camera.getComponent<Component::Transform>();
 		cameraTransform.location = { 0.0f, -10.0f, -7.0f };

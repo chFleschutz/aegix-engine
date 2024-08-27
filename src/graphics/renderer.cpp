@@ -8,6 +8,9 @@
 #include <cassert>
 #include <stdexcept>
 
+//temp
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Window& window, VulkanDevice& device) 
@@ -49,9 +52,7 @@ namespace Aegix::Graphics
 	{
 		// TODO: Move this to a script
 		auto& camera = scene.camera().getComponent<Component::Camera>().camera;
-		auto& cameraTransform = scene.camera().getComponent<Component::Transform>();
 		camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio(), 0.1f, 100.0f);
-		camera.setViewYXZ(cameraTransform.location, cameraTransform.rotation);
 
 		FrameInfo frameInfo{
 			m_currentFrameIndex,

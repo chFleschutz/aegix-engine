@@ -21,12 +21,12 @@ namespace Aegix::Graphics
 			throw std::runtime_error("failed to create window surface");
 	}
 
-	void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+	void Window::framebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height)
 	{
-		auto vreWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-		vreWindow->m_frameBufferResized = true;
-		vreWindow->m_width = width;
-		vreWindow->m_height = height;
+		auto window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+		window->m_frameBufferResized = true;
+		window->m_width = width;
+		window->m_height = height;
 	}
 
 	void Window::initWindow()
