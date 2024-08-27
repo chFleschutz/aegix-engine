@@ -51,7 +51,7 @@ namespace Aegix::Graphics
 	void Renderer::renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene)
 	{
 		auto& camera = scene.camera().getComponent<Component::Camera>();
-		camera.aspectRatio = m_swapChain->extentAspectRatio();
+		camera.aspect = m_swapChain->extentAspectRatio();
 
 		FrameInfo frameInfo{
 			m_currentFrameIndex,

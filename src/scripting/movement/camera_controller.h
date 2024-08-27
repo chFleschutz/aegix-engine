@@ -63,8 +63,18 @@ namespace Aegix::Scripting
 
 		void calcProjectionMatrix(Component::Camera& camera)
 		{
-			camera.projectionMatrix = glm::perspective(glm::radians(camera.fov), camera.aspectRatio, camera.near, camera.far);
-			camera.projectionMatrix[1][1] *= -1; // Correct for Vulkan's inverted Y coordinates
+			assert(abs(camera.aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
+
+			// Projection matrix for right handed system with depth range [0, 1]
+			// Note: Value [1][1] is negated because Vulkan uses a flipped y-axis
+			const float tanHalfFovy = tan(camera.fov / 2.0f);
+			glm::mat4 projectionMat{ 0.0f };
+			projectionMat[0][0] = 1.0f / (camera.aspect * tanHalfFovy);
+			projectionMat[1][1] = -1.0f / (tanHalfFovy);	
+			projectionMat[2][2] = camera.far / (camera.near - camera.far);
+			projectionMat[2][3] = -1.0f;
+			projectionMat[3][2] = -(camera.far * camera.near) / (camera.far - camera.near);
+			camera.projectionMatrix = projectionMat;
 		}
 	};
 }
