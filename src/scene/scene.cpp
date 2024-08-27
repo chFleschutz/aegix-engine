@@ -3,7 +3,6 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scripting/movement/kinematic_movement_controller.h"
-#include "scripting/movement/camera_controller.h"
 
 #include <cassert>
 
