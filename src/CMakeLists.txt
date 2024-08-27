@@ -5,6 +5,7 @@ target_sources(AegixEngine PRIVATE
 	"core/asset_manager.cpp"
 	"core/engine.cpp"
 	"core/input.cpp"
+	"core/systems/camera_system.cpp" 
 	"core/systems/system_manager.cpp"
 	"graphics/buffer.cpp"
 	"graphics/camera.cpp"
