@@ -62,6 +62,7 @@ namespace Aegix
 
 			// Update 
 			m_scene->update(frameTimeSec);
+			m_systems.update(frameTimeSec, *m_scene);
 			m_gui.update(frameTimeSec);
 
 			// Rendering
