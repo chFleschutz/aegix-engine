@@ -15,7 +15,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<Aegix::Component::Transform>().rotation += glm::vec3{ 0.0f, 1.0f, 0.0f } *deltaSeconds;
+		getComponent<Aegix::Component::Transform>().rotation += glm::vec3{ 0.0f, 0.0f, 1.0f } * deltaSeconds;
 	}
 };
 
@@ -30,22 +30,11 @@ public:
 		auto& assetManager = Aegix::AssetManager::instance();
 
 		// MODELS
-
 		auto teapotModel = assetManager.createModel("models/teapot.obj");
 		auto planeModel = assetManager.createModel("models/plane.obj");
-
 		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
-		auto helmetTexture = assetManager.createTexture("damaged_helmet/Default_albedo.jpg");
-		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(helmetTexture);
-		helmetMat->setData({
-			.shininess = 32.0f
-			});
 
-		auto helmet = createEntity("Helmet");
-		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
-		helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
-		helmet.getComponent<Aegix::Component::Transform>().location = { 5.0f, 0.0f, 0.0f };
-
+		// MATERIALS
 		auto paintingTexture = assetManager.createTexture("textures/painting.png");
 		auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
 		paintingMat->setData({
@@ -58,12 +47,13 @@ public:
 			.shininess = 128.0f
 			});
 
-		auto teapot = createEntity("Teapot");
-		teapot.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
-		teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
-		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
-		teapot.addComponent<Rotator>();
+		auto helmetTexture = assetManager.createTexture("damaged_helmet/Default_albedo.jpg");
+		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(helmetTexture);
+		helmetMat->setData({
+			.shininess = 32.0f
+			});
 
+		// ENTITIES
 		auto plane = createEntity("Plane");
 		plane.addComponent<Aegix::Component::Mesh>(planeModel);
 		plane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
@@ -75,8 +65,21 @@ public:
 		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		floorPlane.getComponent<Aegix::Component::Transform>().rotation = { glm::radians(-90.0f), 0.0f, 0.0f };
 
-		// LIGHTS
+		auto teapot = createEntity("Teapot");
+		teapot.addComponent<Aegix::Component::Mesh>(teapotModel);
+		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
+		teapot.addComponent<Rotator>();
+		auto& teapotTransform = teapot.getComponent<Aegix::Component::Transform>();
+		teapotTransform.scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
+		auto helmet = createEntity("Helmet");
+		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
+		helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
+		auto& helmetTransform = helmet.getComponent<Aegix::Component::Transform>();
+		helmetTransform.location = { 0.0f, 0.0f, 5.0f };
+		helmetTransform.rotation = { glm::radians(180.0f), 0.0f, 0.0f };
+
+		// LIGHTS
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 5.0f });
