@@ -1,10 +1,13 @@
 # Aegix Engine
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Vulkan.svg" width="500"/>
+Aegix is a small game engine written in modern C++. It uses the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. 
 
-## Introduction <a name="introduction"></a>
+###
 
-Aegix is a simple rendering / game engine. It leverages the power of the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. Please note that this project is a work in progress.
+![aegix-helmet](https://github.com/user-attachments/assets/f77b25d8-bd15-49df-bc4f-47285141c251)
+
+![aegix-editor](https://github.com/user-attachments/assets/86b8bafd-462d-4a64-95da-b348e024ae0a)
+
 
 ## Prerequisites <a name="prerequisites"></a>
 
