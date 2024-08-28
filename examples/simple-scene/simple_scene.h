@@ -32,7 +32,7 @@ public:
 		// MODELS
 		auto teapotMesh = assetManager.createModel("models/teapot.obj");
 		auto planeMesh = assetManager.createModel("models/plane.obj");
-		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
+		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.glb");
 
 		// MATERIALS
 		auto paintingTexture = assetManager.createTexture("textures/painting.png");
