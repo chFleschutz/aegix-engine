@@ -14,7 +14,8 @@ namespace Aegix::Graphics
 	class UniformBuffer
 	{
 	public:
-		UniformBuffer(VulkanDevice& device)
+		UniformBuffer(VulkanDevice& device, const T& data = {})
+			: m_data{ data }
 		{
 			for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 			{
@@ -53,7 +54,7 @@ namespace Aegix::Graphics
 		}
 
 	private:
-		T m_data{};
+		T m_data;
 		std::array<std::unique_ptr<Buffer>, SwapChain::MAX_FRAMES_IN_FLIGHT> m_buffers;
 	};
 }
