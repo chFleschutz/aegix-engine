@@ -225,7 +225,8 @@ namespace Aegix::Graphics
 	{
 		for (auto& set : m_descriptorSets)
 		{
-			assert(pool.allocateDescriptorSet(setLayout.descriptorSetLayout(), set) && "Failed to allocate descriptor set");
+			auto result = pool.allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
+			assert(result && "Failed to allocate descriptor set");
 		}
 	}
 }
