@@ -28,6 +28,7 @@ layout(set = 0, binding = 0, std140) uniform Global
 layout(set = 1, binding = 0, std140) uniform Material 
 {
 	vec3 albedo;
+    vec3 emissiveFactor;
 	float metallic;
 	float roughness;
 	float ambientOcclusion;

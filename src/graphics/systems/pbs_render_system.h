@@ -15,10 +15,11 @@ namespace Aegix::Graphics
 
 		struct Data
 		{
-			glm::vec3 albedo{ 1.0f, 1.0f, 1.0f };
-			float metallic = 0.0f;
-			float roughness = 1.0f;
-			float ambientOcclusion = 0.0f;
+			alignas(16) glm::vec3 albedo{ 1.0f, 1.0f, 1.0f };
+			alignas(16) glm::vec3 emissive{ 1.0f, 1.0f, 1.0f };
+			alignas(4) float metallic = 0.0f;
+			alignas(4) float roughness = 1.0f;
+			alignas(4) float ambientOcclusion = 0.0f;
 		};
 
 		std::shared_ptr<PBSMaterialInstance> instance;
@@ -29,7 +30,7 @@ namespace Aegix::Graphics
 	public:
 		PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool, 
 			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
-			std::shared_ptr<Texture> ao, PBSMaterial::Data data = {});
+			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data = {});
 
 	private:
 		UniformBuffer<PBSMaterial::Data> m_uniformBuffer;
@@ -37,6 +38,7 @@ namespace Aegix::Graphics
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_metalRoughnessTexture;
 		std::shared_ptr<Texture> m_aoTexture;
+		std::shared_ptr<Texture> m_emissiveTexture;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend PBSRenderSystem;

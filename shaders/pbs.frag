@@ -25,6 +25,7 @@ layout(set = 0, binding = 0) uniform Global
 layout(set = 1, binding = 0, std140) uniform Material 
 {
 	vec3 albedo;
+    vec3 emissiveFactor;
 	float metallic;
 	float roughness;
 	float ambientOcclusion;
@@ -34,6 +35,7 @@ layout(set = 1, binding = 1) uniform sampler2D albedoMap;
 layout(set = 1, binding = 2) uniform sampler2D normalMap;
 layout(set = 1, binding = 3) uniform sampler2D metalRoughnessMap;
 layout(set = 1, binding = 4) uniform sampler2D ambientOcclusionMap;
+layout(set = 1, binding = 5) uniform sampler2D emissiveMap;
 
 layout(push_constant) uniform Push 
 {
@@ -57,6 +59,7 @@ void main()
     float metallic = texture(metalRoughnessMap, inUV).b;
     float roughness = texture(metalRoughnessMap, inUV).g;
     float ambientOcclusion = texture(ambientOcclusionMap, inUV).r;
+    vec3 emissive = texture(emissiveMap, inUV).rgb;
 
     vec3 cameraPosition = vec3(global.inverseView[3]);
     mat3 tbn = calcTBN();
@@ -96,6 +99,9 @@ void main()
 
     // Ambient light
     Lo += vec3(0.03) * albedo * ambientOcclusion;
+
+    // Emissive
+    Lo += emissive * material.emissiveFactor;
 
     outColor = vec4(Lo, 1.0);
 }
