@@ -33,4 +33,10 @@ namespace Aegix
 	{
 		return std::make_shared<Graphics::Texture>(m_renderer.device(), ASSETS_DIR / texturePath, config);
 	}
+
+	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const glm::vec4& color, size_t width, size_t height, const Graphics::Texture::Config& config)
+	{
+		return std::make_shared<Graphics::Texture>(m_renderer.device(), color, width, height, config);
+	}
+
 }

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "graphics/buffer.h"
 #include "graphics/device.h"
+#include "utils/math_utils.h"
 
 #include <vulkan/vulkan.h>
 
@@ -20,6 +22,7 @@ namespace Aegix::Graphics
 		};
 
 		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config);
+		Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config);
 		~Texture();
 
 		Texture(const Texture&) = delete;
@@ -29,6 +32,7 @@ namespace Aegix::Graphics
 
 	private:
 		void loadTexture(const std::filesystem::path& filePath);
+		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);
 		void createImageView();
 		void createTextureSampler(VkSamplerAddressMode addressMode, VkFilter magFilter, VkFilter minFilter);
 

@@ -1,7 +1,5 @@
 #include "texture.h"
 
-#include "graphics/buffer.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -13,6 +11,24 @@ namespace Aegix::Graphics
 		: m_device{ device }, m_format{ config.format }
 	{
 		loadTexture(texturePath);
+		createImageView();
+		createTextureSampler(config.addressMode, config.magFilter, config.minFilter);
+	}
+
+	Texture::Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config)
+		: m_device{ device }, m_format{ config.format }
+	{
+		auto pixelCount = width * height;
+		Buffer stagingBuffer{ m_device, sizeof(color), pixelCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
+		
+		std::vector<glm::vec4> pixels(pixelCount, color);
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(pixels.data());
+		stagingBuffer.unmap();
+
+		createImage(width, height, stagingBuffer);
+
 		createImageView();
 		createTextureSampler(config.addressMode, config.magFilter, config.minFilter);
 	}
@@ -52,11 +68,16 @@ namespace Aegix::Graphics
 
 		stbi_image_free(pixels);
 
+		createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), stagingBuffer);
+	}
+
+	void Texture::createImage(uint32_t width, uint32_t height, const Buffer& buffer)
+	{
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = static_cast<uint32_t>(texWidth);
-		imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;
@@ -70,10 +91,10 @@ namespace Aegix::Graphics
 
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_textureImage, m_textureImageMemory);
 
-		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_UNDEFINED, 
+		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		m_device.copyBufferToImage(stagingBuffer.buffer(), m_textureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
-		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+		m_device.copyBufferToImage(buffer.buffer(), m_textureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
+		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
