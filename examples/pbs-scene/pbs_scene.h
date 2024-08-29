@@ -19,10 +19,11 @@ public:
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		// MODELS
-		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
+		auto damagedHelmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
+		auto scifiHelmetMesh = assetManager.createModel("scifi_helmet/ScifiHelmet.gltf");
 
 		// MATERIALS
-		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>(
+		auto damagedHelmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>(
 			assetManager.createTexture("damaged_helmet/Default_albedo.jpg", { .format = VK_FORMAT_R8G8B8A8_SRGB }),
 			assetManager.createTexture("damaged_helmet/Default_normal.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
 			assetManager.createTexture("damaged_helmet/Default_metalRoughness.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
@@ -30,18 +31,30 @@ public:
 			assetManager.createTexture("damaged_helmet/Default_emissive.jpg", { .format = VK_FORMAT_R8G8B8A8_SRGB })
 		);
 
+		auto scifiHelmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>(
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_BaseColor.png", { .format = VK_FORMAT_R8G8B8A8_SRGB }),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_Normal.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_MetallicRoughness.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_AmbientOcclusion.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture(glm::vec4{0.0f}, 1, 1, {.format = VK_FORMAT_R8G8B8A8_UNORM})
+		);
+
 		// ENTITIES
-		auto helmet = createEntity("Helmet");
-		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
-		helmet.addComponent<Aegix::Graphics::PBSMaterial>(helmetMat);
-		auto& helmetTransform = helmet.getComponent<Aegix::Component::Transform>();
-		helmetTransform.rotation = { glm::radians(180.0f), 0.0f, 0.0f };
+		auto damagedHelmet = createEntity("Damaged Helmet", { -2.0f, 0.0f, 2.0f });
+		damagedHelmet.addComponent<Aegix::Component::Mesh>(damagedHelmetMesh);
+		damagedHelmet.addComponent<Aegix::Graphics::PBSMaterial>(damagedHelmetMat);
+		damagedHelmet.getComponent<Aegix::Component::Transform>().rotation = { glm::radians(180.0f), 0.0f, 0.0f };
+
+		auto scifiHelmet = createEntity("SciFi Helmet", { 2.0f, 0.0f, 2.0f });
+		scifiHelmet.addComponent<Aegix::Component::Mesh>(scifiHelmetMesh);
+		scifiHelmet.addComponent<Aegix::Graphics::PBSMaterial>(scifiHelmetMat);
+		scifiHelmet.getComponent<Aegix::Component::Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
 
 		// LIGHTS
 		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 5.0f });
-		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 100.0f);
+		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 200.0f);
 
 		auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
-		light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::green(), 100.0f);
+		light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::white(), 200.0f);
 	}
 };
