@@ -25,7 +25,7 @@ layout(set = 0, binding = 0) uniform Global
 layout(set = 1, binding = 0, std140) uniform Material 
 {
 	vec3 albedo;
-    vec3 emissiveFactor;
+    vec3 emissive;
 	float metallic;
 	float roughness;
 	float ambientOcclusion;
@@ -54,12 +54,12 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {
-    vec3 albedo = texture(albedoMap, inUV).rgb;
+    vec3 albedo = texture(albedoMap, inUV).rgb * material.albedo;
     vec3 normal = texture(normalMap, inUV).rgb * 2.0 - 1.0; 
-    float metallic = texture(metalRoughnessMap, inUV).b;
-    float roughness = texture(metalRoughnessMap, inUV).g;
-    float ambientOcclusion = texture(ambientOcclusionMap, inUV).r;
-    vec3 emissive = texture(emissiveMap, inUV).rgb;
+    vec3 emissive = texture(emissiveMap, inUV).rgb * material.emissive;
+    float metallic = texture(metalRoughnessMap, inUV).b * material.metallic;
+    float roughness = texture(metalRoughnessMap, inUV).g * material.roughness;
+    float ambientOcclusion = texture(ambientOcclusionMap, inUV).r * material.ambientOcclusion;
 
     vec3 cameraPosition = vec3(global.inverseView[3]);
     mat3 tbn = calcTBN();
@@ -101,7 +101,7 @@ void main()
     Lo += vec3(0.03) * albedo * ambientOcclusion;
 
     // Emissive
-    Lo += emissive * material.emissiveFactor;
+    Lo += emissive * material.emissive;
 
     outColor = vec4(Lo, 1.0);
 }

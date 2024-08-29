@@ -17,9 +17,9 @@ namespace Aegix::Graphics
 		{
 			alignas(16) glm::vec3 albedo{ 1.0f, 1.0f, 1.0f };
 			alignas(16) glm::vec3 emissive{ 1.0f, 1.0f, 1.0f };
-			alignas(4) float metallic = 0.0f;
+			alignas(4) float metallic = 1.0f;
 			alignas(4) float roughness = 1.0f;
-			alignas(4) float ambientOcclusion = 0.0f;
+			alignas(4) float ambientOcclusion = 1.0f;
 		};
 
 		std::shared_ptr<PBSMaterialInstance> instance;
