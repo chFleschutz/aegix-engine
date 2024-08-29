@@ -47,6 +47,7 @@ add_subdirectory("src")
 
 if(BUILD_EXAMPLES)
     add_subdirectory("examples/simple-scene")
+    add_subdirectory("examples/pbs-scene")
 endif()
 
 
