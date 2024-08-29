@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/asset_manager.h"
-#include "graphics/systems/default_render_system.h"
+#include "graphics/systems/pbs_render_system.h"
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
@@ -21,16 +21,12 @@ public:
 		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.glb");
 
 		// MATERIALS
-		auto helmetTexture = assetManager.createTexture("damaged_helmet/Default_albedo.jpg");
-		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(helmetTexture);
-		helmetMat->setData({
-			.shininess = 32.0f
-			});
+		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>();
 
 		// ENTITIES
 		auto helmet = createEntity("Helmet");
 		helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
-		helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
+		helmet.addComponent<Aegix::Graphics::PBSMaterial>(helmetMat);
 		auto& helmetTransform = helmet.getComponent<Aegix::Component::Transform>();
 		helmetTransform.rotation = { glm::radians(180.0f), 0.0f, 0.0f };
 

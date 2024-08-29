@@ -15,10 +15,10 @@ namespace Aegix::Graphics
 
 		struct Data
 		{
-			glm::vec4 albedo;
-			float metallic;
-			float roughness;
-			float ambientOcclusion;
+			glm::vec3 albedo{ 1.0f, 1.0f, 1.0f };
+			float metallic = 0.0f;
+			float roughness = 1.0f;
+			float ambientOcclusion = 0.0f;
 		};
 
 		std::shared_ptr<PBSMaterialInstance> instance;

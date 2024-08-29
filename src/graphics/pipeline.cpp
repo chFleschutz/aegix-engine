@@ -98,6 +98,7 @@ namespace Aegix::Graphics
 	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
 	{
 		auto shaderCode = File::readBinary(shaderPath);
+		assert(!shaderCode.empty() && "Shader code is empty");
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
