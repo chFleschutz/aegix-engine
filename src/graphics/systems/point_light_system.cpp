@@ -6,7 +6,7 @@
 namespace Aegix::Graphics
 {
 	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: RenderSystem(device)
+		: RenderSystem(device, renderPass, globalSetLayout)
 	{
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)
@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 
 	void PointLightSystem::render(const FrameInfo& frameInfo)
 	{
-		const float pointLightScale = 0.01f;
+		constexpr float pointLightScale = 0.005f;
 
 		m_pipeline->bind(frameInfo.commandBuffer);
 
@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 			PointLightPushConstants push{};
 			push.position = glm::vec4(transform.location, 1.0f);
 			push.color = glm::vec4(pointLight.color, 1.0f);
-			push.radius = pointLight.intensity * pointLightScale;
+			push.radius = pointLight.intensity * pointLightScale * transform.scale.x;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,

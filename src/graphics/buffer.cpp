@@ -86,7 +86,7 @@ namespace Aegix::Graphics
 		return vkInvalidateMappedMemoryRanges(m_device.device(), 1, &mappedRange);
 	}
 
-	VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset)
+	VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) const
 	{
 		return VkDescriptorBufferInfo{ m_buffer, offset, size };
 	}

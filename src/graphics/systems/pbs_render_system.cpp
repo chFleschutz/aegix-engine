@@ -1,32 +1,33 @@
-#include "default_render_system.h"
-
-#include "scene/components.h"
+#include "pbs_render_system.h"
 
 namespace Aegix::Graphics
 {
-	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-		std::shared_ptr<Texture> texture) 
-		: m_uniformBuffer{ device }, m_texture{ texture }
+	PBSMaterialInstance::PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
+		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
+		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data)
+		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
+		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer {	device, data }
 	{
-		assert(m_texture != nullptr && "Texture is null");
-
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
-			.addTexture(1, *m_texture)
+			.addTexture(1, m_albedoTexture)
+			.addTexture(2, m_normalTexture)
+			.addTexture(3, m_metalRoughnessTexture)
+			.addTexture(4, m_aoTexture)
+			.addTexture(5, m_emissiveTexture)
 			.build();
 	}
 
-	void DefaultMaterialInstance::setData(const DefaultMaterial::Data& data)
-	{
-		m_uniformBuffer.setData(data);
-	}
-
-	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+	PBSRenderSystem::PBSRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device, renderPass, globalSetLayout)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
@@ -38,12 +39,12 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::Builder(m_device)
 			.setRenderPass(renderPass)
 			.setPipelineLayout(m_pipelineLayout->pipelineLayout())
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default.frag.spv")
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "pbs.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbs.frag.spv")
 			.build();
 	}
 
-	void DefaultRenderSystem::render(const FrameInfo& frameInfo)
+	void PBSRenderSystem::render(const FrameInfo& frameInfo)
 	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
@@ -57,13 +58,13 @@ namespace Aegix::Graphics
 			0, nullptr
 		);
 
-		DefaultMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
+		PBSMaterialInstance* lastMaterial = nullptr;
+		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, PBSMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)
 				continue;
-			
+
 			// Material Descriptor Set
 			if (lastMaterial != material.instance.get())
 			{

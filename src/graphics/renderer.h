@@ -75,9 +75,9 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		std::unique_ptr<DescriptorPool> m_globalPool;
-		std::vector<std::unique_ptr<Buffer>> m_globalUniformBuffers;
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
-		std::vector<VkDescriptorSet> m_globalDescriptorSets;
+		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
+		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
 
 		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
 	};

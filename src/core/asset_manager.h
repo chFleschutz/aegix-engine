@@ -32,6 +32,8 @@ namespace Aegix
 		/// @return Texture with the data from the file
 		std::shared_ptr<Graphics::Texture> createTexture(const std::filesystem::path& texturePath, const Graphics::Texture::Config& config = {});
 
+		std::shared_ptr<Graphics::Texture> createTexture(const glm::vec4& color, size_t width = 1, size_t height = 1, const Graphics::Texture::Config& config = {});
+
 		/// @brief Adds a render system to the renderer and returns a reference to it
 		/// @tparam T Type of the render system to add
 		/// @note If a render system of type T already exists, it will be returned instead
