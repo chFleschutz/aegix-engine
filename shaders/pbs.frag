@@ -43,6 +43,7 @@ layout(push_constant) uniform Push
 
 const float PI = 3.14159265359;
 
+mat3 calcTBN();
 float lightAttenuation(vec3 lightPos, vec3 fragPos);
 float NormalDistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
@@ -51,16 +52,16 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {
-    vec3 cameraPosition = vec3(global.inverseView[3]);
-    vec3 N = normalize(inWorldNormal);
-    vec3 V = normalize(cameraPosition - inWorldPos);
-
-    // Read textures
     vec3 albedo = texture(albedoMap, inUV).rgb;
-//    vec3 normal = texture(normalMap, inUV).rgb; // TODO: Implement normal mapping
+    vec3 normal = texture(normalMap, inUV).rgb * 2.0 - 1.0; 
     float metallic = texture(metalRoughnessMap, inUV).b;
     float roughness = texture(metalRoughnessMap, inUV).g;
     float ambientOcclusion = texture(ambientOcclusionMap, inUV).r;
+
+    vec3 cameraPosition = vec3(global.inverseView[3]);
+    mat3 tbn = calcTBN();
+    vec3 N = normalize(tbn * normal);
+    vec3 V = normalize(cameraPosition - inWorldPos);
 
     // Tint reflection for metals
     vec3 F0 = vec3(0.04); // default for dielectric materials
@@ -97,6 +98,20 @@ void main()
     Lo += vec3(0.03) * albedo * ambientOcclusion;
 
     outColor = vec4(Lo, 1.0);
+}
+
+mat3 calcTBN()
+{
+    vec3 Q1 = dFdx(inWorldPos);
+    vec3 Q2 = dFdy(inWorldPos);
+    vec2 st1 = dFdx(inUV);
+    vec2 st2 = dFdy(inUV);
+
+    vec3 N = normalize(inWorldNormal);
+    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+    vec3 B = -normalize(cross(N, T));
+
+    return mat3(T, B, N);
 }
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos)
