@@ -254,9 +254,8 @@ namespace Aegix::Graphics
 				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 			m_globalUniformBuffers[i]->map();
 
-			auto bufferInfo = m_globalUniformBuffers[i]->descriptorInfo();
 			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
-				.writeBuffer(0, &bufferInfo)
+				.writeBuffer(0, m_globalUniformBuffers[i]->descriptorInfo())
 				.build(m_globalDescriptorSets[i]);
 		}
 	}

@@ -12,11 +12,9 @@ namespace Aegix::Graphics
 
 		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			auto bufferInfo = m_uniformBuffer.descriptorInfo(i);
-			auto imageInfo = m_texture->descriptorImageInfo();
 			DescriptorWriter(setLayout, pool)
-				.writeBuffer(0, &bufferInfo)
-				.writeImage(1, &imageInfo)
+				.writeBuffer(0, m_uniformBuffer.descriptorInfo(i))
+				.writeImage(1, m_texture->descriptorImageInfo())
 				.build(m_descriptorSets[i]);
 		}
 	}

@@ -132,38 +132,40 @@ namespace Aegix::Graphics
     {
     }
 
-    DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
+    DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo)
     {
-        assert(m_setLayout.m_bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
 
         auto& bindingDescription = m_setLayout.m_bindings[binding];
-
         assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
+
+		m_bufferInfos.emplace_back(bufferInfo);
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
         write.dstBinding = binding;
-        write.pBufferInfo = bufferInfo;
+        write.pBufferInfo = &m_bufferInfos.back();
         write.descriptorCount = 1;
 
         m_writes.push_back(write);
         return *this;
     }
 
-    DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
+    DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const VkDescriptorImageInfo& imageInfo)
     {
-        assert(m_setLayout.m_bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
 
         auto& bindingDescription = m_setLayout.m_bindings[binding];
-
         assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
+
+		m_imageInfos.emplace_back(imageInfo);
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
         write.dstBinding = binding;
-        write.pImageInfo = imageInfo;
+        write.pImageInfo = &m_imageInfos.back();
         write.descriptorCount = 1;
 
         m_writes.push_back(write);

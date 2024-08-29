@@ -90,15 +90,18 @@ namespace Aegix::Graphics
     public:
         DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
 
-        DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-        DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
-
+        DescriptorWriter& writeBuffer(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo);
+        DescriptorWriter& writeImage(uint32_t binding, const VkDescriptorImageInfo& imageInfo);
+        
         bool build(VkDescriptorSet& set);
         void overwrite(VkDescriptorSet& set);
 
     private:
         DescriptorSetLayout& m_setLayout;
         DescriptorPool& m_pool;
+
+        std::vector<VkDescriptorBufferInfo> m_bufferInfos;
+		std::vector<VkDescriptorImageInfo> m_imageInfos;
         std::vector<VkWriteDescriptorSet> m_writes;
     };
 }
