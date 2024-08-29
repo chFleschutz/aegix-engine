@@ -20,6 +20,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/systems/default_render_system.cpp"
 	"graphics/systems/point_light_system.cpp"
+	"graphics/systems/pbs_render_system.cpp"
 	"graphics/systems/render_system.cpp"
 	"physics/motion_dynamics.cpp"
 	"scene/entity.cpp"
