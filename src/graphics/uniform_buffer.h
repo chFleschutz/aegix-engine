@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 		}
 
 		/// @brief Returns the descriptor info for the buffer
-		VkDescriptorBufferInfo descriptorInfo(int index) const { return m_buffers[index]->descriptorInfo(); }
+		VkDescriptorBufferInfo descriptorBufferInfo(int index) const { return m_buffers[index]->descriptorInfo(); }
 
 		/// @brief Returns the data in the buffer
 		const T& data() const { return m_data; }

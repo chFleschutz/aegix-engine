@@ -27,11 +27,16 @@ namespace Aegix::Graphics
 	class PBSMaterialInstance
 	{
 	public:
-		PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-			PBSMaterial::Data data = {});
+		PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool, 
+			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
+			std::shared_ptr<Texture> ao, PBSMaterial::Data data = {});
 
 	private:
 		UniformBuffer<PBSMaterial::Data> m_uniformBuffer;
+		std::shared_ptr<Texture> m_albedoTexture;
+		std::shared_ptr<Texture> m_normalTexture;
+		std::shared_ptr<Texture> m_metalRoughnessTexture;
+		std::shared_ptr<Texture> m_aoTexture;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend PBSRenderSystem;

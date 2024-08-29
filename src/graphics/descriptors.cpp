@@ -132,43 +132,39 @@ namespace Aegix::Graphics
 	{
 	}
 
-	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo)
+	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
 	{
 		assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
 
 		auto& bindingDescription = m_setLayout.m_bindings[binding];
 		assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
 
-		m_bufferInfos.emplace_back(bufferInfo);
-
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.descriptorType = bindingDescription.descriptorType;
 		write.dstBinding = binding;
-		write.pBufferInfo = &m_bufferInfos.back();
+		write.pBufferInfo = bufferInfo;
 		write.descriptorCount = 1;
 
-		m_writes.push_back(write);
+		m_writes.emplace_back(write);
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const VkDescriptorImageInfo& imageInfo)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
 	{
 		assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
 
 		auto& bindingDescription = m_setLayout.m_bindings[binding];
 		assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
 
-		m_imageInfos.emplace_back(imageInfo);
-
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.descriptorType = bindingDescription.descriptorType;
 		write.dstBinding = binding;
-		write.pImageInfo = &m_imageInfos.back();
+		write.pImageInfo = imageInfo;
 		write.descriptorCount = 1;
 
-		m_writes.push_back(write);
+		m_writes.emplace_back(write);
 		return *this;
 	}
 
@@ -185,26 +181,41 @@ namespace Aegix::Graphics
 	DescriptorSet::Builder::Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout)
 		: m_device{ device }, m_pool{ pool }, m_setLayout{ setLayout }
 	{
-		m_writer.resize(SwapChain::MAX_FRAMES_IN_FLIGHT, DescriptorWriter(setLayout, pool));
 	}
 
 	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
 	{
-		for (auto& writer : m_writer)
+		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 		{
-			writer.writeImage(binding, texture.descriptorImageInfo());
+			m_descriptorInfos[i].imageInfos.emplace_back(binding, texture.descriptorImageInfo());
 		}
-
 		return *this;
+	}
+
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture)
+	{
+		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
+		return addTexture(binding, *texture);
 	}
 
 	std::unique_ptr<DescriptorSet> DescriptorSet::Builder::build()
 	{
 		auto set = std::make_unique<DescriptorSet>(m_pool, m_setLayout);
 
-		for (size_t i = 0; i < m_writer.size(); i++)
+		for (size_t i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			m_writer[i].build(set->descriptorSet(i));
+			DescriptorWriter writer{ m_setLayout, m_pool };
+			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].bufferInfos)
+			{
+				writer.writeBuffer(binding, &bufferInfo);
+			}
+
+			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].imageInfos)
+			{
+				writer.writeImage(binding, &bufferInfo);
+			}
+
+			writer.build(set->m_descriptorSets[i]);
 		}
 
 		return set;

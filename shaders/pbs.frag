@@ -30,6 +30,11 @@ layout(set = 1, binding = 0, std140) uniform Material
 	float ambientOcclusion;
 } material;
 
+layout(set = 1, binding = 1) uniform sampler2D albedoMap;
+layout(set = 1, binding = 2) uniform sampler2D normalMap;
+layout(set = 1, binding = 3) uniform sampler2D metalRoughnessMap;
+layout(set = 1, binding = 4) uniform sampler2D ambientOcclusionMap;
+
 layout(push_constant) uniform Push 
 {
     mat4 modelMatrix; 

@@ -92,18 +92,16 @@ namespace Aegix::Graphics
 	{
 	public:
 		DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
+		~DescriptorWriter() = default;
 
-		DescriptorWriter& writeBuffer(uint32_t binding, const VkDescriptorBufferInfo& bufferInfo);
-		DescriptorWriter& writeImage(uint32_t binding, const VkDescriptorImageInfo& imageInfo);
+		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
 
 		void build(VkDescriptorSet set);
 
 	private:
 		DescriptorSetLayout& m_setLayout;
 		DescriptorPool& m_pool;
-
-		std::vector<VkDescriptorBufferInfo> m_bufferInfos;
-		std::vector<VkDescriptorImageInfo> m_imageInfos;
 		std::vector<VkWriteDescriptorSet> m_writes;
 	};
 
@@ -115,27 +113,37 @@ namespace Aegix::Graphics
 		{
 		public:
 			Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout);
+			Builder(const Builder&) = delete;
+			~Builder() = default;
+
+			Builder& operator=(const Builder&) = delete;
 
 			template<typename T>
 			Builder& addBuffer(uint32_t binding, const UniformBuffer<T>& buffer)
 			{
-				for (size_t i = 0; i < m_writer.size(); i++)
+				for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 				{
-					m_writer[i].writeBuffer(binding, buffer.descriptorInfo(i));
+					m_descriptorInfos[i].bufferInfos.emplace_back(binding, buffer.descriptorBufferInfo(i));
 				}
 				return *this;
 			}
 
 			Builder& addTexture(uint32_t binding, const Texture& texture);
+			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture);
 
 			std::unique_ptr<DescriptorSet> build();
 
 		private:
+			struct DescriptorInfo
+			{
+				std::vector<std::pair<uint32_t, VkDescriptorBufferInfo>> bufferInfos;
+				std::vector<std::pair<uint32_t, VkDescriptorImageInfo>> imageInfos;
+			};
+
 			VulkanDevice& m_device;
 			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
-
-			std::vector<DescriptorWriter> m_writer;
+			std::array<DescriptorInfo, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
 		};
 
 		DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout);

@@ -2,11 +2,18 @@
 
 namespace Aegix::Graphics
 {
-	PBSMaterialInstance::PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool, PBSMaterial::Data data)
-		: m_uniformBuffer{ device, data }
+	PBSMaterialInstance::PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
+		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
+		std::shared_ptr<Texture> ao, PBSMaterial::Data data)
+		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
+		m_aoTexture{ ao }, m_uniformBuffer{ device, data }
 	{
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
+			.addTexture(1, m_albedoTexture)
+			.addTexture(2, m_normalTexture)
+			.addTexture(3, m_metalRoughnessTexture)
+			.addTexture(4, m_aoTexture)
 			.build();
 	}
 
@@ -15,6 +22,10 @@ namespace Aegix::Graphics
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		m_pipelineLayout = PipelineLayout::Builder(m_device)

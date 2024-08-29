@@ -16,6 +16,7 @@ namespace Aegix::Graphics
 			VkFilter magFilter = VK_FILTER_LINEAR;
 			VkFilter minFilter = VK_FILTER_LINEAR;
 			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
 		};
 
 		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config);
@@ -33,6 +34,7 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 
+		VkFormat m_format;
 		VkImage m_textureImage;
 		VkDeviceMemory m_textureImageMemory;
 		VkImageView m_textureImageView;

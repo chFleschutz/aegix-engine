@@ -10,7 +10,7 @@
 namespace Aegix::Graphics
 {
 	Texture::Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config)
-		: m_device{ device }
+		: m_device{ device }, m_format{ config.format }
 	{
 		loadTexture(texturePath);
 		createImageView();
@@ -60,7 +60,7 @@ namespace Aegix::Graphics
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;
-		imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		imageInfo.format = m_format;
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -70,10 +70,10 @@ namespace Aegix::Graphics
 
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_textureImage, m_textureImageMemory);
 
-		m_device.transitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, 
+		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_UNDEFINED, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		m_device.copyBufferToImage(stagingBuffer.buffer(), m_textureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
-		m_device.transitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = m_textureImage;
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		viewInfo.format = m_format;
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = 1;

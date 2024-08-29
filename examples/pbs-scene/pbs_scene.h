@@ -19,10 +19,15 @@ public:
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		// MODELS
-		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.glb");
+		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
 
 		// MATERIALS
-		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>();
+		auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::PBSMaterial>(
+			assetManager.createTexture("damaged_helmet/Default_albedo.jpg", { .format = VK_FORMAT_R8G8B8A8_SRGB }),
+			assetManager.createTexture("damaged_helmet/Default_normal.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture("damaged_helmet/Default_metalRoughness.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture("damaged_helmet/Default_AO.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM })
+		);
 
 		// ENTITIES
 		auto helmet = createEntity("Helmet");
