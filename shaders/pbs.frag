@@ -62,9 +62,8 @@ void main()
     float ambientOcclusion = texture(ambientOcclusionMap, inUV).r * material.ambientOcclusion;
 
     vec3 cameraPosition = vec3(global.inverseView[3]);
-    mat3 tbn = calcTBN();
-    vec3 N = normalize(tbn * normal);
     vec3 V = normalize(cameraPosition - inWorldPos);
+    vec3 N = normalize(length(normal) < 0.1 ? inWorldNormal : calcTBN() * normal);
 
     // Tint reflection for metals
     vec3 F0 = vec3(0.04); // default for dielectric materials

@@ -22,7 +22,13 @@ namespace Aegix::Graphics
 		Buffer stagingBuffer{ m_device, sizeof(color), pixelCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		
-		std::vector<glm::vec4> pixels(pixelCount, color);
+		uint8_t r = static_cast<uint8_t>(color.r * 255);
+		uint8_t g = static_cast<uint8_t>(color.g * 255);
+		uint8_t b = static_cast<uint8_t>(color.b * 255);
+		uint8_t a = static_cast<uint8_t>(color.a * 255);
+		uint32_t colorInt = (a << 24) | (b << 16) | (g << 8) | r;
+
+		std::vector<uint32_t> pixels(pixelCount, colorInt);
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer(pixels.data());
 		stagingBuffer.unmap();
