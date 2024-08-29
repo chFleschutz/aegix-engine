@@ -32,11 +32,9 @@ namespace Aegix::Graphics
 			std::shared_ptr<Texture> texture);
 
 		void setData(const DefaultMaterial::Data& data);
-		DefaultMaterial::Data data() const { return m_data; }
+		const DefaultMaterial::Data& data() const { return m_uniformBuffer.data(); }
 
 	private:
-		DefaultMaterial::Data m_data;
-
 		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_texture;
 		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;

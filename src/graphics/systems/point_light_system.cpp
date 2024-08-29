@@ -6,7 +6,7 @@
 namespace Aegix::Graphics
 {
 	PointLightSystem::PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: RenderSystem(device)
+		: RenderSystem(device, renderPass, globalSetLayout)
 	{
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)

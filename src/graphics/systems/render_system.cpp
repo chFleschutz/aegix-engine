@@ -2,7 +2,7 @@
 
 namespace Aegix::Graphics
 {
-	Graphics::RenderSystem::RenderSystem(VulkanDevice& device)
+	Graphics::RenderSystem::RenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: m_device{ device } 
 	{
 	}

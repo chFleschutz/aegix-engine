@@ -5,8 +5,8 @@
 namespace Aegix::Graphics
 {
 	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-		std::shared_ptr<Texture> texture)
-		: m_uniformBuffer{ device, setLayout, pool }, m_texture{ texture }
+		std::shared_ptr<Texture> texture) 
+		: m_uniformBuffer{ device }, m_texture{ texture }
 	{
 		assert(m_texture != nullptr && "Texture is null");
 
@@ -23,12 +23,11 @@ namespace Aegix::Graphics
 
 	void DefaultMaterialInstance::setData(const DefaultMaterial::Data& data)
 	{
-		m_data = data;
 		m_uniformBuffer.setData(data);
 	}
 
 	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: RenderSystem(device)
+		: RenderSystem(device, renderPass, globalSetLayout)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
