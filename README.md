@@ -4,10 +4,9 @@ Aegix is a small game engine written in modern C++. It uses the Vulkan Graphics 
 
 ###
 
-![aegix-helmet](https://github.com/user-attachments/assets/f77b25d8-bd15-49df-bc4f-47285141c251)
+![aegix-pbs](https://github.com/user-attachments/assets/4072ddde-12f5-4e31-9715-ebb641b0be4f)
 
-![aegix-editor](https://github.com/user-attachments/assets/86b8bafd-462d-4a64-95da-b348e024ae0a)
-
+![aegix-editor](https://github.com/user-attachments/assets/0020011f-e0dc-4a6c-a0bf-33044d6ec5cf)
 
 ## Prerequisites <a name="prerequisites"></a>
 
