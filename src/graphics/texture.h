@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 		Texture(const Texture&) = delete;
 		Texture& operator=(const Texture&) = delete;
 
-		VkDescriptorImageInfo descriptorImageInfo();
+		VkDescriptorImageInfo descriptorImageInfo() const;
 
 	private:
 		void loadTexture(const std::filesystem::path& filePath);

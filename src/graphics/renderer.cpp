@@ -56,7 +56,7 @@ namespace Aegix::Graphics
 		FrameInfo frameInfo{
 			m_currentFrameIndex,
 			commandBuffer,
-			m_globalDescriptorSets[m_currentFrameIndex],
+			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
 			camera,
 			&scene
 		};
@@ -246,18 +246,11 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
-		m_globalUniformBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		m_globalDescriptorSets.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_globalUniformBuffers[i] = std::make_unique<Buffer>(m_device, sizeof(GlobalUbo), 1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-			m_globalUniformBuffers[i]->map();
+		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(m_device);
 
-			DescriptorWriter(*m_globalSetLayout, *m_globalPool)
-				.writeBuffer(0, m_globalUniformBuffers[i]->descriptorInfo())
-				.build(m_globalDescriptorSets[i]);
-		}
+		m_globalDescriptorSet = DescriptorSet::Builder(m_device, *m_globalPool, *m_globalSetLayout)
+			.addBuffer(0, *m_globalUBO)
+			.build();
 	}
 
 
@@ -279,7 +272,6 @@ namespace Aegix::Graphics
 		}
 		ubo.numLights = lighIndex;
 
-		m_globalUniformBuffers[m_currentFrameIndex]->writeToBuffer(&ubo);
-		m_globalUniformBuffers[m_currentFrameIndex]->flush();
+		m_globalUBO->setData(m_currentFrameIndex, ubo);
 	}
 }

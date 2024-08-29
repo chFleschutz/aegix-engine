@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 		/// @param size (Optional) Size of the memory range of the descriptor
 		/// @param offset (Optional) Byte offset from beginning
 		/// @return VkDescriptorBufferInfo of specified offset and range
-		VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+		VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
 
 		/// @brief Copies "instanceSize" bytes of data to the mapped buffer at an offset of index alignmentSize
 		/// @param data Pointer to the data to copy

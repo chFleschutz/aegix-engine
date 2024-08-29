@@ -2,6 +2,14 @@
 
 namespace Aegix::Graphics
 {
+	PBSMaterialInstance::PBSMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool, PBSMaterial::Data data)
+		: m_uniformBuffer{ device, data }
+	{
+		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
+			.addBuffer(1, m_uniformBuffer)
+			.build();
+	}
+
 	PBSRenderSystem::PBSRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device, renderPass, globalSetLayout)
 	{

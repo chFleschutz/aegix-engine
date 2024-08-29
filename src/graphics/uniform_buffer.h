@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 		}
 
 		/// @brief Returns the descriptor info for the buffer
-		VkDescriptorBufferInfo descriptorInfo(int index) { return m_buffers[index]->descriptorInfo(); }
+		VkDescriptorBufferInfo descriptorInfo(int index) const { return m_buffers[index]->descriptorInfo(); }
 
 		/// @brief Returns the data in the buffer
 		const T& data() const { return m_data; }
@@ -47,10 +47,11 @@ namespace Aegix::Graphics
 		/// @param data The new data
 		/// @param index The index of the currently active frame
 		/// @note This function can be savely called during rendering
-		void setData(const T& data, int index)
+		void setData(int index, const T& data)
 		{
 			m_data = data;
 			m_buffers[index]->writeToBuffer(&data);
+			m_buffers[index]->flush();
 		}
 
 	private:

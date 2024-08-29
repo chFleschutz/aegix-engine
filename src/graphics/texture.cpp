@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 		vkFreeMemory(m_device.device(), m_textureImageMemory, nullptr);
 	}
 
-	VkDescriptorImageInfo Texture::descriptorImageInfo()
+	VkDescriptorImageInfo Texture::descriptorImageInfo() const
 	{
 		VkDescriptorImageInfo info{};
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

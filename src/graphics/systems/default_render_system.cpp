@@ -10,13 +10,10 @@ namespace Aegix::Graphics
 	{
 		assert(m_texture != nullptr && "Texture is null");
 
-		for (int i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			DescriptorWriter(setLayout, pool)
-				.writeBuffer(0, m_uniformBuffer.descriptorInfo(i))
-				.writeImage(1, m_texture->descriptorImageInfo())
-				.build(m_descriptorSets[i]);
-		}
+		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
+			.addBuffer(0, m_uniformBuffer)
+			.addTexture(1, *m_texture)
+			.build();
 	}
 
 	void DefaultMaterialInstance::setData(const DefaultMaterial::Data& data)
@@ -71,12 +68,15 @@ namespace Aegix::Graphics
 			if (lastMaterial != material.instance.get())
 			{
 				lastMaterial = material.instance.get();
+				auto& descriptorSet = material.instance->m_descriptorSet;
+				assert(descriptorSet != nullptr && "Material descriptor set is null");
+
 				vkCmdBindDescriptorSets(
 					frameInfo.commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
 					m_pipelineLayout->pipelineLayout(),
 					1, 1,
-					&material.instance->m_descriptorSets[frameInfo.frameIndex],
+					&descriptorSet->descriptorSet(frameInfo.frameIndex),
 					0, nullptr
 				);
 			}

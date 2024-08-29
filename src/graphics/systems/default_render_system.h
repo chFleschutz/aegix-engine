@@ -37,7 +37,8 @@ namespace Aegix::Graphics
 	private:
 		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_texture;
-		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets;
+		
+		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend DefaultRenderSystem;
 	};
