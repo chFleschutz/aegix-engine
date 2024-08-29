@@ -55,9 +55,16 @@ void main()
     vec3 N = normalize(inWorldNormal);
     vec3 V = normalize(cameraPosition - inWorldPos);
 
+    // Read textures
+    vec3 albedo = texture(albedoMap, inUV).rgb;
+//    vec3 normal = texture(normalMap, inUV).rgb; // TODO: Implement normal mapping
+    float metallic = texture(metalRoughnessMap, inUV).b;
+    float roughness = texture(metalRoughnessMap, inUV).g;
+    float ambientOcclusion = texture(ambientOcclusionMap, inUV).r;
+
     // Tint reflection for metals
     vec3 F0 = vec3(0.04); // default for dielectric materials
-    F0 = mix(F0, material.albedo, material.metallic);
+    F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < global.numLights; i++)
@@ -71,11 +78,11 @@ void main()
         vec3 radiance = light.color.rgb * light.color.w * attenuation;
 
         // Cook-Torrance BRDF
-        float D = NormalDistributionGGX(N, H, material.roughness);
-        float G = GeometrySmith(N, V, L, material.roughness);
+        float D = NormalDistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
         vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
         vec3 kS = F;
-        vec3 kD = (1.0 - kS) * (1.0 - material.metallic);
+        vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
         vec3 DFG = D * G * F ;
         float NdotV = max(dot(N, V), 0.0);
@@ -83,11 +90,11 @@ void main()
         vec3 specular = DFG / (4.0 * NdotV * NdotL + 0.0001);
 
         // Add light contribution
-        Lo += (kD * material.albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
     // Ambient light
-    Lo += vec3(0.03) * material.albedo * material.ambientOcclusion;
+    Lo += vec3(0.03) * albedo * ambientOcclusion;
 
     outColor = vec4(Lo, 1.0);
 }
