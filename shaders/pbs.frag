@@ -38,8 +38,8 @@ layout(push_constant) uniform Push
 
 const float PI = 3.14159265359;
 
-float lightAttenuation(float d);
-float DistributionGGX(vec3 N, vec3 H, float roughness);
+float lightAttenuation(vec3 lightPos, vec3 fragPos);
+float NormalDistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
@@ -47,55 +47,53 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0);
 void main()
 {
     vec3 cameraPosition = vec3(global.inverseView[3]);
-
     vec3 N = normalize(inWorldNormal);
     vec3 V = normalize(cameraPosition - inWorldPos);
 
-    vec3 F0 = vec3(0.04);
+    // Tint reflection for metals
+    vec3 F0 = vec3(0.04); // default for dielectric materials
     F0 = mix(F0, material.albedo, material.metallic);
 
     vec3 Lo = vec3(0.0);
     for (int i = 0; i < global.numLights; i++)
     {
-        vec3 lightPosition = global.pointLights[i].position.xyz;
-        vec3 lightColor = global.pointLights[i].color.rgb;
-        float lightIntesity = global.pointLights[i].color.w;
-
-        vec3 L = normalize(lightPosition - inWorldPos);
+        PointLight light = global.pointLights[i];
+        vec3 L = normalize(light.position.xyz - inWorldPos);
         vec3 H = normalize(V + L);
 
-        float lightDistance = length(lightPosition - inWorldPos);
-        float attenuation = lightAttenuation(lightDistance);
-        vec3 radiance = lightColor * lightIntesity * attenuation;
+        // Light radiance
+        float attenuation = lightAttenuation(light.position.xyz, inWorldPos);
+        vec3 radiance = light.color.rgb * light.color.w * attenuation;
 
-        // BRDF
-        float NDF = DistributionGGX(N, H, material.roughness);
+        // Cook-Torrance BRDF
+        float D = NormalDistributionGGX(N, H, material.roughness);
         float G = GeometrySmith(N, V, L, material.roughness);
         vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
-
         vec3 kS = F;
         vec3 kD = (1.0 - kS) * (1.0 - material.metallic);
 
-        vec3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-        vec3 specular = numerator / denominator;
-
+        vec3 DFG = D * G * F ;
+        float NdotV = max(dot(N, V), 0.0);
         float NdotL = max(dot(N, L), 0.0);
+        vec3 specular = DFG / (4.0 * NdotV * NdotL + 0.0001);
+
+        // Add light contribution
         Lo += (kD * material.albedo / PI + specular) * radiance * NdotL;
     }
 
-    vec3 ambient = vec3(0.03) * material.albedo * material.ambientOcclusion;
-    vec3 color = ambient + Lo;
+    // Ambient light
+    Lo += vec3(0.03) * material.albedo * material.ambientOcclusion;
 
-    outColor = vec4(color, 1.0);
+    outColor = vec4(Lo, 1.0);
 }
 
-float lightAttenuation(float d)
+float lightAttenuation(vec3 lightPos, vec3 fragPos)
 {
+	float d = length(lightPos - fragPos);
     return 1.0 / (d * d);
 }
 
-float DistributionGGX(vec3 N, vec3 H, float roughness)
+float NormalDistributionGGX(vec3 N, vec3 H, float roughness)
 {
     float a = roughness * roughness;
     float a2 = a * a;

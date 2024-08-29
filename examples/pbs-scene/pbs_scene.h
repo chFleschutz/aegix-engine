@@ -16,6 +16,7 @@ public:
 	void initialize() override
 	{
 		auto& assetManager = Aegix::AssetManager::instance();
+		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		// MODELS
 		auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.glb");
@@ -31,8 +32,6 @@ public:
 		helmetTransform.rotation = { glm::radians(180.0f), 0.0f, 0.0f };
 
 		// LIGHTS
-		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
-
 		auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 5.0f });
 		light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 100.0f);
 
