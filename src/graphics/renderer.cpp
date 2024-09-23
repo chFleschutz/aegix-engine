@@ -80,6 +80,18 @@ namespace Aegix::Graphics
 		vkDeviceWaitIdle(m_device.device());
 	}
 
+	void Renderer::renderFrame(Scene::Scene& scene)
+	{
+		auto commandBuffer = beginFrame();
+
+		for (auto& renderpass : m_renderpasses)
+		{
+			renderpass.render(commandBuffer, scene);
+		}
+
+		endFrame();
+	}
+
 	void Renderer::createCommandBuffers()
 	{
 		m_commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);

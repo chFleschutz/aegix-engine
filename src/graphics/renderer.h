@@ -4,6 +4,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_info.h"
+#include "graphics/renderpass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/window.h"
@@ -51,6 +52,8 @@ namespace Aegix::Graphics
 
 		void shutdown();
 
+		void renderFrame(Scene::Scene& scene);
+
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
@@ -80,5 +83,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
 
 		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
+
+		std::vector<Renderpass> m_renderpasses;
 	};
 }
