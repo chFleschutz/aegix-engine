@@ -83,19 +83,24 @@ namespace Aegix::Graphics
 	void Renderer::renderFrame(Scene::Scene& scene)
 	{
 		auto commandBuffer = beginFrame();
+		beginSwapChainRenderPass(commandBuffer);
 
 		FrameInfo frameInfo{
-			.frameIndex = m_currentFrameIndex,
-			.commandBuffer = commandBuffer,
-			.scene = scene,
-			.aspectRatio = m_swapChain->extentAspectRatio(),
+			m_currentFrameIndex,
+			commandBuffer,
+			scene,
+			m_swapChain->extentAspectRatio(),
+			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex)
 		};
+
+		updateGlobalUBO(frameInfo);
 
 		for (auto& renderpass : m_renderpasses)
 		{
 			renderpass.render(frameInfo);
 		}
 
+		endSwapChainRenderPass(commandBuffer);
 		endFrame(commandBuffer);
 	}
 
