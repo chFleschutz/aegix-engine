@@ -13,7 +13,7 @@
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Window& window, VulkanDevice& device) 
+	Renderer::Renderer(Window& window, VulkanDevice& device)
 		: m_window{ window }, m_device{ device }
 	{
 		recreateSwapChain();
@@ -68,11 +68,11 @@ namespace Aegix::Graphics
 			system->render(frameInfo);
 		}
 	}
-	
+
 	void Renderer::endRenderFrame(VkCommandBuffer commandBuffer)
 	{
 		endSwapChainRenderPass(commandBuffer);
-		endFrame();
+		endFrame(commandBuffer);
 	}
 
 	void Graphics::Renderer::shutdown()
@@ -84,12 +84,19 @@ namespace Aegix::Graphics
 	{
 		auto commandBuffer = beginFrame();
 
+		NewFrameInfo frameInfo{
+			.frameIndex = m_currentFrameIndex,
+			.commandBuffer = commandBuffer,
+			.scene = scene,
+			.aspectRatio = m_swapChain->extentAspectRatio()
+		};
+
 		for (auto& renderpass : m_renderpasses)
 		{
-			renderpass.render(commandBuffer, scene);
+			renderpass.render(frameInfo);
 		}
 
-		endFrame();
+		endFrame(commandBuffer);
 	}
 
 	void Renderer::createCommandBuffers()
@@ -189,10 +196,10 @@ namespace Aegix::Graphics
 		return commandBuffer;
 	}
 
-	void Renderer::endFrame()
+	void Renderer::endFrame(VkCommandBuffer commandBuffer)
 	{
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
-		auto commandBuffer = currentCommandBuffer();
+
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("failed to record command buffer");
 

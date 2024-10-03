@@ -4,7 +4,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_info.h"
-#include "graphics/renderpass.h"
+#include "graphics/renderpasses/render_pass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/window.h"
@@ -61,7 +61,8 @@ namespace Aegix::Graphics
 		void initializeDescriptorPool();
 
 		VkCommandBuffer beginFrame();
-		void endFrame();
+		void endFrame(VkCommandBuffer commandBuffer);
+
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
@@ -84,6 +85,6 @@ namespace Aegix::Graphics
 
 		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
 
-		std::vector<Renderpass> m_renderpasses;
+		std::vector<RenderPass> m_renderpasses;
 	};
 }

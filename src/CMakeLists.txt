@@ -18,6 +18,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/texture.cpp"
 	"graphics/window.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
+	"graphics/renderpasses/lighting_pass.cpp"  
 	"graphics/systems/default_render_system.cpp"
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/pbs_render_system.cpp"
@@ -33,7 +34,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- "graphics/renderpass.h" "graphics/renderpass.cpp")
+)
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"

@@ -29,4 +29,13 @@ namespace Aegix::Graphics
 		Component::Camera& camera;
 		Scene::Scene* scene;
 	};
+
+	// TODO: Rename and remove other FrameInfo
+	struct NewFrameInfo
+	{
+		int frameIndex;
+		VkCommandBuffer commandBuffer;
+		Scene::Scene& scene;
+		float aspectRatio;
+	};
 }
