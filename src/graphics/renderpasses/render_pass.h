@@ -10,6 +10,6 @@ namespace Aegix::Graphics
 	public:
 		virtual ~RenderPass() = default;
 
-		virtual void render(const NewFrameInfo& frameInfo) = 0;
+		virtual void render(const FrameInfo& frameInfo) = 0;
 	};
 }

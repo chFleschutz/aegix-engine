@@ -5,12 +5,15 @@
 
 namespace Aegix::Graphics
 {
-	void LightingPass::render(const NewFrameInfo& frameInfo)
+	void LightingPass::render(const FrameInfo& frameInfo)
 	{
 		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
 		camera.aspect = frameInfo.aspectRatio;
 
 		updateGlobalUBO(frameInfo, camera);
+
+		// TODO: Remove this
+		const_cast<FrameInfo&>(frameInfo).globalDescriptorSet = m_globalDescriptorSet->descriptorSet(frameInfo.frameIndex);
 
 		//for (auto&& [_, system] : frameInfo.scene.activeRenderSystems)
 		//{
@@ -18,7 +21,7 @@ namespace Aegix::Graphics
 		//}
 	}
 
-	void LightingPass::updateGlobalUBO(const NewFrameInfo& frameInfo, const Component::Camera& camera)
+	void LightingPass::updateGlobalUBO(const FrameInfo& frameInfo, const Component::Camera& camera)
 	{
 		GlobalUbo ubo{};
 	

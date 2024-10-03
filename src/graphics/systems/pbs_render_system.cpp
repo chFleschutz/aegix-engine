@@ -59,7 +59,7 @@ namespace Aegix::Graphics
 		);
 
 		PBSMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, PBSMaterial>();
+		auto view = frameInfo.scene.viewEntities<Component::Transform, Component::Mesh, PBSMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)

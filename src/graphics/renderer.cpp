@@ -56,9 +56,9 @@ namespace Aegix::Graphics
 		FrameInfo frameInfo{
 			m_currentFrameIndex,
 			commandBuffer,
-			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
-			camera,
-			&scene
+			scene,
+			m_swapChain->extentAspectRatio(),
+			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex)
 		};
 
 		updateGlobalUBO(frameInfo);
@@ -84,11 +84,11 @@ namespace Aegix::Graphics
 	{
 		auto commandBuffer = beginFrame();
 
-		NewFrameInfo frameInfo{
+		FrameInfo frameInfo{
 			.frameIndex = m_currentFrameIndex,
 			.commandBuffer = commandBuffer,
 			.scene = scene,
-			.aspectRatio = m_swapChain->extentAspectRatio()
+			.aspectRatio = m_swapChain->extentAspectRatio(),
 		};
 
 		for (auto& renderpass : m_renderpasses)
@@ -275,13 +275,15 @@ namespace Aegix::Graphics
 
 	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
 	{
+		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
+
 		GlobalUbo ubo{};
-		ubo.projection = frameInfo.camera.projectionMatrix;
-		ubo.view = frameInfo.camera.viewMatrix;
-		ubo.inverseView = frameInfo.camera.inverseViewMatrix;
+		ubo.projection = camera.projectionMatrix;
+		ubo.view = camera.viewMatrix;
+		ubo.inverseView = camera.inverseViewMatrix;
 
 		int lighIndex = 0;
-		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");

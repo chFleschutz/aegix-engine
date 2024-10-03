@@ -39,7 +39,7 @@ namespace Aegix::Graphics
 			0, nullptr
 		);
 
-		auto view = frameInfo.scene->viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 		view.use<Aegix::Component::Transform>(); // Sort because of Transparency
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{

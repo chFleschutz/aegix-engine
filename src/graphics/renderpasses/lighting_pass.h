@@ -23,10 +23,10 @@ namespace Aegix::Graphics
 		LightingPass() = default;
 		~LightingPass() = default;
 
-		void render(const NewFrameInfo& frameInfo) override;
+		void render(const FrameInfo& frameInfo) override;
 
 	private:
-		void updateGlobalUBO(const NewFrameInfo& frameInfo, const Component::Camera& camera);
+		void updateGlobalUBO(const FrameInfo& frameInfo, const Component::Camera& camera);
 
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
 		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
