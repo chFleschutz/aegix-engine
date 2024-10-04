@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer commandBuffer;
 		Scene::Scene& scene;
 		float aspectRatio;
-		VkDescriptorSet globalDescriptorSet; // TODO: Remove
 		const RenderSystemCollection& renderSystemCollection;
+		VkDescriptorSet globalDescriptorSet;
 	};
 }

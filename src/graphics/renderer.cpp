@@ -17,9 +17,9 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		initializeDescriptorPool();
-		initializeGlobalUBO();
 
-		m_renderpasses.emplace_back(std::make_unique<LightingPass>());
+		auto lightingPass = std::make_unique<LightingPass>(m_device, *m_globalPool);
+		m_renderpasses.emplace_back(std::move(lightingPass));
 	}
 
 	Renderer::~Renderer()
@@ -51,11 +51,8 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
 			m_renderSystemCollection
 		};
-
-		updateGlobalUBO(frameInfo);
 
 		for (auto& renderpass : m_renderpasses)
 		{
@@ -226,42 +223,5 @@ namespace Aegix::Graphics
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
 
 		vkCmdEndRenderPass(commandBuffer);
-	}
-
-	void Renderer::initializeGlobalUBO()
-	{
-		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.build();
-
-		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(m_device);
-
-		m_globalDescriptorSet = DescriptorSet::Builder(m_device, *m_globalPool, *m_globalSetLayout)
-			.addBuffer(0, *m_globalUBO)
-			.build();
-	}
-
-
-	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
-	{
-		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
-
-		GlobalUbo ubo{};
-		ubo.projection = camera.projectionMatrix;
-		ubo.view = camera.viewMatrix;
-		ubo.inverseView = camera.inverseViewMatrix;
-
-		int lighIndex = 0;
-		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
-		for (auto&& [entity, transform, pointLight] : view.each())
-		{
-			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
-			lighIndex++;
-		}
-		ubo.numLights = lighIndex;
-
-		m_globalUBO->setData(m_currentFrameIndex, ubo);
 	}
 }

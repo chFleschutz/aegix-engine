@@ -11,6 +11,8 @@
 #include "graphics/window.h"
 #include "scene/scene.h"
 
+#include "graphics/renderpasses/lighting_pass.h"
+
 #include <memory>
 #include <type_traits>
 #include <typeindex>
@@ -31,7 +33,13 @@ namespace Aegix::Graphics
 		template<typename T>
 		RenderSystem& addRenderSystem()
 		{
-			return m_renderSystemCollection.addRenderSystem<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
+			// TODO:
+			// Add parameter for renderpass identifier
+			// Find renderpass by identifier
+			// Add render system to this renderpass
+			auto globalSetLayout = static_cast<LightingPass*>(m_renderpasses[0].get())->globalSetLayout();
+
+			return m_renderSystemCollection.addRenderSystem<T>(m_device, swapChainRenderPass(), globalSetLayout);
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -60,9 +68,6 @@ namespace Aegix::Graphics
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-		void initializeGlobalUBO();
-		void updateGlobalUBO(const FrameInfo& frameInfo);
-
 		Window& m_window;
 		VulkanDevice& m_device;
 		std::unique_ptr<SwapChain> m_swapChain;
@@ -73,9 +78,6 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		std::unique_ptr<DescriptorPool> m_globalPool;
-		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
-		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
-		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
 
 		RenderSystemCollection m_renderSystemCollection;
 
