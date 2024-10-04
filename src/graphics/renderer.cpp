@@ -9,9 +9,6 @@
 #include <cassert>
 #include <stdexcept>
 
-//temp
-#include <glm/gtc/matrix_transform.hpp>
-
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Window& window, VulkanDevice& device)
@@ -33,6 +30,8 @@ namespace Aegix::Graphics
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
 	{
 		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
+		assert(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE && "Command buffer not initialized");
+
 		return m_commandBuffers[m_currentFrameIndex];
 	}
 
@@ -40,48 +39,6 @@ namespace Aegix::Graphics
 	{
 		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
 		return m_currentFrameIndex;
-	}
-
-	VkCommandBuffer Renderer::beginRenderFrame()
-	{
-		auto commandBuffer = beginFrame();
-		assert(commandBuffer && "Failed to begin frame");
-
-		beginSwapChainRenderPass(commandBuffer);
-		return commandBuffer;
-	}
-
-	void Renderer::renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene)
-	{
-		auto& camera = scene.camera().getComponent<Component::Camera>();
-		camera.aspect = m_swapChain->extentAspectRatio();
-
-		FrameInfo frameInfo{
-			m_currentFrameIndex,
-			commandBuffer,
-			scene,
-			m_swapChain->extentAspectRatio(),
-			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
-			m_renderSystemCollection
-		};
-
-		updateGlobalUBO(frameInfo);
-
-		for (auto&& [_, system] : m_renderSystemCollection)
-		{
-			system->render(frameInfo);
-		}
-	}
-
-	void Renderer::endRenderFrame(VkCommandBuffer commandBuffer)
-	{
-		endSwapChainRenderPass(commandBuffer);
-		endFrame(commandBuffer);
-	}
-
-	void Graphics::Renderer::shutdown()
-	{
-		vkDeviceWaitIdle(m_device.device());
 	}
 
 	void Renderer::renderFrame(Scene::Scene& scene)
@@ -109,10 +66,13 @@ namespace Aegix::Graphics
 		endFrame(commandBuffer);
 	}
 
+	void Graphics::Renderer::waitIdle()
+	{
+		vkDeviceWaitIdle(m_device.device());
+	}
+
 	void Renderer::createCommandBuffers()
 	{
-		m_commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
-
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -120,7 +80,7 @@ namespace Aegix::Graphics
 		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
 
 		if (vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS)
-			throw std::runtime_error("failed to allocate command buffers");
+			throw std::runtime_error("Failed to allocate command buffers");
 	}
 
 	void Renderer::freeCommandBuffers()
@@ -129,9 +89,10 @@ namespace Aegix::Graphics
 			m_device.device(),
 			m_device.commandPool(),
 			static_cast<uint32_t>(m_commandBuffers.size()),
-			m_commandBuffers.data());
+			m_commandBuffers.data()
+		);
 
-		m_commandBuffers.clear();
+		std::fill(m_commandBuffers.begin(), m_commandBuffers.end(), VK_NULL_HANDLE);
 	}
 
 	void Renderer::recreateSwapChain()
@@ -155,8 +116,6 @@ namespace Aegix::Graphics
 			if (!oldSwapChain->compareSwapFormats(*m_swapChain.get()))
 				throw std::runtime_error("Swap chain image or depth format has changed");
 		}
-
-		// Todo
 	}
 
 	void Renderer::initializeDescriptorPool()
@@ -192,7 +151,7 @@ namespace Aegix::Graphics
 		}
 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-			throw std::runtime_error("failed to aquire swap chain image");
+			throw std::runtime_error("Failed to aquire swap chain image");
 
 		m_isFrameStarted = true;
 
@@ -201,7 +160,7 @@ namespace Aegix::Graphics
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-			throw std::runtime_error("failed to begin recording command buffer");
+			throw std::runtime_error("Failed to begin recording command buffer");
 
 		return commandBuffer;
 	}
@@ -211,7 +170,7 @@ namespace Aegix::Graphics
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-			throw std::runtime_error("failed to record command buffer");
+			throw std::runtime_error("Failed to record command buffer");
 
 		auto result = m_swapChain->submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
@@ -221,7 +180,7 @@ namespace Aegix::Graphics
 		}
 		else if (result != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to present swap chain image");
+			throw std::runtime_error("Failed to present swap chain image");
 		}
 
 		m_isFrameStarted = false;

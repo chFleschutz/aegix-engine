@@ -79,7 +79,7 @@ namespace Aegix
 			applyFrameBrake(frameBeginTime);
 		}
 
-		m_renderer.shutdown();
+		m_renderer.waitIdle();
 		m_scene->runtimeEnd();
 	}
 

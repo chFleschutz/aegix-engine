@@ -24,8 +24,9 @@ namespace Aegix::Graphics
 	public:
 		Renderer(Window& window, VulkanDevice& device);
 		Renderer(const Renderer&) = delete;
-		Renderer& operator=(const Renderer&) = delete;
 		~Renderer();
+
+		Renderer& operator=(const Renderer&) = delete;
 
 		template<typename T>
 		RenderSystem& addRenderSystem()
@@ -36,18 +37,16 @@ namespace Aegix::Graphics
 		VulkanDevice& device() { return m_device; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
 		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
+		VkCommandBuffer currentCommandBuffer() const;
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }
-		VkCommandBuffer currentCommandBuffer() const;
 		int frameIndex() const;
 
-		VkCommandBuffer beginRenderFrame();
-		void renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene);
-		void endRenderFrame(VkCommandBuffer commandBuffer);
-
-		void shutdown();
-
+		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene);
+
+		/// @brief Waits for the GPU to be idle
+		void waitIdle();
 
 	private:
 		void createCommandBuffers();
@@ -67,7 +66,7 @@ namespace Aegix::Graphics
 		Window& m_window;
 		VulkanDevice& m_device;
 		std::unique_ptr<SwapChain> m_swapChain;
-		std::vector<VkCommandBuffer> m_commandBuffers;
+		std::array<VkCommandBuffer, SwapChain::MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
