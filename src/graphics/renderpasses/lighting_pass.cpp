@@ -1,6 +1,5 @@
 #include "lighting_pass.h"
 
-#include "graphics/systems/render_system_collection.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 
@@ -30,7 +29,7 @@ namespace Aegix::Graphics
 
 		updateGlobalUBO(frameInfo);
 
-		for (auto&& [_, system] : frameInfo.renderSystemCollection)
+		for (auto&& [_, system] : m_renderSystemCollection)
 		{
 			system->render(frameInfo);
 		}

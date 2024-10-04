@@ -1,22 +1,15 @@
 #pragma once
 
-#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
-#include "graphics/frame_info.h"
 #include "graphics/renderpasses/render_pass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
-#include "graphics/systems/render_system_collection.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
 
-#include "graphics/renderpasses/lighting_pass.h"
-
+#include <array>
 #include <memory>
-#include <type_traits>
-#include <typeindex>
-#include <unordered_map>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -37,9 +30,7 @@ namespace Aegix::Graphics
 			// Add parameter for renderpass identifier
 			// Find renderpass by identifier
 			// Add render system to this renderpass
-			auto globalSetLayout = static_cast<LightingPass*>(m_renderpasses[0].get())->globalSetLayout();
-
-			return m_renderSystemCollection.addRenderSystem<T>(m_device, swapChainRenderPass(), globalSetLayout);
+			return m_renderpasses[0]->addRenderSystem<T>(m_device, swapChainRenderPass());
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -78,8 +69,6 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		std::unique_ptr<DescriptorPool> m_globalPool;
-
-		RenderSystemCollection m_renderSystemCollection;
 
 		std::vector<std::unique_ptr<RenderPass>> m_renderpasses;
 	};

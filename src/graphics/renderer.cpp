@@ -1,11 +1,8 @@
 #include "renderer.h"
 
-#include "scene/components.h"
-#include "scene/entity.h"
 #include "scene/scene.h"
 #include "graphics/renderpasses/lighting_pass.h"
 
-#include <array>
 #include <cassert>
 #include <stdexcept>
 
@@ -51,7 +48,6 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			m_renderSystemCollection
 		};
 
 		for (auto& renderpass : m_renderpasses)
