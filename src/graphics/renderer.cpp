@@ -14,15 +14,18 @@ namespace Aegix::Graphics
 	{
 		recreateSwapChain();
 		createCommandBuffers();
-		initializeDescriptorPool();
-
-		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
-		m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
+		createDescriptorPool();
+		createRenderpasses();
 	}
 
 	Renderer::~Renderer()
 	{
-		freeCommandBuffers();
+		vkFreeCommandBuffers(
+			m_device.device(),
+			m_device.commandPool(),
+			static_cast<uint32_t>(m_commandBuffers.size()),
+			m_commandBuffers.data()
+		);
 	}
 
 	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
@@ -77,42 +80,30 @@ namespace Aegix::Graphics
 			throw std::runtime_error("Failed to allocate command buffers");
 	}
 
-	void Renderer::freeCommandBuffers()
-	{
-		vkFreeCommandBuffers(
-			m_device.device(),
-			m_device.commandPool(),
-			static_cast<uint32_t>(m_commandBuffers.size()),
-			m_commandBuffers.data()
-		);
-
-		std::fill(m_commandBuffers.begin(), m_commandBuffers.end(), VK_NULL_HANDLE);
-	}
-
 	void Renderer::recreateSwapChain()
 	{
 		auto extend = m_window.extend();
 		while (extend.width == 0 || extend.height == 0) // minimized
 		{
-			extend = m_window.extend();
 			glfwWaitEvents();
+			extend = m_window.extend();
 		}
 		vkDeviceWaitIdle(m_device.device());
 
-		if (m_swapChain == nullptr)
-		{
-			m_swapChain = std::make_unique<SwapChain>(m_device, extend);
-		}
-		else
+		if (m_swapChain)
 		{
 			std::shared_ptr<SwapChain> oldSwapChain = std::move(m_swapChain);
 			m_swapChain = std::make_unique<SwapChain>(m_device, extend, oldSwapChain);
-			if (!oldSwapChain->compareSwapFormats(*m_swapChain.get()))
-				throw std::runtime_error("Swap chain image or depth format has changed");
+
+			assert(oldSwapChain->compareSwapFormats(*m_swapChain.get()), "Swap chain image or depth format has changed");
+		}
+		else
+		{
+			m_swapChain = std::make_unique<SwapChain>(m_device, extend);
 		}
 	}
 
-	void Renderer::initializeDescriptorPool()
+	void Renderer::createDescriptorPool()
 	{
 		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
 		m_globalPool = DescriptorPool::Builder(m_device)
@@ -131,6 +122,12 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
 			.build();
+	}
+
+	void Renderer::createRenderpasses()
+	{
+		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
+		m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
@@ -181,7 +178,7 @@ namespace Aegix::Graphics
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)
+	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) const
 	{
 		assert(m_isFrameStarted && "Cannot call beginSwapChainRenderPass while frame is not in progress");
 		assert(commandBuffer == currentCommandBuffer() && "Cannot begin render pass on a command buffer from a diffrent frame");
@@ -214,7 +211,7 @@ namespace Aegix::Graphics
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer)
+	void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) const 
 	{
 		assert(m_isFrameStarted && "Cannot call endSwapChainRenderPass while frame is not in progress");
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
