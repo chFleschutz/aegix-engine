@@ -1,7 +1,8 @@
 #include "renderer.h"
 
-#include "scene/scene.h"
 #include "graphics/renderpasses/lighting_pass.h"
+#include "graphics/renderpasses/ui_pass.h"
+#include "scene/scene.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -15,8 +16,8 @@ namespace Aegix::Graphics
 		createCommandBuffers();
 		initializeDescriptorPool();
 
-		auto lightingPass = std::make_unique<LightingPass>(m_device, *m_globalPool);
-		m_renderpasses.emplace_back(std::move(lightingPass));
+		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
+		m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
 	}
 
 	Renderer::~Renderer()

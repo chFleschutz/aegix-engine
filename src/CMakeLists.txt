@@ -19,6 +19,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/window.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/renderpasses/lighting_pass.cpp"  
+	"graphics/renderpasses/ui_pass.cpp"
 	"graphics/systems/default_render_system.cpp"
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/pbs_render_system.cpp"

@@ -24,13 +24,13 @@ namespace Aegix::Graphics
 		Renderer& operator=(const Renderer&) = delete;
 
 		template<typename T>
-		RenderSystem& addRenderSystem()
+		RenderSystem& addRenderSystem(int renderPassIndex = 0)
 		{
 			// TODO:
 			// Add parameter for renderpass identifier
 			// Find renderpass by identifier
 			// Add render system to this renderpass
-			return m_renderpasses[0]->addRenderSystem<T>(m_device, swapChainRenderPass());
+			return m_renderpasses[renderPassIndex]->addRenderSystem<T>(m_device, swapChainRenderPass());
 		}
 
 		VulkanDevice& device() { return m_device; }

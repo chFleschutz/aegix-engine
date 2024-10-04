@@ -1,10 +1,9 @@
 #pragma once
 
-#include "graphics/renderer.h"
-#include "graphics/window.h"
 #include "graphics/layers/layer.h"
 
-#include "imgui.h"
+#include <memory>
+#include <vector>
 
 namespace Aegix::Graphics
 {
@@ -13,7 +12,7 @@ namespace Aegix::Graphics
 	class GUI
 	{
 	public:
-		GUI(const Window& window, Renderer& renderer);
+		GUI() = default;
 		GUI(const GUI&) = delete;
 		GUI(GUI&&) = delete;
 		~GUI();
@@ -25,7 +24,7 @@ namespace Aegix::Graphics
 		void update(float deltaTime);
 
 		/// @brief Renders all GUI elements
-		void renderGui(VkCommandBuffer commandBuffer);
+		void renderGui();
 
 		/// @brief Pushes a layer to the stack
 		void pushLayer(std::shared_ptr<Layer> layer);
