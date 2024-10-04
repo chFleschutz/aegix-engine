@@ -1,5 +1,6 @@
 #include "lighting_pass.h"
 
+#include "graphics/systems/render_system_collection.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 
@@ -10,9 +11,9 @@ namespace Aegix::Graphics
 		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
 		camera.aspect = frameInfo.aspectRatio;
 
-		//for (auto&& [_, system] : frameInfo.scene.activeRenderSystems)
-		//{
-		//	system->render(frameInfo);
-		//}
+		for (auto&& [_, system] : frameInfo.renderSystemCollection)
+		{
+			system->render(frameInfo);
+		}
 	}
 }

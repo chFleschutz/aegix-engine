@@ -6,6 +6,8 @@
 
 namespace Aegix::Graphics
 {
+	class RenderSystemCollection;
+
 	struct GlobalLimits
 	{
 		static constexpr int MAX_LIGHTS = 10;
@@ -28,5 +30,6 @@ namespace Aegix::Graphics
 		Scene::Scene& scene;
 		float aspectRatio;
 		VkDescriptorSet globalDescriptorSet; // TODO: Remove
+		const RenderSystemCollection& renderSystemCollection;
 	};
 }

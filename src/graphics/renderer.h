@@ -7,6 +7,7 @@
 #include "graphics/renderpasses/render_pass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
+#include "graphics/systems/render_system_collection.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
 
@@ -29,13 +30,7 @@ namespace Aegix::Graphics
 		template<typename T>
 		RenderSystem& addRenderSystem()
 		{
-			static_assert(std::is_base_of_v<RenderSystem, T>, "T has to be a subclass of RenderSystem");
-			auto it = m_renderSystems.find(typeid(T));
-			if (it != m_renderSystems.end())
-				return *it->second;
-
-			auto newSystem = std::make_unique<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
-			return *m_renderSystems.emplace(typeid(T), std::move(newSystem)).first->second;
+			return m_renderSystemCollection.addRenderSystem<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -83,8 +78,8 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
 		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
 
-		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
+		RenderSystemCollection m_renderSystemCollection;
 
-		std::vector<RenderPass> m_renderpasses;
+		std::vector<std::unique_ptr<RenderPass>> m_renderpasses;
 	};
 }

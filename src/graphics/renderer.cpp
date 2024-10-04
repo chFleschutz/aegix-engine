@@ -3,6 +3,7 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
+#include "graphics/renderpasses/lighting_pass.h"
 
 #include <array>
 #include <cassert>
@@ -20,6 +21,8 @@ namespace Aegix::Graphics
 		createCommandBuffers();
 		initializeDescriptorPool();
 		initializeGlobalUBO();
+
+		m_renderpasses.emplace_back(std::make_unique<LightingPass>());
 	}
 
 	Renderer::~Renderer()
@@ -58,12 +61,13 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex)
+			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
+			m_renderSystemCollection
 		};
 
 		updateGlobalUBO(frameInfo);
 
-		for (auto&& [_, system] : m_renderSystems)
+		for (auto&& [_, system] : m_renderSystemCollection)
 		{
 			system->render(frameInfo);
 		}
@@ -90,14 +94,15 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex)
+			m_globalDescriptorSet->descriptorSet(m_currentFrameIndex),
+			m_renderSystemCollection
 		};
 
 		updateGlobalUBO(frameInfo);
 
 		for (auto& renderpass : m_renderpasses)
 		{
-			renderpass.render(frameInfo);
+			renderpass->render(frameInfo);
 		}
 
 		endSwapChainRenderPass(commandBuffer);

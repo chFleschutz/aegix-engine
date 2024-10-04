@@ -68,12 +68,13 @@ namespace Aegix
 			m_gui.update(frameTimeSec);
 
 			// Rendering
-			auto commandBuffer = m_renderer.beginRenderFrame();
-			{
-				m_renderer.renderScene(commandBuffer, *m_scene);
-				m_gui.renderGui(commandBuffer);
-			}
-			m_renderer.endRenderFrame(commandBuffer);
+			//auto commandBuffer = m_renderer.beginRenderFrame();
+			//{
+			//	m_renderer.renderScene(commandBuffer, *m_scene);
+			//	m_gui.renderGui(commandBuffer);
+			//}
+			//m_renderer.endRenderFrame(commandBuffer);
+			m_renderer.renderFrame(*m_scene);
 
 			applyFrameBrake(frameBeginTime);
 		}
