@@ -29,10 +29,14 @@ namespace Aegix::Graphics
 
 		updateGlobalUBO(frameInfo);
 
+		beginRenderPass(frameInfo);
+
 		for (auto&& [_, system] : m_renderSystemCollection)
 		{
 			system->render(frameInfo);
 		}
+
+		endRenderPass(frameInfo);
 	}
 
 	void LightingPass::updateGlobalUBO(const FrameInfo& frameInfo)
@@ -56,5 +60,41 @@ namespace Aegix::Graphics
 		ubo.numLights = lighIndex;
 
 		m_globalUBO->setData(frameInfo.frameIndex, ubo);
+	}
+
+	void LightingPass::beginRenderPass(FrameInfo& frameInfo)
+	{
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = frameInfo.swapChainRenderPass;
+		renderPassInfo.framebuffer = frameInfo.swapChainFramebuffer;
+
+		renderPassInfo.renderArea.offset = { 0,0 };
+		renderPassInfo.renderArea.extent = { frameInfo.swapChainExtent };
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		vkCmdBeginRenderPass(frameInfo.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(frameInfo.swapChainExtent.width);
+		viewport.height = static_cast<float>(frameInfo.swapChainExtent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(frameInfo.commandBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor{ { 0, 0 }, frameInfo.swapChainExtent };
+		vkCmdSetScissor(frameInfo.commandBuffer, 0, 1, &scissor);
+	}
+
+	void LightingPass::endRenderPass(FrameInfo& frameInfo)
+	{
+		vkCmdEndRenderPass(frameInfo.commandBuffer);
 	}
 }

@@ -45,13 +45,23 @@ namespace Aegix::Graphics
 	void Renderer::renderFrame(Scene::Scene& scene)
 	{
 		auto commandBuffer = beginFrame();
-		beginSwapChainRenderPass(commandBuffer);
+		if (!commandBuffer)
+		{
+			assert(false && "Failed to begin frame");
+			return;
+		}
+
+		assert(m_isFrameStarted && "Frame not started");
 
 		FrameInfo frameInfo{
 			m_currentFrameIndex,
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
+			nullptr,
+			m_swapChain->renderPass(),
+			m_swapChain->swapChainExtent(),
+			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
 		for (auto& renderpass : m_renderpasses)
@@ -59,7 +69,6 @@ namespace Aegix::Graphics
 			renderpass->render(frameInfo);
 		}
 
-		endSwapChainRenderPass(commandBuffer);
 		endFrame(commandBuffer);
 	}
 
@@ -95,7 +104,7 @@ namespace Aegix::Graphics
 			std::shared_ptr<SwapChain> oldSwapChain = std::move(m_swapChain);
 			m_swapChain = std::make_unique<SwapChain>(m_device, extend, oldSwapChain);
 
-			assert(oldSwapChain->compareSwapFormats(*m_swapChain.get()), "Swap chain image or depth format has changed");
+			assert(oldSwapChain->compareSwapFormats(*m_swapChain.get()) && "Swap chain image or depth format has changed");
 		}
 		else
 		{
@@ -127,7 +136,7 @@ namespace Aegix::Graphics
 	void Renderer::createRenderpasses()
 	{
 		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
-		m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
+		//m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
@@ -176,46 +185,5 @@ namespace Aegix::Graphics
 
 		m_isFrameStarted = false;
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
-	}
-
-	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) const
-	{
-		assert(m_isFrameStarted && "Cannot call beginSwapChainRenderPass while frame is not in progress");
-		assert(commandBuffer == currentCommandBuffer() && "Cannot begin render pass on a command buffer from a diffrent frame");
-
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_swapChain->renderPass();
-		renderPassInfo.framebuffer = m_swapChain->frameBuffer(m_currentImageIndex);
-
-		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = { m_swapChain->swapChainExtent() };
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(m_swapChain->swapChainExtent().width);
-		viewport.height = static_cast<float>(m_swapChain->swapChainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		VkRect2D scissor{ {0,0}, m_swapChain->swapChainExtent() };
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-	}
-
-	void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) const 
-	{
-		assert(m_isFrameStarted && "Cannot call endSwapChainRenderPass while frame is not in progress");
-		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
-
-		vkCmdEndRenderPass(commandBuffer);
 	}
 }

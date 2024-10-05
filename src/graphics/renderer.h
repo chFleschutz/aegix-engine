@@ -58,9 +58,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer beginFrame();
 		void endFrame(VkCommandBuffer commandBuffer);
 
-		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer) const;
-		void endSwapChainRenderPass(VkCommandBuffer commandBuffer) const;
-
 		Window& m_window;
 		VulkanDevice& m_device;
 		

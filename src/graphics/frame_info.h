@@ -30,5 +30,10 @@ namespace Aegix::Graphics
 		Scene::Scene& scene;
 		float aspectRatio;
 		VkDescriptorSet globalDescriptorSet;
+
+		// TODO: Replace with a more general solution
+		VkRenderPass swapChainRenderPass;
+		VkExtent2D swapChainExtent;
+		VkFramebuffer swapChainFramebuffer;
 	};
 }

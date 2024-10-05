@@ -14,11 +14,10 @@ namespace Aegix::Graphics
 
 		void render(FrameInfo& frameInfo) override;
 
-		// TODO: Temporary
-		VkDescriptorSetLayout globalSetLayout() const { return m_globalSetLayout->descriptorSetLayout(); }
-
 	private:
 		void updateGlobalUBO(const FrameInfo& frameInfo);
+		void beginRenderPass(FrameInfo& frameInfo);
+		void endRenderPass(FrameInfo& frameInfo);
 
 		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
 		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
