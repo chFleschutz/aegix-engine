@@ -7,7 +7,7 @@ namespace Aegix::Graphics
 	class UiPass : public RenderPass
 	{
 	public:
-		UiPass(const Window& window, VulkanDevice& device, VkDescriptorPool globalPool, VkRenderPass renderpass);
+		UiPass(VulkanDevice& device, const Window& window, VkDescriptorPool globalPool, VkRenderPass renderpass);
 		~UiPass();
 
 		void render(FrameInfo& frameInfo) override;

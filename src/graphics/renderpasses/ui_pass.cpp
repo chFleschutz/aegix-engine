@@ -8,7 +8,8 @@
 
 namespace Aegix::Graphics
 {
-	UiPass::UiPass(const Window& window, VulkanDevice& device, VkDescriptorPool globalPool, VkRenderPass renderpass)
+	UiPass::UiPass(VulkanDevice& device, const Window& window, VkDescriptorPool globalPool, VkRenderPass renderpass)
+		: RenderPass(device)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();

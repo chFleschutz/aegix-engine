@@ -66,7 +66,7 @@ namespace Aegix::Graphics
 
 		for (auto& renderpass : m_renderpasses)
 		{
-			renderpass->render(frameInfo);
+			renderpass->execute(frameInfo);
 		}
 
 		endFrame(commandBuffer);
@@ -136,7 +136,7 @@ namespace Aegix::Graphics
 	void Renderer::createRenderpasses()
 	{
 		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
-		//m_renderpasses.emplace_back(std::make_unique<UiPass>(m_window, m_device, m_globalPool->descriptorPool(), swapChainRenderPass()));
+		//m_renderpasses.emplace_back(std::make_unique<UiPass>(m_device, m_window, m_globalPool->descriptorPool(), swapChainRenderPass()));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

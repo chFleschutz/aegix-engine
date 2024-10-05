@@ -12,12 +12,11 @@ namespace Aegix::Graphics
 		LightingPass(VulkanDevice& device, DescriptorPool& pool);
 		~LightingPass() = default;
 
+	protected:
 		void render(FrameInfo& frameInfo) override;
 
 	private:
 		void updateGlobalUBO(const FrameInfo& frameInfo);
-		void beginRenderPass(FrameInfo& frameInfo);
-		void endRenderPass(FrameInfo& frameInfo);
 
 		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
 		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
