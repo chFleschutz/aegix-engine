@@ -455,6 +455,28 @@ namespace Aegix::Graphics
 		throw std::runtime_error("failed to find supported format!");
 	}
 
+	VkImageAspectFlags VulkanDevice::findAspectFlags(VkFormat format) const
+	{
+		switch (format)
+		{
+		case VK_FORMAT_D16_UNORM:
+		case VK_FORMAT_X8_D24_UNORM_PACK32:
+		case VK_FORMAT_D32_SFLOAT:
+			return VK_IMAGE_ASPECT_DEPTH_BIT;
+
+		case VK_FORMAT_S8_UINT:
+			return VK_IMAGE_ASPECT_STENCIL_BIT;
+
+		case VK_FORMAT_D16_UNORM_S8_UINT:
+		case VK_FORMAT_D24_UNORM_S8_UINT:
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:
+			return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+
+		default:
+			return VK_IMAGE_ASPECT_COLOR_BIT;  // For color formats
+		}
+	}
+
 	VkCommandBuffer VulkanDevice::beginSingleTimeCommands() const
 	{
 		VkCommandBufferAllocateInfo allocInfo{};
@@ -640,27 +662,6 @@ namespace Aegix::Graphics
 	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
 		uint32_t mipLevels) const
 	{
-		VkImageAspectFlags aspectFlags = 0;
-
-		switch (format)
-		{
-		case VK_FORMAT_D16_UNORM:
-		case VK_FORMAT_X8_D24_UNORM_PACK32:
-		case VK_FORMAT_D32_SFLOAT:
-			aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-		case VK_FORMAT_S8_UINT:
-			aspectFlags = VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		case VK_FORMAT_D16_UNORM_S8_UINT:
-		case VK_FORMAT_D24_UNORM_S8_UINT:
-		case VK_FORMAT_D32_SFLOAT_S8_UINT:
-			aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		default:
-			aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;  // For color formats
-		}
-
-		transitionImageLayout(image, oldLayout, newLayout, mipLevels, aspectFlags);
+		transitionImageLayout(image, oldLayout, newLayout, mipLevels, findAspectFlags(format));
 	}
 }

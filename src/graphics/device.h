@@ -59,6 +59,7 @@ namespace Aegix::Graphics
 		QueueFamilyIndices findPhysicalQueueFamilies() const;
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, 
 			VkFormatFeatureFlags features) const;
+		VkImageAspectFlags findAspectFlags(VkFormat format) const;
 
 		VkCommandBuffer beginSingleTimeCommands() const;
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
