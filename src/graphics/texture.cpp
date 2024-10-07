@@ -7,32 +7,24 @@
 
 namespace Aegix::Graphics
 {
-	Texture::Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config)
-		: m_device{ device }, m_format{ config.format }
+	Texture::Texture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format)
+		: m_device{ device }, m_format{ format }
 	{
-		loadTexture(texturePath);
+		createImage(texturePath);
 		createImageView();
 	}
 
-	Texture::Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config)
-		: m_device{ device }, m_format{ config.format }
+	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format)
+		: m_device{ device }, m_format{ format }
 	{
-		auto pixelCount = width * height;
-		Buffer stagingBuffer{ m_device, sizeof(color), pixelCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
-		
-		uint8_t r = static_cast<uint8_t>(color.r * 255);
-		uint8_t g = static_cast<uint8_t>(color.g * 255);
-		uint8_t b = static_cast<uint8_t>(color.b * 255);
-		uint8_t a = static_cast<uint8_t>(color.a * 255);
-		uint32_t colorInt = (a << 24) | (b << 16) | (g << 8) | r;
+		createImage(width, height, color);
+		createImageView();
+	}
 
-		std::vector<uint32_t> pixels(pixelCount, colorInt);
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer(pixels.data());
-		stagingBuffer.unmap();
-
-		createImage(width, height, stagingBuffer);
+	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format)
+		: m_device{ device }, m_format{ format }
+	{
+		createImage(width, height);
 		createImageView();
 	}
 
@@ -43,28 +35,7 @@ namespace Aegix::Graphics
 		vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
 	}
 
-	void Texture::loadTexture(const std::filesystem::path& filePath)
-	{
-		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
-
-		if (!pixels)
-			throw std::runtime_error("Failed to load texture image: " + filePath.string());
-
-		Buffer stagingBuffer{m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
-
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer(pixels);
-		stagingBuffer.unmap();
-
-		stbi_image_free(pixels);
-
-		createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), stagingBuffer);
-	}
-
-	void Texture::createImage(uint32_t width, uint32_t height, const Buffer& buffer)
+	void Texture::createImage(uint32_t width, uint32_t height)
 	{
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -83,12 +54,57 @@ namespace Aegix::Graphics
 		imageInfo.flags = 0;
 
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_imageMemory);
+	}
 
-		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		m_device.copyBufferToImage(buffer.buffer(), m_image, imageInfo.extent.width, imageInfo.extent.height, 1);
-		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	void Texture::createImage(uint32_t width, uint32_t height, const Buffer& buffer)
+	{
+		createImage(width, height);
+
+		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		m_device.copyBufferToImage(buffer.buffer(), m_image, width, height, 1);
+		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
+
+	void Texture::createImage(uint32_t width, uint32_t height, const glm::vec4& color)
+	{
+		auto pixelCount = width * height;
+
+		uint8_t r = static_cast<uint8_t>(color.r * 255);
+		uint8_t g = static_cast<uint8_t>(color.g * 255);
+		uint8_t b = static_cast<uint8_t>(color.b * 255);
+		uint8_t a = static_cast<uint8_t>(color.a * 255);
+		uint32_t colorInt = (a << 24) | (b << 16) | (g << 8) | r;
+		std::vector<uint32_t> pixels(pixelCount, colorInt);
+
+		Buffer stagingBuffer{ m_device, sizeof(uint32_t), pixelCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
+
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(pixels.data());
+		stagingBuffer.unmap();
+
+		createImage(width, height, stagingBuffer);
+	}
+
+	void Texture::createImage(const std::filesystem::path& filePath)
+	{
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
+
+		if (!pixels)
+			throw std::runtime_error("Failed to load texture image: " + filePath.string());
+
+		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
+
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(pixels);
+		stagingBuffer.unmap();
+		
+		stbi_image_free(pixels);
+
+		createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), stagingBuffer);
 	}
 
 	void Texture::createImageView()

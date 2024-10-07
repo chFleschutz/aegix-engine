@@ -13,13 +13,9 @@ namespace Aegix::Graphics
 	class Texture
 	{
 	public:
-		struct Config
-		{
-			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
-		};
-
-		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config);
-		Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config);
+		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format);
+		Texture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format);
+		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format);
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) = delete;
 		~Texture();
@@ -32,8 +28,10 @@ namespace Aegix::Graphics
 		VkImageView imageView() const { return m_imageView; }
 
 	private:
-		void loadTexture(const std::filesystem::path& filePath);
+		void createImage(uint32_t width, uint32_t height);
 		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);
+		void createImage(uint32_t width, uint32_t height, const glm::vec4& color);
+		void createImage(const std::filesystem::path& filePath);
 		void createImageView();
 
 		VulkanDevice& m_device;

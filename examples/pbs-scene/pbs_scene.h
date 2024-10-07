@@ -29,26 +29,26 @@ public:
 		auto planeMesh = assetManager.createModel("models/plane.obj");
 
 		// MATERIALS
-		auto textureBlack = assetManager.createTexture(glm::vec4{ 0.0f }, 1, 1, { .format = VK_FORMAT_R8G8B8A8_UNORM });
-		auto textureWhite = assetManager.createTexture(glm::vec4{ 1.0f }, 1, 1, { .format = VK_FORMAT_R8G8B8A8_UNORM });
-		auto defaultNormal = assetManager.createTexture(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, 1, 1, { .format = VK_FORMAT_R8G8B8A8_UNORM });
+		auto textureBlack = assetManager.createTexture(glm::vec4{ 0.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureWhite = assetManager.createTexture(glm::vec4{ 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultNormal = assetManager.createTexture(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
 		auto planeMat = assetManager.createMaterialInstance<Graphics::PBSMaterial>(
 			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack
 		);
 
 		auto damagedHelmetMat = assetManager.createMaterialInstance<Graphics::PBSMaterial>(
-			assetManager.createTexture("damaged_helmet/Default_albedo.jpg", { .format = VK_FORMAT_R8G8B8A8_SRGB }),
-			assetManager.createTexture("damaged_helmet/Default_normal.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
-			assetManager.createTexture("damaged_helmet/Default_metalRoughness.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
-			assetManager.createTexture("damaged_helmet/Default_AO.jpg", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
-			assetManager.createTexture("damaged_helmet/Default_emissive.jpg", { .format = VK_FORMAT_R8G8B8A8_SRGB })
+			assetManager.createTexture("damaged_helmet/Default_albedo.jpg"),
+			assetManager.createTexture("damaged_helmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			assetManager.createTexture("damaged_helmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			assetManager.createTexture("damaged_helmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			assetManager.createTexture("damaged_helmet/Default_emissive.jpg")
 		);
 
 		auto scifiHelmetMat = assetManager.createMaterialInstance<Graphics::PBSMaterial>(
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_BaseColor.png", { .format = VK_FORMAT_R8G8B8A8_SRGB }),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_Normal.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_MetallicRoughness.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_AmbientOcclusion.png", { .format = VK_FORMAT_R8G8B8A8_UNORM }),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_BaseColor.png"),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
+			assetManager.createTexture("scifi_helmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
 			textureBlack
 		);
 
