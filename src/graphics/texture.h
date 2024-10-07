@@ -37,6 +37,8 @@ namespace Aegix::Graphics
 		VkImage image() const { return m_image; }
 		VkImageView imageView() const { return m_imageView; }
 
+		void transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
+
 	private:
 		void createImage(uint32_t width, uint32_t height);
 		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);

@@ -35,6 +35,11 @@ namespace Aegix::Graphics
 		vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
 	}
 
+	void Texture::transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
+	{
+		m_device.transitionImageLayout(m_image, m_format, oldLayout, newLayout);
+	}
+
 	void Texture::createImage(uint32_t width, uint32_t height)
 	{
 		VkImageCreateInfo imageInfo{};
