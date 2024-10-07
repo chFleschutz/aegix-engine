@@ -68,7 +68,7 @@ namespace Aegix::Graphics
 		const Attachment& depthStencilAttachment() const { return m_depthStencilAttachment.value(); }
 
 		/// @brief Renderes the render pass 
-		void execute(FrameInfo& frameInfo);
+		virtual void execute(FrameInfo& frameInfo);
 
 		template<typename T>
 		RenderSystem& addRenderSystem(VulkanDevice& device, VkRenderPass renderpass)
