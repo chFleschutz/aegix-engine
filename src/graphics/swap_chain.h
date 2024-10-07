@@ -24,6 +24,7 @@ namespace Aegix::Graphics
 
 		VkFramebuffer frameBuffer(int index) const { return mSwapChainFramebuffers[index]; }
 		VkRenderPass renderPass() const { return mRenderPass; }
+		VkImage image(int index) const { return mSwapChainImages[index]; }
 		VkImageView imageView(int index) const { return mSwapChainImageViews[index]; }
 		size_t imageCount() const { return mSwapChainImages.size(); }
 		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }
@@ -51,10 +52,10 @@ namespace Aegix::Graphics
 		void createFramebuffers();
 		void createSyncObjects();
 
-		// Helper functions
-		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
+		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
+		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
+		uint32_t chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const;
 
 		VkFormat mSwapChainImageFormat;
 		VkFormat mSwapChainDepthFormat;

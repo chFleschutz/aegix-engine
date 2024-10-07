@@ -138,16 +138,10 @@ namespace Aegix::Graphics
 	void SwapChain::createSwapChain()
 	{
 		SwapChainSupportDetails swapChainSupport = m_device.querySwapChainSupport();
-
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-		{
-			imageCount = swapChainSupport.capabilities.maxImageCount;
-		}
+		uint32_t imageCount = chooseImageCount(swapChainSupport.capabilities);
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -158,16 +152,21 @@ namespace Aegix::Graphics
 		createInfo.imageExtent = extent;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		createInfo.presentMode = presentMode;
+		createInfo.clipped = VK_TRUE;
+		createInfo.oldSwapchain = m_oldSwapChain == nullptr ? VK_NULL_HANDLE : m_oldSwapChain->m_swapChain;
 
 		QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
 		assert(indices.isComplete() && "Queue family indices are not complete");
-		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value()};
-
+		
+		std::array<uint32_t, 2> queueFamilyIndices{ indices.graphicsFamily.value(), indices.presentFamily.value() };
 		if (indices.graphicsFamily != indices.presentFamily)
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
+			createInfo.queueFamilyIndexCount = queueFamilyIndices.size();
+			createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 		}
 		else
 		{
@@ -176,14 +175,8 @@ namespace Aegix::Graphics
 			createInfo.pQueueFamilyIndices = nullptr;
 		}
 
-		createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = presentMode;
-		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = m_oldSwapChain == nullptr ? VK_NULL_HANDLE : m_oldSwapChain->m_swapChain;
-
 		if (vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
-			throw std::runtime_error("failed to create swap chain");
+			throw std::runtime_error("Failed to create swap chain");
 
 		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
 		mSwapChainImages.resize(imageCount);
@@ -367,7 +360,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+	VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
@@ -381,7 +374,7 @@ namespace Aegix::Graphics
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+	VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const 
 	{
 		for (const auto& availablePresentMode : availablePresentModes)
 		{
@@ -396,7 +389,7 @@ namespace Aegix::Graphics
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const 
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 		{
@@ -414,6 +407,17 @@ namespace Aegix::Graphics
 
 			return actualExtent;
 		}
+	}
+
+	uint32_t SwapChain::chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const
+	{
+		auto imageCount = capabilities.minImageCount + 1;
+		if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+		{
+			imageCount = capabilities.maxImageCount;
+		}
+
+		return imageCount;
 	}
 
 	VkFormat SwapChain::findDepthFormat()
