@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 
 		/// @brief Creates an empty texture (primarily for render targets)
 		/// @note The texture will be in VK_LAYOUT_UNDEFINED layout
-		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format);
+		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
 
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) = delete;
@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 		void transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	private:
-		void createImage(uint32_t width, uint32_t height);
+		void createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage);
 		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);
 		void createImage(uint32_t width, uint32_t height, const glm::vec4& color);
 		void createImage(const std::filesystem::path& filePath);

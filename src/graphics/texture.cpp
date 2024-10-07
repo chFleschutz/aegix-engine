@@ -21,10 +21,10 @@ namespace Aegix::Graphics
 		createImageView();
 	}
 
-	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format)
+	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
 		: m_device{ device }, m_format{ format }
 	{
-		createImage(width, height);
+		createImage(width, height, usage);
 		createImageView();
 	}
 
@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 		m_device.transitionImageLayout(m_image, m_format, oldLayout, newLayout);
 	}
 
-	void Texture::createImage(uint32_t width, uint32_t height)
+	void Texture::createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage)
 	{
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -53,7 +53,7 @@ namespace Aegix::Graphics
 		imageInfo.format = m_format;
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0;
@@ -63,7 +63,7 @@ namespace Aegix::Graphics
 
 	void Texture::createImage(uint32_t width, uint32_t height, const Buffer& buffer)
 	{
-		createImage(width, height);
+		createImage(width, height, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		m_device.copyBufferToImage(buffer.buffer(), m_image, width, height, 1);
