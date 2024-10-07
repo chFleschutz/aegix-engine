@@ -15,28 +15,26 @@ namespace Aegix::Graphics
 	public:
 		struct Config
 		{
-			VkFilter magFilter = VK_FILTER_LINEAR;
-			VkFilter minFilter = VK_FILTER_LINEAR;
-			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
 		};
 
 		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, const Texture::Config& config);
 		Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config);
+		Texture(const Texture&) = delete;
+		Texture(Texture&&) = delete;
 		~Texture();
 
-		Texture(const Texture&) = delete;
 		Texture& operator=(const Texture&) = delete;
+		Texture& operator=(Texture&&) = delete;
 
-		VkDescriptorImageInfo descriptorImageInfo() const;
-		VkImageView imageView() const { return m_imageView; }
 		VkFormat format() const { return m_format; }
+		VkImage image() const { return m_image; }
+		VkImageView imageView() const { return m_imageView; }
 
 	private:
 		void loadTexture(const std::filesystem::path& filePath);
 		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);
 		void createImageView();
-		void createTextureSampler(VkSamplerAddressMode addressMode, VkFilter magFilter, VkFilter minFilter);
 
 		VulkanDevice& m_device;
 
@@ -44,6 +42,29 @@ namespace Aegix::Graphics
 		VkImage m_image;
 		VkDeviceMemory m_imageMemory;
 		VkImageView m_imageView;
-		VkSampler m_textureSampler;
+	};
+
+	class Sampler
+	{
+	public:
+		struct Config
+		{
+			VkFilter magFilter = VK_FILTER_LINEAR;
+			VkFilter minFilter = VK_FILTER_LINEAR;
+			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			bool anisotropy = true;
+		};
+
+		explicit Sampler(VulkanDevice& device, const Config& config = {});
+		Sampler(const Sampler&) = delete;
+		Sampler(Sampler&&) = delete;
+		~Sampler();
+
+		VkSampler sampler() const { return m_sampler; }
+
+	private:
+		VulkanDevice& m_device;
+
+		VkSampler m_sampler;
 	};
 }

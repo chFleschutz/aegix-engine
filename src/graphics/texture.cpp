@@ -12,7 +12,6 @@ namespace Aegix::Graphics
 	{
 		loadTexture(texturePath);
 		createImageView();
-		createTextureSampler(config.addressMode, config.magFilter, config.minFilter);
 	}
 
 	Texture::Texture(VulkanDevice& device, const glm::vec4& color, uint32_t width, uint32_t height, const Texture::Config& config)
@@ -34,26 +33,14 @@ namespace Aegix::Graphics
 		stagingBuffer.unmap();
 
 		createImage(width, height, stagingBuffer);
-
 		createImageView();
-		createTextureSampler(config.addressMode, config.magFilter, config.minFilter);
 	}
 
 	Texture::~Texture()
 	{
-		vkDestroySampler(m_device.device(), m_textureSampler, nullptr);
 		vkDestroyImageView(m_device.device(), m_imageView, nullptr);
 		vkDestroyImage(m_device.device(), m_image, nullptr);
 		vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
-	}
-
-	VkDescriptorImageInfo Texture::descriptorImageInfo() const
-	{
-		VkDescriptorImageInfo info{};
-		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = m_imageView;
-		info.sampler = m_textureSampler;
-		return info;
 	}
 
 	void Texture::loadTexture(const std::filesystem::path& filePath)
@@ -121,16 +108,18 @@ namespace Aegix::Graphics
 			throw std::runtime_error("failed to create texture image view");
 	}
 
-	void Texture::createTextureSampler(VkSamplerAddressMode addressMode, VkFilter magFilter, VkFilter minFilter)
+
+	Sampler::Sampler(VulkanDevice& device, const Config& config)
+		: m_device{ device }
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = magFilter;
-		samplerInfo.minFilter = minFilter;
-		samplerInfo.addressModeU = addressMode;
-		samplerInfo.addressModeV = addressMode;
-		samplerInfo.addressModeW = addressMode;
-		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.magFilter = config.magFilter;
+		samplerInfo.minFilter = config.minFilter;
+		samplerInfo.addressModeU = config.addressMode;
+		samplerInfo.addressModeV = config.addressMode;
+		samplerInfo.addressModeW = config.addressMode;
+		samplerInfo.anisotropyEnable = config.anisotropy;
 		samplerInfo.maxAnisotropy = m_device.properties().limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -141,7 +130,12 @@ namespace Aegix::Graphics
 		samplerInfo.maxLod = 0.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if (vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS)
+		if (vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture sampler");
+	}
+
+	Sampler::~Sampler()
+	{
+		vkDestroySampler(m_device.device(), m_sampler, nullptr);
 	}
 }

@@ -37,8 +37,8 @@ namespace Aegix::Graphics
 	private:
 		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_texture;
-		
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
+		Sampler m_sampler;
 
 		friend DefaultRenderSystem;
 	};

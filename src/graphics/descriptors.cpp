@@ -183,19 +183,24 @@ namespace Aegix::Graphics
 	{
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture, const Sampler& sampler)
 	{
 		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 		{
-			m_descriptorInfos[i].imageInfos.emplace_back(binding, texture.descriptorImageInfo());
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.sampler = sampler.sampler();
+			imageInfo.imageView = texture.imageView();
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			m_descriptorInfos[i].imageInfos.emplace_back(binding, imageInfo);
 		}
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture, const Sampler& sampler)
 	{
 		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
-		return addTexture(binding, *texture);
+		return addTexture(binding, *texture, sampler);
 	}
 
 	std::unique_ptr<DescriptorSet> DescriptorSet::Builder::build()

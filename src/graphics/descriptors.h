@@ -128,8 +128,8 @@ namespace Aegix::Graphics
 				return *this;
 			}
 
-			Builder& addTexture(uint32_t binding, const Texture& texture);
-			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture);
+			Builder& addTexture(uint32_t binding, const Texture& texture, const Sampler& sampler);
+			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture, const Sampler& sampler);
 
 			std::unique_ptr<DescriptorSet> build();
 

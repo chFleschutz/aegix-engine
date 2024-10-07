@@ -40,6 +40,7 @@ namespace Aegix::Graphics
 		std::shared_ptr<Texture> m_aoTexture;
 		std::shared_ptr<Texture> m_emissiveTexture;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
+		Sampler m_sampler;
 
 		friend PBSRenderSystem;
 	};
