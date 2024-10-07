@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 		Texture& operator=(const Texture&) = delete;
 
 		VkDescriptorImageInfo descriptorImageInfo() const;
-		VkImageView imageView() const { return m_textureImageView; }
+		VkImageView imageView() const { return m_imageView; }
 		VkFormat format() const { return m_format; }
 
 	private:
@@ -41,9 +41,9 @@ namespace Aegix::Graphics
 		VulkanDevice& m_device;
 
 		VkFormat m_format;
-		VkImage m_textureImage;
-		VkDeviceMemory m_textureImageMemory;
-		VkImageView m_textureImageView;
+		VkImage m_image;
+		VkDeviceMemory m_imageMemory;
+		VkImageView m_imageView;
 		VkSampler m_textureSampler;
 	};
 }

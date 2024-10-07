@@ -42,16 +42,16 @@ namespace Aegix::Graphics
 	Texture::~Texture()
 	{
 		vkDestroySampler(m_device.device(), m_textureSampler, nullptr);
-		vkDestroyImageView(m_device.device(), m_textureImageView, nullptr);
-		vkDestroyImage(m_device.device(), m_textureImage, nullptr);
-		vkFreeMemory(m_device.device(), m_textureImageMemory, nullptr);
+		vkDestroyImageView(m_device.device(), m_imageView, nullptr);
+		vkDestroyImage(m_device.device(), m_image, nullptr);
+		vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
 	}
 
 	VkDescriptorImageInfo Texture::descriptorImageInfo() const
 	{
 		VkDescriptorImageInfo info{};
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = m_textureImageView;
+		info.imageView = m_imageView;
 		info.sampler = m_textureSampler;
 		return info;
 	}
@@ -95,12 +95,12 @@ namespace Aegix::Graphics
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0;
 
-		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_textureImage, m_textureImageMemory);
+		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_imageMemory);
 
-		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_UNDEFINED,
+		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		m_device.copyBufferToImage(buffer.buffer(), m_textureImage, imageInfo.extent.width, imageInfo.extent.height, 1);
-		m_device.transitionImageLayout(m_textureImage, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		m_device.copyBufferToImage(buffer.buffer(), m_image, imageInfo.extent.width, imageInfo.extent.height, 1);
+		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
@@ -108,7 +108,7 @@ namespace Aegix::Graphics
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = m_textureImage;
+		viewInfo.image = m_image;
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		viewInfo.format = m_format;
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -117,7 +117,7 @@ namespace Aegix::Graphics
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_textureImageView) != VK_SUCCESS)
+		if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageView) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture image view");
 	}
 
