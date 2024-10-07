@@ -2,10 +2,36 @@
 
 namespace Aegix::Graphics
 {
-	RenderPass::RenderPass(VulkanDevice& device)
-		: m_device{ device }
+	RenderPass::Builder& RenderPass::Builder::addColorAttachment(const Attachment& attachment)
 	{
-		// TODO:
+		m_colorAttachments.emplace_back(attachment);
+		return *this;
+	}
+
+	RenderPass::Builder& RenderPass::Builder::addColorAttachment(std::shared_ptr<Texture> image, VkAttachmentLoadOp loadOp,
+		VkClearValue clearValue, VkSampleCountFlagBits samples)
+	{
+		m_colorAttachments.emplace_back(image->format(), clearValue, loadOp, samples, image);
+		return *this;
+	}
+
+	RenderPass::Builder& RenderPass::Builder::setDepthStencilAttachment(const Attachment& attachment)
+	{
+		m_depthStencilAttachment = attachment;
+		return *this;
+	}
+
+	RenderPass::Builder& RenderPass::Builder::addSampledTexture(const SampledTexture& texture)
+	{
+		m_sampledTextures.emplace_back(texture);
+		return *this;
+	}
+
+
+	RenderPass::RenderPass(Builder& builder)
+		: m_device{ builder.m_device }, m_colorAttachments{ std::move(builder.m_colorAttachments) },
+		m_depthStencilAttachment{ std::move(builder.m_depthStencilAttachment) }
+	{
 		//createRenderPass();
 		//createFramebuffer();
 	}
@@ -49,8 +75,8 @@ namespace Aegix::Graphics
 
 			VkAttachmentDescription attachmentDesc{};
 			attachmentDesc.format = attachment.format;
-			attachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-			attachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			attachmentDesc.samples = attachment.samples;
+			attachmentDesc.loadOp = attachment.loadOp;
 			attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			attachmentDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -60,7 +86,7 @@ namespace Aegix::Graphics
 
 			VkAttachmentReference attachmentRef{};
 			attachmentRef.attachment = static_cast<uint32_t>(i);
-			attachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			colorRefs.emplace_back(attachmentRef);
 		}
 
@@ -72,8 +98,8 @@ namespace Aegix::Graphics
 		{
 			VkAttachmentDescription depthStencilAttachment{};
 			depthStencilAttachment.format = m_depthStencilAttachment->format;
-			depthStencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-			depthStencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depthStencilAttachment.samples = m_depthStencilAttachment->samples;
+			depthStencilAttachment.loadOp = m_depthStencilAttachment->loadOp;
 			depthStencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			depthStencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			depthStencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -116,7 +142,7 @@ namespace Aegix::Graphics
 		if (m_depthStencilAttachment.has_value())
 		{
 			assert(m_depthStencilAttachment->image && "Depth/stencil attachment image not initialized");
-			attachments.emplace_back(m_depthStencilAttachment->image->imageView()); 
+			attachments.emplace_back(m_depthStencilAttachment->image->imageView());
 		}
 
 		VkFramebufferCreateInfo framebufferInfo{};
@@ -135,7 +161,7 @@ namespace Aegix::Graphics
 	void RenderPass::beginRenderPass(VkCommandBuffer commandBuffer)
 	{
 		std::vector<VkClearValue> clearValues(attachmentCount());
-		
+
 		for (size_t i = 0; i < m_colorAttachments.size(); i++)
 		{
 			clearValues[i] = m_colorAttachments[i].clearValue;

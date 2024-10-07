@@ -5,16 +5,16 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
-		: RenderPass(device)
+	LightingPass::LightingPass(Builder& builder, DescriptorPool& pool)
+		: RenderPass(builder)
 	{
-		m_globalSetLayout = DescriptorSetLayout::Builder(device)
+		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
-		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(device);
+		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(m_device);
 
-		m_globalDescriptorSet = DescriptorSet::Builder(device, pool, *m_globalSetLayout)
+		m_globalDescriptorSet = DescriptorSet::Builder(m_device, pool, *m_globalSetLayout)
 			.addBuffer(0, *m_globalUBO)
 			.build();
 	}

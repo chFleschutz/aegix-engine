@@ -135,8 +135,17 @@ namespace Aegix::Graphics
 
 	void Renderer::createRenderpasses()
 	{
-		m_renderpasses.emplace_back(std::make_unique<LightingPass>(m_device, *m_globalPool));
-		//m_renderpasses.emplace_back(std::make_unique<UiPass>(m_device, m_window, m_globalPool->descriptorPool(), swapChainRenderPass()));
+		auto lightingPass = RenderPass::Builder(m_device)
+			.addColorAttachment({ VK_FORMAT_R8G8B8A8_UNORM })
+			.setDepthStencilAttachment({ VK_FORMAT_D32_SFLOAT })
+			.build<LightingPass>(*m_globalPool);
+
+		//auto uiPass = RenderPass::Builder(m_device)
+		//	.addColorAttachment(lightingPass->colorAttachment(0).image, VK_ATTACHMENT_LOAD_OP_LOAD)
+		//	.build<UiPass>(m_window, m_globalPool->descriptorPool(), swapChainRenderPass());
+
+		m_renderpasses.push_back(std::move(lightingPass));
+		//m_renderpasses.push_back(std::move(uiPass));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

@@ -30,6 +30,7 @@ namespace Aegix::Graphics
 
 		VkDescriptorImageInfo descriptorImageInfo() const;
 		VkImageView imageView() const { return m_textureImageView; }
+		VkFormat format() const { return m_format; }
 
 	private:
 		void loadTexture(const std::filesystem::path& filePath);

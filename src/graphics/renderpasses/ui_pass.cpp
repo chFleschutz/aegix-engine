@@ -8,8 +8,8 @@
 
 namespace Aegix::Graphics
 {
-	UiPass::UiPass(VulkanDevice& device, const Window& window, VkDescriptorPool globalPool, VkRenderPass renderpass)
-		: RenderPass(device)
+	UiPass::UiPass(Builder& builder, const Window& window, VkDescriptorPool globalPool, VkRenderPass renderpass)
+		: RenderPass(builder)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -23,11 +23,11 @@ namespace Aegix::Graphics
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
 		ImGui_ImplVulkan_InitInfo init_info = {};
-		init_info.Instance = device.instance();
-		init_info.PhysicalDevice = device.physicalDevice();
-		init_info.Device = device.device();
-		init_info.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
-		init_info.Queue = device.graphicsQueue();
+		init_info.Instance = m_device.instance();
+		init_info.PhysicalDevice = m_device.physicalDevice();
+		init_info.Device = m_device.device();
+		init_info.QueueFamily = m_device.findPhysicalQueueFamilies().graphicsFamily.value();
+		init_info.Queue = m_device.graphicsQueue();
 		init_info.PipelineCache = nullptr;
 		init_info.DescriptorPool = globalPool;
 		init_info.RenderPass = renderpass;

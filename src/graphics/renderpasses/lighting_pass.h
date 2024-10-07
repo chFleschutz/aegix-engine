@@ -9,7 +9,7 @@ namespace Aegix::Graphics
 	class LightingPass : public RenderPass
 	{
 	public:
-		LightingPass(VulkanDevice& device, DescriptorPool& pool);
+		LightingPass(Builder& builder, DescriptorPool& pool);
 		~LightingPass() = default;
 
 	protected:
