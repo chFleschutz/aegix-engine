@@ -22,16 +22,15 @@ namespace Aegix::Graphics
 		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
-		VkFramebuffer frameBuffer(int index) { return mSwapChainFramebuffers[index]; }
-		VkRenderPass renderPass() { return mRenderPass; }
-		VkImageView imageView(int index) { return mSwapChainImageViews[index]; }
-		size_t imageCount() { return mSwapChainImages.size(); }
-		VkFormat swapChainImageFormat() { return mSwapChainImageFormat; }
-		VkExtent2D swapChainExtent() { return mSwapChainExtent; }
-		uint32_t width() { return mSwapChainExtent.width; }
-		uint32_t height() { return mSwapChainExtent.height; }
-
-		float extentAspectRatio() {	return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
+		VkFramebuffer frameBuffer(int index) const { return mSwapChainFramebuffers[index]; }
+		VkRenderPass renderPass() const { return mRenderPass; }
+		VkImageView imageView(int index) const { return mSwapChainImageViews[index]; }
+		size_t imageCount() const { return mSwapChainImages.size(); }
+		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }
+		VkExtent2D extend() const { return mSwapChainExtent; }
+		uint32_t width() const { return mSwapChainExtent.width; }
+		uint32_t height() const { return mSwapChainExtent.height; }
+		float extentAspectRatio() const { return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
 		VkFormat findDepthFormat();
 
 		VkResult acquireNextImage(uint32_t* imageIndex);

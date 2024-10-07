@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "graphics/renderpasses/lighting_pass.h"
+#include "graphics/renderpasses/swap_chain_blit_pass.h"
 #include "graphics/renderpasses/ui_pass.h"
 #include "scene/scene.h"
 
@@ -60,7 +61,7 @@ namespace Aegix::Graphics
 			m_swapChain->extentAspectRatio(),
 			nullptr,
 			m_swapChain->renderPass(),
-			m_swapChain->swapChainExtent(),
+			m_swapChain->extend(),
 			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
@@ -144,8 +145,13 @@ namespace Aegix::Graphics
 		//	.addColorAttachment(lightingPass->colorAttachment(0).image, VK_ATTACHMENT_LOAD_OP_LOAD)
 		//	.build<UiPass>(m_window, m_globalPool->descriptorPool(), swapChainRenderPass());
 
-		m_renderpasses.push_back(std::move(lightingPass));
-		//m_renderpasses.push_back(std::move(uiPass));
+		//auto swapChainBlitPass = RenderPass::Builder(m_device)
+		//	.addColorAttachment(lightingPass->colorAttachment(0).image, VK_ATTACHMENT_LOAD_OP_LOAD)
+		//	.build<SwapChainBlitPass>(*m_swapChain);
+
+		m_renderpasses.emplace_back(std::move(lightingPass));
+		//m_renderpasses.emplace_back(std::move(uiPass));
+		//m_renderpasses.emplace_back(std::move(swapChainBlitPass));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

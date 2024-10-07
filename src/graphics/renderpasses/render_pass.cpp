@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		// TODO: remove later
 		m_renderPass = frameInfo.swapChainRenderPass;
 		m_framebuffer = frameInfo.swapChainFramebuffer;
-		m_renderArea = frameInfo.swapChainExtent;
+		m_renderArea = frameInfo.extend;
 
 		beginRenderPass(frameInfo.commandBuffer);
 		render(frameInfo);

@@ -36,7 +36,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
-)
+ "graphics/renderpasses/swap_chain_blit_pass.h" "graphics/renderpasses/swap_chain_blit_pass.cpp")
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"
