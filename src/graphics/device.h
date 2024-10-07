@@ -45,32 +45,37 @@ namespace Aegix::Graphics
 		VulkanDevice& operator=(const VulkanDevice&) = delete;
 		VulkanDevice& operator=(VulkanDevice&&) = delete;
 
-		VkInstance instance() { return m_instance; }
-		VkCommandPool commandPool() { return m_commandPool; }
-		VkDevice device() { return m_device; }
-		VkSurfaceKHR surface() { return m_surface; }
-		VkQueue graphicsQueue() { return m_graphicsQueue; }
-		VkQueue presentQueue() { return m_presentQueue; }
-		VkPhysicalDevice physicalDevice() { return m_physicalDevice; }
-		VkPhysicalDeviceProperties properties() { return m_properties; }
+		VkInstance instance() const { return m_instance; }
+		VkCommandPool commandPool() const { return m_commandPool; }
+		VkDevice device() const { return m_device; }
+		VkSurfaceKHR surface() const { return m_surface; }
+		VkQueue graphicsQueue() const { return m_graphicsQueue; }
+		VkQueue presentQueue() const { return m_presentQueue; }
+		VkPhysicalDevice physicalDevice() const { return m_physicalDevice; }
+		VkPhysicalDeviceProperties properties() const { return m_properties; }
 
-		SwapChainSupportDetails querySwapChainSupport() { return querySwapChainSupport(m_physicalDevice); }
-		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties);
-		QueueFamilyIndices findPhysicalQueueFamilies() { return findQueueFamilies(m_physicalDevice); }
-		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		SwapChainSupportDetails querySwapChainSupport() const;
+		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const;
+		QueueFamilyIndices findPhysicalQueueFamilies() const;
+		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, 
+			VkFormatFeatureFlags features) const;
 
-		VkCommandBuffer beginSingleTimeCommands();
-		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+		VkCommandBuffer beginSingleTimeCommands() const;
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
 
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags m_properties, VkBuffer& buffer, 
-			VkDeviceMemory& bufferMemory);
-		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+			VkDeviceMemory& bufferMemory) const;
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
+		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) const;
 
 		void createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties, VkImage& image, 
-			VkDeviceMemory& imageMemory);
+			VkDeviceMemory& imageMemory) const;
+		void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+			uint32_t mipLevels = 1, VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT) const; 
+		void transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels = 1, 
+			VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT) const;
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
-			uint32_t mipLevels = 1);
+			uint32_t mipLevels = 1) const;
 
 	private:
 		void createInstance();
@@ -83,11 +88,11 @@ namespace Aegix::Graphics
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		std::vector<const char*> getRequiredExtensions();
 		bool checkValidationLayerSupport();
-		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		void hasGflwRequiredInstanceExtensions();
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
 
 		VkInstance m_instance;
 		VkDebugUtilsMessengerEXT m_debugMessenger;
