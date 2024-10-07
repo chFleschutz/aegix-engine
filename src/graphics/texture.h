@@ -10,12 +10,22 @@
 
 namespace Aegix::Graphics
 {
+	/// @brief Represents a Texture on the gpu and wraps a VkImage, VkDeviceMemory and VkImageView
 	class Texture
 	{
 	public:
+		/// @brief Creates a texture from a file, supports: jpeg, png, tga, bmp, psd, gif, hdr, pic, pnm (see: https://github.com/nothings/stb/blob/master/stb_image.h)
+		/// @note The texture will be in VK_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout
 		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format);
+
+		/// @brief Creates a texture with a single color
+		/// @note The texture will be in VK_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout
 		Texture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format);
+
+		/// @brief Creates an empty texture (primarily for render targets)
+		/// @note The texture will be in VK_LAYOUT_UNDEFINED layout
 		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format);
+
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) = delete;
 		~Texture();
