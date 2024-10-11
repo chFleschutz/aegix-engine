@@ -16,9 +16,11 @@ namespace Aegix::Graphics
 		Reference
 	};
 
+
 	struct FrameGraphRessource
 	{
 		RessourceType type;
+
 		std::string name;
 		VkFormat format;
 		VkExtent2D size;
@@ -28,6 +30,7 @@ namespace Aegix::Graphics
 		std::shared_ptr<Texture> texture;
 	};
 
+
 	struct FrameGraphNode
 	{
 		std::vector<FrameGraphRessource> inputs;
@@ -36,16 +39,19 @@ namespace Aegix::Graphics
 		std::unique_ptr<FrameGraphRenderPass> renderPass;
 	};
 
+
 	class FrameGraph
 	{
 	public:
-		FrameGraph();
+		FrameGraph(VulkanDevice& device);
 		FrameGraph(const FrameGraph&) = delete;
 		~FrameGraph() = default;
 
 		void render(FrameInfo& frameInfo);
 
 	private:
+		VulkanDevice& m_device;
+
 		std::vector<FrameGraphNode> m_nodes;
 	};
 }

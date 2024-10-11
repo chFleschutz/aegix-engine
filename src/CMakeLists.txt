@@ -15,7 +15,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/pipeline.cpp"
 	"graphics/renderer.cpp"
-	"graphics/renderpasses/lighting_pass.cpp"  
+	"graphics/frame_graph/lighting_pass.cpp"  
 	"graphics/renderpasses/ui_pass.cpp"
 	"graphics/renderpasses/render_pass.cpp"
 	"graphics/renderpasses/swap_chain_blit_pass.cpp"

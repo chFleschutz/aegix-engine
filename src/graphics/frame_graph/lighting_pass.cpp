@@ -5,8 +5,8 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass(Builder& builder, DescriptorPool& pool)
-		: RenderPass(builder)
+	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
+		: m_device{ device }
 	{
 		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
@@ -19,14 +19,14 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	void LightingPass::render(FrameInfo& frameInfo)
+	void LightingPass::execute(const FrameInfo& frameInfo)
 	{
 		// TODO: Update aspect ration only on resize
 		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
 		camera.aspect = frameInfo.aspectRatio;
 
 		// TODO: Bind global descriptor set here instead of in each render system
-		frameInfo.globalDescriptorSet = m_globalDescriptorSet->descriptorSet(frameInfo.frameIndex);
+		const_cast<FrameInfo&>(frameInfo).globalDescriptorSet = m_globalDescriptorSet->descriptorSet(frameInfo.frameIndex);
 
 		updateGlobalUBO(frameInfo);
 

@@ -2,9 +2,9 @@
 
 namespace Aegix::Graphics
 {
-	FrameGraph::FrameGraph()
+	FrameGraph::FrameGraph(VulkanDevice& device)
+		: m_device{ device }
 	{
-		// TODO: Init Graph
 	}
 
 	void FrameGraph::render(FrameInfo& frameInfo)
