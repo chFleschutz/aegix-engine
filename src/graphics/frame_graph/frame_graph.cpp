@@ -2,8 +2,7 @@
 
 namespace Aegix::Graphics
 {
-	FrameGraph::FrameGraph(VulkanDevice& device)
-		: m_device{ device }
+	FrameGraph::FrameGraph()
 	{
 	}
 

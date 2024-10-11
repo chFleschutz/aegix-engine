@@ -43,15 +43,18 @@ namespace Aegix::Graphics
 	class FrameGraph
 	{
 	public:
-		FrameGraph(VulkanDevice& device);
+		FrameGraph();
 		FrameGraph(const FrameGraph&) = delete;
 		~FrameGraph() = default;
 
 		void render(FrameInfo& frameInfo);
 
-	private:
-		VulkanDevice& m_device;
+		void add(FrameGraphNode node)
+		{
+			m_nodes.emplace_back(std::move(node));
+		}
 
+	private:
 		std::vector<FrameGraphNode> m_nodes;
 	};
 }

@@ -1,8 +1,6 @@
 #include "renderer.h"
 
-#include "graphics/renderpasses/lighting_pass.h"
-#include "graphics/renderpasses/swap_chain_blit_pass.h"
-#include "graphics/renderpasses/ui_pass.h"
+#include "frame_graph/lighting_pass.h"
 #include "scene/scene.h"
 
 #include <cassert>
@@ -16,7 +14,7 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		createDescriptorPool();
-		createRenderpasses();
+		createFrameGraph();
 	}
 
 	Renderer::~Renderer()
@@ -66,12 +64,6 @@ namespace Aegix::Graphics
 		};
 
 		m_frameGraph.render(frameInfo);
-
-		// TODO: Remove this
-		for (auto& renderpass : m_renderpasses)
-		{
-			renderpass->execute(frameInfo);
-		}
 
 		endFrame(commandBuffer);
 	}
@@ -137,24 +129,12 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	void Renderer::createRenderpasses()
+	void Renderer::createFrameGraph()
 	{
-		auto lightingPass = RenderPass::Builder(m_device)
-			.addColorAttachment({ VK_FORMAT_R8G8B8A8_UNORM })
-			.setDepthStencilAttachment({ VK_FORMAT_D32_SFLOAT })
-			.build<LightingPass>(*m_globalPool);
+		FrameGraphNode lightingPass{};
+		lightingPass.renderPass = std::make_unique<LightingPass>(m_device, *m_globalPool);
 
-		//auto uiPass = RenderPass::Builder(m_device)
-		//	.addColorAttachment(lightingPass->colorAttachment(0).image, VK_ATTACHMENT_LOAD_OP_LOAD)
-		//	.build<UiPass>(m_window, m_globalPool->descriptorPool(), swapChainRenderPass());
-
-		//auto swapChainBlitPass = RenderPass::Builder(m_device)
-		//	.addColorAttachment(lightingPass->colorAttachment(0).image, VK_ATTACHMENT_LOAD_OP_LOAD)
-		//	.build<SwapChainBlitPass>(*m_swapChain);
-
-		m_renderpasses.emplace_back(std::move(lightingPass));
-		//m_renderpasses.emplace_back(std::move(uiPass));
-		//m_renderpasses.emplace_back(std::move(swapChainBlitPass));
+		m_frameGraph.add(std::move(lightingPass));
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

@@ -3,6 +3,8 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 
+#include "graphics/systems/pbs_render_system.h"
+
 namespace Aegix::Graphics
 {
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
@@ -17,6 +19,9 @@ namespace Aegix::Graphics
 		m_globalDescriptorSet = DescriptorSet::Builder(m_device, pool, *m_globalSetLayout)
 			.addBuffer(0, *m_globalUBO)
 			.build();
+
+		// TODO: temp
+		m_renderSystem = std::make_unique<PBSRenderSystem>(m_device, , m_globalSetLayout);
 	}
 
 	void LightingPass::execute(const FrameInfo& frameInfo)
@@ -30,10 +35,8 @@ namespace Aegix::Graphics
 
 		updateGlobalUBO(frameInfo);
 
-		for (auto&& [_, system] : m_renderSystemCollection)
-		{
-			system->render(frameInfo);
-		}
+		// TODO: Use multiple rendersystems
+		m_renderSystem->render(frameInfo);
 	}
 
 	void LightingPass::updateGlobalUBO(const FrameInfo& frameInfo)

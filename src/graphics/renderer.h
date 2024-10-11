@@ -54,7 +54,7 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void recreateSwapChain();
 		void createDescriptorPool();
-		void createRenderpasses();
+		void createFrameGraph();
 
 		VkCommandBuffer beginFrame();
 		void endFrame(VkCommandBuffer commandBuffer);
@@ -65,7 +65,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<SwapChain> m_swapChain;
 		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::array<VkCommandBuffer, SwapChain::MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
-		std::vector<std::unique_ptr<RenderPass>> m_renderpasses;
 
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
