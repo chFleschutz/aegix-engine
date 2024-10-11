@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/texture.h"
+#include "graphics/renderpasses/frame_graph_render_pass.h"
 
 #include <vector>
 #include <string>
@@ -30,6 +31,8 @@ namespace Aegix::Graphics
 	{
 		std::vector<FrameGraphRessource> inputs;
 		std::vector<FrameGraphRessource> outputs;
+
+		std::unique_ptr<FrameGraphRenderPass> renderPass;
 	};
 
 	class FrameGraph
