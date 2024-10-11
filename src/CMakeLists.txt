@@ -21,6 +21,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/renderpasses/lighting_pass.cpp"  
 	"graphics/renderpasses/ui_pass.cpp"
 	"graphics/renderpasses/render_pass.cpp"
+	"graphics/renderpasses/swap_chain_blit_pass.cpp"
 	"graphics/systems/default_render_system.cpp"
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/pbs_render_system.cpp"
@@ -36,7 +37,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- "graphics/renderpasses/swap_chain_blit_pass.h" "graphics/renderpasses/swap_chain_blit_pass.cpp")
+)
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"
