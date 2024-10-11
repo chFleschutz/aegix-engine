@@ -1,10 +1,11 @@
 #pragma once
 
+#include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/frame_info.h"
 #include "graphics/texture.h"
-#include "graphics/renderpasses/frame_graph_render_pass.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Aegix::Graphics
 {
@@ -38,6 +39,11 @@ namespace Aegix::Graphics
 	class FrameGraph
 	{
 	public:
+		FrameGraph();
+		FrameGraph(const FrameGraph&) = delete;
+		~FrameGraph() = default;
+
+		void render(FrameInfo& frameInfo);
 
 	private:
 		std::vector<FrameGraphNode> m_nodes;

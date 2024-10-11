@@ -65,6 +65,9 @@ namespace Aegix::Graphics
 			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
+		m_frameGraph.render(frameInfo);
+
+		// TODO: Remove this
 		for (auto& renderpass : m_renderpasses)
 		{
 			renderpass->execute(frameInfo);

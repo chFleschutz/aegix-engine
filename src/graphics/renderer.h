@@ -2,6 +2,7 @@
 
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
+#include "graphics/frame_graph/frame_graph.h"
 #include "graphics/renderpasses/render_pass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
@@ -69,5 +70,7 @@ namespace Aegix::Graphics
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
+
+		FrameGraph m_frameGraph;
 	};
 }
