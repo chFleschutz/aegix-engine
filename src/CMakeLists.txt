@@ -26,6 +26,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/systems/point_light_system.cpp"
 	"graphics/systems/pbs_render_system.cpp"
 	"graphics/systems/render_system.cpp"
+	"graphics/vulkan_tools.cpp"
 	"physics/motion_dynamics.cpp"
 	"scene/entity.cpp"
 	"scene/scene.cpp"
