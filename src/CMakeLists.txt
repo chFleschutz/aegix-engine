@@ -11,6 +11,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/frame_graph/frame_graph.cpp"
+	"graphics/frame_graph/raster_pass.cpp"
 	"graphics/gui.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/pipeline.cpp"
