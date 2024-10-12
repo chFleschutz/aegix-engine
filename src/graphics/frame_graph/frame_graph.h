@@ -9,49 +9,46 @@
 
 namespace Aegix::Graphics
 {
-	enum class RessourceType
+	enum class RessourceUsage
 	{
-		Attachment,
-		SampledTexture,
-		Reference
-	};
-
-
-	struct FrameGraphRessource
-	{
-		RessourceType type;
-
-		std::string name;
-		VkFormat format;
-		VkExtent2D size;
-		VkAttachmentLoadOp loadOp;
-		VkClearValue clearValue;
-
-		std::shared_ptr<Texture> texture;
-	};
-
-
-	struct FrameGraphNode
-	{
-		std::vector<FrameGraphRessource> inputs;
-		std::vector<FrameGraphRessource> outputs;
-
-		std::unique_ptr<FrameGraphRenderPass> renderPass;
+		Write,
+		Read,
+		ReadWrite
 	};
 
 
 	class FrameGraph
 	{
 	public:
+		struct Ressource
+		{
+			std::string name;
+			RessourceUsage type;
+			VkFormat format;
+			VkExtent2D size;
+			VkAttachmentLoadOp loadOp;
+			VkClearValue clearValue;
+
+			std::shared_ptr<Texture> texture;
+		};
+
+
+		struct FrameGraphNode
+		{
+			std::vector<Ressource> ressources;
+			std::unique_ptr<FrameGraphRenderPass> renderPass;
+		};
+
+
 		FrameGraph();
 		FrameGraph(const FrameGraph&) = delete;
 		~FrameGraph() = default;
 
 		void render(FrameInfo& frameInfo);
 
-		void add(FrameGraphNode node)
+		void addNode(const FrameGraphNode& node)
 		{
-			m_nodes.emplace_back(std::move(node));
+			m_nodes.emplace_back(node);
 		}
 
 	private:
