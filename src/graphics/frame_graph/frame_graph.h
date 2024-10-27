@@ -16,6 +16,16 @@ namespace Aegix::Graphics
 		FrameGraph(const FrameGraph&) = delete;
 		~FrameGraph() = default;
 
+		// TODO: Sort passes based on dependencies
+		// TODO: Refactor this into a Builder class
+		void buildDependencies()
+		{
+			for (auto& pass : m_passes)
+			{
+				pass->create();
+			}
+		}
+
 		void execute(FrameInfo& frameInfo)
 		{
 			for (auto& pass : m_passes)

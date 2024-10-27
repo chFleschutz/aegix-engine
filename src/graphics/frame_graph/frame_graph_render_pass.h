@@ -29,6 +29,8 @@ namespace Aegix::Graphics
 		FrameGraphPass(const FrameGraphPass&) = delete;
 		virtual ~FrameGraphPass() = default;
 
+		virtual void create() {};
+
 		virtual void execute(const FrameInfo& frameInfo)
 		{
 			// TODO: Pass frameInfo to execute callback
@@ -60,7 +62,6 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 
-		VkExtent2D m_renderArea;
 		std::vector<ResourceBinding> m_inputs;
 		std::vector<ResourceBinding> m_outputs;
 		std::function<void()> m_execute;

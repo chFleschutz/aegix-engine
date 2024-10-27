@@ -152,6 +152,8 @@ namespace Aegix::Graphics
 		auto bloomPass = m_frameGraph.createPass<ComputePass>("BloomPass");
 		bloomPass->addInput(colorTexture, ResourceUsage::SampledTexture);
 		bloomPass->addOutput(colorTexture, ResourceUsage::StorageTexture);
+
+		m_frameGraph.buildDependencies();
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
