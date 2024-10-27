@@ -34,6 +34,7 @@ namespace Aegix::Graphics
 		Texture& operator=(Texture&&) = delete;
 
 		VkFormat format() const { return m_format; }
+		VkExtent2D extent() const { return m_extent; }
 		VkImage image() const { return m_image; }
 		VkImageView imageView() const { return m_imageView; }
 
@@ -49,6 +50,7 @@ namespace Aegix::Graphics
 		VulkanDevice& m_device;
 
 		VkFormat m_format;
+		VkExtent2D m_extent;
 		VkImage m_image;
 		VkDeviceMemory m_imageMemory;
 		VkImageView m_imageView;

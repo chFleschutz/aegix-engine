@@ -42,6 +42,8 @@ namespace Aegix::Graphics
 
 	void Texture::createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage)
 	{
+		m_extent = { width, height };
+
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
