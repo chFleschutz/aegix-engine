@@ -9,49 +9,53 @@
 
 namespace Aegix::Graphics
 {
-	enum class RessourceUsage
-	{
-		Write,
-		Read,
-		ReadWrite
-	};
-
-
 	class FrameGraph
 	{
 	public:
-		struct Ressource
-		{
-			std::string name;
-			RessourceUsage type;
-			VkFormat format;
-			VkExtent2D size;
-			VkAttachmentLoadOp loadOp;
-			VkClearValue clearValue;
-
-			std::shared_ptr<Texture> texture;
-		};
-
-
-		struct FrameGraphNode
-		{
-			std::vector<Ressource> ressources;
-			std::unique_ptr<FrameGraphRenderPass> renderPass;
-		};
-
-
-		FrameGraph();
+		FrameGraph(VulkanDevice& device) : m_device{ device } {};
 		FrameGraph(const FrameGraph&) = delete;
 		~FrameGraph() = default;
 
-		void render(FrameInfo& frameInfo);
-
-		void addNode(const FrameGraphNode& node)
+		void execute(FrameInfo& frameInfo)
 		{
-			m_nodes.emplace_back(node);
+			for (auto& pass : m_passes)
+			{
+				pass->execute(frameInfo);
+			}
+		}
+
+		void registerCallback(const std::string& name, std::function<void()> callback)
+		{
+			m_callbacks[name] = callback;
+		}
+
+		std::shared_ptr<FrameGraphResource> createResource(const std::string& name)
+		{
+			auto resource = std::make_shared<FrameGraphResource>(name, nullptr);
+			m_resources[name] = resource;
+			return resource;
+		}
+
+		template<typename T>
+		std::shared_ptr<FrameGraphPass> createPass(std::string name)
+		{
+			static_assert(std::is_base_of<FrameGraphPass, T>::value, "T must derive from FrameGraphPass");
+
+			auto pass = std::make_shared<T>(m_device);
+			m_passes.push_back(pass);
+
+			auto it = m_callbacks.find(name);
+			assert(it != m_callbacks.end() && "Callback for FrameGraphPass was not found");
+			
+			pass->setExecuteCallback(it->second);
+			return pass;
 		}
 
 	private:
-		std::vector<FrameGraphNode> m_nodes;
+		VulkanDevice& m_device;
+
+		std::unordered_map<std::string, std::function<void()>> m_callbacks;
+		std::unordered_map<std::string, std::shared_ptr<FrameGraphResource>> m_resources;
+		std::vector<std::shared_ptr<FrameGraphPass>> m_passes;
 	};
 }

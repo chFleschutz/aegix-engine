@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 			// Add parameter for renderpass identifier
 			// Find renderpass by identifier
 			// Add render system to this renderpass
-			return m_renderpasses[renderPassIndex]->addRenderSystem<T>(m_device, swapChainRenderPass());
+			//return m_renderpasses[renderPassIndex]->addRenderSystem<T>(m_device, swapChainRenderPass());
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -70,6 +70,6 @@ namespace Aegix::Graphics
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 
-		FrameGraph m_frameGraph;
+		FrameGraph m_frameGraph{ m_device };
 	};
 }

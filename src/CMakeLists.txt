@@ -40,7 +40,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
-)
+ "graphics/frame_graph/compute_pass.h")
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"

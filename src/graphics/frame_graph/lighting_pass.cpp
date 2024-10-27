@@ -8,7 +8,7 @@
 namespace Aegix::Graphics
 {
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
-		: m_device{ device }
+		: FrameGraphPass{ device }
 	{
 		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 			.build();
 
 		// TODO: temp
-		m_renderSystem = std::make_unique<PBSRenderSystem>(m_device, , m_globalSetLayout);
+		//m_renderSystem = std::make_unique<PBSRenderSystem>(m_device, , m_globalSetLayout);
 	}
 
 	void LightingPass::execute(const FrameInfo& frameInfo)

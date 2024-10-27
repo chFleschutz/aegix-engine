@@ -3,6 +3,9 @@
 #include "frame_graph/lighting_pass.h"
 #include "scene/scene.h"
 
+#include "frame_graph/raster_pass.h"
+#include "frame_graph/compute_pass.h"
+
 #include <cassert>
 #include <stdexcept>
 
@@ -63,7 +66,7 @@ namespace Aegix::Graphics
 			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
-		m_frameGraph.render(frameInfo);
+		m_frameGraph.execute(frameInfo);
 
 		endFrame(commandBuffer);
 	}
@@ -131,10 +134,24 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		FrameGraphNode lightingPass{};
-		lightingPass.renderPass = std::make_unique<LightingPass>(m_device, *m_globalPool);
+		m_frameGraph.registerCallback("ShadowPass", []() { std::cout << "Shadow pass executed\n"; });
+		m_frameGraph.registerCallback("LightingPass", []() { std::cout << "Lighting pass executed\n"; });
+		m_frameGraph.registerCallback("BloomPass", []() { std::cout << "Bloom pass executed\n"; });
 
-		m_frameGraph.add(std::move(lightingPass));
+		auto shadowTexture = m_frameGraph.createResource("ShadowMap");
+		auto colorTexture = m_frameGraph.createResource("ColorTexture");
+		auto depthTexture = m_frameGraph.createResource("DepthTexture");
+
+		auto shadowPass = m_frameGraph.createPass<RasterPass>("ShadowPass");
+		shadowPass->addOutput(shadowTexture, ResourceUsage::DepthAttachment);
+
+		auto lightingPass = m_frameGraph.createPass<RasterPass>("LightingPass");
+		lightingPass->addInput(shadowTexture, ResourceUsage::SampledTexture);
+		lightingPass->addOutput(colorTexture, ResourceUsage::ColorAttachment);
+
+		auto bloomPass = m_frameGraph.createPass<ComputePass>("BloomPass");
+		bloomPass->addInput(colorTexture, ResourceUsage::SampledTexture);
+		bloomPass->addOutput(colorTexture, ResourceUsage::StorageTexture);
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

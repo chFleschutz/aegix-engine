@@ -8,7 +8,7 @@
 
 namespace Aegix::Graphics
 {
-	class LightingPass : public FrameGraphRenderPass
+	class LightingPass : public FrameGraphPass
 	{
 	public:
 		LightingPass(VulkanDevice& device, DescriptorPool& pool);
@@ -17,8 +17,6 @@ namespace Aegix::Graphics
 
 	private:
 		void updateGlobalUBO(const FrameInfo& frameInfo);
-
-		VulkanDevice& m_device;
 
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
 		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;

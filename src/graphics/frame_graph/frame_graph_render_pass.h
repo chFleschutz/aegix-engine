@@ -6,29 +6,63 @@
 
 namespace Aegix::Graphics
 {
-	struct Attachment
+	struct FrameGraphResource
 	{
-		VkFormat format;
-		VkClearValue clearValue;
-		VkAttachmentLoadOp loadOp;
+		std::string name;
 		std::shared_ptr<Texture> texture;
 	};
 
-	class FrameGraphRenderPass
+	enum class ResourceUsage
+	{
+		ColorAttachment,
+		DepthAttachment,
+		SampledTexture,
+		StorageTexture,
+		UniformBuffer,
+		StorageBuffer,
+	};
+
+	class FrameGraphPass
 	{
 	public:
-		FrameGraphRenderPass(VulkanDevice& device) : m_device{ device } {}
-		FrameGraphRenderPass(const FrameGraphRenderPass&) = delete;
-		virtual ~FrameGraphRenderPass() = default;
+		FrameGraphPass(VulkanDevice& device) : m_device{ device } {}
+		FrameGraphPass(const FrameGraphPass&) = delete;
+		virtual ~FrameGraphPass() = default;
 
-		virtual void execute(const FrameInfo& frameInfo) = 0;
+		virtual void execute(const FrameInfo& frameInfo)
+		{
+			// TODO: Pass frameInfo to execute callback
+			if (m_execute)
+				m_execute();
+		}
 
-		void setAttachments(std::vector<Attachment> attachments) { m_attachments = std::move(attachments); }
+		void addInput(const std::shared_ptr<FrameGraphResource>& resource, ResourceUsage usage)
+		{
+			m_inputs.emplace_back(resource, usage);
+		}
+
+		void addOutput(const std::shared_ptr<FrameGraphResource>& resource, ResourceUsage usage)
+		{
+			m_outputs.emplace_back(resource, usage);
+		}
+
+		void setExecuteCallback(std::function<void()> execute) 
+		{
+			m_execute = execute;
+		}
 
 	protected:
+		struct ResourceBinding
+		{
+			std::shared_ptr<FrameGraphResource> resource;
+			ResourceUsage usage;
+		};
+
 		VulkanDevice& m_device;
 
-		std::vector<Attachment> m_attachments;
 		VkExtent2D m_renderArea;
+		std::vector<ResourceBinding> m_inputs;
+		std::vector<ResourceBinding> m_outputs;
+		std::function<void()> m_execute;
 	};
 }
