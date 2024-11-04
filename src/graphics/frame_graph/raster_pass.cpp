@@ -6,9 +6,11 @@ namespace Aegix::Graphics
 {
 	void RasterPass::create()
 	{
-		createRenderPass();
-		createFramebuffer();
-		createClearValues();
+		auto attachments = findAttachments();
+		createRenderArea(attachments);
+		createRenderPass(attachments);
+		createFramebuffer(attachments);
+		createClearValues(attachments);
 	}
 
 	void RasterPass::execute(const FrameInfo& frameInfo)
@@ -20,30 +22,27 @@ namespace Aegix::Graphics
 		endRenderPass(frameInfo.commandBuffer);
 	}
 
-	void RasterPass::createRenderArea()
+	void RasterPass::createRenderArea(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources)
 	{
-		for (const auto& [resource, usage] : m_outputs)
+		for (const auto& [resource, usage] : attachmentRessources)
 		{
-			if (usage != ResourceUsage::ColorAttachment && usage != ResourceUsage::DepthAttachment)
-				continue;
+			// Ensure all attachments have the same dimensions
+			assert(m_renderArea.width == 0 || m_renderArea.width == resource->texture->width());
+			assert(m_renderArea.height == 0 || m_renderArea.height == resource->texture->height());
 
-			assert(resource->texture && "Attachment image not initialized");
 			m_renderArea = resource->texture->extent();
 		}
 	}
 
-	void RasterPass::createRenderPass()
+	void RasterPass::createRenderPass(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources)
 	{
 		std::vector<VkAttachmentDescription> attachments;
 		std::vector<VkAttachmentReference> colorRefs;
-		VkAttachmentReference depthRef{};
+		VkAttachmentReference depthRef{ VK_ATTACHMENT_UNUSED, VK_IMAGE_LAYOUT_UNDEFINED };
 
 		// TODO: Only works for output resources (Read-only resources are not considered)
-		for (const auto& [resource, usage] : m_outputs)
+		for (const auto& [resource, usage] : attachmentRessources)
 		{
-			if (usage != ResourceUsage::ColorAttachment && usage != ResourceUsage::DepthAttachment)
-				continue;
-
 			assert(resource->texture && "Color attachment image not initialized");
 
 			VkAttachmentDescription attachmentDesc{};
@@ -105,25 +104,21 @@ namespace Aegix::Graphics
 		CHECK_VK_RESULT(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass));
 	}
 
-	void RasterPass::createFramebuffer()
+	void RasterPass::createFramebuffer(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources)
 	{
-		std::vector<VkImageView> attachments{};
+		std::vector<VkImageView> attachmentViews{};
 
-		for (const auto& [resource, usage] : m_outputs)
+		for (const auto& [resource, usage] : attachmentRessources)
 		{
-			if (usage != ResourceUsage::ColorAttachment && usage != ResourceUsage::DepthAttachment)
-				continue;
-
 			assert(resource->texture && "Attachment image not initialized");
-
-			attachments.emplace_back(resource->texture->imageView());
+			attachmentViews.emplace_back(resource->texture->imageView());
 		}
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferInfo.renderPass = m_renderPass;
-		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		framebufferInfo.pAttachments = attachments.data();
+		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachmentViews.size());
+		framebufferInfo.pAttachments = attachmentViews.data();
 		framebufferInfo.width = m_renderArea.width;
 		framebufferInfo.height = m_renderArea.height;
 		framebufferInfo.layers = 1;
@@ -131,9 +126,9 @@ namespace Aegix::Graphics
 		CHECK_VK_RESULT(vkCreateFramebuffer(m_device, &framebufferInfo, nullptr, &m_framebuffer));
 	}
 
-	void RasterPass::createClearValues()
+	void RasterPass::createClearValues(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources)
 	{
-		for (const auto& [resource, usage] : m_outputs)
+		for (const auto& [resource, usage] : attachmentRessources)
 		{
 			if (usage == ResourceUsage::ColorAttachment)
 			{
@@ -167,5 +162,18 @@ namespace Aegix::Graphics
 	void RasterPass::endRenderPass(VkCommandBuffer commandBuffer)
 	{
 		vkCmdEndRenderPass(commandBuffer);
+	}
+
+	std::vector<FrameGraphPass::ResourceBinding> RasterPass::findAttachments()
+	{
+		std::vector<ResourceBinding> attachments{};
+
+		for (const auto& [resource, usage] : m_outputs)
+		{
+			if (usage == ResourceUsage::ColorAttachment || usage == ResourceUsage::DepthAttachment)
+				attachments.emplace_back(resource, usage);
+		}
+
+		return attachments;
 	}
 }

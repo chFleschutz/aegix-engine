@@ -14,13 +14,15 @@ namespace Aegix::Graphics
 		virtual void execute(const FrameInfo& frameInfo) override;
 
 	private:
-		void createRenderArea();
-		void createRenderPass();
-		void createFramebuffer();
-		void createClearValues();
+		void createRenderArea(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources);
+		void createRenderPass(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources);
+		void createFramebuffer(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources);
+		void createClearValues(const std::vector<FrameGraphPass::ResourceBinding>& attachmentRessources);
 
 		void beginRenderPass(VkCommandBuffer commandBuffer);
 		void endRenderPass(VkCommandBuffer commandBuffer);
+
+		std::vector<FrameGraphPass::ResourceBinding> findAttachments();
 
 		VkExtent2D m_renderArea = { 0, 0 };
 		VkRenderPass m_renderPass = VK_NULL_HANDLE;
