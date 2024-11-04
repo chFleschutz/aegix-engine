@@ -39,9 +39,10 @@ namespace Aegix::Graphics
 			m_callbacks[name] = callback;
 		}
 
-		std::shared_ptr<FrameGraphResource> createResource(const std::string& name)
+		std::shared_ptr<FrameGraphResource> createResource(const std::string& name, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
 		{
-			auto resource = std::make_shared<FrameGraphResource>(name, nullptr);
+			auto texture = std::make_shared<Texture>(m_device, width, height, format, usage);
+			auto resource = std::make_shared<FrameGraphResource>(name, texture);
 			m_resources[name] = resource;
 			return resource;
 		}
