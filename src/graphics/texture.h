@@ -35,6 +35,8 @@ namespace Aegix::Graphics
 
 		VkFormat format() const { return m_format; }
 		VkExtent2D extent() const { return m_extent; }
+		uint32_t width() const { return m_extent.width; }
+		uint32_t height() const { return m_extent.height; }
 		VkImage image() const { return m_image; }
 		VkImageView imageView() const { return m_imageView; }
 
