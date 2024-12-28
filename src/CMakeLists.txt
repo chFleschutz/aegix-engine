@@ -11,15 +11,10 @@ target_sources(AegixEngine PRIVATE
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/frame_graph/frame_graph.cpp"
-	"graphics/frame_graph/raster_pass.cpp"
 	"graphics/gui.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/pipeline.cpp"
 	"graphics/renderer.cpp"
-	"graphics/frame_graph/lighting_pass.cpp"  
-	"graphics/renderpasses/ui_pass.cpp"
-	"graphics/renderpasses/render_pass.cpp"
-	"graphics/renderpasses/swap_chain_blit_pass.cpp"
 	"graphics/static_mesh.cpp"
 	"graphics/swap_chain.cpp"
 	"graphics/systems/default_render_system.cpp"
@@ -40,7 +35,7 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- "graphics/frame_graph/compute_pass.h")
+ )
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"
