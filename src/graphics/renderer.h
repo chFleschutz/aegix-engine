@@ -3,7 +3,6 @@
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_graph/frame_graph.h"
-#include "graphics/renderpasses/render_pass.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/window.h"

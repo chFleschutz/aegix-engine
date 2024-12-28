@@ -1,10 +1,6 @@
 #include "renderer.h"
 
-#include "frame_graph/lighting_pass.h"
 #include "scene/scene.h"
-
-#include "frame_graph/raster_pass.h"
-#include "frame_graph/compute_pass.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -67,7 +63,8 @@ namespace Aegix::Graphics
 			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
-		m_frameGraph.execute(frameInfo);
+		// TODO: Pass whole frameInfo to the frame graph
+		m_frameGraph.execute(frameInfo.commandBuffer);
 
 		endFrame(commandBuffer);
 	}
@@ -135,34 +132,27 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.registerCallback("ShadowPass", []() { std::cout << "Shadow pass executed\n"; });
-		m_frameGraph.registerCallback("LightingPass", []() { std::cout << "Lighting pass executed\n"; });
-		m_frameGraph.registerCallback("BloomPass", []() { std::cout << "Bloom pass executed\n"; });
-		m_frameGraph.registerCallback("CompositePass", []() { std::cout << "Composite pass executed\n"; });
+		auto& gbufferPass = m_frameGraph.addPass("GBuffer", 
+			[&](RenderPass& pass)
+			{
+				std::cout << "Setting up GBuffer pass\n";
+			}, 
+			[](VkCommandBuffer commandBuffer)
+			{
+				std::cout << "Executing GBuffer pass\n";
+			});
 
-		auto shadowTexture = m_frameGraph.createResource("ShadowMap", 1024, 1024, VK_FORMAT_D32_SFLOAT, 
-			VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-		auto colorTexture = m_frameGraph.createResource("ColorTexture", m_swapChain->width(), m_swapChain->height(), 
-			VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-		auto depthTexture = m_frameGraph.createResource("DepthTexture", m_swapChain->width(), m_swapChain->height(),
-			VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+		auto& lightingPass = m_frameGraph.addPass("Lighting",
+			[&](RenderPass& pass)
+			{
+				std::cout << "Setting up Lighting pass\n";
+			},
+			[](VkCommandBuffer commandBuffer)
+			{
+				std::cout << "Executing Lighting pass\n";
+			});
 
-		auto shadowPass = m_frameGraph.createPass<RasterPass>("ShadowPass");
-		shadowPass->addOutput(shadowTexture, ResourceUsage::DepthAttachment);
-
-		auto lightingPass = m_frameGraph.createPass<RasterPass>("LightingPass");
-		lightingPass->addInput(shadowTexture, ResourceUsage::SampledTexture);
-		lightingPass->addOutput(colorTexture, ResourceUsage::ColorAttachment);
-		lightingPass->addOutput(depthTexture, ResourceUsage::DepthAttachment);
-
-		auto bloomPass = m_frameGraph.createPass<ComputePass>("BloomPass");
-		bloomPass->addInput(colorTexture, ResourceUsage::SampledTexture);
-		bloomPass->addOutput(colorTexture, ResourceUsage::StorageTexture);
-
-		auto compositePass = m_frameGraph.createPass<ComputePass>("CompositePass");
-		compositePass->addInput(colorTexture, ResourceUsage::SampledTexture);
-
-		m_frameGraph.buildDependencies();
+		m_frameGraph.compile();
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
