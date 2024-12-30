@@ -63,8 +63,8 @@ namespace Aegix::Graphics
 			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
-		// TODO: Pass whole frameInfo to the frame graph
-		m_frameGraph.execute(frameInfo.commandBuffer);
+		// TODO: Pass frameInfo to the frame graph
+		m_frameGraph.execute();
 
 		endFrame(commandBuffer);
 	}
@@ -132,24 +132,36 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& gbufferPass = m_frameGraph.addPass("GBuffer", 
-			[&](RenderPass& pass)
+		struct GBufferData
+		{
+			std::string name;
+		};
+
+		struct LightingData
+		{
+			std::string name;
+		};
+
+		m_frameGraph.addPass<GBufferData>("GBuffer", 
+			[&](FrameGraph::Builder& builder, GBufferData& data)
 			{
-				std::cout << "Setting up GBuffer pass\n";
+				data.name = "GBuffer";
+				std::cout << "Setting up " << data.name << " pass\n";
 			}, 
-			[](VkCommandBuffer commandBuffer)
+			[=](const GBufferData& data)
 			{
-				std::cout << "Executing GBuffer pass\n";
+				std::cout << "Executing " << data.name << " pass\n";
 			});
 
-		auto& lightingPass = m_frameGraph.addPass("Lighting",
-			[&](RenderPass& pass)
+		m_frameGraph.addPass<LightingData>("Lighting",
+			[&](FrameGraph::Builder& builder, LightingData& data)
 			{
-				std::cout << "Setting up Lighting pass\n";
+				data.name = "Lighting";
+				std::cout << "Setting up " << data.name << " pass\n";
 			},
-			[](VkCommandBuffer commandBuffer)
+			[=](const LightingData& data)
 			{
-				std::cout << "Executing Lighting pass\n";
+				std::cout << "Executing " << data.name << " pass\n";
 			});
 
 		m_frameGraph.compile();

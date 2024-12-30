@@ -69,6 +69,6 @@ namespace Aegix::Graphics
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 
-		FrameGraph m_frameGraph{ m_device };
+		FrameGraph m_frameGraph;
 	};
 }

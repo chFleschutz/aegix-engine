@@ -7,10 +7,13 @@ target_sources(AegixEngine PRIVATE
 	"core/input.cpp"
 	"core/systems/camera_system.cpp" 
 	"core/systems/system_manager.cpp"
+
 	"graphics/buffer.cpp"
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/frame_graph/frame_graph.cpp"
+	"graphics/frame_graph/frame_graph_node.h" 
+	"graphics/frame_graph/frame_graph_pass.h"
 	"graphics/gui.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/pipeline.cpp"
@@ -24,18 +27,22 @@ target_sources(AegixEngine PRIVATE
 	"graphics/texture.cpp"
 	"graphics/vulkan_tools.cpp"
 	"graphics/window.cpp"
+
 	"physics/motion_dynamics.cpp"
+
 	"scene/entity.cpp"
 	"scene/scene.cpp"
+
 	"scripting/script_manager.cpp"
 	"scripting/movement/dynamic_movement_controller.cpp"
 	"scripting/movement/kinematic_movement_controller.cpp"
+
 	"utils/color.cpp"
 	"utils/file.cpp"
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
- )
+)
 
 target_include_directories(AegixEngine PUBLIC 
 	"${CMAKE_CURRENT_SOURCE_DIR}"
