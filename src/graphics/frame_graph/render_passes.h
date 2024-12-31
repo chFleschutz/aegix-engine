@@ -9,7 +9,6 @@ namespace Aegix::Graphics
 {
 	struct GBufferData
 	{
-		std::string name;
 		FrameGraphResourceID albedo;
 		FrameGraphResourceID normal;
 		FrameGraphResourceID depth;
@@ -23,8 +22,7 @@ namespace Aegix::Graphics
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
-					data.name = "GBuffer";
-					std::cout << "Setting up " << data.name << " pass\n";
+					std::cout << "Creating GBuffer pass\n";
 
 					data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
 					data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
@@ -35,7 +33,7 @@ namespace Aegix::Graphics
 				},
 				[=](const GBufferData& data)
 				{
-					std::cout << "Executing " << data.name << " pass ";
+					std::cout << "Executing GBuffer pass\n";
 				});
 		}
 	};
@@ -44,7 +42,6 @@ namespace Aegix::Graphics
 
 	struct LightingData
 	{
-		std::string name;
 		FrameGraphResourceID lighting;
 	};
 
@@ -58,8 +55,7 @@ namespace Aegix::Graphics
 			blackboard += frameGraph.addPass<LightingData>("Lighting",
 				[&](FrameGraph::Builder& builder, LightingData& data)
 				{
-					data.name = "Lighting";
-					std::cout << "Setting up " << data.name << " pass\n";
+					std::cout << "Creating Lighting pass\n";
 
 					data.lighting = builder.create<FrameGraphTexture>("Lighting", { 1920, 1080 });
 					builder.declareWrite(data.lighting);
@@ -70,7 +66,7 @@ namespace Aegix::Graphics
 				},
 				[=](const LightingData& data)
 				{
-					std::cout << "Executing " << data.name << " pass\n";
+					std::cout << "Executing Lighting pass\n";
 				});
 		}
 	};

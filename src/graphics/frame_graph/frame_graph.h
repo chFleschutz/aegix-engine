@@ -1,18 +1,20 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_node.h"
-#include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_pass.h"
 #include "graphics/frame_graph/frame_graph_resource.h"
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Aegix::Graphics
 {
 	template <typename T>
 	concept HasDesc = requires(T) { typename T::Desc; };
+
 
 	class FrameGraphTexture
 	{
@@ -23,7 +25,6 @@ namespace Aegix::Graphics
 			uint32_t height;
 		};
 	};
-	
 
 
 	class FrameGraph
@@ -56,12 +57,12 @@ namespace Aegix::Graphics
 		};
 
 		template <typename Data = NoData, typename Setup, typename Execute>
+			requires std::is_invocable_v<Setup, Builder&, Data&> && 
+					 std::is_invocable_v<Execute, const Data&> &&
+					 (sizeof(Execute) < 1024)
+		[[nodiscard]]
 		const Data& addPass(const std::string& name, Setup&& setup, Execute&& execute)
 		{
-			static_assert(std::is_invocable_v<Setup, Builder&, Data&>, "Invalid setup lambda");
-			static_assert(std::is_invocable_v<Execute, const Data&>, "Invalid execute lambda");
-			static_assert(sizeof(Execute) < 1024, "Execute lambda captures too much (max 1024 bytes)");
-
 			auto pass = std::make_unique<FrameGraphPass<Data, Execute>>(std::forward<Execute>(execute));
 			auto& data = pass->data;
 
@@ -69,7 +70,7 @@ namespace Aegix::Graphics
 			auto& node = m_nodes.emplace_back(name, id, std::move(pass));
 
 			Builder builder{ *this, node };
-			std::invoke(setup, builder, data);
+			std::invoke(std::forward<Setup>(setup), builder, data);
 			return data;
 		}
 
