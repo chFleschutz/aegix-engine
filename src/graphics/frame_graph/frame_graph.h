@@ -4,10 +4,12 @@
 #include "graphics/frame_graph/frame_graph_pass.h"
 #include "graphics/frame_graph/frame_graph_resource.h"
 
+#include <algorithm>
+#include <cassert>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace Aegix::Graphics
 {
@@ -28,6 +30,8 @@ namespace Aegix::Graphics
 	class PassNode : public FrameGraphNode
 	{
 	public:
+		friend class FrameGraph;
+
 		PassNode(std::string_view name, uint32_t id, std::unique_ptr<FrameGraphPassBase> pass)
 			: FrameGraphNode{ name, id }, m_pass{ std::move(pass) }
 		{
@@ -38,8 +42,24 @@ namespace Aegix::Graphics
 			std::invoke(*m_pass);
 		}
 
+		void addRead(FrameGraphResourceID resource)
+		{
+			assert(std::find(m_reads.begin(), m_reads.end(), resource) == m_reads.end() && 
+				"Resource already declared as read");
+			m_reads.emplace_back(resource);
+		}
+
+		void addWrite(FrameGraphResourceID resource)
+		{
+			assert(std::find(m_writes.begin(), m_writes.end(), resource) == m_writes.end() &&
+				"Resource already declared as write");
+			m_writes.emplace_back(resource);
+		}
+
 	private:
 		std::unique_ptr<FrameGraphPassBase> m_pass;
+		std::vector<FrameGraphResourceID> m_reads;
+		std::vector<FrameGraphResourceID> m_writes;
 	};
 
 	class FrameGraph
@@ -50,8 +70,6 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
-			friend class FrameGraph;
-
 			Builder(FrameGraph& frameGraph, PassNode& node)
 				: m_frameGraph{ frameGraph }, m_node{ node }
 			{
@@ -65,17 +83,14 @@ namespace Aegix::Graphics
 				return m_frameGraph.createResource<T>(name, desc);
 			}
 
-			auto declareRead(FrameGraphResourceID resource) -> FrameGraphResourceID
+			void declareRead(FrameGraphResourceID resource) 
 			{
-				// TODO
-				return resource;
+				m_node.addRead(resource);
 			}
 
-			[[nodiscard]]
-			auto declareWrite(FrameGraphResourceID resource) -> FrameGraphResourceID
+			void declareWrite(FrameGraphResourceID resource)
 			{
-				// TODO
-				return resource;
+				m_node.addWrite(resource);
 			}
 
 		private:

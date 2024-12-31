@@ -155,9 +155,9 @@ namespace Aegix::Graphics
 				data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
 				data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
 
-				data.albedo = builder.declareWrite(data.albedo);
-				data.normal = builder.declareWrite(data.normal);
-				data.depth = builder.declareWrite(data.depth);
+				builder.declareWrite(data.albedo);
+				builder.declareWrite(data.normal);
+				builder.declareWrite(data.depth);
 			}, 
 			[=](const GBufferData& data)
 			{
