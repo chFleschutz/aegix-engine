@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_pass.h"
+#include "graphics/frame_graph/frame_graph_resource.h"
 
 #include <functional>
 #include <string>
@@ -10,6 +11,20 @@
 
 namespace Aegix::Graphics
 {
+	template <typename T>
+	concept HasDesc = requires(T) { typename T::Desc; };
+
+	class FrameGraphTexture
+	{
+	public:
+		struct Desc
+		{
+			uint32_t width;
+			uint32_t height;
+		};
+
+	};
+
 	class PassNode : public FrameGraphNode
 	{
 	public:
@@ -35,9 +50,32 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
+			friend class FrameGraph;
+
 			Builder(FrameGraph& frameGraph, PassNode& node)
 				: m_frameGraph{ frameGraph }, m_node{ node }
 			{
+			}
+
+			template <typename T>
+				requires HasDesc<T>
+			[[nodiscard]] 
+			auto create(const std::string_view name, const typename T::Desc& desc) -> FrameGraphResourceID
+			{
+				return m_frameGraph.createResource<T>(name, desc);
+			}
+
+			auto declareRead(FrameGraphResourceID resource) -> FrameGraphResourceID
+			{
+				// TODO
+				return resource;
+			}
+
+			[[nodiscard]]
+			auto declareWrite(FrameGraphResourceID resource) -> FrameGraphResourceID
+			{
+				// TODO
+				return resource;
 			}
 
 		private:
@@ -77,6 +115,15 @@ namespace Aegix::Graphics
 		}
 
 	private:
+		template <typename T>
+		auto createResource(const std::string_view name, const typename T::Desc& desc) -> FrameGraphResourceID
+		{
+			const auto id = static_cast<FrameGraphResourceID>(m_resources.size());
+			m_resources.emplace_back(id, desc, T{});
+			return id;
+		}
+
 		std::vector<PassNode> m_passes;
+		std::vector<FrameGraphResource> m_resources;
 	};
 }

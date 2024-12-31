@@ -135,6 +135,9 @@ namespace Aegix::Graphics
 		struct GBufferData
 		{
 			std::string name;
+			FrameGraphResourceID albedo;
+			FrameGraphResourceID normal;
+			FrameGraphResourceID depth;
 		};
 
 		struct LightingData
@@ -147,10 +150,19 @@ namespace Aegix::Graphics
 			{
 				data.name = "GBuffer";
 				std::cout << "Setting up " << data.name << " pass\n";
+
+				data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
+				data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
+				data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
+
+				data.albedo = builder.declareWrite(data.albedo);
+				data.normal = builder.declareWrite(data.normal);
+				data.depth = builder.declareWrite(data.depth);
 			}, 
 			[=](const GBufferData& data)
 			{
-				std::cout << "Executing " << data.name << " pass\n";
+				std::cout << "Executing " << data.name << " pass ";
+
 			});
 
 		m_frameGraph.addPass<LightingData>("Lighting",
