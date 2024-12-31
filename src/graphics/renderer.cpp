@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "scene/scene.h"
+#include "graphics/frame_graph/frame_graph_blackboard.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -143,9 +144,12 @@ namespace Aegix::Graphics
 		struct LightingData
 		{
 			std::string name;
+			FrameGraphResourceID lighting;
 		};
 
-		m_frameGraph.addPass<GBufferData>("GBuffer", 
+		FrameGraphBlackboard board;
+
+		board += m_frameGraph.addPass<GBufferData>("GBuffer", 
 			[&](FrameGraph::Builder& builder, GBufferData& data)
 			{
 				data.name = "GBuffer";
@@ -154,7 +158,6 @@ namespace Aegix::Graphics
 				data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
 				data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
 				data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
-
 				builder.declareWrite(data.albedo);
 				builder.declareWrite(data.normal);
 				builder.declareWrite(data.depth);
@@ -162,14 +165,21 @@ namespace Aegix::Graphics
 			[=](const GBufferData& data)
 			{
 				std::cout << "Executing " << data.name << " pass ";
-
 			});
 
-		m_frameGraph.addPass<LightingData>("Lighting",
+		const auto& gBuffer = board.get<GBufferData>();
+		board += m_frameGraph.addPass<LightingData>("Lighting",
 			[&](FrameGraph::Builder& builder, LightingData& data)
 			{
 				data.name = "Lighting";
 				std::cout << "Setting up " << data.name << " pass\n";
+
+				data.lighting = builder.create<FrameGraphTexture>("Lighting", { 1920, 1080 });
+				builder.declareWrite(data.lighting);
+
+				builder.declareRead(gBuffer.albedo);
+				builder.declareRead(gBuffer.normal);
+				builder.declareRead(gBuffer.depth);
 			},
 			[=](const LightingData& data)
 			{

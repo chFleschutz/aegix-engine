@@ -12,6 +12,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
 	"graphics/frame_graph/frame_graph.cpp"
+	"graphics/frame_graph/frame_graph_blackboard.h"
 	"graphics/frame_graph/frame_graph_node.h" 
 	"graphics/frame_graph/frame_graph_pass.h"
 	"graphics/frame_graph/frame_graph_resource.h"
