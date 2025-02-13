@@ -88,15 +88,17 @@ namespace Aegix::Graphics
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "Aegix Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_0; 
+		appInfo.apiVersion = VK_API_VERSION_1_3; 
+
+		auto extensions = requiredExtensions();
 
 		VkInstanceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-
-		auto extensions = getRequiredExtensions();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 		createInfo.ppEnabledExtensionNames = extensions.data();
+		createInfo.enabledLayerCount = 0;
+		createInfo.pNext = nullptr;
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if (enableValidationLayers)
@@ -107,11 +109,6 @@ namespace Aegix::Graphics
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 			std::cout << "Vulkan Validation Layer enabled\n";
-		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
-			createInfo.pNext = nullptr;
 		}
 
 		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
@@ -159,7 +156,7 @@ namespace Aegix::Graphics
 		float queuePriority = 1.0f;
 		for (uint32_t queueFamily : uniqueQueueFamilies)
 		{
-			VkDeviceQueueCreateInfo queueCreateInfo = {};
+			VkDeviceQueueCreateInfo queueCreateInfo{};
 			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			queueCreateInfo.queueFamilyIndex = queueFamily;
 			queueCreateInfo.queueCount = 1;
@@ -167,14 +164,20 @@ namespace Aegix::Graphics
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		VkPhysicalDeviceFeatures deviceFeatures = {};
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{};
+		dynamicRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+		dynamicRendering.dynamicRendering = VK_TRUE;
 
-		VkDeviceCreateInfo createInfo = {};
+		VkPhysicalDeviceFeatures2 deviceFeatures{};
+		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		deviceFeatures.pNext = &dynamicRendering;
+		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+
+		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.pEnabledFeatures = &deviceFeatures;
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
@@ -289,14 +292,15 @@ namespace Aegix::Graphics
 		return true;
 	}
 
-	std::vector<const char*> VulkanDevice::getRequiredExtensions()
+	std::vector<const char*> VulkanDevice::requiredExtensions() const
 	{
 		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions;
-		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
+		std::vector<const char*> extensions;
+		extensions.reserve(glfwExtensionCount);
+		extensions.insert(extensions.end(), glfwExtensions, glfwExtensions + glfwExtensionCount);
+		
 		if (enableValidationLayers)
 		{
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -321,8 +325,7 @@ namespace Aegix::Graphics
 		}
 
 		//std::cout << "required extensions:" << std::endl;
-		auto requiredExtensions = getRequiredExtensions();
-		for (const auto& required : requiredExtensions)
+		for (const auto& required : requiredExtensions())
 		{
 			//std::cout << "\t" << required << std::endl;
 			if (available.find(required) == available.end())

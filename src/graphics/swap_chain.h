@@ -22,16 +22,18 @@ namespace Aegix::Graphics
 		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
-		VkFramebuffer frameBuffer(int index) { return mSwapChainFramebuffers[index]; }
-		VkRenderPass renderPass() { return mRenderPass; }
-		VkImageView imageView(int index) { return mSwapChainImageViews[index]; }
-		size_t imageCount() { return mSwapChainImages.size(); }
-		VkFormat swapChainImageFormat() { return mSwapChainImageFormat; }
-		VkExtent2D swapChainExtent() { return mSwapChainExtent; }
-		uint32_t width() { return mSwapChainExtent.width; }
-		uint32_t height() { return mSwapChainExtent.height; }
+		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
+		VkImageView depthImageView(int index) const { return mDepthImageViews[index]; }
+		VkImage colorImage(int index) const { return mColorImages[index]; }
+		VkImage depthImage(int index) const { return mDepthImages[index]; }
 
-		float extentAspectRatio() {	return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
+		size_t imageCount() const { return mColorImages.size(); }
+		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }
+		VkExtent2D swapChainExtent() const { return mSwapChainExtent; }
+		uint32_t width() const { return mSwapChainExtent.width; }
+		uint32_t height() const { return mSwapChainExtent.height; }
+
+		float extentAspectRatio() const { return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
 		VkFormat findDepthFormat();
 
 		VkResult acquireNextImage(uint32_t* imageIndex);
@@ -48,8 +50,6 @@ namespace Aegix::Graphics
 		void createSwapChain();
 		void createImageViews();
 		void createDepthResources();
-		void createRenderPass();
-		void createFramebuffers();
 		void createSyncObjects();
 
 		// Helper functions
@@ -61,14 +61,12 @@ namespace Aegix::Graphics
 		VkFormat mSwapChainDepthFormat;
 		VkExtent2D mSwapChainExtent;
 
-		std::vector<VkFramebuffer> mSwapChainFramebuffers;
-		VkRenderPass mRenderPass;
-
 		std::vector<VkImage> mDepthImages;
-		std::vector<VkDeviceMemory> mDepthImageMemorys;
+		std::vector<VkDeviceMemory> mDepthImageMemories;
 		std::vector<VkImageView> mDepthImageViews;
-		std::vector<VkImage> mSwapChainImages;
-		std::vector<VkImageView> mSwapChainImageViews;
+
+		std::vector<VkImage> mColorImages;
+		std::vector<VkImageView> mColorImageViews;
 
 		VulkanDevice& m_device;
 		VkExtent2D m_windowExtent;

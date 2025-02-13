@@ -53,7 +53,7 @@ namespace Aegix::Graphics
 			glm::mat4 normalMatrix{ 1.0f };
 		};
 
-		DefaultRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
 		virtual void render(const FrameInfo& frameInfo) override;
 	};

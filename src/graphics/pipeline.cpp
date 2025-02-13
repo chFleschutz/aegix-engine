@@ -69,10 +69,11 @@ namespace Aegix::Graphics
 
 	// *************** Pipeline::Builder *********************
 
-	Pipeline::Builder::Builder(VulkanDevice& device)
+	Pipeline::Builder::Builder(VulkanDevice& device, VkPipelineLayout pipelineLayout)
 		: m_device{ device }
 	{
 		Pipeline::defaultPipelineConfigInfo(m_configInfo);
+		m_configInfo.pipelineLayout = pipelineLayout;
 	}
 
 	Pipeline::Builder::~Builder()
@@ -81,18 +82,6 @@ namespace Aegix::Graphics
 		{
 			vkDestroyShaderModule(m_device.device(), shaderStage.module, nullptr);
 		}
-	}
-
-	Pipeline::Builder& Pipeline::Builder::setRenderPass(VkRenderPass renderPass)
-	{
-		m_configInfo.renderPass = renderPass;
-		return *this;
-	}
-
-	Pipeline::Builder& Pipeline::Builder::setPipelineLayout(VkPipelineLayout pipelineLayout)
-	{
-		m_configInfo.pipelineLayout = pipelineLayout;
-		return *this;
 	}
 
 	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
@@ -122,6 +111,26 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	Pipeline::Builder& Pipeline::Builder::setColorAttachmentFormats(std::vector<VkFormat> colorFormats)
+	{
+		m_configInfo.colorAttachmentFormats = std::move(colorFormats);
+		m_configInfo.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_configInfo.colorAttachmentFormats.size());
+		m_configInfo.renderingInfo.pColorAttachmentFormats = m_configInfo.colorAttachmentFormats.data();
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setDepthAttachmentFormat(VkFormat depthFormat)
+	{
+		m_configInfo.renderingInfo.depthAttachmentFormat = depthFormat;
+		return *this;
+	}
+
+	Pipeline::Builder& Pipeline::Builder::setStencilFormat(VkFormat stencilFormat)
+	{
+		m_configInfo.renderingInfo.stencilAttachmentFormat = stencilFormat;
+		return *this;
+	}
+
 	Pipeline::Builder& Pipeline::Builder::enableAlphaBlending()
 	{
 		Pipeline::enableAlphaBlending(m_configInfo);
@@ -143,7 +152,6 @@ namespace Aegix::Graphics
 	std::unique_ptr<Pipeline> Pipeline::Builder::build()
 	{
 		assert(m_configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
-		assert(m_configInfo.renderPass != VK_NULL_HANDLE && "Cannot create pipeline: no renderPass provided");
 
 		return std::make_unique<Pipeline>(m_device, m_configInfo);
 	}
@@ -169,6 +177,8 @@ namespace Aegix::Graphics
 
 	void Pipeline::defaultPipelineConfigInfo(Pipeline::Config& configInfo)
 	{
+		configInfo.renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -254,7 +264,6 @@ namespace Aegix::Graphics
 	void Pipeline::createGraphicsPipeline(const Pipeline::Config& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
-		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
 
 		auto& bindingDescriptions = configInfo.bindingDescriptions;
 		auto& attributeDescriptions = configInfo.attributeDescriptions;
@@ -267,6 +276,7 @@ namespace Aegix::Graphics
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.pNext = &configInfo.renderingInfo;
 		pipelineInfo.stageCount = static_cast<uint32_t>(configInfo.shaderStges.size());
 		pipelineInfo.pStages = configInfo.shaderStges.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -278,7 +288,7 @@ namespace Aegix::Graphics
 		pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 		pipelineInfo.pDynamicState = &configInfo.dynamicStateInfo;
 		pipelineInfo.layout = configInfo.pipelineLayout;
-		pipelineInfo.renderPass = configInfo.renderPass;
+		pipelineInfo.renderPass = VK_NULL_HANDLE;
 		pipelineInfo.subpass = configInfo.subpass;
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;

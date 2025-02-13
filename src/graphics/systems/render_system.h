@@ -10,7 +10,7 @@ namespace Aegix::Graphics
 	class RenderSystem
 	{
 	public:
-		RenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		RenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 		RenderSystem(const RenderSystem&) = delete;
 		RenderSystem& operator=(const RenderSystem&) = delete;
 		virtual ~RenderSystem() = default;
