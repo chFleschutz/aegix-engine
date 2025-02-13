@@ -27,6 +27,8 @@ namespace Aegix::Graphics
 
 		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
 		VkImageView depthImageView(int index) const { return mDepthImageViews[index]; }
+		VkImage colorImage(int index) const { return mColorImages[index]; }
+		VkImage depthImage(int index) const { return mDepthImages[index]; }
 
 		size_t imageCount() const { return mColorImages.size(); }
 		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }

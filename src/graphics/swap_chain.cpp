@@ -378,6 +378,8 @@ namespace Aegix::Graphics
 			}
 		}
 
+		// TODO: Rendersystems assume VK_FORMAT_B8G8R8A8_SRGB as the swapchain format
+		assert(availableFormats[0].format == VK_FORMAT_B8G8R8A8_SRGB && "Currently the only supported format is VK_FORMAT_B8G8R8A8_SRGB");
 		return availableFormats[0];
 	}
 
@@ -418,8 +420,9 @@ namespace Aegix::Graphics
 
 	VkFormat SwapChain::findDepthFormat()
 	{
+		// TODO: Rendersystems assume VK_FORMAT_D32_SFLOAT as the depth format
 		return m_device.findSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			{ VK_FORMAT_D32_SFLOAT/*, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT*/ },
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}
