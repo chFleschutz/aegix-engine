@@ -71,9 +71,7 @@ namespace Aegix
 			auto commandBuffer = m_renderer.beginRenderFrame();
 			{
 				m_renderer.renderScene(commandBuffer, *m_scene);
-
-				// TODO: Adjust ImGui to work with dynamic rendering
-				//m_gui.renderGui(commandBuffer);
+				m_gui.renderGui(commandBuffer);
 			}
 			m_renderer.endRenderFrame(commandBuffer);
 
