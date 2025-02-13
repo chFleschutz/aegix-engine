@@ -57,6 +57,7 @@ namespace Aegix::Graphics
 			std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 			std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 			std::vector<VkPipelineShaderStageCreateInfo> shaderStges{};
+			std::vector<VkFormat> colorAttachmentFormats{};
 			VkPipelineRenderingCreateInfo renderingInfo{};
 			VkPipelineViewportStateCreateInfo viewportInfo{};
 			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};

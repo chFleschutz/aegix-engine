@@ -113,8 +113,9 @@ namespace Aegix::Graphics
 
 	Pipeline::Builder& Pipeline::Builder::setColorAttachmentFormats(std::vector<VkFormat> colorFormats)
 	{
-		m_configInfo.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(colorFormats.size());
-		m_configInfo.renderingInfo.pColorAttachmentFormats = colorFormats.data();
+		m_configInfo.colorAttachmentFormats = std::move(colorFormats);
+		m_configInfo.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_configInfo.colorAttachmentFormats.size());
+		m_configInfo.renderingInfo.pColorAttachmentFormats = m_configInfo.colorAttachmentFormats.data();
 		return *this;
 	}
 
@@ -287,7 +288,7 @@ namespace Aegix::Graphics
 		pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
 		pipelineInfo.pDynamicState = &configInfo.dynamicStateInfo;
 		pipelineInfo.layout = configInfo.pipelineLayout;
-		pipelineInfo.renderPass = nullptr;
+		pipelineInfo.renderPass = VK_NULL_HANDLE;
 		pipelineInfo.subpass = configInfo.subpass;
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
