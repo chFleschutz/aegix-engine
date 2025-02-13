@@ -33,6 +33,7 @@ namespace Aegix::Graphics
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
 		DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
 
+		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
 		VkDescriptorSetLayout descriptorSetLayout() const { return m_descriptorSetLayout; }
 
 	private:
@@ -71,6 +72,7 @@ namespace Aegix::Graphics
 		DescriptorPool(const DescriptorPool&) = delete;
 		DescriptorPool& operator=(const DescriptorPool&) = delete;
 
+		operator VkDescriptorPool() const { return m_descriptorPool; }
 		VkDescriptorPool descriptorPool() const { return m_descriptorPool; }
 
 		bool allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;

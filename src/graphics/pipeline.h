@@ -31,9 +31,11 @@ namespace Aegix::Graphics
 		PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
 			const std::vector<VkPushConstantRange>& pushConstants);
 		PipelineLayout(const PipelineLayout&) = delete;
-		PipelineLayout operator=(const PipelineLayout&) = delete;
 		~PipelineLayout();
 
+		PipelineLayout operator=(const PipelineLayout&) = delete;
+
+		operator VkPipelineLayout() const { return m_pipelineLayout; }
 		VkPipelineLayout pipelineLayout() const { return m_pipelineLayout; }
 
 	private:
@@ -95,6 +97,7 @@ namespace Aegix::Graphics
 		Pipeline operator=(const Pipeline&) = delete;
 		~Pipeline();
 
+		operator VkPipeline() const { return m_graphicsPipeline; }
 		VkPipeline pipeline() const { return m_graphicsPipeline; }
 
 		void bind(VkCommandBuffer commandBuffer);
