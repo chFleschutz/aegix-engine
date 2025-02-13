@@ -22,9 +22,6 @@ namespace Aegix::Graphics
 		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
-		VkFramebuffer frameBuffer(int index) const { return mSwapChainFramebuffers[index]; }
-		VkRenderPass renderPass() const { return mRenderPass; }
-
 		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
 		VkImageView depthImageView(int index) const { return mDepthImageViews[index]; }
 		VkImage colorImage(int index) const { return mColorImages[index]; }
@@ -53,8 +50,6 @@ namespace Aegix::Graphics
 		void createSwapChain();
 		void createImageViews();
 		void createDepthResources();
-		void createRenderPass();
-		void createFramebuffers();
 		void createSyncObjects();
 
 		// Helper functions
@@ -65,9 +60,6 @@ namespace Aegix::Graphics
 		VkFormat mSwapChainImageFormat;
 		VkFormat mSwapChainDepthFormat;
 		VkExtent2D mSwapChainExtent;
-
-		std::vector<VkFramebuffer> mSwapChainFramebuffers;
-		VkRenderPass mRenderPass;
 
 		std::vector<VkImage> mDepthImages;
 		std::vector<VkDeviceMemory> mDepthImageMemories;

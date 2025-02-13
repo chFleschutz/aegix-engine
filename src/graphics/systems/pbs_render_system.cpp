@@ -18,8 +18,8 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	PBSRenderSystem::PBSRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: RenderSystem(device, renderPass, globalSetLayout)
+	PBSRenderSystem::PBSRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
+		: RenderSystem(device, globalSetLayout)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)

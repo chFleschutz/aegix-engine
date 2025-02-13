@@ -33,13 +33,12 @@ namespace Aegix::Graphics
 			if (it != m_renderSystems.end())
 				return *it->second;
 
-			auto newSystem = std::make_unique<T>(m_device, swapChainRenderPass(), m_globalSetLayout->descriptorSetLayout());
+			auto newSystem = std::make_unique<T>(m_device, *m_globalSetLayout);
 			return *m_renderSystems.emplace(typeid(T), std::move(newSystem)).first->second;
 		}
 
 		VulkanDevice& device() { return m_device; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
-		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }
 		VkCommandBuffer currentCommandBuffer() const;
