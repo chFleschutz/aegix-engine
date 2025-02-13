@@ -26,11 +26,11 @@ namespace Aegix::Graphics
 
 	SwapChain::~SwapChain()
 	{
-		for (auto imageView : mSwapChainImageViews)
+		for (auto imageView : mColorImageViews)
 		{
 			vkDestroyImageView(m_device.device(), imageView, nullptr);
 		}
-		mSwapChainImageViews.clear();
+		mColorImageViews.clear();
 
 		if (m_swapChain != nullptr)
 		{
@@ -42,7 +42,7 @@ namespace Aegix::Graphics
 		{
 			vkDestroyImageView(m_device.device(), mDepthImageViews[i], nullptr);
 			vkDestroyImage(m_device.device(), mDepthImages[i], nullptr);
-			vkFreeMemory(m_device.device(), mDepthImageMemorys[i], nullptr);
+			vkFreeMemory(m_device.device(), mDepthImageMemories[i], nullptr);
 		}
 
 		for (auto framebuffer : mSwapChainFramebuffers)
@@ -186,8 +186,8 @@ namespace Aegix::Graphics
 			throw std::runtime_error("failed to create swap chain");
 
 		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
-		mSwapChainImages.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, mSwapChainImages.data());
+		mColorImages.resize(imageCount);
+		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, mColorImages.data());
 
 		mSwapChainImageFormat = surfaceFormat.format;
 		mSwapChainExtent = extent;
@@ -195,12 +195,12 @@ namespace Aegix::Graphics
 
 	void SwapChain::createImageViews()
 	{
-		mSwapChainImageViews.resize(mSwapChainImages.size());
-		for (size_t i = 0; i < mSwapChainImages.size(); i++)
+		mColorImageViews.resize(mColorImages.size());
+		for (size_t i = 0; i < mColorImages.size(); i++)
 		{
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image = mSwapChainImages[i];
+			viewInfo.image = mColorImages[i];
 			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			viewInfo.format = mSwapChainImageFormat;
 			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -209,7 +209,7 @@ namespace Aegix::Graphics
 			viewInfo.subresourceRange.baseArrayLayer = 0;
 			viewInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mSwapChainImageViews[i]) != VK_SUCCESS)
+			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mColorImageViews[i]) != VK_SUCCESS)
 				throw std::runtime_error("failed to create texture image view!");
 		}
 	}
@@ -277,7 +277,7 @@ namespace Aegix::Graphics
 		mSwapChainFramebuffers.resize(imageCount());
 		for (size_t i = 0; i < imageCount(); i++)
 		{
-			std::array<VkImageView, 2> attachments = { mSwapChainImageViews[i], mDepthImageViews[i] };
+			std::array<VkImageView, 2> attachments = { mColorImageViews[i], mDepthImageViews[i] };
 
 			VkFramebufferCreateInfo framebufferInfo = {};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -299,7 +299,7 @@ namespace Aegix::Graphics
 		mSwapChainDepthFormat = depthFormat;
 
 		mDepthImages.resize(imageCount());
-		mDepthImageMemorys.resize(imageCount());
+		mDepthImageMemories.resize(imageCount());
 		mDepthImageViews.resize(imageCount());
 
 		for (int i = 0; i < mDepthImages.size(); i++)
@@ -324,7 +324,7 @@ namespace Aegix::Graphics
 				imageInfo,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				mDepthImages[i],
-				mDepthImageMemorys[i]);
+				mDepthImageMemories[i]);
 
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

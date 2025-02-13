@@ -57,7 +57,7 @@ namespace Aegix::Graphics
 			std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 			std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 			std::vector<VkPipelineShaderStageCreateInfo> shaderStges{};
-
+			VkPipelineRenderingCreateInfo renderingInfo{};
 			VkPipelineViewportStateCreateInfo viewportInfo{};
 			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
 			VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
@@ -68,19 +68,19 @@ namespace Aegix::Graphics
 			std::vector<VkDynamicState> dynamicStateEnables{};
 			VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 			VkPipelineLayout pipelineLayout = nullptr;
-			VkRenderPass renderPass = nullptr;
 			uint32_t subpass = 0;
 		};
 
 		class Builder
 		{
 		public:
-			Builder(VulkanDevice& device);
+			Builder(VulkanDevice& device, VkPipelineLayout pipelineLayout);
 			~Builder();
 
-			Builder& setRenderPass(VkRenderPass renderPass);
-			Builder& setPipelineLayout(VkPipelineLayout pipelineLayout);
 			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
+			Builder& setColorAttachmentFormats(std::vector<VkFormat> colorFormats);
+			Builder& setDepthAttachmentFormat(VkFormat depthFormat);
+			Builder& setStencilFormat(VkFormat stencilFormat);
 			Builder& enableAlphaBlending();
 			Builder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 			Builder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
