@@ -38,6 +38,7 @@ namespace Aegix::Graphics
 		}
 
 		VulkanDevice& device() { return m_device; }
+		SwapChain& swapChain() { return *m_swapChain; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return m_isFrameStarted; }

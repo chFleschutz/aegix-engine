@@ -10,35 +10,40 @@ namespace Aegix::Graphics
 {
 	GUI::GUI(const Window& window, Renderer& renderer)
 	{
-		//IMGUI_CHECKVERSION();
-		//ImGui::CreateContext();
-		//ImGui::StyleColorsDark();
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
 
-		//ImGuiIO& io = ImGui::GetIO();
-		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-		//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-		//ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
+		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
-		//auto& device = renderer.device();
-		//ImGui_ImplVulkan_InitInfo init_info = {};
-		//init_info.Instance = device.instance();
-		//init_info.PhysicalDevice = device.physicalDevice();
-		//init_info.Device = device.device();
-		//init_info.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
-		//init_info.Queue = device.graphicsQueue();
-		//init_info.PipelineCache = nullptr;
-		//init_info.DescriptorPool = renderer.globalPool().descriptorPool();
-		//init_info.Subpass = 0;
-		//init_info.MinImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
-		//init_info.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
-		//init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		//init_info.Allocator = nullptr;
-		//init_info.CheckVkResultFn = nullptr;
-		//ImGui_ImplVulkan_Init(&init_info);
+		auto& device = renderer.device();
+		VkFormat colorFormat = renderer.swapChain().swapChainImageFormat();
+		VkFormat depthFormat = renderer.swapChain().findDepthFormat();
 
-		//ImGui_ImplVulkan_CreateFontsTexture();
+		ImGui_ImplVulkan_InitInfo initInfo{};
+		initInfo.Instance = device.instance();
+		initInfo.PhysicalDevice = device.physicalDevice();
+		initInfo.Device = device.device();
+		initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
+		initInfo.Queue = device.graphicsQueue();
+		initInfo.DescriptorPool = renderer.globalPool().descriptorPool();
+		initInfo.Subpass = 0;
+		initInfo.MinImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+		initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		initInfo.UseDynamicRendering = true;
+		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+		initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+		initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
+		initInfo.PipelineRenderingCreateInfo.depthAttachmentFormat = depthFormat;
+		ImGui_ImplVulkan_Init(&initInfo);
+
+		ImGui_ImplVulkan_CreateFontsTexture();
 	}
 
 	GUI::~GUI()
@@ -48,9 +53,9 @@ namespace Aegix::Graphics
 			layer->onDetach();
 		}
 
-		//ImGui_ImplVulkan_Shutdown();
-		//ImGui_ImplGlfw_Shutdown();
-		//ImGui::DestroyContext();
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 	}
 
 	void GUI::update(float deltaTime)
@@ -64,18 +69,18 @@ namespace Aegix::Graphics
 
 	void GUI::renderGui(VkCommandBuffer commandBuffer)
 	{
-		//ImGui_ImplVulkan_NewFrame();
-		//ImGui_ImplGlfw_NewFrame();
-		//ImGui::NewFrame();
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-		//// Cant use iterator because its possible to push/pop layers during update
-		//for (int i = 0; i < m_layers.size(); i++)
-		//{
-		//	m_layers[i]->onGuiRender();
-		//}
+		// Cant use iterator because its possible to push/pop layers during update
+		for (int i = 0; i < m_layers.size(); i++)
+		{
+			m_layers[i]->onGuiRender();
+		}
 
-		//ImGui::Render();
-		//ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	}
 
 	void GUI::pushLayer(std::shared_ptr<Layer> layer)
