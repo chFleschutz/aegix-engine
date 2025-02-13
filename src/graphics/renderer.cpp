@@ -204,6 +204,31 @@ namespace Aegix::Graphics
 		assert(m_isFrameStarted && "Cannot call beginSwapChainRenderPass while frame is not in progress");
 		assert(commandBuffer == currentCommandBuffer() && "Cannot begin render pass on a command buffer from a diffrent frame");
 
+		// Transition swap chain image layout
+		VkImageMemoryBarrier imageBarrier{};
+		imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageBarrier.srcAccessMask = 0;
+		imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageBarrier.image = m_swapChain->colorImage(m_currentImageIndex);
+		imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageBarrier.subresourceRange.baseMipLevel = 0;
+		imageBarrier.subresourceRange.levelCount = 1;
+		imageBarrier.subresourceRange.baseArrayLayer = 0;
+		imageBarrier.subresourceRange.layerCount = 1;
+
+		vkCmdPipelineBarrier(commandBuffer,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			0, 
+			0, nullptr, 
+			0, nullptr, 
+			1, &imageBarrier
+		);
+
 		VkRenderingAttachmentInfo colorAttachment{};
 		colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 		colorAttachment.imageView = m_swapChain->colorImageView(m_currentImageIndex);
@@ -225,7 +250,7 @@ namespace Aegix::Graphics
 		renderArea.extent = m_swapChain->swapChainExtent();
 
 		VkRenderingInfo renderInfo{};
-		renderInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 		renderInfo.renderArea = renderArea;
 		renderInfo.layerCount = 1;
 		renderInfo.colorAttachmentCount = 1;
@@ -257,6 +282,31 @@ namespace Aegix::Graphics
 		assert(commandBuffer == currentCommandBuffer() && "Cannot end render pass on a command buffer from a diffrent frame");
 
 		vkCmdEndRendering(commandBuffer);
+
+		// Transition swap chain image layout to present
+		VkImageMemoryBarrier presentBarrier{};
+		presentBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		presentBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		presentBarrier.dstAccessMask = 0;
+		presentBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		presentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		presentBarrier.image = m_swapChain->colorImage(m_currentImageIndex);
+		presentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		presentBarrier.subresourceRange.baseMipLevel = 0;
+		presentBarrier.subresourceRange.levelCount = 1;
+		presentBarrier.subresourceRange.baseArrayLayer = 0;
+		presentBarrier.subresourceRange.layerCount = 1;
+
+		vkCmdPipelineBarrier(commandBuffer,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+			0, 
+			0, nullptr, 
+			0, nullptr, 
+			1, &presentBarrier
+		);
 	}
 
 	void Renderer::initializeGlobalUBO()
