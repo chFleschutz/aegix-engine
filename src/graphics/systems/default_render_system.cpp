@@ -31,15 +31,15 @@ namespace Aegix::Graphics
 
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)
-			.addDescriptorSetLayout(m_descriptorSetLayout->descriptorSetLayout())
+			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
 			.build();
 
-		m_pipeline = Pipeline::Builder(m_device)
-			.setRenderPass(renderPass)
-			.setPipelineLayout(m_pipelineLayout->pipelineLayout())
+		m_pipeline = Pipeline::Builder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default.frag.spv")
+			.setColorAttachmentFormats({ VK_FORMAT_B8G8R8A8_SRGB })
+			.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
 			.build();
 	}
 
