@@ -46,12 +46,8 @@ namespace Aegix::Graphics
 	void Renderer::renderFrame(Scene::Scene& scene)
 	{
 		auto commandBuffer = beginFrame();
-		if (!commandBuffer)
-		{
-			assert(false && "Failed to begin frame");
-			return;
-		}
 
+		assert(commandBuffer && "Failed to begin frame");
 		assert(m_isFrameStarted && "Frame not started");
 
 		FrameInfo frameInfo{
@@ -163,12 +159,16 @@ namespace Aegix::Graphics
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			throw std::runtime_error("Failed to begin recording command buffer");
 
+		m_swapChain->transitionColorAttachment(commandBuffer, m_currentImageIndex);
+
 		return commandBuffer;
 	}
 
 	void Renderer::endFrame(VkCommandBuffer commandBuffer)
 	{
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
+
+		m_swapChain->transitionPresent(commandBuffer, m_currentImageIndex);
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Failed to record command buffer");

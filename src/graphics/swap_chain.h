@@ -45,6 +45,9 @@ namespace Aegix::Graphics
 				swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
 		}
 
+		void transitionColorAttachment(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		void transitionPresent(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
 	private:
 		void init();
 		void createSwapChain();
