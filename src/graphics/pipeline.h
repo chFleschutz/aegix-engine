@@ -31,9 +31,11 @@ namespace Aegix::Graphics
 		PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
 			const std::vector<VkPushConstantRange>& pushConstants);
 		PipelineLayout(const PipelineLayout&) = delete;
-		PipelineLayout operator=(const PipelineLayout&) = delete;
 		~PipelineLayout();
 
+		PipelineLayout operator=(const PipelineLayout&) = delete;
+
+		operator VkPipelineLayout() const { return m_pipelineLayout; }
 		VkPipelineLayout pipelineLayout() const { return m_pipelineLayout; }
 
 	private:
@@ -55,7 +57,8 @@ namespace Aegix::Graphics
 			std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 			std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 			std::vector<VkPipelineShaderStageCreateInfo> shaderStges{};
-
+			std::vector<VkFormat> colorAttachmentFormats{};
+			VkPipelineRenderingCreateInfo renderingInfo{};
 			VkPipelineViewportStateCreateInfo viewportInfo{};
 			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
 			VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
@@ -66,19 +69,19 @@ namespace Aegix::Graphics
 			std::vector<VkDynamicState> dynamicStateEnables{};
 			VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 			VkPipelineLayout pipelineLayout = nullptr;
-			VkRenderPass renderPass = nullptr;
 			uint32_t subpass = 0;
 		};
 
 		class Builder
 		{
 		public:
-			Builder(VulkanDevice& device);
+			Builder(VulkanDevice& device, VkPipelineLayout pipelineLayout);
 			~Builder();
 
-			Builder& setRenderPass(VkRenderPass renderPass);
-			Builder& setPipelineLayout(VkPipelineLayout pipelineLayout);
 			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
+			Builder& setColorAttachmentFormats(std::vector<VkFormat> colorFormats);
+			Builder& setDepthAttachmentFormat(VkFormat depthFormat);
+			Builder& setStencilFormat(VkFormat stencilFormat);
 			Builder& enableAlphaBlending();
 			Builder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 			Builder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
@@ -95,6 +98,7 @@ namespace Aegix::Graphics
 		Pipeline operator=(const Pipeline&) = delete;
 		~Pipeline();
 
+		operator VkPipeline() const { return m_graphicsPipeline; }
 		VkPipeline pipeline() const { return m_graphicsPipeline; }
 
 		void bind(VkCommandBuffer commandBuffer);

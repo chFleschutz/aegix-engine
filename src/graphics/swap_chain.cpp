@@ -26,11 +26,11 @@ namespace Aegix::Graphics
 
 	SwapChain::~SwapChain()
 	{
-		for (auto imageView : mSwapChainImageViews)
+		for (auto imageView : mColorImageViews)
 		{
 			vkDestroyImageView(m_device.device(), imageView, nullptr);
 		}
-		mSwapChainImageViews.clear();
+		mColorImageViews.clear();
 
 		if (m_swapChain != nullptr)
 		{
@@ -42,15 +42,8 @@ namespace Aegix::Graphics
 		{
 			vkDestroyImageView(m_device.device(), mDepthImageViews[i], nullptr);
 			vkDestroyImage(m_device.device(), mDepthImages[i], nullptr);
-			vkFreeMemory(m_device.device(), mDepthImageMemorys[i], nullptr);
+			vkFreeMemory(m_device.device(), mDepthImageMemories[i], nullptr);
 		}
-
-		for (auto framebuffer : mSwapChainFramebuffers)
-		{
-			vkDestroyFramebuffer(m_device.device(), framebuffer, nullptr);
-		}
-
-		vkDestroyRenderPass(m_device.device(), mRenderPass, nullptr);
 
 		// cleanup synchronization objects
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -129,9 +122,7 @@ namespace Aegix::Graphics
 	{
 		createSwapChain();
 		createImageViews();
-		createRenderPass();
 		createDepthResources();
-		createFramebuffers();
 		createSyncObjects();
 	}
 
@@ -179,8 +170,8 @@ namespace Aegix::Graphics
 			throw std::runtime_error("Failed to create swap chain");
 
 		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
-		mSwapChainImages.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, mSwapChainImages.data());
+		mColorImages.resize(imageCount);
+		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, mColorImages.data());
 
 		mSwapChainImageFormat = surfaceFormat.format;
 		mSwapChainExtent = extent;
@@ -188,12 +179,12 @@ namespace Aegix::Graphics
 
 	void SwapChain::createImageViews()
 	{
-		mSwapChainImageViews.resize(mSwapChainImages.size());
-		for (size_t i = 0; i < mSwapChainImages.size(); i++)
+		mColorImageViews.resize(mColorImages.size());
+		for (size_t i = 0; i < mColorImages.size(); i++)
 		{
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image = mSwapChainImages[i];
+			viewInfo.image = mColorImages[i];
 			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			viewInfo.format = mSwapChainImageFormat;
 			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -202,87 +193,8 @@ namespace Aegix::Graphics
 			viewInfo.subresourceRange.baseArrayLayer = 0;
 			viewInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mSwapChainImageViews[i]) != VK_SUCCESS)
+			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mColorImageViews[i]) != VK_SUCCESS)
 				throw std::runtime_error("failed to create texture image view!");
-		}
-	}
-
-	void SwapChain::createRenderPass()
-	{
-		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = findDepthFormat();
-		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkAttachmentReference depthAttachmentRef{};
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkAttachmentDescription colorAttachment = {};
-		colorAttachment.format = swapChainImageFormat();
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-		VkAttachmentReference colorAttachmentRef = {};
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpass = {};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-		VkSubpassDependency dependency = {};
-		dependency.dstSubpass = 0;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.srcAccessMask = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-
-		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
-		VkRenderPassCreateInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		renderPassInfo.pAttachments = attachments.data();
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
-
-		if (vkCreateRenderPass(m_device.device(), &renderPassInfo, nullptr, &mRenderPass) != VK_SUCCESS)
-			throw std::runtime_error("failed to create render pass!");
-	}
-
-	void SwapChain::createFramebuffers()
-	{
-		mSwapChainFramebuffers.resize(imageCount());
-		for (size_t i = 0; i < imageCount(); i++)
-		{
-			std::array<VkImageView, 2> attachments = { mSwapChainImageViews[i], mDepthImageViews[i] };
-
-			VkFramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = mRenderPass;
-			framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = mSwapChainExtent.width;
-			framebufferInfo.height = mSwapChainExtent.height;
-			framebufferInfo.layers = 1;
-
-			if (vkCreateFramebuffer(m_device.device(), &framebufferInfo,	nullptr, &mSwapChainFramebuffers[i]) != VK_SUCCESS)
-				throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 
@@ -292,7 +204,7 @@ namespace Aegix::Graphics
 		mSwapChainDepthFormat = depthFormat;
 
 		mDepthImages.resize(imageCount());
-		mDepthImageMemorys.resize(imageCount());
+		mDepthImageMemories.resize(imageCount());
 		mDepthImageViews.resize(imageCount());
 
 		for (int i = 0; i < mDepthImages.size(); i++)
@@ -317,7 +229,7 @@ namespace Aegix::Graphics
 				imageInfo,
 				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 				mDepthImages[i],
-				mDepthImageMemorys[i]);
+				mDepthImageMemories[i]);
 
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -371,6 +283,8 @@ namespace Aegix::Graphics
 			}
 		}
 
+		// TODO: Rendersystems assume VK_FORMAT_B8G8R8A8_SRGB as the swapchain format
+		assert(availableFormats[0].format == VK_FORMAT_B8G8R8A8_SRGB && "Currently the only supported format is VK_FORMAT_B8G8R8A8_SRGB");
 		return availableFormats[0];
 	}
 
@@ -422,8 +336,9 @@ namespace Aegix::Graphics
 
 	VkFormat SwapChain::findDepthFormat()
 	{
+		// TODO: Rendersystems assume VK_FORMAT_D32_SFLOAT as the depth format
 		return m_device.findSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			{ VK_FORMAT_D32_SFLOAT/*, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT*/ },
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}

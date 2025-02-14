@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 			float radius;
 		};
 
-		PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
 		virtual void render(const FrameInfo& frameInfo) override;
 	};

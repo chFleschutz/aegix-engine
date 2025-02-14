@@ -38,10 +38,11 @@ Follow these steps to get started with the Aegix Engine:
 
 This project uses several external libraries:
 
+- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf.git): Loading GLTF 3D-Models
 - [entt](https://github.com/skypjack/entt): Entity Component System
 - [glfw](https://github.com/glfw/glfw): Windowing
 - [glm](https://github.com/g-truc/glm): Math Library
 - [imgui](https://github.com/ocornut/imgui): UI
 - [stb](https://github.com/nothings/stb): Image Loading
-- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): Loading 3D Models
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): Loading OBJ 3D-Models
 - [Vulkan](https://www.vulkan.org/): Graphics API

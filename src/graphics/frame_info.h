@@ -32,8 +32,6 @@ namespace Aegix::Graphics
 		VkDescriptorSet globalDescriptorSet;
 
 		// TODO: Replace with a more general solution
-		VkRenderPass swapChainRenderPass;
 		VkExtent2D extend;
-		VkFramebuffer swapChainFramebuffer;
 	};
 }

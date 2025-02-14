@@ -89,7 +89,7 @@ namespace Aegix::Graphics
 		void createCommandPool();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
-		std::vector<const char*> getRequiredExtensions();
+		std::vector<const char*> requiredExtensions() const;
 		bool checkValidationLayerSupport();
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);

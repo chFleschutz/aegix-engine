@@ -29,15 +29,14 @@ namespace Aegix::Graphics
 		RenderSystem& addRenderSystem(int renderPassIndex = 0)
 		{
 			// TODO:
-			// Add parameter for renderpass identifier
-			// Find renderpass by identifier
-			// Add render system to this renderpass
-			//return m_renderpasses[renderPassIndex]->addRenderSystem<T>(m_device, swapChainRenderPass());
+			// 1. Create render system
+			// 2. Find renderpass in framegraph
+			// 3. Add render system to render pass
 		}
 
 		VulkanDevice& device() { return m_device; }
+		SwapChain& swapChain() { return *m_swapChain; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
-		VkRenderPass swapChainRenderPass() const { return m_swapChain->renderPass(); }
 		VkCommandBuffer currentCommandBuffer() const;
 		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
 		bool isFrameStarted() const { return m_isFrameStarted; }

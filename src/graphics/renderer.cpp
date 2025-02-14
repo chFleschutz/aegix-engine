@@ -60,9 +60,7 @@ namespace Aegix::Graphics
 			scene,
 			m_swapChain->extentAspectRatio(),
 			nullptr,
-			m_swapChain->renderPass(),
 			m_swapChain->extend(),
-			m_swapChain->frameBuffer(m_currentImageIndex)
 		};
 
 		// TODO: Pass frameInfo to the frame graph
