@@ -15,8 +15,6 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		createDescriptorPool();
-
-		createFrameGraph();
 	}
 
 	Renderer::~Renderer()
@@ -59,8 +57,16 @@ namespace Aegix::Graphics
 			m_swapChain->extend(),
 		};
 
-		// TODO: Pass frameInfo to the frame graph
-		m_frameGraph.execute();
+		{
+			FrameGraph frameGraph;
+			FrameGraphBlackboard blackboard;
+
+			GBufferPass{ frameGraph, blackboard };
+			LightingPass{ frameGraph, blackboard };
+
+			frameGraph.compile();
+			frameGraph.execute();
+		}
 
 		endFrame(commandBuffer);
 	}
@@ -124,16 +130,6 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
 			.build();
-	}
-
-	void Renderer::createFrameGraph()
-	{
-		FrameGraphBlackboard blackboard;
-
-		GBufferPass{ m_frameGraph, blackboard };
-		LightingPass{ m_frameGraph, blackboard };
-
-		m_frameGraph.compile();
 	}
 
 	VkCommandBuffer Renderer::beginFrame()
