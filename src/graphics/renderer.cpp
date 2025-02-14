@@ -57,9 +57,16 @@ namespace Aegix::Graphics
 			m_swapChain->extend(),
 		};
 
+		SwapChainData swapChainData{
+			m_swapChain->colorImageView(m_currentImageIndex),
+			m_swapChain->depthImageView(m_currentImageIndex),
+			m_swapChain->extend(),
+		};
+
 		{
 			FrameGraph frameGraph;
 			FrameGraphBlackboard blackboard;
+			blackboard += swapChainData;
 
 			GBufferPass{ frameGraph, blackboard };
 			LightingPass{ frameGraph, blackboard };

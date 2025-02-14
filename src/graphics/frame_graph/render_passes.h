@@ -22,27 +22,33 @@ namespace Aegix::Graphics
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
-					std::cout << "Creating GBuffer pass\n";
-
-					data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
-					data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
-					data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
-					builder.declareWrite(data.albedo);
-					builder.declareWrite(data.normal);
-					builder.declareWrite(data.depth);
+					//data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
+					//data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
+					//data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
+					//builder.declareWrite(data.albedo);
+					//builder.declareWrite(data.normal);
+					//builder.declareWrite(data.depth);
 				},
 				[=](const GBufferData& data, const FrameInfo& frameInfo)
 				{
-					std::cout << "Executing GBuffer pass\n";
 				});
 		}
 	};
 
-
+	// TODO: move somewhere else
+	struct SwapChainData
+	{
+		VkImageView colorImageView;
+		VkImageView depthImageView;
+		VkExtent2D extent;
+	};
 
 	struct LightingData
 	{
 		FrameGraphResourceID lighting;
+		VkImageView colorImageView;
+		VkImageView depthImageView;
+		VkExtent2D extent;
 	};
 
 	class LightingPass
@@ -50,23 +56,76 @@ namespace Aegix::Graphics
 	public:
 		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
-			const auto& gBuffer = blackboard.get<GBufferData>();
+			//const auto& gBuffer = blackboard.get<GBufferData>();
+			const auto& swapChain = blackboard.get<SwapChainData>();
 
 			blackboard += frameGraph.addPass<LightingData>("Lighting",
 				[&](FrameGraph::Builder& builder, LightingData& data)
 				{
-					std::cout << "Creating Lighting pass\n";
+					//data.lighting = builder.create<FrameGraphTexture>("Lighting", { 1920, 1080 });
+					//builder.declareWrite(data.lighting);
 
-					data.lighting = builder.create<FrameGraphTexture>("Lighting", { 1920, 1080 });
-					builder.declareWrite(data.lighting);
+					//builder.declareRead(gBuffer.albedo);
+					//builder.declareRead(gBuffer.normal);
+					//builder.declareRead(gBuffer.depth);
 
-					builder.declareRead(gBuffer.albedo);
-					builder.declareRead(gBuffer.normal);
-					builder.declareRead(gBuffer.depth);
+					data.colorImageView = swapChain.colorImageView;
+					data.depthImageView = swapChain.depthImageView;
+					data.extent = swapChain.extent;
 				},
-				[=](const LightingData& data, const FrameInfo& frameInfo)
+				[](const LightingData& data, const FrameInfo& frameInfo)
 				{
-					std::cout << "Executing Lighting pass\n";
+					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
+
+					VkRenderingAttachmentInfo colorAttachment{};
+					colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachment.imageView = data.colorImageView;
+					colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachment.clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+					VkRenderingAttachmentInfo depthAttachment{};
+					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					depthAttachment.imageView = data.depthImageView;
+					depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+					depthAttachment.clearValue.depthStencil = { 1.0f, 0 };
+
+					VkRect2D renderArea{};
+					renderArea.offset = { 0,0 };
+					renderArea.extent = data.extent;
+
+					VkRenderingInfo renderInfo{};
+					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+					renderInfo.renderArea = renderArea;
+					renderInfo.layerCount = 1;
+					renderInfo.colorAttachmentCount = 1;
+					renderInfo.pColorAttachments = &colorAttachment;
+					renderInfo.pDepthAttachment = &depthAttachment;
+
+					vkCmdBeginRendering(commandBuffer, &renderInfo);
+
+					VkViewport viewport{};
+					viewport.x = 0.0f;
+					viewport.y = 0.0f;
+					viewport.width = static_cast<float>(data.extent.width);
+					viewport.height = static_cast<float>(data.extent.height);
+					viewport.minDepth = 0.0f;
+					viewport.maxDepth = 1.0f;
+
+					vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+					VkRect2D scissor{};
+					scissor.offset = { 0, 0 };
+					scissor.extent = data.extent;
+
+					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+					// TODO: Rendering
+
+					vkCmdEndRendering(commandBuffer);
 				});
 		}
 	};
