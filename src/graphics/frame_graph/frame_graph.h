@@ -58,7 +58,7 @@ namespace Aegix::Graphics
 
 		template <typename Data = NoData, typename Setup, typename Execute>
 			requires std::is_invocable_v<Setup, Builder&, Data&> && 
-					 std::is_invocable_v<Execute, const Data&> &&
+					 std::is_invocable_v<Execute, const Data&, const FrameInfo&> &&
 					 (sizeof(Execute) < 1024)
 		[[nodiscard]]
 		const Data& addPass(const std::string& name, Setup&& setup, Execute&& execute)
@@ -87,11 +87,11 @@ namespace Aegix::Graphics
 			// TODO
 		}
 
-		void execute()
+		void execute(const FrameInfo& frameInfo)
 		{
 			for (auto& node : m_nodes)
 			{
-				node.executePass();
+				node.executePass(frameInfo);
 			}
 		}
 

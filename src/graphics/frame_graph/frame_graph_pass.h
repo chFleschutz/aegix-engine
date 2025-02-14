@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/frame_info.h"
+
 #include <functional>
 
 namespace Aegix::Graphics
@@ -7,23 +9,23 @@ namespace Aegix::Graphics
 	struct FrameGraphPassBase
 	{
 		virtual ~FrameGraphPassBase() = default;
-		virtual void operator()() = 0;
+		virtual void operator()(const FrameInfo& frameInfo) = 0;
 	};
 
 	template <typename Data, typename Execute>
 	struct FrameGraphPass : public FrameGraphPassBase
 	{
 		explicit FrameGraphPass(Execute&& exec)
-			: execute{ std::forward<Execute>(exec) }
+			: executeFunc{ std::forward<Execute>(exec) }
 		{
 		}
 
-		void operator()() override
+		void operator()(const FrameInfo& frameInfo) override
 		{
-			execute(data);
+			executeFunc(data, frameInfo);
 		}
 
 		Data data{};
-		Execute execute;
+		Execute executeFunc;
 	};
 }

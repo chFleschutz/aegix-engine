@@ -65,7 +65,7 @@ namespace Aegix::Graphics
 			LightingPass{ frameGraph, blackboard };
 
 			frameGraph.compile();
-			frameGraph.execute();
+			frameGraph.execute(frameInfo);
 		}
 
 		endFrame(commandBuffer);

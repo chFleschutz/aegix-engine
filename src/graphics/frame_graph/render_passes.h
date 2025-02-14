@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 					builder.declareWrite(data.normal);
 					builder.declareWrite(data.depth);
 				},
-				[=](const GBufferData& data)
+				[=](const GBufferData& data, const FrameInfo& frameInfo)
 				{
 					std::cout << "Executing GBuffer pass\n";
 				});
@@ -64,7 +64,7 @@ namespace Aegix::Graphics
 					builder.declareRead(gBuffer.normal);
 					builder.declareRead(gBuffer.depth);
 				},
-				[=](const LightingData& data)
+				[=](const LightingData& data, const FrameInfo& frameInfo)
 				{
 					std::cout << "Executing Lighting pass\n";
 				});
