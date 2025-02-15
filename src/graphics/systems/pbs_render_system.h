@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data = {});
 
 	private:
-		UniformBuffer<PBSMaterial::Data> m_uniformBuffer;
+		UniformBufferData<PBSMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_albedoTexture;
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_metalRoughnessTexture;

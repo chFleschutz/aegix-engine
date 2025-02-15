@@ -121,7 +121,7 @@ namespace Aegix::Graphics
 			Builder& operator=(const Builder&) = delete;
 
 			template<typename T>
-			Builder& addBuffer(uint32_t binding, const UniformBuffer<T>& buffer)
+			Builder& addBuffer(uint32_t binding, const UniformBufferData<T>& buffer)
 			{
 				for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 				{

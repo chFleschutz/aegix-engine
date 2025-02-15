@@ -71,6 +71,6 @@ namespace Aegix::Graphics
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
 		std::unique_ptr<DescriptorSet> m_globalSet;
-		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
+		std::unique_ptr<UniformBufferData<GlobalUbo>> m_globalUBO;
 	};
 }

@@ -203,7 +203,7 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
-		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(m_device);
+		m_globalUBO = std::make_unique<UniformBufferData<GlobalUbo>>(m_device);
 
 		m_globalSet = DescriptorSet::Builder(m_device, *m_globalPool, *m_globalSetLayout)
 			.addBuffer(0, *m_globalUBO)
