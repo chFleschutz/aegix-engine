@@ -4,7 +4,8 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
-#include "graphics/frame_graph/render_passes.h"
+#include "graphics/render_passes/g_buffer_pass.h"
+#include "graphics/render_passes/lighting_pass.h"
 
 #include <cassert>
 #include <stdexcept>

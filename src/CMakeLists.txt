@@ -16,7 +16,9 @@ target_sources(AegixEngine PRIVATE
 	"graphics/frame_graph/frame_graph_node.h" 
 	"graphics/frame_graph/frame_graph_pass.h"
 	"graphics/frame_graph/frame_graph_resource.h"
-	"graphics/frame_graph/render_passes.h"
+	"graphics/render_passes/g_buffer_pass.h" 
+	"graphics/render_passes/lighting_pass.h"
+	
 	"graphics/gui.cpp"
 	"graphics/layers/scene_properties_layer.cpp" 
 	"graphics/pipeline.cpp"
