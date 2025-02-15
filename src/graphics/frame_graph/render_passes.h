@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
+#include "graphics/systems/render_system.h"
 
 #include <iostream>
 
@@ -43,18 +44,21 @@ namespace Aegix::Graphics
 		VkExtent2D extent;
 	};
 
+	using RenderSystemList = std::vector<std::unique_ptr<RenderSystem>>;
+
 	struct LightingData
 	{
 		FrameGraphResourceID lighting;
 		VkImageView colorImageView;
 		VkImageView depthImageView;
 		VkExtent2D extent;
+		RenderSystemList* renderSystems;
 	};
 
 	class LightingPass
 	{
 	public:
-		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
+		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, RenderSystemList& renderSystems)
 		{
 			//const auto& gBuffer = blackboard.get<GBufferData>();
 			const auto& swapChain = blackboard.get<SwapChainData>();
@@ -72,6 +76,7 @@ namespace Aegix::Graphics
 					data.colorImageView = swapChain.colorImageView;
 					data.depthImageView = swapChain.depthImageView;
 					data.extent = swapChain.extent;
+					data.renderSystems = &renderSystems;
 				},
 				[](const LightingData& data, const FrameInfo& frameInfo)
 				{
@@ -123,7 +128,10 @@ namespace Aegix::Graphics
 
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-					// TODO: Rendering
+					for (const auto& system : *data.renderSystems)
+					{
+						system->render(frameInfo);
+					}
 
 					vkCmdEndRendering(commandBuffer);
 				});

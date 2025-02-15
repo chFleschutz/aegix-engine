@@ -25,13 +25,11 @@ namespace Aegix::Graphics
 		Renderer& operator=(const Renderer&) = delete;
 		Renderer& operator=(Renderer&&) = delete;
 
-		template<typename T>
-		RenderSystem& addRenderSystem(int renderPassIndex = 0)
+		template<typename T, typename... Args>
+		RenderSystem& addRenderSystem(Args&&... args)
 		{
-			// TODO:
-			// 1. Create render system
-			// 2. Find renderpass in framegraph
-			// 3. Add render system to render pass
+			m_renderSystems.emplace_back(std::make_unique<T>(m_device, *m_globalSetLayout));
+			return *m_renderSystems.back();
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -56,6 +54,9 @@ namespace Aegix::Graphics
 		VkCommandBuffer beginFrame();
 		void endFrame(VkCommandBuffer commandBuffer);
 
+		void initializeGlobalUBO();
+		void updateGlobalUBO(const FrameInfo& frameInfo);
+
 		Window& m_window;
 		VulkanDevice& m_device;
 		
@@ -66,5 +67,10 @@ namespace Aegix::Graphics
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
+
+		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
+		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
+		std::unique_ptr<DescriptorSet> m_globalSet;
+		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
 	};
 }

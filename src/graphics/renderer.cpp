@@ -1,6 +1,8 @@
 #include "renderer.h"
 
 #include "scene/scene.h"
+#include "scene/components.h"
+#include "scene/entity.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/frame_graph/render_passes.h"
 
@@ -15,6 +17,8 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		createDescriptorPool();
+
+		initializeGlobalUBO();
 	}
 
 	Renderer::~Renderer()
@@ -53,9 +57,11 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			nullptr,
+			m_globalSet->descriptorSet(m_currentFrameIndex),
 			m_swapChain->extend(),
 		};
+
+		updateGlobalUBO(frameInfo);
 
 		SwapChainData swapChainData{
 			m_swapChain->colorImageView(m_currentImageIndex),
@@ -69,7 +75,7 @@ namespace Aegix::Graphics
 			blackboard += swapChainData;
 
 			GBufferPass{ frameGraph, blackboard };
-			LightingPass{ frameGraph, blackboard };
+			LightingPass{ frameGraph, blackboard, m_renderSystems };
 
 			frameGraph.compile();
 			frameGraph.execute(frameInfo);
@@ -189,5 +195,42 @@ namespace Aegix::Graphics
 
 		m_isFrameStarted = false;
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
+	}
+
+	void Renderer::initializeGlobalUBO()
+	{
+		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.build();
+
+		m_globalUBO = std::make_unique<UniformBuffer<GlobalUbo>>(m_device);
+
+		m_globalSet = DescriptorSet::Builder(m_device, *m_globalPool, *m_globalSetLayout)
+			.addBuffer(0, *m_globalUBO)
+			.build();
+	}
+
+	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
+	{
+		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
+		camera.aspect = m_swapChain->extentAspectRatio();
+
+		GlobalUbo ubo{};
+		ubo.projection = camera.projectionMatrix;
+		ubo.view = camera.viewMatrix;
+		ubo.inverseView = camera.inverseViewMatrix;
+
+		int lighIndex = 0;
+		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
+		for (auto&& [entity, transform, pointLight] : view.each())
+		{
+			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
+			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
+			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
+			lighIndex++;
+		}
+		ubo.numLights = lighIndex;
+
+		m_globalUBO->setData(m_currentFrameIndex, ubo);
 	}
 }
