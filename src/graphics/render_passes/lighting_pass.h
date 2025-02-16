@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 
 					data.renderSystems = &renderSystems;
 				},
-				[](const LightingData& data, const FrameInfo& frameInfo)
+				[](const LightingData& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 

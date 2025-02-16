@@ -138,7 +138,11 @@ namespace Aegix::Graphics
 	{
 		FrameGraphBlackboard blackboard;
 
-		GBufferPass{ m_frameGraph, blackboard };
+		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT });
+		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT });
+		auto depth = m_frameGraph.addTexture(m_device, "Depth", { 1920, 1080, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT });
+
+		GBufferPass{ m_frameGraph, blackboard, albedo, normal, depth };
 		LightingPass{ m_frameGraph, blackboard, m_renderSystems };
 
 		m_frameGraph.compile();

@@ -15,20 +15,23 @@ namespace Aegix::Graphics
 	class GBufferPass
 	{
 	public:
-		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
+		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, 
+			FrameGraphResourceID albedo, FrameGraphResourceID normal, FrameGraphResourceID depth )
 		{
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
-					//data.albedo = builder.create<FrameGraphTexture>("Albedo", { 1920, 1080 });
-					//data.normal = builder.create<FrameGraphTexture>("Normal", { 1920, 1080 });
-					//data.depth = builder.create<FrameGraphTexture>("Depth", { 1920, 1080 });
-					//builder.declareWrite(data.albedo);
-					//builder.declareWrite(data.normal);
-					//builder.declareWrite(data.depth);
+					data.albedo = builder.declareWrite(albedo);
+					data.normal = builder.declareWrite(normal);
+					data.depth = builder.declareWrite(depth);
 				},
-				[=](const GBufferData& data, const FrameInfo& frameInfo)
+				[=](const GBufferData& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
+					const auto& albedo = resources.getTexture(data.albedo);
+					const auto& normal = resources.getTexture(data.normal);
+					const auto& depth = resources.getTexture(data.depth);
+
+					// TODO: Implement GBuffer pass
 				});
 		}
 	};

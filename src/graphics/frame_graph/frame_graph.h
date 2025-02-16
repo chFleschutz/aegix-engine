@@ -2,7 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_pass.h"
-#include "graphics/frame_graph/frame_graph_resource.h"
+#include "graphics/frame_graph/frame_graph_resource_pool.h"
 
 #include <functional>
 #include <memory>
@@ -12,20 +12,6 @@
 
 namespace Aegix::Graphics
 {
-	template <typename T>
-	concept HasDesc = requires(T) { typename T::Desc; };
-
-
-	class FrameGraphTexture
-	{
-	public:
-		struct Desc
-		{
-			uint32_t width;
-			uint32_t height;
-		};
-	};
-
 
 	class FrameGraph
 	{
@@ -40,16 +26,17 @@ namespace Aegix::Graphics
 			{
 			}
 
-			template <typename T>
-				requires HasDesc<T>
-			[[nodiscard]]
-			auto create(const std::string_view name, const typename T::Desc& desc) -> FrameGraphResourceID
-			{
-				return m_frameGraph.addResource<T>(name, desc);
+			FrameGraphResourceID declareRead(FrameGraphResourceID resource) 
+			{ 
+				m_node.addRead(resource); 
+				return resource;
 			}
 
-			void declareRead(FrameGraphResourceID resource) { m_node.addRead(resource); }
-			void declareWrite(FrameGraphResourceID resource) { m_node.addWrite(resource); }
+			FrameGraphResourceID declareWrite(FrameGraphResourceID resource) 
+			{ 
+				m_node.addWrite(resource);
+				return resource;
+			}
 
 		private:
 			FrameGraph& m_frameGraph;
@@ -58,7 +45,7 @@ namespace Aegix::Graphics
 
 		template <typename Data = NoData, typename Setup, typename Execute>
 			requires std::is_invocable_v<Setup, Builder&, Data&> && 
-					 std::is_invocable_v<Execute, const Data&, const FrameInfo&> &&
+					 std::is_invocable_v<Execute, const Data&, const FrameGraphResourcePool&, const FrameInfo&> &&
 					 (sizeof(Execute) < 1024)
 		[[nodiscard]]
 		const Data& addPass(const std::string& name, Setup&& setup, Execute&& execute)
@@ -74,12 +61,9 @@ namespace Aegix::Graphics
 			return data;
 		}
 
-		template <typename T>
-		auto addResource(const std::string_view name, const typename T::Desc& desc) -> FrameGraphResourceID
+		auto addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc) -> FrameGraphResourceID
 		{
-			const auto id = static_cast<FrameGraphResourceID>(m_resources.size());
-			m_resources.emplace_back(id, desc, T{});
-			return id;
+			return m_resourcePool.addTexture(device, name, desc);
 		}
 
 		void compile()
@@ -91,12 +75,17 @@ namespace Aegix::Graphics
 		{
 			for (auto& node : m_nodes)
 			{
-				node.executePass(frameInfo);
+				node.executePass(m_resourcePool, frameInfo);
 			}
+		}
+
+		void swapChainResized()
+		{
+			// TODO
 		}
 
 	private:
 		std::vector<FrameGraphNode> m_nodes;
-		std::vector<FrameGraphResource> m_resources;
+		FrameGraphResourcePool m_resourcePool;
 	};
 }
