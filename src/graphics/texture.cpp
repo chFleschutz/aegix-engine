@@ -28,11 +28,25 @@ namespace Aegix::Graphics
 		createImageView();
 	}
 
+	Texture::Texture(Texture&& other) noexcept
+		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent },
+		m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, m_imageView{ other.m_imageView }
+	{
+		other.m_image = VK_NULL_HANDLE;
+		other.m_imageMemory = VK_NULL_HANDLE;
+		other.m_imageView = VK_NULL_HANDLE;
+	}
+
 	Texture::~Texture()
 	{
-		vkDestroyImageView(m_device.device(), m_imageView, nullptr);
-		vkDestroyImage(m_device.device(), m_image, nullptr);
-		vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
+		if (m_imageView != VK_NULL_HANDLE)
+			vkDestroyImageView(m_device.device(), m_imageView, nullptr);
+	
+		if (m_image != VK_NULL_HANDLE)
+			vkDestroyImage(m_device.device(), m_image, nullptr);
+	
+		if (m_imageMemory != VK_NULL_HANDLE)
+			vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
 	}
 
 	void Texture::transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout)

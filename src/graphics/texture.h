@@ -26,8 +26,8 @@ namespace Aegix::Graphics
 		/// @note The texture will be in VK_LAYOUT_UNDEFINED layout
 		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
 
-		Texture(const Texture&) = delete;
-		Texture(Texture&&) = delete;
+		Texture(const Texture& other) = delete;
+		Texture(Texture&& other) noexcept;
 		~Texture();
 
 		Texture& operator=(const Texture&) = delete;
@@ -53,9 +53,9 @@ namespace Aegix::Graphics
 
 		VkFormat m_format;
 		VkExtent2D m_extent;
-		VkImage m_image;
-		VkDeviceMemory m_imageMemory;
-		VkImageView m_imageView;
+		VkImage m_image = VK_NULL_HANDLE;
+		VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;
+		VkImageView m_imageView = VK_NULL_HANDLE;
 	};
 
 	class Sampler
