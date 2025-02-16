@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 		};
 
 		std::string name;
-		//Texture texture;
+		Texture texture;
 	};
 
 	class FrameGraphResourcePool
@@ -35,7 +35,7 @@ namespace Aegix::Graphics
 
 		FrameGraphResourceID addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc)
 		{
-			m_textures.emplace_back(name/*, Texture{ device, desc.width, desc.height, desc.format, desc.usage }*/);
+			m_textures.emplace_back(name, Texture{ device, desc.width, desc.height, desc.format, desc.usage });
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
