@@ -50,6 +50,7 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void recreateSwapChain();
 		void createDescriptorPool();
+		void createFrameGraph();
 
 		VkCommandBuffer beginFrame();
 		void endFrame(VkCommandBuffer commandBuffer);
@@ -67,6 +68,8 @@ namespace Aegix::Graphics
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
+
+		FrameGraph m_frameGraph;
 
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;

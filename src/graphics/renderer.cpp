@@ -20,6 +20,8 @@ namespace Aegix::Graphics
 		createDescriptorPool();
 
 		initializeGlobalUBO();
+
+		createFrameGraph();
 	}
 
 	Renderer::~Renderer()
@@ -60,27 +62,13 @@ namespace Aegix::Graphics
 			m_swapChain->extentAspectRatio(),
 			m_globalSet->descriptorSet(m_currentFrameIndex),
 			m_swapChain->extend(),
+			m_swapChain->colorImageView(m_currentImageIndex),
+			m_swapChain->depthImageView(m_currentImageIndex)
 		};
 
 		updateGlobalUBO(frameInfo);
 
-		SwapChainData swapChainData{
-			m_swapChain->colorImageView(m_currentImageIndex),
-			m_swapChain->depthImageView(m_currentImageIndex),
-			m_swapChain->extend(),
-		};
-
-		{
-			FrameGraph frameGraph;
-			FrameGraphBlackboard blackboard;
-			blackboard += swapChainData;
-
-			GBufferPass{ frameGraph, blackboard };
-			LightingPass{ frameGraph, blackboard, m_renderSystems };
-
-			frameGraph.compile();
-			frameGraph.execute(frameInfo);
-		}
+		m_frameGraph.execute(frameInfo);
 
 		endFrame(commandBuffer);
 	}
@@ -144,6 +132,16 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
 			.build();
+	}
+
+	void Renderer::createFrameGraph()
+	{
+		FrameGraphBlackboard blackboard;
+
+		GBufferPass{ m_frameGraph, blackboard };
+		LightingPass{ m_frameGraph, blackboard, m_renderSystems };
+
+		m_frameGraph.compile();
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

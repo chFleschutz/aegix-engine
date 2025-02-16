@@ -32,6 +32,8 @@ namespace Aegix::Graphics
 		VkDescriptorSet globalDescriptorSet;
 
 		// TODO: Replace with a more general solution
-		VkExtent2D extend;
+		VkExtent2D swapChainExtend;
+		VkImageView swapChainColor;
+		VkImageView swapChainDepth;
 	};
 }

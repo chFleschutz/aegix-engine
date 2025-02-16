@@ -6,22 +6,11 @@
 
 namespace Aegix::Graphics
 {
-	// TODO: move somewhere else
-	struct SwapChainData
-	{
-		VkImageView colorImageView;
-		VkImageView depthImageView;
-		VkExtent2D extent;
-	};
-
 	using RenderSystemList = std::vector<std::unique_ptr<RenderSystem>>;
 
 	struct LightingData
 	{
 		FrameGraphResourceID lighting;
-		VkImageView colorImageView;
-		VkImageView depthImageView;
-		VkExtent2D extent;
 		RenderSystemList* renderSystems;
 	};
 
@@ -31,7 +20,6 @@ namespace Aegix::Graphics
 		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, RenderSystemList& renderSystems)
 		{
 			//const auto& gBuffer = blackboard.get<GBufferData>();
-			const auto& swapChain = blackboard.get<SwapChainData>();
 
 			blackboard += frameGraph.addPass<LightingData>("Lighting",
 				[&](FrameGraph::Builder& builder, LightingData& data)
@@ -43,9 +31,6 @@ namespace Aegix::Graphics
 					//builder.declareRead(gBuffer.normal);
 					//builder.declareRead(gBuffer.depth);
 
-					data.colorImageView = swapChain.colorImageView;
-					data.depthImageView = swapChain.depthImageView;
-					data.extent = swapChain.extent;
 					data.renderSystems = &renderSystems;
 				},
 				[](const LightingData& data, const FrameInfo& frameInfo)
@@ -54,7 +39,7 @@ namespace Aegix::Graphics
 
 					VkRenderingAttachmentInfo colorAttachment{};
 					colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachment.imageView = data.colorImageView;
+					colorAttachment.imageView = frameInfo.swapChainColor;
 					colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 					colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -62,7 +47,7 @@ namespace Aegix::Graphics
 
 					VkRenderingAttachmentInfo depthAttachment{};
 					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					depthAttachment.imageView = data.depthImageView;
+					depthAttachment.imageView = frameInfo.swapChainDepth;
 					depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 					depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 					depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -70,7 +55,7 @@ namespace Aegix::Graphics
 
 					VkRect2D renderArea{};
 					renderArea.offset = { 0,0 };
-					renderArea.extent = data.extent;
+					renderArea.extent = frameInfo.swapChainExtend;
 
 					VkRenderingInfo renderInfo{};
 					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -85,8 +70,8 @@ namespace Aegix::Graphics
 					VkViewport viewport{};
 					viewport.x = 0.0f;
 					viewport.y = 0.0f;
-					viewport.width = static_cast<float>(data.extent.width);
-					viewport.height = static_cast<float>(data.extent.height);
+					viewport.width = static_cast<float>(frameInfo.swapChainExtend.width);
+					viewport.height = static_cast<float>(frameInfo.swapChainExtend.height);
 					viewport.minDepth = 0.0f;
 					viewport.maxDepth = 1.0f;
 
@@ -94,7 +79,7 @@ namespace Aegix::Graphics
 
 					VkRect2D scissor{};
 					scissor.offset = { 0, 0 };
-					scissor.extent = data.extent;
+					scissor.extent = frameInfo.swapChainExtend;
 
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
