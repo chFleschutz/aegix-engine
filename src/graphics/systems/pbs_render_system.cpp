@@ -39,8 +39,9 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::Builder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "pbs.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbs.frag.spv")
-			.setColorAttachmentFormats({ VK_FORMAT_B8G8R8A8_SRGB })
-			.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.build();
 	}
 

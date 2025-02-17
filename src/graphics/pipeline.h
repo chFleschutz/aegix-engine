@@ -63,7 +63,7 @@ namespace Aegix::Graphics
 			VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
 			VkPipelineRasterizationStateCreateInfo rasterizationInfo{};
 			VkPipelineMultisampleStateCreateInfo multisampleInfo{};
-			VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+			std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
 			VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
 			VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
 			std::vector<VkDynamicState> dynamicStateEnables{};
@@ -79,10 +79,9 @@ namespace Aegix::Graphics
 			~Builder();
 
 			Builder& addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath);
-			Builder& setColorAttachmentFormats(std::vector<VkFormat> colorFormats);
-			Builder& setDepthAttachmentFormat(VkFormat depthFormat);
+			Builder& addColorAttachment(VkFormat colorFormat, bool alphaBlending = false);
+			Builder& setDepthAttachment(VkFormat depthFormat);
 			Builder& setStencilFormat(VkFormat stencilFormat);
-			Builder& enableAlphaBlending();
 			Builder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 			Builder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
 
@@ -104,7 +103,6 @@ namespace Aegix::Graphics
 		void bind(VkCommandBuffer commandBuffer);
 
 		static void defaultPipelineConfigInfo(Pipeline::Config& configInfo);
-		static void enableAlphaBlending(Pipeline::Config& configInfo);
 
 	private:
 		void createGraphicsPipeline(const Pipeline::Config& configInfo);

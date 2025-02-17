@@ -111,15 +111,39 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::setColorAttachmentFormats(std::vector<VkFormat> colorFormats)
+	Pipeline::Builder& Pipeline::Builder::addColorAttachment(VkFormat colorFormat, bool alphaBlending)
 	{
-		m_configInfo.colorAttachmentFormats = std::move(colorFormats);
+		m_configInfo.colorAttachmentFormats.emplace_back(colorFormat);
 		m_configInfo.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_configInfo.colorAttachmentFormats.size());
 		m_configInfo.renderingInfo.pColorAttachmentFormats = m_configInfo.colorAttachmentFormats.data();
+
+		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colorBlendAttachment.blendEnable = VK_FALSE;
+		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+		if (alphaBlending)
+		{
+			colorBlendAttachment.blendEnable = VK_TRUE;
+			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		}
+
+		m_configInfo.colorBlendAttachments.emplace_back(colorBlendAttachment);
+		
+		m_configInfo.colorBlendInfo.attachmentCount = m_configInfo.renderingInfo.colorAttachmentCount;
+		m_configInfo.colorBlendInfo.pAttachments = m_configInfo.colorBlendAttachments.data();
+
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::setDepthAttachmentFormat(VkFormat depthFormat)
+
+	Pipeline::Builder& Pipeline::Builder::setDepthAttachment(VkFormat depthFormat)
 	{
 		m_configInfo.renderingInfo.depthAttachmentFormat = depthFormat;
 		return *this;
@@ -128,12 +152,6 @@ namespace Aegix::Graphics
 	Pipeline::Builder& Pipeline::Builder::setStencilFormat(VkFormat stencilFormat)
 	{
 		m_configInfo.renderingInfo.stencilAttachmentFormat = stencilFormat;
-		return *this;
-	}
-
-	Pipeline::Builder& Pipeline::Builder::enableAlphaBlending()
-	{
-		Pipeline::enableAlphaBlending(m_configInfo);
 		return *this;
 	}
 
@@ -209,20 +227,21 @@ namespace Aegix::Graphics
 		configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE;
 		configInfo.multisampleInfo.alphaToOneEnable = VK_FALSE;
 
-		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		configInfo.colorBlendAttachment.blendEnable = VK_FALSE;
-		configInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-		configInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-		configInfo.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-		configInfo.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+		configInfo.colorBlendAttachments.push_back({});
+		configInfo.colorBlendAttachments[0].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		configInfo.colorBlendAttachments[0].blendEnable = VK_FALSE;
+		configInfo.colorBlendAttachments[0].srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		configInfo.colorBlendAttachments[0].dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+		configInfo.colorBlendAttachments[0].colorBlendOp = VK_BLEND_OP_ADD;
+		configInfo.colorBlendAttachments[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		configInfo.colorBlendAttachments[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		configInfo.colorBlendAttachments[0].alphaBlendOp = VK_BLEND_OP_ADD;
 
 		configInfo.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
 		configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
-		configInfo.colorBlendInfo.attachmentCount = 1;
-		configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
+		configInfo.colorBlendInfo.attachmentCount = static_cast<uint32_t>(configInfo.colorBlendAttachments.size());
+		configInfo.colorBlendInfo.pAttachments = configInfo.colorBlendAttachments.data();
 		configInfo.colorBlendInfo.blendConstants[0] = 0.0f;
 		configInfo.colorBlendInfo.blendConstants[1] = 0.0f;
 		configInfo.colorBlendInfo.blendConstants[2] = 0.0f;
@@ -247,18 +266,6 @@ namespace Aegix::Graphics
 
 		configInfo.bindingDescriptions = StaticMesh::defaultBindingDescriptions();
 		configInfo.attributeDescriptions = StaticMesh::defaultAttributeDescriptions();
-	}
-
-	void Pipeline::enableAlphaBlending(Pipeline::Config& configInfo)
-	{
-		configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
-		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		configInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		configInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		configInfo.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-		configInfo.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	}
 
 	void Pipeline::createGraphicsPipeline(const Pipeline::Config& configInfo)
