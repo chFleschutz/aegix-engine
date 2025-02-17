@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 
 		const FrameGraphTexture& getTexture(FrameGraphResourceID id) const
 		{
-			return m_textures.at(id);
+			return m_textures[id];
 		}
 
 	private:

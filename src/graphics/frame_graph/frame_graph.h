@@ -3,6 +3,7 @@
 #include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
+#include "graphics/descriptors.h"
 
 #include <functional>
 #include <memory>
@@ -12,6 +13,11 @@
 
 namespace Aegix::Graphics
 {
+	struct RendererData
+	{
+		VulkanDevice& device;
+		DescriptorPool& pool;
+	};
 
 	class FrameGraph
 	{
@@ -83,6 +89,8 @@ namespace Aegix::Graphics
 		{
 			// TODO
 		}
+
+		auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
 	private:
 		std::vector<FrameGraphNode> m_nodes;

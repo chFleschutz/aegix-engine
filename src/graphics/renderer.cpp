@@ -137,11 +137,12 @@ namespace Aegix::Graphics
 	void Renderer::createFrameGraph()
 	{
 		FrameGraphBlackboard blackboard;
+		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT });
-		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT });
-		auto depth = m_frameGraph.addTexture(m_device, "Depth", { 1920, 1080, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT });
-		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT });
+		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto depth = m_frameGraph.addTexture(m_device, "Depth", { 1920, 1080, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
 
 		GBufferPass{ m_frameGraph, blackboard, m_renderSystems, albedo, normal, depth };
 		LightingPass{ m_frameGraph, blackboard, sceneColor };

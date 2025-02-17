@@ -4,6 +4,9 @@
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/systems/render_system.h"
 
+#include <array>
+#include <cassert>
+
 namespace Aegix::Graphics
 {
 	using RenderSystemList = std::vector<std::unique_ptr<RenderSystem>>;
@@ -37,19 +40,34 @@ namespace Aegix::Graphics
 					const auto& normal = resources.getTexture(data.normal);
 					const auto& depth = resources.getTexture(data.depth);
 
+					VkExtent2D extent = albedo.texture.extent();
+					assert(extent.width == normal.texture.extent().width && extent.height == normal.texture.extent().height);
+					assert(extent.width == depth.texture.extent().width && extent.height == depth.texture.extent().height);
+
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
-					VkRenderingAttachmentInfo colorAttachment{};
-					colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachment.imageView = frameInfo.swapChainColor;
-					colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachment.clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+					// TODO: Automate layout transitions (and remove the const_casts)
+					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					const_cast<Texture&>(normal.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+					std::array<VkRenderingAttachmentInfo, 2> colorAttachments{};
+					colorAttachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachments[0].imageView = albedo.texture.imageView();
+					colorAttachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachments[0].clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+					colorAttachments[1].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachments[1].imageView = normal.texture.imageView();
+					colorAttachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachments[1].clearValue.color = { 0.0f, 0.0f, 1.0f, 1.0f };
 
 					VkRenderingAttachmentInfo depthAttachment{};
 					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					depthAttachment.imageView = frameInfo.swapChainDepth;
+					depthAttachment.imageView = depth.texture.imageView();
 					depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 					depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 					depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -57,14 +75,14 @@ namespace Aegix::Graphics
 
 					VkRect2D renderArea{};
 					renderArea.offset = { 0,0 };
-					renderArea.extent = frameInfo.swapChainExtend;
+					renderArea.extent = extent;
 
 					VkRenderingInfo renderInfo{};
 					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 					renderInfo.renderArea = renderArea;
 					renderInfo.layerCount = 1;
-					renderInfo.colorAttachmentCount = 1;
-					renderInfo.pColorAttachments = &colorAttachment;
+					renderInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
+					renderInfo.pColorAttachments = colorAttachments.data();
 					renderInfo.pDepthAttachment = &depthAttachment;
 
 					vkCmdBeginRendering(commandBuffer, &renderInfo);
@@ -72,8 +90,8 @@ namespace Aegix::Graphics
 					VkViewport viewport{};
 					viewport.x = 0.0f;
 					viewport.y = 0.0f;
-					viewport.width = static_cast<float>(frameInfo.swapChainExtend.width);
-					viewport.height = static_cast<float>(frameInfo.swapChainExtend.height);
+					viewport.width = static_cast<float>(extent.width);
+					viewport.height = static_cast<float>(extent.height);
 					viewport.minDepth = 0.0f;
 					viewport.maxDepth = 1.0f;
 
@@ -81,7 +99,7 @@ namespace Aegix::Graphics
 
 					VkRect2D scissor{};
 					scissor.offset = { 0, 0 };
-					scissor.extent = frameInfo.swapChainExtend;
+					scissor.extent = extent;
 
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -91,6 +109,10 @@ namespace Aegix::Graphics
 					}
 
 					vkCmdEndRendering(commandBuffer);
+
+					// TODO: Automate layout transitions (and remove the const_casts)
+					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					const_cast<Texture&>(normal.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 				});
 		}
 	};
