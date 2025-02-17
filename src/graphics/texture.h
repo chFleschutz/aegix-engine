@@ -40,7 +40,8 @@ namespace Aegix::Graphics
 		VkImage image() const { return m_image; }
 		VkImageView imageView() const { return m_imageView; }
 
-		void transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
+		void transitionLayout(VkImageLayout newLayout);
+		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
 
 	private:
 		void createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage);
@@ -53,6 +54,7 @@ namespace Aegix::Graphics
 
 		VkFormat m_format;
 		VkExtent2D m_extent;
+		VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImage m_image = VK_NULL_HANDLE;
 		VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;
 		VkImageView m_imageView = VK_NULL_HANDLE;
