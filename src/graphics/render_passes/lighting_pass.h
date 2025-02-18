@@ -131,8 +131,8 @@ namespace Aegix::Graphics
 						0, nullptr
 					);
 
-					// Draw Quad
-					vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+					// Draw Fullscreen Triangle
+					vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 					// End Rendering
 					vkCmdEndRendering(commandBuffer);
