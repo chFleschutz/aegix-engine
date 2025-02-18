@@ -13,8 +13,11 @@ namespace Aegix::Graphics
 
 	struct GBufferData
 	{
-		FrameGraphResourceID albedo;
+		FrameGraphResourceID position;
 		FrameGraphResourceID normal;
+		FrameGraphResourceID albedo;
+		FrameGraphResourceID arm;
+		FrameGraphResourceID emissive;
 		FrameGraphResourceID depth;
 		RenderSystemList* renderSystems;
 	};
@@ -23,47 +26,81 @@ namespace Aegix::Graphics
 	{
 	public:
 		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, RenderSystemList& renderSystems,
-			FrameGraphResourceID albedo, FrameGraphResourceID normal, FrameGraphResourceID depth )
+			FrameGraphResourceID position, FrameGraphResourceID normal, FrameGraphResourceID albedo, FrameGraphResourceID arm, 
+			FrameGraphResourceID emissive, FrameGraphResourceID depth )
 		{
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
-					data.albedo = builder.declareWrite(albedo);
+					data.position = builder.declareWrite(position);
 					data.normal = builder.declareWrite(normal);
+					data.albedo = builder.declareWrite(albedo);
+					data.arm = builder.declareWrite(arm);
+					data.emissive = builder.declareWrite(emissive);
 					data.depth = builder.declareWrite(depth);
 
 					data.renderSystems = &renderSystems;
 				},
 				[](const GBufferData& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
-					const auto& albedo = resources.getTexture(data.albedo);
+					const auto& position = resources.getTexture(data.position);
 					const auto& normal = resources.getTexture(data.normal);
+					const auto& albedo = resources.getTexture(data.albedo);
+					const auto& arm = resources.getTexture(data.arm);
+					const auto& emissive = resources.getTexture(data.emissive);
 					const auto& depth = resources.getTexture(data.depth);
 
 					VkExtent2D extent = albedo.texture.extent();
+					assert(extent.width == position.texture.extent().width && extent.height == position.texture.extent().height);
 					assert(extent.width == normal.texture.extent().width && extent.height == normal.texture.extent().height);
+					assert(extent.width == arm.texture.extent().width && extent.height == arm.texture.extent().height);
+					assert(extent.width == emissive.texture.extent().width && extent.height == emissive.texture.extent().height);
 					assert(extent.width == depth.texture.extent().width && extent.height == depth.texture.extent().height);
 
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
 					// TODO: Automate layout transitions (and remove the const_casts)
-					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					const_cast<Texture&>(position.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 					const_cast<Texture&>(normal.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					const_cast<Texture&>(arm.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					const_cast<Texture&>(emissive.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-					std::array<VkRenderingAttachmentInfo, 2> colorAttachments{};
+					std::array<VkRenderingAttachmentInfo, 5> colorAttachments{};
 					colorAttachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[0].imageView = albedo.texture.imageView();
+					colorAttachments[0].imageView = position.texture.imageView();
 					colorAttachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					colorAttachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 					colorAttachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[0].clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+					colorAttachments[0].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 					colorAttachments[1].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 					colorAttachments[1].imageView = normal.texture.imageView();
 					colorAttachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					colorAttachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 					colorAttachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[1].clearValue.color = { 0.0f, 0.0f, 1.0f, 1.0f };
+					colorAttachments[1].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+					colorAttachments[2].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachments[2].imageView = albedo.texture.imageView();
+					colorAttachments[2].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachments[2].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+					colorAttachments[3].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachments[3].imageView = arm.texture.imageView();
+					colorAttachments[3].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachments[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachments[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachments[3].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+					colorAttachments[4].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+					colorAttachments[4].imageView = emissive.texture.imageView();
+					colorAttachments[4].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colorAttachments[4].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					colorAttachments[4].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					colorAttachments[4].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 					VkRenderingAttachmentInfo depthAttachment{};
 					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;

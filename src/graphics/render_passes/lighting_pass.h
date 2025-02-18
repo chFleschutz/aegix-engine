@@ -35,23 +35,35 @@ namespace Aegix::Graphics
 				{
 					data.sceneColor = builder.declareWrite(sceneColor);
 
-					builder.declareRead(gBuffer.albedo);
+					builder.declareRead(gBuffer.position);
 					builder.declareRead(gBuffer.normal);
+					builder.declareRead(gBuffer.albedo);
+					builder.declareRead(gBuffer.arm);
+					builder.declareRead(gBuffer.emissive);
 					builder.declareRead(gBuffer.depth);
 
-					const auto& albedo = resources.getTexture(gBuffer.albedo);
+					const auto& position = resources.getTexture(gBuffer.position);
 					const auto& normal = resources.getTexture(gBuffer.normal);
+					const auto& albedo = resources.getTexture(gBuffer.albedo);
+					const auto& arm = resources.getTexture(gBuffer.arm);
+					const auto& emissive = resources.getTexture(gBuffer.emissive);
 
 					data.sampler = std::make_unique<Sampler>(renderer.device);
 
 					data.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
 						.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+						.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+						.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+						.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.build();
 
 					data.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *data.descriptorSetLayout)
-						.addTexture(0, albedo.texture, *data.sampler)
+						.addTexture(0, position.texture, *data.sampler)
 						.addTexture(1, normal.texture, *data.sampler)
+						.addTexture(2, albedo.texture, *data.sampler)
+						.addTexture(3, arm.texture, *data.sampler)
+						.addTexture(4, emissive.texture, *data.sampler)
 						.build();
 
 					data.pipelineLayout = PipelineLayout::Builder(renderer.device)

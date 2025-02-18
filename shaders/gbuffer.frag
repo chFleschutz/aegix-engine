@@ -4,8 +4,11 @@ layout(location = 0) in vec3 inWorldPos;
 layout(location = 1) in vec3 inWorldNormal;
 layout(location = 2) in vec2 inUV;
 
-layout(location = 0) out vec4 outAlbedo;
+layout(location = 0) out vec4 outPosition;
 layout(location = 1) out vec4 outNormal;
+layout(location = 2) out vec4 outAlbedo;
+layout(location = 3) out vec4 outARM;       // Ambient, Roughness, Metallic
+layout(location = 4) out vec4 outEmissive;
 
 struct PointLight
 {
@@ -103,9 +106,11 @@ void main()
     // Emissive
     Lo += emissive * material.emissive;
 
-//    outColor = vec4(Lo, 1.0);
-    outAlbedo = vec4(Lo, 1.0);
+    outPosition = vec4(inWorldPos, 1.0);
     outNormal = vec4(N, 0.0);
+    outAlbedo = vec4(Lo, 1.0);
+    outARM = vec4(ambientOcclusion, roughness, metallic, 0.0);
+    outEmissive = vec4(emissive, 1.0);
 }
 
 mat3 calcTBN()
