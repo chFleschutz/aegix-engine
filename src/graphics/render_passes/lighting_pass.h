@@ -193,11 +193,12 @@ namespace Aegix::Graphics
 			ubo.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
 
 			ubo.ambient = { 
-				.color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f) 
+				.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) 
 			};
+
 			ubo.directional = {
-				.direction = glm::vec4(glm::normalize(glm::vec3(1.0f, -1.0f, -1.0f)), 1.0f),
-				.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+				.direction = glm::vec4(glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f)), 0.0f),
+				.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
 			};
 
 			int32_t lighIndex = 0;

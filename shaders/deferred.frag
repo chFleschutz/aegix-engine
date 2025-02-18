@@ -43,6 +43,7 @@ float NormalDistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
 vec3 FresnelSchlick(float cosTheta, vec3 F0);
+vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float metallic, vec3 radiance, vec3 F0);
 
 void main()
 {
@@ -68,32 +69,21 @@ void main()
     {
         PointLight pointLight = lighting.pointLights[i];
         vec3 L = normalize(pointLight.position.xyz - position);
-        vec3 H = normalize(V + L);
 
-        // Light radiance
         float attenuation = lightAttenuation(pointLight.position.xyz, position);
         vec3 radiance = pointLight.color.rgb * pointLight.color.w * attenuation;
 
-        // Cook-Torrance BRDF
-        float D = NormalDistributionGGX(N, H, roughness);
-        float G = GeometrySmith(N, V, L, roughness);
-        vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
-        vec3 kS = F;
-        vec3 kD = (1.0 - kS) * (1.0 - metallic);
-
-        vec3 DFG = D * G * F ;
-        float NdotV = max(dot(N, V), 0.0);
-        float NdotL = max(dot(N, L), 0.0);
-        vec3 specular = DFG / (4.0 * NdotV * NdotL + 0.0001);
-
-        // Add light contribution
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }
 
     // Ambient light
-    Lo += vec3(0.03) * albedo * ambientOcclusion;
+    vec3 ambientLight = lighting.ambientLight.color.rgb * lighting.ambientLight.color.w;
+    Lo += albedo * ambientLight;
 
-    
+    // Directional light
+    vec3 L = normalize(-lighting.directionalLight.direction.xyz);
+    vec3 radiance = lighting.directionalLight.color.rgb * lighting.directionalLight.color.w;
+    Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
 
     // Emissive material
     Lo += emissive;
@@ -139,4 +129,23 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float metallic, vec3 radiance, vec3 F0)
+{
+    vec3 H = normalize(V + L);
+
+    // Cook-Torrance BRDF
+    float D = NormalDistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    vec3 F = FresnelSchlick(max(dot(H, V), 0.0), F0);
+    vec3 kS = F;
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
+
+    vec3 DFG = D * G * F ;
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    vec3 specular = DFG / (4.0 * NdotV * NdotL + 0.0001);
+
+    return (kD * albedo / PI + specular) * radiance * NdotL;
 }
