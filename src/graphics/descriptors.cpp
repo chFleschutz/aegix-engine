@@ -182,6 +182,15 @@ namespace Aegix::Graphics
 		: m_device{ device }, m_pool{ pool }, m_setLayout{ setLayout }
 	{
 	}
+	
+	DescriptorSet::Builder& DescriptorSet::Builder::addBuffer(uint32_t binding, const UniformBuffer& buffer)
+	{
+		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
+		{
+			m_descriptorInfos[i].bufferInfos.emplace_back(binding, buffer.descriptorBufferInfo(i));
+		}
+		return *this;
+	}
 
 	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture, const Sampler& sampler)
 	{

@@ -130,6 +130,7 @@ namespace Aegix::Graphics
 				return *this;
 			}
 
+			Builder& addBuffer(uint32_t binding, const UniformBuffer& buffer);
 			Builder& addTexture(uint32_t binding, const Texture& texture, const Sampler& sampler);
 			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture, const Sampler& sampler);
 
