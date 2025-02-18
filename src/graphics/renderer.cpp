@@ -140,7 +140,7 @@ namespace Aegix::Graphics
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
 		auto position = m_frameGraph.addTexture(m_device, "Position", { 1920, 1080, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_A2B10G10R10_UNORM_PACK32, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
 		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
 		auto arm = m_frameGraph.addTexture(m_device, "ARM", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
 		auto emissive = m_frameGraph.addTexture(m_device, "Emissive", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });

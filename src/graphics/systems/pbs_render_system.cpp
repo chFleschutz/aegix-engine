@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "gbuffer.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "gbuffer.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-			.addColorAttachment(VK_FORMAT_A2B10G10R10_UNORM_PACK32)
+			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
