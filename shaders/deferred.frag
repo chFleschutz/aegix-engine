@@ -10,6 +10,31 @@ layout(set = 0, binding = 2) uniform sampler2D albedoMap;
 layout(set = 0, binding = 3) uniform sampler2D armMap;
 layout(set = 0, binding = 4) uniform sampler2D emissiveMap;
 
+struct AmbientLight
+{
+	vec4 color;
+};
+
+struct DirectionalLight
+{
+	vec4 direction;
+	vec4 color;
+};
+
+struct PointLight
+{
+	vec4 position;
+	vec4 color;
+};
+
+layout(set = 0, binding = 5) uniform Lighting
+{
+	AmbientLight ambientLight;
+	DirectionalLight directionalLight;
+	PointLight pointLights[10];
+	int numPointLights;
+} lighting;
+
 void main()
 {
 	vec3 albedo = texture(albedoMap, inUV).rgb;

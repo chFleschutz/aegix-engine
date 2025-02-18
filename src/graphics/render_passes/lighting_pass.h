@@ -6,6 +6,30 @@
 
 namespace Aegix::Graphics
 {
+	struct LightingUBO
+	{
+		struct AmbientLight
+		{
+			glm::vec4 color;
+		};
+		AmbientLight ambient;
+
+		struct DirectionalLight
+		{
+			glm::vec4 direction;
+			glm::vec4 color;
+		};
+		DirectionalLight directional;
+
+		struct PointLight
+		{
+			glm::vec4 position;
+			glm::vec4 color;
+		};
+		std::array<PointLight, GlobalLimits::MAX_LIGHTS> pointLights;
+		int32_t pointLightCount;
+	};
+
 	struct LightingResources
 	{
 		FrameGraphResourceID sceneColor;
@@ -14,6 +38,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> descriptorSet;
 		std::unique_ptr<Sampler> sampler;
+		std::unique_ptr<UniformBufferData<LightingUBO>> ubo;
 	};
 
 	struct LightingData
@@ -50,12 +75,15 @@ namespace Aegix::Graphics
 
 					data.sampler = std::make_unique<Sampler>(renderer.device);
 
+					data.ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
+
 					data.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
 						.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+						.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
 						.build();
 
 					data.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *data.descriptorSetLayout)
@@ -64,6 +92,7 @@ namespace Aegix::Graphics
 						.addTexture(2, albedo.texture, *data.sampler)
 						.addTexture(3, arm.texture, *data.sampler)
 						.addTexture(4, emissive.texture, *data.sampler)
+						.addBuffer(5, *data.ubo)
 						.build();
 
 					data.pipelineLayout = PipelineLayout::Builder(renderer.device)
@@ -81,6 +110,8 @@ namespace Aegix::Graphics
 				},
 				[](const LightingResources& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
+					updateLighting(frameInfo, const_cast<LightingResources&>(data));
+
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
 					// Begin Rendering
@@ -151,6 +182,36 @@ namespace Aegix::Graphics
 				});
 
 			blackboard.add<LightingData>(lightingResources.sceneColor);
+		}
+
+		static void updateLighting(const FrameInfo& frameInfo, LightingResources& data)
+		{
+			LightingUBO ubo{};
+
+			ubo.ambient = { 
+				.color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f) 
+			};
+			ubo.directional = {
+				.direction = glm::vec4(glm::normalize(glm::vec3(1.0f, -1.0f, -1.0f)), 1.0f),
+				.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+			};
+
+			int32_t lighIndex = 0;
+			auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
+			for (auto&& [entity, transform, pointLight] : view.each())
+			{
+				assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
+				ubo.pointLights[lighIndex] = LightingUBO::PointLight{
+					.position = glm::vec4(transform.location, 1.0f),
+					.color = glm::vec4(pointLight.color, pointLight.intensity)
+				};
+				lighIndex++;
+
+				assert(lighIndex < 4);
+			}
+			ubo.pointLightCount = lighIndex;
+
+			data.ubo->setData(frameInfo.frameIndex, ubo);
 		}
 	};
 }
