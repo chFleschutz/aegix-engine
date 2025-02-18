@@ -8,6 +8,8 @@ namespace Aegix::Graphics
 {
 	struct LightingUBO
 	{
+		glm::vec4 cameraPosition;
+
 		struct AmbientLight
 		{
 			glm::vec4 color;
@@ -187,6 +189,8 @@ namespace Aegix::Graphics
 		static void updateLighting(const FrameInfo& frameInfo, LightingResources& data)
 		{
 			LightingUBO ubo{};
+
+			ubo.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
 
 			ubo.ambient = { 
 				.color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f) 
