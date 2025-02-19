@@ -71,13 +71,6 @@ namespace Aegix::Graphics
 
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
-					// TODO: Automate layout transitions
-					position.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					normal.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					albedo.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					arm.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					emissive.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
 					std::array<VkRenderingAttachmentInfo, 5> colorAttachments{};
 					colorAttachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 					colorAttachments[0].imageView = position.texture.imageView();
@@ -159,13 +152,6 @@ namespace Aegix::Graphics
 					}
 
 					vkCmdEndRendering(commandBuffer);
-
-					// TODO: Automate layout transitions 
-					position.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					normal.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					albedo.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					arm.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					emissive.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 				});
 		}
 

@@ -4,6 +4,7 @@
 #include "graphics/frame_graph/frame_graph_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/descriptors.h"
+#include "graphics/vulkan_tools.h"
 
 #include <functional>
 #include <memory>
@@ -90,6 +91,8 @@ namespace Aegix::Graphics
 		{
 			for (auto& node : m_nodes)
 			{
+				placeBarriers(frameInfo.commandBuffer, node);
+
 				node.executePass(m_resourcePool, frameInfo);
 			}
 		}
@@ -102,6 +105,102 @@ namespace Aegix::Graphics
 		auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
 	private:
+		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)
+		{
+			std::vector<VkImageMemoryBarrier> readDepthBarriers;
+			std::vector<VkImageMemoryBarrier> readColorBarriers;
+			readColorBarriers.reserve(node.reads().size());
+
+			for (auto& read : node.reads())
+			{
+				Texture& texture = m_resourcePool.texture(read).texture;
+
+				VkImageLayout newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				
+				if (texture.layout() == newLayout)
+					continue;
+
+				if (Tools::isDepthFormat(texture.format()))
+				{
+					readDepthBarriers.emplace_back(texture.imageMemoryBarrier(newLayout));
+				}
+				else
+				{
+					readColorBarriers.emplace_back(texture.imageMemoryBarrier(newLayout));
+				}
+			}
+
+			if (!readDepthBarriers.empty())
+			{
+				vkCmdPipelineBarrier(commandBuffer,
+					VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					0,
+					0, nullptr,
+					0, nullptr,
+					static_cast<uint32_t>(readDepthBarriers.size()), readDepthBarriers.data()
+				);
+			}
+
+			if (!readColorBarriers.empty())
+			{
+				vkCmdPipelineBarrier(commandBuffer,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					0,
+					0, nullptr,
+					0, nullptr,
+					static_cast<uint32_t>(readColorBarriers.size()), readColorBarriers.data()
+				);
+			}
+
+			std::vector<VkImageMemoryBarrier> writeDepthBarriers;
+			std::vector<VkImageMemoryBarrier> writeColorBarriers;
+			writeColorBarriers.reserve(node.writes().size());
+
+			for (auto& write : node.writes())
+			{
+				Texture& texture = m_resourcePool.texture(write).texture;
+
+				if (Tools::isDepthFormat(texture.format()))
+				{
+					VkImageLayout newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					if (texture.layout() != newLayout)
+						writeDepthBarriers.emplace_back(texture.imageMemoryBarrier(newLayout));
+				}
+				else
+				{
+					VkImageLayout newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					if (texture.layout() != newLayout)
+						writeColorBarriers.emplace_back(texture.imageMemoryBarrier(newLayout));
+				}
+			}
+
+			if (!writeDepthBarriers.empty())
+			{
+				vkCmdPipelineBarrier(commandBuffer,
+					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+					0,
+					0, nullptr,
+					0, nullptr,
+					static_cast<uint32_t>(writeDepthBarriers.size()), writeDepthBarriers.data()
+				);
+			}
+
+			if (!writeColorBarriers.empty())
+			{
+				vkCmdPipelineBarrier(commandBuffer,
+					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					0,
+					0, nullptr,
+					0, nullptr,
+					static_cast<uint32_t>(writeColorBarriers.size()), writeColorBarriers.data()
+				);
+			}
+		}
+
 		std::vector<FrameGraphNode> m_nodes;
 		FrameGraphResourcePool m_resourcePool;
 	};

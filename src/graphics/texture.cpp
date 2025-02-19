@@ -1,5 +1,7 @@
 #include "texture.h"
 
+#include "graphics/vulkan_tools.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -47,6 +49,28 @@ namespace Aegix::Graphics
 	
 		if (m_imageMemory != VK_NULL_HANDLE)
 			vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
+	}
+
+	auto Texture::imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = m_layout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = m_image;
+		barrier.subresourceRange.aspectMask = Tools::aspectFlags(m_format);
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
+		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
+
+		m_layout = newLayout;
+
+		return barrier;
 	}
 
 	void Texture::transitionLayout(VkImageLayout newLayout)

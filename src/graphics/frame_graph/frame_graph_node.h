@@ -42,6 +42,9 @@ namespace Aegix::Graphics
 			m_writes.emplace_back(resource);
 		}
 
+		[[nodiscard]] auto reads() const -> std::vector<FrameGraphResourceID> { return m_reads; }
+		[[nodiscard]] auto writes() const -> std::vector<FrameGraphResourceID> { return m_writes; }
+
 	private:
 		std::string m_name;
 		FrameGraphNodeID m_id;

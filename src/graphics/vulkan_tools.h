@@ -23,4 +23,9 @@ namespace Aegix::Tools
 
 	/// @brief Returns true if the format is a depth or depth-stencil format otherwise false
 	bool isDepthFormat(VkFormat format);
+
+	auto srcAccessMask(VkImageLayout layout) -> VkAccessFlags;
+	auto dstAccessMask(VkImageLayout layout) -> VkAccessFlags;
+
+	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
 }

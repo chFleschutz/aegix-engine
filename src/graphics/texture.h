@@ -33,12 +33,17 @@ namespace Aegix::Graphics
 		Texture& operator=(const Texture&) = delete;
 		Texture& operator=(Texture&&) = delete;
 
-		VkFormat format() const { return m_format; }
-		VkExtent2D extent() const { return m_extent; }
-		uint32_t width() const { return m_extent.width; }
-		uint32_t height() const { return m_extent.height; }
-		VkImage image() const { return m_image; }
-		VkImageView imageView() const { return m_imageView; }
+		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
+		[[nodiscard]] auto extent() const -> VkExtent2D{ return m_extent; }
+		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
+		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
+		[[nodiscard]] auto image() const -> VkImage { return m_image; }
+		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
+		[[nodiscard]] auto layout() const -> VkImageLayout { return m_layout; }
+
+		/// @brief Returns a VkImageMemoryBarrier for transitioning the image to the new layout
+		/// @note The internal layout will be changed to the new layout, make sure to submit the barrier to a command buffer
+		[[nodiscard]] auto imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier;
 
 		void transitionLayout(VkImageLayout newLayout);
 		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
