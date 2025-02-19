@@ -40,10 +40,8 @@ namespace Aegix::Graphics
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
-		const FrameGraphTexture& texture(FrameGraphResourceID id) const
-		{
-			return m_textures[id];
-		}
+		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[id]; }
+		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[id]; }
 
 		auto renderStages() -> RenderStagePool& { return m_renderStages; }
 		auto renderStage(RenderStageType type) -> RenderStage& { return m_renderStages.renderStage(type); }

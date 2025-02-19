@@ -55,12 +55,12 @@ namespace Aegix::Graphics
 					auto& stage = resources.renderStage(RenderStageType::Geometry);
 					updateUBO(stage, frameInfo);
 
-					const auto& position = resources.texture(data.position);
-					const auto& normal = resources.texture(data.normal);
-					const auto& albedo = resources.texture(data.albedo);
-					const auto& arm = resources.texture(data.arm);
-					const auto& emissive = resources.texture(data.emissive);
-					const auto& depth = resources.texture(data.depth);
+					auto& position = resources.texture(data.position);
+					auto& normal = resources.texture(data.normal);
+					auto& albedo = resources.texture(data.albedo);
+					auto& arm = resources.texture(data.arm);
+					auto& emissive = resources.texture(data.emissive);
+					auto& depth = resources.texture(data.depth);
 
 					VkExtent2D extent = albedo.texture.extent();
 					assert(extent.width == position.texture.extent().width && extent.height == position.texture.extent().height);
@@ -71,12 +71,12 @@ namespace Aegix::Graphics
 
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
-					// TODO: Automate layout transitions (and remove the const_casts)
-					const_cast<Texture&>(position.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					const_cast<Texture&>(normal.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					const_cast<Texture&>(arm.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					const_cast<Texture&>(emissive.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					// TODO: Automate layout transitions
+					position.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					normal.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					albedo.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					arm.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+					emissive.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 					std::array<VkRenderingAttachmentInfo, 5> colorAttachments{};
 					colorAttachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -160,12 +160,12 @@ namespace Aegix::Graphics
 
 					vkCmdEndRendering(commandBuffer);
 
-					// TODO: Automate layout transitions (and remove the const_casts)
-					const_cast<Texture&>(position.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					const_cast<Texture&>(normal.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					const_cast<Texture&>(albedo.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					const_cast<Texture&>(arm.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-					const_cast<Texture&>(emissive.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					// TODO: Automate layout transitions 
+					position.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					normal.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					albedo.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					arm.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+					emissive.texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 				});
 		}
 
