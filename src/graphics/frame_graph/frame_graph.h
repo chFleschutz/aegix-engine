@@ -130,29 +130,17 @@ namespace Aegix::Graphics
 				}
 			}
 
-			if (!readDepthBarriers.empty())
-			{
-				vkCmdPipelineBarrier(commandBuffer,
-					VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					0,
-					0, nullptr,
-					0, nullptr,
-					static_cast<uint32_t>(readDepthBarriers.size()), readDepthBarriers.data()
-				);
-			}
+			Tools::vk::cmdPipelineBarrier(commandBuffer,
+				VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				readDepthBarriers
+			);
 
-			if (!readColorBarriers.empty())
-			{
-				vkCmdPipelineBarrier(commandBuffer,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					0,
-					0, nullptr,
-					0, nullptr,
-					static_cast<uint32_t>(readColorBarriers.size()), readColorBarriers.data()
-				);
-			}
+			Tools::vk::cmdPipelineBarrier(commandBuffer,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				readColorBarriers
+			);
 
 			std::vector<VkImageMemoryBarrier> writeDepthBarriers;
 			std::vector<VkImageMemoryBarrier> writeColorBarriers;
@@ -176,29 +164,17 @@ namespace Aegix::Graphics
 				}
 			}
 
-			if (!writeDepthBarriers.empty())
-			{
-				vkCmdPipelineBarrier(commandBuffer,
-					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-					0,
-					0, nullptr,
-					0, nullptr,
-					static_cast<uint32_t>(writeDepthBarriers.size()), writeDepthBarriers.data()
-				);
-			}
+			Tools::vk::cmdPipelineBarrier(commandBuffer,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+				writeDepthBarriers
+			);
 
-			if (!writeColorBarriers.empty())
-			{
-				vkCmdPipelineBarrier(commandBuffer,
-					VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-					0,
-					0, nullptr,
-					0, nullptr,
-					static_cast<uint32_t>(writeColorBarriers.size()), writeColorBarriers.data()
-				);
-			}
+			Tools::vk::cmdPipelineBarrier(commandBuffer,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				writeColorBarriers
+			);
 		}
 
 		std::vector<FrameGraphNode> m_nodes;

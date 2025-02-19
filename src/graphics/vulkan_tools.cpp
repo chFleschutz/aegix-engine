@@ -131,3 +131,17 @@ namespace Aegix::Tools
 		}
 	}
 }
+
+void Aegix::Tools::vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, const std::vector<VkImageMemoryBarrier>& barriers)
+{
+	if (barriers.empty())
+		return;
+
+	vkCmdPipelineBarrier(commandBuffer,
+		srcStage, dstStage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		static_cast<uint32_t>(barriers.size()), barriers.data()
+	);
+}

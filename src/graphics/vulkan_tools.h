@@ -5,6 +5,7 @@
 #include <cassert>
 #include <iostream>
 #include <string_view>
+#include <vector>
 
 #define CHECK_VK_RESULT(f)																				\
 {																										\
@@ -28,4 +29,10 @@ namespace Aegix::Tools
 	auto dstAccessMask(VkImageLayout layout) -> VkAccessFlags;
 
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
+
+	namespace vk
+	{
+		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+			const std::vector<VkImageMemoryBarrier>& barriers);
+	}
 }
