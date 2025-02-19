@@ -1,5 +1,6 @@
 #pragma once
 
+#include "frame_graph/render_stage_pool.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_graph/frame_graph.h"
@@ -28,8 +29,10 @@ namespace Aegix::Graphics
 		template<typename T, typename... Args>
 		RenderSystem& addRenderSystem(Args&&... args)
 		{
-			m_renderSystems.emplace_back(std::make_unique<T>(m_device, *m_globalSetLayout));
-			return *m_renderSystems.back();
+			// TODO: Make enum a parameter
+			auto& stage = m_frameGraph.resourcePool().renderStage(RenderStageType::Geometry);
+			stage.renderSystems.emplace_back(std::make_unique<T>(m_device, *stage.descriptorSetLayout, std::forward<Args>(args)...));
+			return *stage.renderSystems.back();
 		}
 
 		VulkanDevice& device() { return m_device; }
@@ -55,9 +58,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer beginFrame();
 		void endFrame(VkCommandBuffer commandBuffer);
 
-		void initializeGlobalUBO();
-		void updateGlobalUBO(const FrameInfo& frameInfo);
-
 		Window& m_window;
 		VulkanDevice& m_device;
 		
@@ -70,10 +70,5 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		FrameGraph m_frameGraph;
-
-		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
-		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
-		std::unique_ptr<DescriptorSet> m_globalSet;
-		std::unique_ptr<UniformBufferData<GlobalUbo>> m_globalUBO;
 	};
 }

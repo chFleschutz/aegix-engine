@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/frame_graph/render_stage_pool.h"
 #include "graphics/texture.h"
 
 #include <string>
@@ -39,12 +40,16 @@ namespace Aegix::Graphics
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
-		const FrameGraphTexture& getTexture(FrameGraphResourceID id) const
+		const FrameGraphTexture& texture(FrameGraphResourceID id) const
 		{
 			return m_textures[id];
 		}
 
+		auto renderStages() -> RenderStagePool& { return m_renderStages; }
+		auto renderStage(RenderStageType type) -> RenderStage& { return m_renderStages.renderStage(type); }
+		
 	private:
 		std::vector<FrameGraphTexture> m_textures;
+		RenderStagePool m_renderStages;
 	};
 }

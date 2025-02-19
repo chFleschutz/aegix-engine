@@ -6,8 +6,6 @@
 
 namespace Aegix::Graphics
 {
-	class RenderSystemCollection;
-
 	struct GlobalLimits
 	{
 		static constexpr int MAX_LIGHTS = 10;
@@ -15,12 +13,9 @@ namespace Aegix::Graphics
 
 	struct GlobalUbo
 	{
-		glm::mat4 projection{1.0f};
-		glm::mat4 view{1.0f};
-		glm::mat4 inverseView{1.0f};
-		glm::vec4 ambientLightColor{1.0f, 1.0f, 1.0f, 0.02f}; // w is the intesity
-		PointLight pointLights[GlobalLimits::MAX_LIGHTS];
-		int numLights;
+		glm::mat4 projection{ 1.0f };
+		glm::mat4 view{ 1.0f };
+		glm::mat4 inverseView{ 1.0f };
 	};
 
 	struct FrameInfo
@@ -29,7 +24,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer commandBuffer;
 		Scene::Scene& scene;
 		float aspectRatio;
-		VkDescriptorSet globalDescriptorSet;
 
 		// TODO: Replace with a more general solution
 		VkExtent2D swapChainExtend;

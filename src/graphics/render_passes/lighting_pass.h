@@ -69,11 +69,11 @@ namespace Aegix::Graphics
 					builder.declareRead(gBuffer.emissive);
 					builder.declareRead(gBuffer.depth);
 
-					const auto& position = resources.getTexture(gBuffer.position);
-					const auto& normal = resources.getTexture(gBuffer.normal);
-					const auto& albedo = resources.getTexture(gBuffer.albedo);
-					const auto& arm = resources.getTexture(gBuffer.arm);
-					const auto& emissive = resources.getTexture(gBuffer.emissive);
+					const auto& position = resources.texture(gBuffer.position);
+					const auto& normal = resources.texture(gBuffer.normal);
+					const auto& albedo = resources.texture(gBuffer.albedo);
+					const auto& arm = resources.texture(gBuffer.arm);
+					const auto& emissive = resources.texture(gBuffer.emissive);
 
 					data.sampler = std::make_unique<Sampler>(renderer.device);
 
@@ -110,7 +110,7 @@ namespace Aegix::Graphics
 						.setVertexBindingDescriptions({}) // Clear default vertex binding
 						.build();
 				},
-				[](const LightingResources& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+				[](const LightingResources& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
 					updateLighting(frameInfo, const_cast<LightingResources&>(data));
 

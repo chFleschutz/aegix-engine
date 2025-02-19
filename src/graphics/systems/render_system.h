@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 
 		DescriptorSetLayout& descriptorSetLayout() { return *m_descriptorSetLayout; }
 
-		virtual void render(const FrameInfo& frameInfo) = 0;
+		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) = 0;
 
 	protected:
 		VulkanDevice& m_device;

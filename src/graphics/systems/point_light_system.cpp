@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	void PointLightSystem::render(const FrameInfo& frameInfo)
+	void PointLightSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
 		constexpr float pointLightScale = 0.005f;
 
@@ -32,9 +32,9 @@ namespace Aegix::Graphics
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			m_pipelineLayout->pipelineLayout(),
+			*m_pipelineLayout,
 			0, 1,
-			&frameInfo.globalDescriptorSet,
+			&globalSet,
 			0, nullptr
 		);
 
@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
-				m_pipelineLayout->pipelineLayout(),
+				*m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(PointLightPushConstants),

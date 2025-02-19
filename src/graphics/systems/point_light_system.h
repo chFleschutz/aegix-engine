@@ -18,6 +18,6 @@ namespace Aegix::Graphics
 
 		PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const FrameInfo& frameInfo) override;
+		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};
 } 

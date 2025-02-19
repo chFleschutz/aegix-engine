@@ -10,7 +10,7 @@ namespace Aegix::Graphics
 	struct FrameGraphPassBase
 	{
 		virtual ~FrameGraphPassBase() = default;
-		virtual void operator()(const FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
+		virtual void operator()(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
 	};
 
 	template <typename Data, typename Execute>
@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 		{
 		}
 
-		void operator()(const FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		void operator()(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
 			executeFunc(data, resources, frameInfo);
 		}

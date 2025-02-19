@@ -51,7 +51,7 @@ namespace Aegix::Graphics
 
 		template <typename Data = NoData, typename Setup, typename Execute>
 			requires std::is_invocable_v<Setup, Builder&, Data&> && 
-					 std::is_invocable_v<Execute, const Data&, const FrameGraphResourcePool&, const FrameInfo&> &&
+					 std::is_invocable_v<Execute, const Data&, FrameGraphResourcePool&, const FrameInfo&> &&
 					 (sizeof(Execute) < 1024)
 		[[nodiscard]]
 		const Data& addPass(const std::string& name, Setup&& setup, Execute&& execute)
@@ -67,6 +67,15 @@ namespace Aegix::Graphics
 			return data;
 		}
 
+		FrameGraph() = default;
+		FrameGraph(const FrameGraph&) = delete;
+		FrameGraph(FrameGraph&&) = delete;
+		~FrameGraph() = default;
+
+		FrameGraph& operator=(const FrameGraph&) = delete;
+		FrameGraph& operator=(FrameGraph&&) = delete;
+
+		[[nodiscard]]
 		auto addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc) -> FrameGraphResourceID
 		{
 			return m_resourcePool.addTexture(device, name, desc);

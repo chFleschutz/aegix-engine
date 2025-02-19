@@ -18,9 +18,6 @@ namespace Aegix::Graphics
 		recreateSwapChain();
 		createCommandBuffers();
 		createDescriptorPool();
-
-		initializeGlobalUBO();
-
 		createFrameGraph();
 	}
 
@@ -60,14 +57,11 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain->extentAspectRatio(),
-			m_globalSet->descriptorSet(m_currentFrameIndex),
 			m_swapChain->extend(),
 			m_swapChain->colorImageView(m_currentImageIndex),
 			m_swapChain->depthImageView(m_currentImageIndex)
 		};
-
-		updateGlobalUBO(frameInfo);
-
+		
 		m_frameGraph.execute(frameInfo);
 
 		endFrame(commandBuffer);
@@ -148,7 +142,7 @@ namespace Aegix::Graphics
 
 		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
 
-		GBufferPass{ m_frameGraph, blackboard, m_renderSystems, position, normal, albedo, arm, emissive, depth };
+		GBufferPass{ m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth };
 		LightingPass{ m_frameGraph, blackboard, sceneColor };
 
 		m_frameGraph.compile();
@@ -204,42 +198,5 @@ namespace Aegix::Graphics
 
 		m_isFrameStarted = false;
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
-	}
-
-	void Renderer::initializeGlobalUBO()
-	{
-		m_globalSetLayout = DescriptorSetLayout::Builder(m_device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.build();
-
-		m_globalUBO = std::make_unique<UniformBufferData<GlobalUbo>>(m_device);
-
-		m_globalSet = DescriptorSet::Builder(m_device, *m_globalPool, *m_globalSetLayout)
-			.addBuffer(0, *m_globalUBO)
-			.build();
-	}
-
-	void Graphics::Renderer::updateGlobalUBO(const FrameInfo& frameInfo)
-	{
-		auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
-		camera.aspect = m_swapChain->extentAspectRatio();
-
-		GlobalUbo ubo{};
-		ubo.projection = camera.projectionMatrix;
-		ubo.view = camera.viewMatrix;
-		ubo.inverseView = camera.inverseViewMatrix;
-
-		int lighIndex = 0;
-		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
-		for (auto&& [entity, transform, pointLight] : view.each())
-		{
-			assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex].position = glm::vec4(transform.location, 1.0f);
-			ubo.pointLights[lighIndex].color = glm::vec4(pointLight.color, pointLight.intensity);
-			lighIndex++;
-		}
-		ubo.numLights = lighIndex;
-
-		m_globalUBO->setData(m_currentFrameIndex, ubo);
 	}
 }

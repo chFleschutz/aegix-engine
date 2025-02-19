@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 		{
 		}
 
-		void executePass(const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+		void executePass(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 		{
 			std::invoke(*m_pass, resources, frameInfo);
 		}

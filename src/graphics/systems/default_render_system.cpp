@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	void DefaultRenderSystem::render(const FrameInfo& frameInfo)
+	void DefaultRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
@@ -53,7 +53,7 @@ namespace Aegix::Graphics
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			m_pipelineLayout->pipelineLayout(),
 			0, 1,
-			&frameInfo.globalDescriptorSet,
+			&globalSet,
 			0, nullptr
 		);
 

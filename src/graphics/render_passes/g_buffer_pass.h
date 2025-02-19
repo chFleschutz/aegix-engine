@@ -9,8 +9,6 @@
 
 namespace Aegix::Graphics
 {
-	using RenderSystemList = std::vector<std::unique_ptr<RenderSystem>>;
-
 	struct GBufferData
 	{
 		FrameGraphResourceID position;
@@ -19,36 +17,50 @@ namespace Aegix::Graphics
 		FrameGraphResourceID arm;
 		FrameGraphResourceID emissive;
 		FrameGraphResourceID depth;
-		RenderSystemList* renderSystems;
 	};
 
 	class GBufferPass
 	{
 	public:
-		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, RenderSystemList& renderSystems,
+		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard,
 			FrameGraphResourceID position, FrameGraphResourceID normal, FrameGraphResourceID albedo, FrameGraphResourceID arm, 
 			FrameGraphResourceID emissive, FrameGraphResourceID depth )
 		{
+			auto& renderer = blackboard.get<RendererData>();
+
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
+					auto& stage = frameGraph.resourcePool().renderStage(RenderStageType::Geometry);
+
+					stage.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
+						.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+						.build();
+
+					stage.ubo = std::make_unique<UniformBuffer>(renderer.device, GlobalUbo{});
+
+					stage.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *stage.descriptorSetLayout)
+						.addBuffer(0, *stage.ubo)
+						.build();
+
 					data.position = builder.declareWrite(position);
 					data.normal = builder.declareWrite(normal);
 					data.albedo = builder.declareWrite(albedo);
 					data.arm = builder.declareWrite(arm);
 					data.emissive = builder.declareWrite(emissive);
 					data.depth = builder.declareWrite(depth);
-
-					data.renderSystems = &renderSystems;
 				},
-				[](const GBufferData& data, const FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+				[](const GBufferData& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
-					const auto& position = resources.getTexture(data.position);
-					const auto& normal = resources.getTexture(data.normal);
-					const auto& albedo = resources.getTexture(data.albedo);
-					const auto& arm = resources.getTexture(data.arm);
-					const auto& emissive = resources.getTexture(data.emissive);
-					const auto& depth = resources.getTexture(data.depth);
+					auto& stage = resources.renderStage(RenderStageType::Geometry);
+					updateUBO(stage, frameInfo);
+
+					const auto& position = resources.texture(data.position);
+					const auto& normal = resources.texture(data.normal);
+					const auto& albedo = resources.texture(data.albedo);
+					const auto& arm = resources.texture(data.arm);
+					const auto& emissive = resources.texture(data.emissive);
+					const auto& depth = resources.texture(data.depth);
 
 					VkExtent2D extent = albedo.texture.extent();
 					assert(extent.width == position.texture.extent().width && extent.height == position.texture.extent().height);
@@ -140,9 +152,10 @@ namespace Aegix::Graphics
 
 					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-					for (const auto& system : *data.renderSystems)
+					VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(frameInfo.frameIndex);
+					for (const auto& system : stage.renderSystems)
 					{
-						system->render(frameInfo);
+						system->render(frameInfo, globalSet);
 					}
 
 					vkCmdEndRendering(commandBuffer);
@@ -154,6 +167,21 @@ namespace Aegix::Graphics
 					const_cast<Texture&>(arm.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 					const_cast<Texture&>(emissive.texture).transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 				});
+		}
+
+	private:
+		static void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
+		{
+			auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
+			camera.aspect = frameInfo.aspectRatio;
+
+			GlobalUbo ubo{
+				.projection = camera.projectionMatrix,
+				.view = camera.viewMatrix,
+				.inverseView = camera.inverseViewMatrix
+			};
+
+			stage.ubo->setData(frameInfo.frameIndex, ubo);
 		}
 	};
 }
