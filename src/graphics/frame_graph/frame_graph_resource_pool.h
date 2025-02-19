@@ -59,6 +59,23 @@ namespace Aegix::Graphics
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
+		template<typename T>
+			requires std::is_base_of_v<RenderSystem, T>
+		RenderSystem& addRenderSystem(VulkanDevice& device, RenderStage::Type stageType)
+		{
+			auto& stage = renderStage(stageType);
+
+			// Check if rendersystem type already exists
+			for (auto& system : stage.renderSystems)
+			{
+				if (dynamic_cast<T*>(system.get()))
+					return *system;
+			}
+
+			stage.renderSystems.emplace_back(std::make_unique<T>(device, *stage.descriptorSetLayout));
+			return *stage.renderSystems.back();
+		}
+
 		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
 		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
 

@@ -24,13 +24,11 @@ namespace Aegix::Graphics
 		Renderer& operator=(const Renderer&) = delete;
 		Renderer& operator=(Renderer&&) = delete;
 
-		template<typename T, typename... Args>
-		RenderSystem& addRenderSystem(Args&&... args)
+		template<typename T>
+			requires std::is_base_of_v<RenderSystem, T>
+		RenderSystem& addRenderSystem(RenderStage::Type stageType = RenderStage::Type::Geometry)
 		{
-			// TODO: Make enum a parameter
-			auto& stage = m_frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
-			stage.renderSystems.emplace_back(std::make_unique<T>(m_device, *stage.descriptorSetLayout, std::forward<Args>(args)...));
-			return *stage.renderSystems.back();
+			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, stageType);
 		}
 
 		VulkanDevice& device() { return m_device; }
