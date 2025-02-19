@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 			blackboard += frameGraph.addPass<GBufferData>("GBuffer",
 				[&](FrameGraph::Builder& builder, GBufferData& data)
 				{
-					auto& stage = frameGraph.resourcePool().renderStage(RenderStageType::Geometry);
+					auto& stage = frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
 
 					stage.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
 						.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
@@ -52,7 +52,7 @@ namespace Aegix::Graphics
 				},
 				[](const GBufferData& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
-					auto& stage = resources.renderStage(RenderStageType::Geometry);
+					auto& stage = resources.renderStage(RenderStage::Type::Geometry);
 					updateUBO(stage, frameInfo);
 
 					auto& position = resources.texture(data.position);

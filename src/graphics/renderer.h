@@ -1,6 +1,5 @@
 #pragma once
 
-#include "frame_graph/render_stage_pool.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_graph/frame_graph.h"
@@ -11,7 +10,6 @@
 
 #include <array>
 #include <memory>
-#include <vector>
 
 namespace Aegix::Graphics
 {
@@ -30,7 +28,7 @@ namespace Aegix::Graphics
 		RenderSystem& addRenderSystem(Args&&... args)
 		{
 			// TODO: Make enum a parameter
-			auto& stage = m_frameGraph.resourcePool().renderStage(RenderStageType::Geometry);
+			auto& stage = m_frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
 			stage.renderSystems.emplace_back(std::make_unique<T>(m_device, *stage.descriptorSetLayout, std::forward<Args>(args)...));
 			return *stage.renderSystems.back();
 		}

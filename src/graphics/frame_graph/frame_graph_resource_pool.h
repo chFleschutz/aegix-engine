@@ -1,9 +1,14 @@
 #pragma once
 
-#include "graphics/frame_graph/render_stage_pool.h"
+#include "graphics/descriptors.h"
+#include "graphics/systems/render_system.h"
 #include "graphics/texture.h"
+#include "graphics/uniform_buffer.h"
 
+#include <array>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace Aegix::Graphics
 {
@@ -23,6 +28,20 @@ namespace Aegix::Graphics
 		Texture texture;
 	};
 
+	struct RenderStage
+	{
+		enum class Type
+		{
+			Geometry,
+			Count
+		};
+
+		std::vector<std::unique_ptr<RenderSystem>> renderSystems;
+		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
+		std::unique_ptr<DescriptorSet> descriptorSet;
+		std::unique_ptr<UniformBuffer> ubo;
+	};
+
 	class FrameGraphResourcePool
 	{
 	public:
@@ -40,14 +59,14 @@ namespace Aegix::Graphics
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
-		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[id]; }
-		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[id]; }
+		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
+		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
 
-		auto renderStages() -> RenderStagePool& { return m_renderStages; }
-		auto renderStage(RenderStageType type) -> RenderStage& { return m_renderStages.renderStage(type); }
-		
+		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
+		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
+
 	private:
 		std::vector<FrameGraphTexture> m_textures;
-		RenderStagePool m_renderStages;
+		std::array<RenderStage, static_cast<size_t>(RenderStage::Type::Count)> m_renderStages;
 	};
 }

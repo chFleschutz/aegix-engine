@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include "scene/scene.h"
-#include "scene/components.h"
 #include "scene/entity.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/g_buffer_pass.h"
