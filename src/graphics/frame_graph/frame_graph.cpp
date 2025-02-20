@@ -60,7 +60,7 @@ namespace Aegix::Graphics
 		{
 			if (texture.resizePolicy == ResizePolicy::SwapchainRelative)
 			{
-				texture.texture = Texture{ device, width, height, texture.texture.format(), texture.usage };
+				texture.texture.resize(width, height, texture.usage);
 			}
 		}
 	}

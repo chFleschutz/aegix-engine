@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 	}
 
 	Texture::Texture(Texture&& other) noexcept
-		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent },
+		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent }, m_layout{ other.m_layout },
 		m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, m_imageView{ other.m_imageView }
 	{
 		other.m_image = VK_NULL_HANDLE;
@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 
 	Texture::~Texture()
 	{
-		destroy();	
+		destroy();
 	}
 
 	Texture& Texture::operator=(Texture&& other) noexcept
@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 		if (this != &other)
 		{
 			destroy();
-			
+
 			m_format = other.m_format;
 			m_extent = other.m_extent;
 			m_layout = other.m_layout;
@@ -98,10 +98,15 @@ namespace Aegix::Graphics
 		m_layout = newLayout;
 	}
 
+	void Texture::resize(uint32_t width, uint32_t height, VkImageUsageFlags usage)
+	{
+		destroy();
+		createImage(width, height, usage);
+		createImageView();
+	}
+
 	void Texture::createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage)
 	{
-		m_extent = { width, height };
-
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -117,6 +122,9 @@ namespace Aegix::Graphics
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0;
+
+		m_extent = { width, height };
+		m_layout = imageInfo.initialLayout;
 
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_imageMemory);
 	}
@@ -166,7 +174,7 @@ namespace Aegix::Graphics
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer(pixels);
 		stagingBuffer.unmap();
-		
+
 		stbi_image_free(pixels);
 
 		createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), stagingBuffer);
@@ -191,12 +199,17 @@ namespace Aegix::Graphics
 
 	void Texture::destroy()
 	{
+		VkDevice device = m_device.device();
 		if (m_imageView)
-			vkDestroyImageView(m_device.device(), m_imageView, nullptr);
+			m_device.scheduleDeletion([d = m_device.device(), view = m_imageView]() { vkDestroyImageView(d, view, nullptr); });
 		if (m_image)
-			vkDestroyImage(m_device.device(), m_image, nullptr);
+			m_device.scheduleDeletion([d = m_device.device(), image = m_image]() { vkDestroyImage(d, image, nullptr); });
 		if (m_imageMemory)
-			vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
+			m_device.scheduleDeletion([d = m_device.device(), memory = m_imageMemory]() { vkFreeMemory(d, memory, nullptr); });
+
+		m_imageView = VK_NULL_HANDLE;
+		m_image = VK_NULL_HANDLE;
+		m_imageMemory = VK_NULL_HANDLE;
 	}
 
 

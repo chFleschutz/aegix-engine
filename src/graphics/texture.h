@@ -48,6 +48,8 @@ namespace Aegix::Graphics
 		void transitionLayout(VkImageLayout newLayout);
 		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
 
+		void resize(uint32_t width, uint32_t height, VkImageUsageFlags usage);
+
 	private:
 		void createImage(uint32_t width, uint32_t height, VkImageUsageFlags usage);
 		void createImage(uint32_t width, uint32_t height, const Buffer& buffer);
