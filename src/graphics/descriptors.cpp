@@ -127,8 +127,8 @@ namespace Aegix::Graphics
 
 	// *************** Descriptor Writer *********************
 
-	DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool)
-		: m_setLayout{ setLayout }, m_pool{ pool }
+	DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout)
+		: m_setLayout{ setLayout }
 	{
 	}
 
@@ -175,7 +175,7 @@ namespace Aegix::Graphics
 			write.dstSet = set;
 		}
 
-		vkUpdateDescriptorSets(m_pool.m_device.device(), static_cast<uint32_t>(m_writes.size()), m_writes.data(), 0, nullptr);
+		vkUpdateDescriptorSets(m_setLayout.m_device, static_cast<uint32_t>(m_writes.size()), m_writes.data(), 0, nullptr);
 	}
 
 	DescriptorSet::Builder::Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout)
@@ -218,7 +218,7 @@ namespace Aegix::Graphics
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			DescriptorWriter writer{ m_setLayout, m_pool };
+			DescriptorWriter writer{ m_setLayout };
 			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].bufferInfos)
 			{
 				writer.writeBuffer(binding, &bufferInfo);

@@ -93,7 +93,7 @@ namespace Aegix::Graphics
 	class DescriptorWriter
 	{
 	public:
-		DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
+		DescriptorWriter(DescriptorSetLayout& setLayout);
 		~DescriptorWriter() = default;
 
 		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
@@ -103,7 +103,6 @@ namespace Aegix::Graphics
 
 	private:
 		DescriptorSetLayout& m_setLayout;
-		DescriptorPool& m_pool;
 		std::vector<VkWriteDescriptorSet> m_writes;
 	};
 
