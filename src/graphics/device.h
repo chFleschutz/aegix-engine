@@ -7,6 +7,7 @@
 #define TEXTURES_DIR ENGINE_DIR "assets/textures/"
 
 #include "window.h"
+#include "graphics/deletion_queue.h"
 
 #include <string>
 #include <vector>
@@ -80,6 +81,9 @@ namespace Aegix::Graphics
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
 			uint32_t mipLevels = 1) const;
 
+		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
+		void scheduleDeletion(std::function<void()>&& func) { m_deletionQueue.schedule(std::move(func)); }
+
 	private:
 		void createInstance();
 		void setupDebugMessenger();
@@ -112,5 +116,7 @@ namespace Aegix::Graphics
 
 		const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 		const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+		DeletionQueue m_deletionQueue;
 	};
 }

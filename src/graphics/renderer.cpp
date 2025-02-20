@@ -186,7 +186,6 @@ namespace Aegix::Graphics
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Failed to record command buffer");
 
-		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 		auto result = m_swapChain->submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
 		{
@@ -197,6 +196,11 @@ namespace Aegix::Graphics
 		{
 			throw std::runtime_error("Failed to present swap chain image");
 		}
+
+		waitIdle();
+
+		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+		m_device.flushDeletionQueue(m_currentFrameIndex);
 
 		m_isFrameStarted = false;
 	}

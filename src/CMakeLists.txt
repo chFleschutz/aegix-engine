@@ -11,6 +11,8 @@ target_sources(AegixEngine PRIVATE
 	"graphics/buffer.cpp"
 	"graphics/descriptors.cpp"
 	"graphics/device.cpp"
+	"graphics/deletion_queue.h"
+	"graphics/deletion_queue.cpp"
 	"graphics/frame_graph/frame_graph.cpp"
 	"graphics/frame_graph/frame_graph_blackboard.h"
 	"graphics/frame_graph/frame_graph_node.h" 

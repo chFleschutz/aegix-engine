@@ -65,6 +65,8 @@ namespace Aegix::Graphics
 
 	VulkanDevice::~VulkanDevice()
 	{
+		m_deletionQueue.flushAll();
+
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vkDestroyDevice(m_device, nullptr);
 
