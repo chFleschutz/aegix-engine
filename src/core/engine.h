@@ -55,7 +55,7 @@ namespace Aegix
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
 
-		static Engine* s_instance;
+		inline static Engine* s_instance = nullptr;
 
 		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };

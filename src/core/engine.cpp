@@ -9,8 +9,6 @@
 
 namespace Aegix
 {
-	Engine* Engine::s_instance = nullptr;
-
 	Engine::Engine()
 	{
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
