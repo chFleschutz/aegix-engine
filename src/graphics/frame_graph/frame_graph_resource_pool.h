@@ -14,18 +14,19 @@ namespace Aegix::Graphics
 {
 	using FrameGraphResourceID = uint32_t;
 
+	enum class ResizePolicy
+	{
+		Fixed,
+		SwapchainRelative
+	};
+
 	struct FrameGraphTexture
 	{
-		struct Desc
-		{
-			uint32_t width;
-			uint32_t height;
-			VkFormat format;
-			VkImageUsageFlags usage;
-		};
 
 		std::string name;
 		Texture texture;
+		VkImageUsageFlags usage;
+		ResizePolicy resizePolicy;
 	};
 
 	struct RenderStage
@@ -53,9 +54,10 @@ namespace Aegix::Graphics
 		FrameGraphResourcePool& operator=(const FrameGraphResourcePool&) = delete;
 		FrameGraphResourcePool& operator=(FrameGraphResourcePool&&) = delete;
 
-		FrameGraphResourceID addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc)
+		FrameGraphResourceID addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height, 
+			VkFormat format, VkImageUsageFlags usage, ResizePolicy resizePolicy)
 		{
-			m_textures.emplace_back(name, Texture{ device, desc.width, desc.height, desc.format, desc.usage });
+			m_textures.emplace_back(name, Texture{ device, width, height, format, usage }, usage, resizePolicy);
 			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
 		}
 
@@ -78,6 +80,7 @@ namespace Aegix::Graphics
 
 		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
 		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
+		auto textures() -> std::vector<FrameGraphTexture>& { return m_textures; }
 
 		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }

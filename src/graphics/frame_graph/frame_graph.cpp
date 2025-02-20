@@ -1,5 +1,7 @@
 #include "frame_graph.h"
 
+#include "core/engine.h"
+
 namespace Aegix::Graphics
 {
 	// FrameGraph::Builder -------------------------------------------------------
@@ -25,9 +27,16 @@ namespace Aegix::Graphics
 
 	// FrameGraph ----------------------------------------------------------------
 
-	FrameGraphResourceID FrameGraph::addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc)
+	FrameGraphResourceID FrameGraph::addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
+		VkFormat format, VkImageUsageFlags usage)
 	{
-		return m_resourcePool.addTexture(device, name, desc);
+		return m_resourcePool.addTexture(device, name, width, height, format, usage, ResizePolicy::Fixed);
+	}
+
+	FrameGraphResourceID FrameGraph::addTexture(VulkanDevice& device, const std::string& name, VkFormat format, 
+		VkImageUsageFlags usage)
+	{
+		return m_resourcePool.addTexture(device, name, Engine::WIDTH, Engine::HEIGHT, format, usage, ResizePolicy::SwapchainRelative);
 	}
 
 	void FrameGraph::compile()
@@ -45,9 +54,15 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraph::swapChainResized()
+	void FrameGraph::swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height)
 	{
-		// TODO
+		for (auto& texture : m_resourcePool.textures())
+		{
+			if (texture.resizePolicy == ResizePolicy::SwapchainRelative)
+			{
+				texture.texture = Texture{ device, width, height, texture.texture.format(), texture.usage };
+			}
+		}
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)

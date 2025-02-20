@@ -104,6 +104,8 @@ namespace Aegix::Graphics
 		{
 			m_swapChain = std::make_unique<SwapChain>(m_device, extend);
 		}
+
+		m_frameGraph.swapChainResized(m_device, extend.width, extend.height);
 	}
 
 	void Renderer::createDescriptorPool()
@@ -132,14 +134,14 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		auto position = m_frameGraph.addTexture(m_device, "Position", { 1920, 1080, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto normal = m_frameGraph.addTexture(m_device, "Normal", { 1920, 1080, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto arm = m_frameGraph.addTexture(m_device, "ARM", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto emissive = m_frameGraph.addTexture(m_device, "Emissive", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
-		auto depth = m_frameGraph.addTexture(m_device, "Depth", { 1920, 1080, VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto position = m_frameGraph.addTexture(m_device, "Position", VK_FORMAT_R16G16B16A16_SFLOAT);
+		auto normal = m_frameGraph.addTexture(m_device, "Normal", VK_FORMAT_R16G16B16A16_SFLOAT);
+		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", VK_FORMAT_R8G8B8A8_UNORM);
+		auto arm = m_frameGraph.addTexture(m_device, "ARM", VK_FORMAT_R8G8B8A8_UNORM);
+		auto emissive = m_frameGraph.addTexture(m_device, "Emissive", VK_FORMAT_R8G8B8A8_UNORM);
+		auto depth = m_frameGraph.addTexture(m_device, "Depth", VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", { 1920, 1080, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT });
+		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", VK_FORMAT_R8G8B8A8_UNORM);
 
 		GBufferPass{ m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth };
 		LightingPass{ m_frameGraph, blackboard, sceneColor };

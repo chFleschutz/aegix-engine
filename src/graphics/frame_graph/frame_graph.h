@@ -59,13 +59,16 @@ namespace Aegix::Graphics
 			return data;
 		}
 
-		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, const FrameGraphTexture::Desc& desc) -> FrameGraphResourceID;
+		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
+			VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceID;
+		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, VkFormat format, 
+			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceID;
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
 		void compile();
 		void execute(const FrameInfo& frameInfo);
-		void swapChainResized();
+		void swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height);
 
 	private:
 		struct BarrierPlacement
