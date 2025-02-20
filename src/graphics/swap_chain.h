@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/device.h"
+#include "graphics/globals.h"
 
 #include <vulkan/vulkan.h>
 
@@ -13,8 +14,6 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
-		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
-
 		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
 		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
 		~SwapChain();

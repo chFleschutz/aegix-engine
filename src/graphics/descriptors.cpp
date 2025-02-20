@@ -216,7 +216,7 @@ namespace Aegix::Graphics
 	{
 		auto set = std::make_unique<DescriptorSet>(m_pool, m_setLayout);
 
-		for (size_t i = 0; i < SwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			DescriptorWriter writer{ m_setLayout, m_pool };
 			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].bufferInfos)

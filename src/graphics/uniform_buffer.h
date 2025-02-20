@@ -2,7 +2,7 @@
 
 #include "graphics/buffer.h"
 #include "graphics/descriptors.h"
-#include "graphics/swap_chain.h"
+#include "graphics/globals.h"
 
 #include <array>
 
@@ -64,7 +64,7 @@ namespace Aegix::Graphics
 		}
 
 	private:
-		std::array<std::unique_ptr<Buffer>, SwapChain::MAX_FRAMES_IN_FLIGHT> m_buffers;
+		std::array<std::unique_ptr<Buffer>, MAX_FRAMES_IN_FLIGHT> m_buffers;
 	};
 
 

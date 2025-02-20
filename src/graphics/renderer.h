@@ -3,6 +3,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
 #include "graphics/frame_graph/frame_graph.h"
+#include "graphics/globals.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/window.h"
@@ -59,7 +60,7 @@ namespace Aegix::Graphics
 		
 		std::unique_ptr<SwapChain> m_swapChain;
 		std::unique_ptr<DescriptorPool> m_globalPool;
-		std::array<VkCommandBuffer, SwapChain::MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
+		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 
 		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;

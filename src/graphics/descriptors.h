@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/device.h"
-#include "graphics/swap_chain.h"
+#include "graphics/globals.h"
 #include "graphics/texture.h"
 #include "graphics/uniform_buffer.h"
 
@@ -146,7 +146,7 @@ namespace Aegix::Graphics
 			VulkanDevice& m_device;
 			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
-			std::array<DescriptorInfo, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
+			std::array<DescriptorInfo, MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
 		};
 
 		DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout);
@@ -155,6 +155,6 @@ namespace Aegix::Graphics
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }
 
 	private:
-		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
+		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
 	};
 }
