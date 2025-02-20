@@ -6,13 +6,13 @@ namespace Aegix::Graphics
 {
 	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
 		std::shared_ptr<Texture> texture) 
-		: m_uniformBuffer{ device }, m_texture{ texture }, m_sampler{ device }
+		: m_uniformBuffer{ device }, m_texture{ texture }
 	{
 		assert(m_texture != nullptr && "Texture is null");
 
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
-			.addTexture(1, *m_texture, m_sampler)
+			.addTexture(1, *m_texture)
 			.build();
 	}
 

@@ -6,15 +6,15 @@ namespace Aegix::Graphics
 		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data)
 		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
-		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer{ device, data }, m_sampler{ device }
+		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer{ device, data }
 	{
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
-			.addTexture(1, m_albedoTexture, m_sampler)
-			.addTexture(2, m_normalTexture, m_sampler)
-			.addTexture(3, m_metalRoughnessTexture, m_sampler)
-			.addTexture(4, m_aoTexture, m_sampler)
-			.addTexture(5, m_emissiveTexture, m_sampler)
+			.addTexture(1, m_albedoTexture)
+			.addTexture(2, m_normalTexture)
+			.addTexture(3, m_metalRoughnessTexture)
+			.addTexture(4, m_aoTexture)
+			.addTexture(5, m_emissiveTexture)
 			.build();
 	}
 

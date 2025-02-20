@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-#define CHECK_VK_RESULT(f)																				\
+#define VK_CHECK(f)																				\
 {																										\
 	VkResult result = (f);																				\
 	if (result != VK_SUCCESS)																			\

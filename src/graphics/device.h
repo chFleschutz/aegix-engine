@@ -87,6 +87,7 @@ namespace Aegix::Graphics
 		void scheduleDeletion(VkImageView view) { m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); }); }
 		void scheduleDeletion(VkBuffer buffer) { m_deletionQueue.schedule([=]() { vkDestroyBuffer(m_device, buffer, nullptr); }); }
 		void scheduleDeletion(VkDeviceMemory memory) { m_deletionQueue.schedule([=]() { vkFreeMemory(m_device, memory, nullptr); }); }
+		void scheduleDeletion(VkSampler sampler) { m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); }); }
 
 	private:
 		void createInstance();

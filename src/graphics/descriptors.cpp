@@ -5,7 +5,7 @@
 
 namespace Aegix::Graphics
 {
-	// *************** Descriptor Set Layout Builder *********************
+	// DescriptorSetLayout Builder -----------------------------------------------------
 
 	DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType descriptorType,
 		VkShaderStageFlags stageFlags, uint32_t count)
@@ -27,7 +27,9 @@ namespace Aegix::Graphics
 		return std::make_unique<DescriptorSetLayout>(m_device, m_bindings);
 	}
 
-	// *************** Descriptor Set Layout *********************
+
+
+	// DescriptorSetLayout -----------------------------------------------------
 
 	DescriptorSetLayout::DescriptorSetLayout(VulkanDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
 		: m_device{ device }, m_bindings{ bindings }
@@ -52,7 +54,9 @@ namespace Aegix::Graphics
 		vkDestroyDescriptorSetLayout(m_device.device(), m_descriptorSetLayout, nullptr);
 	}
 
-	// *************** Descriptor Pool Builder *********************
+
+
+	// DescriptorPool Builder -----------------------------------------------------
 
 	DescriptorPool::Builder& DescriptorPool::Builder::addPoolSize(VkDescriptorType descriptorType, uint32_t count)
 	{
@@ -77,7 +81,9 @@ namespace Aegix::Graphics
 		return std::make_unique<DescriptorPool>(m_device, m_maxSets, m_poolFlags, m_poolSizes);
 	}
 
-	// *************** Descriptor Pool *********************
+
+
+	// DescriptorPool -----------------------------------------------------
 
 	DescriptorPool::DescriptorPool(VulkanDevice& device, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
 		const std::vector<VkDescriptorPoolSize>& poolSizes)
@@ -125,7 +131,9 @@ namespace Aegix::Graphics
 		vkResetDescriptorPool(m_device.device(), m_descriptorPool, 0);
 	}
 
-	// *************** Descriptor Writer *********************
+
+
+	// DescriptorWriter -----------------------------------------------------
 
 	DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout)
 		: m_setLayout{ setLayout }
@@ -178,6 +186,10 @@ namespace Aegix::Graphics
 		vkUpdateDescriptorSets(m_setLayout.m_device, static_cast<uint32_t>(m_writes.size()), m_writes.data(), 0, nullptr);
 	}
 
+
+
+	// DescriptorSet Builder -----------------------------------------------------
+
 	DescriptorSet::Builder::Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout)
 		: m_device{ device }, m_pool{ pool }, m_setLayout{ setLayout }
 	{
@@ -192,12 +204,12 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture, const Sampler& sampler)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
 	{
 		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 		{
 			VkDescriptorImageInfo imageInfo{};
-			imageInfo.sampler = sampler.sampler();
+			imageInfo.sampler = texture.sampler();
 			imageInfo.imageView = texture.imageView();
 			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -206,10 +218,10 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture, const Sampler& sampler)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture)
 	{
 		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
-		return addTexture(binding, *texture, sampler);
+		return addTexture(binding, *texture);
 	}
 
 	std::unique_ptr<DescriptorSet> DescriptorSet::Builder::build()

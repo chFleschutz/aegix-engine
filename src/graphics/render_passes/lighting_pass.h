@@ -35,11 +35,16 @@ namespace Aegix::Graphics
 	struct LightingResources
 	{
 		FrameGraphResourceID sceneColor;
+		FrameGraphResourceID position;
+		FrameGraphResourceID normal;
+		FrameGraphResourceID albedo;
+		FrameGraphResourceID arm;
+		FrameGraphResourceID emissive;
+		FrameGraphResourceID depth;
 		std::unique_ptr<Pipeline> pipeline;
 		std::unique_ptr<PipelineLayout> pipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> descriptorSet;
-		std::unique_ptr<Sampler> sampler;
 		std::unique_ptr<UniformBufferData<LightingUBO>> ubo;
 	};
 
@@ -62,20 +67,18 @@ namespace Aegix::Graphics
 				{
 					data.sceneColor = builder.declareWrite(sceneColor);
 
-					builder.declareRead(gBuffer.position);
-					builder.declareRead(gBuffer.normal);
-					builder.declareRead(gBuffer.albedo);
-					builder.declareRead(gBuffer.arm);
-					builder.declareRead(gBuffer.emissive);
-					builder.declareRead(gBuffer.depth);
+					data.position = builder.declareRead(gBuffer.position);
+					data.normal = builder.declareRead(gBuffer.normal);
+					data.albedo = builder.declareRead(gBuffer.albedo);
+					data.arm = builder.declareRead(gBuffer.arm);
+					data.emissive = builder.declareRead(gBuffer.emissive);
+					data.depth = builder.declareRead(gBuffer.depth);
 
 					const auto& position = resources.texture(gBuffer.position);
 					const auto& normal = resources.texture(gBuffer.normal);
 					const auto& albedo = resources.texture(gBuffer.albedo);
 					const auto& arm = resources.texture(gBuffer.arm);
 					const auto& emissive = resources.texture(gBuffer.emissive);
-
-					data.sampler = std::make_unique<Sampler>(renderer.device);
 
 					data.ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
 
@@ -89,11 +92,11 @@ namespace Aegix::Graphics
 						.build();
 
 					data.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *data.descriptorSetLayout)
-						.addTexture(0, position.texture, *data.sampler)
-						.addTexture(1, normal.texture, *data.sampler)
-						.addTexture(2, albedo.texture, *data.sampler)
-						.addTexture(3, arm.texture, *data.sampler)
-						.addTexture(4, emissive.texture, *data.sampler)
+						.addTexture(0, position.texture)
+						.addTexture(1, normal.texture)
+						.addTexture(2, albedo.texture)
+						.addTexture(3, arm.texture)
+						.addTexture(4, emissive.texture)
 						.addBuffer(5, *data.ubo)
 						.build();
 
