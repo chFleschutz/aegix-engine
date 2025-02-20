@@ -83,6 +83,10 @@ namespace Aegix::Graphics
 
 		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
 		void scheduleDeletion(std::function<void()>&& func) { m_deletionQueue.schedule(std::move(func)); }
+		void scheduleDeletion(VkImage image) { m_deletionQueue.schedule([=]() { vkDestroyImage(m_device, image, nullptr); }); }
+		void scheduleDeletion(VkImageView view) { m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); }); }
+		void scheduleDeletion(VkBuffer buffer) { m_deletionQueue.schedule([=]() { vkDestroyBuffer(m_device, buffer, nullptr); }); }
+		void scheduleDeletion(VkDeviceMemory memory) { m_deletionQueue.schedule([=]() { vkFreeMemory(m_device, memory, nullptr); }); }
 
 	private:
 		void createInstance();

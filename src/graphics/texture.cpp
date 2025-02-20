@@ -199,13 +199,12 @@ namespace Aegix::Graphics
 
 	void Texture::destroy()
 	{
-		VkDevice device = m_device.device();
 		if (m_imageView)
-			m_device.scheduleDeletion([d = m_device.device(), view = m_imageView]() { vkDestroyImageView(d, view, nullptr); });
+			m_device.scheduleDeletion(m_imageView);
 		if (m_image)
-			m_device.scheduleDeletion([d = m_device.device(), image = m_image]() { vkDestroyImage(d, image, nullptr); });
+			m_device.scheduleDeletion(m_image);
 		if (m_imageMemory)
-			m_device.scheduleDeletion([d = m_device.device(), memory = m_imageMemory]() { vkFreeMemory(d, memory, nullptr); });
+			m_device.scheduleDeletion(m_imageMemory);
 
 		m_imageView = VK_NULL_HANDLE;
 		m_image = VK_NULL_HANDLE;
