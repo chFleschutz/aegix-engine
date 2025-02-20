@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 		~Texture();
 
 		Texture& operator=(const Texture&) = delete;
-		Texture& operator=(Texture&&) = delete;
+		Texture& operator=(Texture&& other) noexcept;
 
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto extent() const -> VkExtent2D{ return m_extent; }
@@ -54,6 +54,7 @@ namespace Aegix::Graphics
 		void createImage(uint32_t width, uint32_t height, const glm::vec4& color);
 		void createImage(const std::filesystem::path& filePath);
 		void createImageView();
+		void destroy();
 
 		VulkanDevice& m_device;
 

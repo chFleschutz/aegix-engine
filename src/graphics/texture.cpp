@@ -41,14 +41,27 @@ namespace Aegix::Graphics
 
 	Texture::~Texture()
 	{
-		if (m_imageView != VK_NULL_HANDLE)
-			vkDestroyImageView(m_device.device(), m_imageView, nullptr);
-	
-		if (m_image != VK_NULL_HANDLE)
-			vkDestroyImage(m_device.device(), m_image, nullptr);
-	
-		if (m_imageMemory != VK_NULL_HANDLE)
-			vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
+		destroy();	
+	}
+
+	Texture& Texture::operator=(Texture&& other) noexcept
+	{
+		if (this != &other)
+		{
+			destroy();
+			
+			m_format = other.m_format;
+			m_extent = other.m_extent;
+			m_layout = other.m_layout;
+			m_image = other.m_image;
+			m_imageMemory = other.m_imageMemory;
+			m_imageView = other.m_imageView;
+
+			other.m_image = VK_NULL_HANDLE;
+			other.m_imageMemory = VK_NULL_HANDLE;
+			other.m_imageView = VK_NULL_HANDLE;
+		}
+		return *this;
 	}
 
 	auto Texture::imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier
@@ -174,6 +187,16 @@ namespace Aegix::Graphics
 
 		if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageView) != VK_SUCCESS)
 			throw std::runtime_error("failed to create texture image view");
+	}
+
+	void Texture::destroy()
+	{
+		if (m_imageView)
+			vkDestroyImageView(m_device.device(), m_imageView, nullptr);
+		if (m_image)
+			vkDestroyImage(m_device.device(), m_image, nullptr);
+		if (m_imageMemory)
+			vkFreeMemory(m_device.device(), m_imageMemory, nullptr);
 	}
 
 
