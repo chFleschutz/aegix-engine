@@ -58,6 +58,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
 		[[nodiscard]] auto sampler() const -> VkSampler { return m_sampler; }
 
+		[[nodiscard]] auto descriptorImageInfo() const -> VkDescriptorImageInfo;
+
 		/// @brief Returns a VkImageMemoryBarrier for transitioning the image to the new layout
 		/// @note The internal layout will be changed to the new layout, make sure to submit the barrier to a command buffer
 		[[nodiscard]] auto imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier;

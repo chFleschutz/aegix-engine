@@ -114,6 +114,16 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	auto Texture::descriptorImageInfo() const -> VkDescriptorImageInfo
+	{
+		VkDescriptorImageInfo info{};
+		info.sampler = m_sampler;
+		info.imageView = m_imageView;
+		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		return info;
+	}
+
 	auto Texture::imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier
 	{
 		VkImageMemoryBarrier barrier{};

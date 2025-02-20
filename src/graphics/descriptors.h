@@ -151,6 +151,7 @@ namespace Aegix::Graphics
 		DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 		~DescriptorSet() = default;
 
+		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }
 
 	private:

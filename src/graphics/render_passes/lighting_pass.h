@@ -117,6 +117,23 @@ namespace Aegix::Graphics
 				{
 					updateLighting(frameInfo, const_cast<LightingResources&>(data));
 
+					auto positionInfo = resources.texture(data.position).texture.descriptorImageInfo();
+					auto normalInfo = resources.texture(data.normal).texture.descriptorImageInfo();
+					auto albedoInfo = resources.texture(data.albedo).texture.descriptorImageInfo();
+					auto armInfo = resources.texture(data.arm).texture.descriptorImageInfo();
+					auto emissiveInfo = resources.texture(data.emissive).texture.descriptorImageInfo();
+					auto uboInfo = data.ubo->descriptorBufferInfo(frameInfo.frameIndex);
+
+					DescriptorWriter{ *data.descriptorSetLayout }
+						.writeImage(0, &positionInfo)
+						.writeImage(1, &normalInfo)
+						.writeImage(2, &albedoInfo)
+						.writeImage(3, &armInfo)
+						.writeImage(4, &emissiveInfo)
+						.writeBuffer(5, &uboInfo)
+						.build(data.descriptorSet->descriptorSet(frameInfo.frameIndex));
+
+
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
 					// Begin Rendering
