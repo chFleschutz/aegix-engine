@@ -179,4 +179,9 @@ namespace Aegix::Tools
 		scissor.extent = extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
+
+	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet)
+	{
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, 0, 1, &descriptorSet, 0, nullptr);
+	}
 }

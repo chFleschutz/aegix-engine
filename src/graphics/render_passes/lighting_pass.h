@@ -118,7 +118,7 @@ namespace Aegix::Graphics
 
 					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 
-					updateLighting(frameInfo, const_cast<LightingResources&>(data));
+					updateLightingUBO(frameInfo, const_cast<LightingResources&>(data));
 
 					auto positionInfo = resources.texture(data.position).texture.descriptorImageInfo();
 					auto normalInfo = resources.texture(data.normal).texture.descriptorImageInfo();
@@ -158,13 +158,8 @@ namespace Aegix::Graphics
 
 					data.pipeline->bind(commandBuffer);
 
-					vkCmdBindDescriptorSets(commandBuffer,
-						VK_PIPELINE_BIND_POINT_GRAPHICS,
-						data.pipelineLayout->pipelineLayout(),
-						0, 1,
-						&data.descriptorSet->descriptorSet(frameInfo.frameIndex),
-						0, nullptr
-					);
+					Tools::vk::cmdBindDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+						*data.pipelineLayout, data.descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 					// Draw Fullscreen Triangle
 					vkCmdDraw(commandBuffer, 3, 1, 0, 0);
@@ -175,7 +170,7 @@ namespace Aegix::Graphics
 			blackboard.add<LightingData>(lightingResources.sceneColor);
 		}
 
-		static void updateLighting(const FrameInfo& frameInfo, LightingResources& data)
+		static void updateLightingUBO(const FrameInfo& frameInfo, LightingResources& data)
 		{
 			LightingUBO ubo{};
 
