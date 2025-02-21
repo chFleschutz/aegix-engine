@@ -22,7 +22,6 @@ namespace Aegix::Graphics
 
 	struct FrameGraphTexture
 	{
-
 		std::string name;
 		Texture texture;
 		VkImageUsageFlags usage;

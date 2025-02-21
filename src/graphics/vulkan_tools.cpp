@@ -130,18 +130,53 @@ namespace Aegix::Tools
 			return VK_IMAGE_ASPECT_COLOR_BIT;  // For all color formats
 		}
 	}
-}
 
-void Aegix::Tools::vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, const std::vector<VkImageMemoryBarrier>& barriers)
-{
-	if (barriers.empty())
-		return;
+	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
+	{
+		VkRenderingAttachmentInfo attachment{};
+		attachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		attachment.imageView = imageView;
+		attachment.imageLayout = layout;
+		attachment.loadOp = loadOp;
+		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachment.clearValue = clearValue;
+		return attachment;
+	}
 
-	vkCmdPipelineBarrier(commandBuffer,
-		srcStage, dstStage,
-		0,
-		0, nullptr,
-		0, nullptr,
-		static_cast<uint32_t>(barriers.size()), barriers.data()
-	);
+	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
+	{
+		return renderingAttachmentInfo(texture.imageView(), texture.layout(), loadOp, clearValue);
+	}
+
+	void vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, const std::vector<VkImageMemoryBarrier>& barriers)
+	{
+		if (barriers.empty())
+			return;
+
+		vkCmdPipelineBarrier(commandBuffer,
+			srcStage, dstStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			static_cast<uint32_t>(barriers.size()), barriers.data()
+		);
+	}
+
+	void vk::cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent)
+	{
+		VkViewport viewport{};
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	}
+
+	void vk::cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent)
+	{
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = extent;
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	}
 }

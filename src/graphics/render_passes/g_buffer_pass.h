@@ -23,8 +23,8 @@ namespace Aegix::Graphics
 	{
 	public:
 		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard,
-			FrameGraphResourceID position, FrameGraphResourceID normal, FrameGraphResourceID albedo, FrameGraphResourceID arm, 
-			FrameGraphResourceID emissive, FrameGraphResourceID depth )
+			FrameGraphResourceID position, FrameGraphResourceID normal, FrameGraphResourceID albedo, FrameGraphResourceID arm,
+			FrameGraphResourceID emissive, FrameGraphResourceID depth)
 		{
 			auto& renderer = blackboard.get<RendererData>();
 
@@ -52,7 +52,9 @@ namespace Aegix::Graphics
 				},
 				[](const GBufferData& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
+					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 					auto& stage = resources.renderStage(RenderStage::Type::Geometry);
+
 					updateUBO(stage, frameInfo);
 
 					auto& position = resources.texture(data.position);
@@ -63,65 +65,22 @@ namespace Aegix::Graphics
 					auto& depth = resources.texture(data.depth);
 
 					VkExtent2D extent = albedo.texture.extent();
-					assert(extent.width == position.texture.extent().width && extent.height == position.texture.extent().height);
-					assert(extent.width == normal.texture.extent().width && extent.height == normal.texture.extent().height);
-					assert(extent.width == arm.texture.extent().width && extent.height == arm.texture.extent().height);
-					assert(extent.width == emissive.texture.extent().width && extent.height == emissive.texture.extent().height);
-					assert(extent.width == depth.texture.extent().width && extent.height == depth.texture.extent().height);
 
-					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
+					auto colorAttachments = std::array{
+						Tools::renderingAttachmentInfo(position.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+						Tools::renderingAttachmentInfo(normal.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+						Tools::renderingAttachmentInfo(albedo.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+						Tools::renderingAttachmentInfo(arm.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+						Tools::renderingAttachmentInfo(emissive.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f })
+					};
 
-					std::array<VkRenderingAttachmentInfo, 5> colorAttachments{};
-					colorAttachments[0].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[0].imageView = position.texture.imageView();
-					colorAttachments[0].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[0].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-					colorAttachments[1].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[1].imageView = normal.texture.imageView();
-					colorAttachments[1].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[1].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-					colorAttachments[2].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[2].imageView = albedo.texture.imageView();
-					colorAttachments[2].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachments[2].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[2].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-					colorAttachments[3].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[3].imageView = arm.texture.imageView();
-					colorAttachments[3].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachments[3].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachments[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[3].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-					colorAttachments[4].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachments[4].imageView = emissive.texture.imageView();
-					colorAttachments[4].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachments[4].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachments[4].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachments[4].clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-					VkRenderingAttachmentInfo depthAttachment{};
-					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					depthAttachment.imageView = depth.texture.imageView();
-					depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-					depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-					depthAttachment.clearValue.depthStencil = { 1.0f, 0 };
-
-					VkRect2D renderArea{};
-					renderArea.offset = { 0,0 };
-					renderArea.extent = extent;
+					VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(
+						depth.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
 
 					VkRenderingInfo renderInfo{};
 					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-					renderInfo.renderArea = renderArea;
+					renderInfo.renderArea.offset = { 0, 0 };
+					renderInfo.renderArea.extent = extent;
 					renderInfo.layerCount = 1;
 					renderInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
 					renderInfo.pColorAttachments = colorAttachments.data();
@@ -129,21 +88,8 @@ namespace Aegix::Graphics
 
 					vkCmdBeginRendering(commandBuffer, &renderInfo);
 
-					VkViewport viewport{};
-					viewport.x = 0.0f;
-					viewport.y = 0.0f;
-					viewport.width = static_cast<float>(extent.width);
-					viewport.height = static_cast<float>(extent.height);
-					viewport.minDepth = 0.0f;
-					viewport.maxDepth = 1.0f;
-
-					vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-					VkRect2D scissor{};
-					scissor.offset = { 0, 0 };
-					scissor.extent = extent;
-
-					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+					Tools::vk::cmdViewport(commandBuffer, extent);
+					Tools::vk::cmdScissor(commandBuffer, extent);
 
 					VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(frameInfo.frameIndex);
 					for (const auto& system : stage.renderSystems)

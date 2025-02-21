@@ -115,6 +115,9 @@ namespace Aegix::Graphics
 				},
 				[](const LightingResources& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 				{
+
+					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
+
 					updateLighting(frameInfo, const_cast<LightingResources&>(data));
 
 					auto positionInfo = resources.texture(data.position).texture.descriptorImageInfo();
@@ -133,33 +136,16 @@ namespace Aegix::Graphics
 						.writeBuffer(5, &uboInfo)
 						.build(data.descriptorSet->descriptorSet(frameInfo.frameIndex));
 
+					VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainColor, 
+						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
 
-					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
-
-					// Begin Rendering
-					VkRenderingAttachmentInfo colorAttachment{};
-					colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					colorAttachment.imageView = frameInfo.swapChainColor;
-					colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					colorAttachment.clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-					VkRenderingAttachmentInfo depthAttachment{};
-					depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-					depthAttachment.imageView = frameInfo.swapChainDepth;
-					depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-					depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-					depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-					depthAttachment.clearValue.depthStencil = { 1.0f, 0 };
-
-					VkRect2D renderArea{};
-					renderArea.offset = { 0,0 };
-					renderArea.extent = frameInfo.swapChainExtend;
-
+					VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainDepth, 
+						VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
+					
 					VkRenderingInfo renderInfo{};
 					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-					renderInfo.renderArea = renderArea;
+					renderInfo.renderArea.offset = { 0, 0 };
+					renderInfo.renderArea.extent = frameInfo.swapChainExtend;
 					renderInfo.layerCount = 1;
 					renderInfo.colorAttachmentCount = 1;
 					renderInfo.pColorAttachments = &colorAttachment;
@@ -167,28 +153,12 @@ namespace Aegix::Graphics
 
 					vkCmdBeginRendering(commandBuffer, &renderInfo);
 
-					VkViewport viewport{};
-					viewport.x = 0.0f;
-					viewport.y = 0.0f;
-					viewport.width = static_cast<float>(frameInfo.swapChainExtend.width);
-					viewport.height = static_cast<float>(frameInfo.swapChainExtend.height);
-					viewport.minDepth = 0.0f;
-					viewport.maxDepth = 1.0f;
+					Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtend);
+					Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtend);
 
-					vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-					VkRect2D scissor{};
-					scissor.offset = { 0, 0 };
-					scissor.extent = frameInfo.swapChainExtend;
-
-					vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-					// Bind Pipeline
 					data.pipeline->bind(commandBuffer);
 
-					// Bind Descriptor Set
-					vkCmdBindDescriptorSets(
-						commandBuffer,
+					vkCmdBindDescriptorSets(commandBuffer,
 						VK_PIPELINE_BIND_POINT_GRAPHICS,
 						data.pipelineLayout->pipelineLayout(),
 						0, 1,
@@ -199,7 +169,6 @@ namespace Aegix::Graphics
 					// Draw Fullscreen Triangle
 					vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
-					// End Rendering
 					vkCmdEndRendering(commandBuffer);
 				});
 

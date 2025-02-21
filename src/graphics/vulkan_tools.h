@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/texture.h"
+
 #include "vulkan/vulkan.h"
 
 #include <cassert>
@@ -30,9 +32,16 @@ namespace Aegix::Tools
 
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
 
+	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
+	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
+
 	namespace vk
 	{
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
+
+		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
+
+		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 	}
 }
