@@ -10,58 +10,49 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
-		SwapChain(VulkanDevice& device, VkExtent2D windowExtent);
-		SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+		SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous = nullptr);
+		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
 
-		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
-		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
-		VkImage colorImage(int index) const { return mColorImages[index]; }
+		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
+		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
+		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }
+		[[nodiscard]] auto extend() const -> VkExtent2D { return m_extent; }
+		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
+		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
+		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
+		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
+		[[nodiscard]] auto findDepthFormat() -> VkFormat;
 
-		uint32_t width() const { return mSwapChainExtent.width; }
-		uint32_t height() const { return mSwapChainExtent.height; }
+		auto acquireNextImage(uint32_t* imageIndex) -> VkResult;
+		auto submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) -> VkResult;
 
-		float extentAspectRatio() const { return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
-		VkExtent2D extend() const { return mSwapChainExtent; }
-		size_t imageCount() const { return mColorImages.size(); }
-		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }
-		VkFormat findDepthFormat();
-
-		VkResult acquireNextImage(uint32_t* imageIndex);
-		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
-
-		bool compareSwapFormats(const SwapChain& swapchain) const 
-		{
-			return swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
-		}
+		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 
 		void transitionColorAttachment(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void transitionPresent(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 	private:
-		void init();
-		void createSwapChain();
+		void createSwapChain(VkSwapchainKHR oldSwapChain);
 		void createImageViews();
 		void createSyncObjects();
 
-		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
-		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const;
-		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
-		uint32_t chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const;
-
-		VkFormat mSwapChainImageFormat;
-		VkExtent2D mSwapChainExtent;
-
-		std::vector<VkImage> mColorImages;
-		std::vector<VkImageView> mColorImageViews;
+		auto chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const -> VkSurfaceFormatKHR;
+		auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const -> VkPresentModeKHR;
+		auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const -> VkExtent2D;
+		auto chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const -> uint32_t;
 
 		VulkanDevice& m_device;
+
+		VkFormat m_format;
+		VkExtent2D m_extent;
 		VkExtent2D m_windowExtent;
 
 		VkSwapchainKHR m_swapChain;
-		std::shared_ptr<SwapChain> m_oldSwapChain;
+		std::vector<VkImage> m_images;
+		std::vector<VkImageView> m_imageViews;
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores;
 		std::vector<VkSemaphore> m_renderFinishedSemaphores;

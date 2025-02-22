@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 		SwapChain& swapChain() { return *m_swapChain; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
 		VkCommandBuffer currentCommandBuffer() const;
-		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
+		float aspectRatio() const { return m_swapChain->aspectRatio(); }
 		bool isFrameStarted() const { return m_isFrameStarted; }
 		int frameIndex() const;
 
