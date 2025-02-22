@@ -21,9 +21,6 @@ layout(set = 0, binding = 0) uniform Global
     mat4 projection;
     mat4 view;
     mat4 inverseView;
-    vec4 ambientLightColor;
-    PointLight pointLights[10];
-    int numLights;
 } global;
 
 layout(set = 1, binding = 0, std140) uniform Material 
