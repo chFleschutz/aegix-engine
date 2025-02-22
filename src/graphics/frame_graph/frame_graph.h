@@ -47,7 +47,7 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
-		void compile();
+		void compile(VulkanDevice& device);
 		void execute(const FrameInfo& frameInfo);
 		void swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height);
 

@@ -134,19 +134,10 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		auto position = m_frameGraph.addTexture(m_device, "Position", VK_FORMAT_R16G16B16A16_SFLOAT);
-		auto normal = m_frameGraph.addTexture(m_device, "Normal", VK_FORMAT_R16G16B16A16_SFLOAT);
-		auto albedo = m_frameGraph.addTexture(m_device, "Albedo", VK_FORMAT_R8G8B8A8_UNORM);
-		auto arm = m_frameGraph.addTexture(m_device, "ARM", VK_FORMAT_R8G8B8A8_UNORM);
-		auto emissive = m_frameGraph.addTexture(m_device, "Emissive", VK_FORMAT_R8G8B8A8_UNORM);
-		auto depth = m_frameGraph.addTexture(m_device, "Depth", VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
+		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 
-		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", VK_FORMAT_R8G8B8A8_UNORM);
-
-		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth);
-		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth, sceneColor);
-
-		m_frameGraph.compile();
+		m_frameGraph.compile(m_device);
 	}
 
 	VkCommandBuffer Renderer::beginFrame()

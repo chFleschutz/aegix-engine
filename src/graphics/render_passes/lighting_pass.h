@@ -37,23 +37,10 @@ namespace Aegix::Graphics
 	class LightingPass : public FrameGraphRenderPass
 	{
 	public:
-		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, 
-			FrameGraphResourceHandle position, FrameGraphResourceHandle normal, FrameGraphResourceHandle albedo,
-			FrameGraphResourceHandle arm, FrameGraphResourceHandle emissive, FrameGraphResourceHandle depth,
-			FrameGraphResourceHandle sceneColor)
-			: m_position{ position }, m_normal{ normal }, m_albedo{ albedo }, m_arm{ arm }, m_emissive{ emissive }, 
-			m_depth{ depth }, m_sceneColor{ sceneColor }
+		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
 			const auto& resources = frameGraph.resourcePool();
 			const auto& renderer = blackboard.get<RendererData>();
-
-			const auto& positionTex = resources.texture(position);
-			const auto& normalTex = resources.texture(normal);
-			const auto& albedoTex = resources.texture(albedo);
-			const auto& armTex = resources.texture(arm);
-			const auto& emissiveTex = resources.texture(emissive);
-
-			m_ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
 
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
 				.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
@@ -64,14 +51,9 @@ namespace Aegix::Graphics
 				.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
 
-			m_descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *m_descriptorSetLayout)
-				.addTexture(0, positionTex.texture)
-				.addTexture(1, normalTex.texture)
-				.addTexture(2, albedoTex.texture)
-				.addTexture(3, armTex.texture)
-				.addTexture(4, emissiveTex.texture)
-				.addBuffer(5, *m_ubo)
-				.build();
+			m_descriptorSet = std::make_unique<DescriptorSet>(renderer.pool, *m_descriptorSetLayout);
+
+			m_ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
 
 			m_pipelineLayout = PipelineLayout::Builder(renderer.device)
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
@@ -87,8 +69,25 @@ namespace Aegix::Graphics
 				.build();
 		}
 
-		virtual auto createInfo() -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
 		{
+			m_position = pool.addResource({ "Position", FrameGraphResourceType::Reference });
+			m_normal = pool.addResource({ "Normal", FrameGraphResourceType::Reference });
+			m_albedo = pool.addResource({ "Albedo", FrameGraphResourceType::Reference });
+			m_arm = pool.addResource({ "ARM", FrameGraphResourceType::Reference });
+			m_emissive = pool.addResource({ "Emissive", FrameGraphResourceType::Reference });
+			m_depth = pool.addResource({ "Depth", FrameGraphResourceType::Reference });
+
+			m_sceneColor = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "SceneColor",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+						.extent = { 0, 0 },
+						.format = VK_FORMAT_R8G8B8A8_UNORM,
+						.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
 			FrameGraphNodeCreateInfo info{};
 			info.name = "Lighting Pass";
 			info.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
@@ -102,11 +101,11 @@ namespace Aegix::Graphics
 
 			updateLightingUBO(frameInfo);
 
-			auto positionInfo = resources.texture(m_position).texture.descriptorImageInfo();
-			auto normalInfo = resources.texture(m_normal).texture.descriptorImageInfo();
-			auto albedoInfo = resources.texture(m_albedo).texture.descriptorImageInfo();
-			auto armInfo = resources.texture(m_arm).texture.descriptorImageInfo();
-			auto emissiveInfo = resources.texture(m_emissive).texture.descriptorImageInfo();
+			auto positionInfo = resources.texture(m_position).descriptorImageInfo();
+			auto normalInfo = resources.texture(m_normal).descriptorImageInfo();
+			auto albedoInfo = resources.texture(m_albedo).descriptorImageInfo();
+			auto armInfo = resources.texture(m_arm).descriptorImageInfo();
+			auto emissiveInfo = resources.texture(m_emissive).descriptorImageInfo();
 			auto uboInfo = m_ubo->descriptorBufferInfo(frameInfo.frameIndex);
 
 			DescriptorWriter{ *m_descriptorSetLayout }

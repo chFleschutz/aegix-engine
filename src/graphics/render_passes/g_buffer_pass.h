@@ -13,11 +13,7 @@ namespace Aegix::Graphics
 	class GBufferPass : public FrameGraphRenderPass
 	{
 	public:
-		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard,
-			FrameGraphResourceHandle position, FrameGraphResourceHandle normal, FrameGraphResourceHandle albedo,
-			FrameGraphResourceHandle arm, FrameGraphResourceHandle emissive, FrameGraphResourceHandle depth)
-			: m_position{ position }, m_normal{ normal }, m_albedo{ albedo }, m_arm{ arm }, m_emissive{ emissive },
-			m_depth{ depth }
+		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
 			auto& renderer = blackboard.get<RendererData>();
 			auto& stage = frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
@@ -33,8 +29,69 @@ namespace Aegix::Graphics
 				.build();
 		}
 
-		virtual auto createInfo() -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
 		{
+			m_position = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "Position",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
+			m_normal = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "Normal",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
+			m_albedo = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "Albedo",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
+			m_arm = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "ARM",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
+			m_emissive = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "Emissive",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					}
+				});
+
+			m_depth = pool.addResource(FrameGraphResourceCreateInfo{
+				.name = "Depth",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = { 0, 0 },
+					.format = VK_FORMAT_D32_SFLOAT,
+					.resizePolicy = ResizePolicy::SwapchainRelative,
+					.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+					}
+				});
+
 			FrameGraphNodeCreateInfo info{};
 			info.name = "GBuffer Pass";
 			info.inputs = {};
@@ -56,18 +113,18 @@ namespace Aegix::Graphics
 			auto& emissive = resources.texture(m_emissive);
 			auto& depth = resources.texture(m_depth);
 
-			VkExtent2D extent = albedo.texture.extent();
+			VkExtent2D extent = albedo.extent();
 
 			auto colorAttachments = std::array{
-				Tools::renderingAttachmentInfo(position.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-				Tools::renderingAttachmentInfo(normal.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-				Tools::renderingAttachmentInfo(albedo.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-				Tools::renderingAttachmentInfo(arm.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-				Tools::renderingAttachmentInfo(emissive.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f })
+				Tools::renderingAttachmentInfo(position, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+				Tools::renderingAttachmentInfo(normal, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+				Tools::renderingAttachmentInfo(albedo, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+				Tools::renderingAttachmentInfo(arm, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
+				Tools::renderingAttachmentInfo(emissive, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f })
 			};
 
 			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(
-				depth.texture, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
+				depth, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
 
 			VkRenderingInfo renderInfo{};
 			renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;

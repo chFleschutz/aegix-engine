@@ -6,21 +6,19 @@ namespace Aegix::Graphics
 {
 	// FrameGraph ----------------------------------------------------------------
 
-	auto FrameGraph::addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
-		VkFormat format, VkImageUsageFlags usage) -> FrameGraphResourceHandle
+	void FrameGraph::compile(VulkanDevice& device)
 	{
-		return m_resourcePool.addTexture(device, name, width, height, format, usage, ResizePolicy::Fixed);
-	}
+		// Resolve references
+		m_resourcePool.resolveReferences();
 
-	auto FrameGraph::addTexture(VulkanDevice& device, const std::string& name, VkFormat format,
-		VkImageUsageFlags usage) -> FrameGraphResourceHandle
-	{
-		return m_resourcePool.addTexture(device, name, Engine::WIDTH, Engine::HEIGHT, format, usage, ResizePolicy::SwapchainRelative);
-	}
+		// Compute graph edges
 
-	void FrameGraph::compile()
-	{
-		// TODO
+		// Topological sort
+
+		// Aliasing
+
+		// Create resources
+		m_resourcePool.createResources(device);
 	}
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
@@ -37,13 +35,7 @@ namespace Aegix::Graphics
 
 	void FrameGraph::swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height)
 	{
-		for (auto& texture : m_resourcePool.textures())
-		{
-			if (texture.resizePolicy == ResizePolicy::SwapchainRelative)
-			{
-				texture.texture.resize(width, height, texture.usage);
-			}
-		}
+		// TODO: Resize resources
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)
@@ -82,7 +74,7 @@ namespace Aegix::Graphics
 
 		for (auto& resource : resources)
 		{
-			Texture& texture = m_resourcePool.texture(resource).texture;
+			Texture& texture = m_resourcePool.texture(resource);
 
 			if (Tools::isDepthFormat(texture.format()))
 			{
