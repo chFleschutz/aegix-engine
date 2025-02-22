@@ -21,6 +21,13 @@ namespace Aegix::Graphics
 
 		// Create resources
 		m_resourcePool.createResources(device);
+
+		// Print frame graph info
+		std::cout << "FrameGraph compiled with " << m_nodes.size() << " passes\n";
+		for (auto nodeHandle : m_nodes)
+		{
+			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
+		}
 	}
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
