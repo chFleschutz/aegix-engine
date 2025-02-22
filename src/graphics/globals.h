@@ -10,4 +10,6 @@ namespace Aegix::Graphics
 	constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 	constexpr uint32_t INVALID_HANDLE = std::numeric_limits<uint32_t>::max();
+
+	constexpr uint32_t MAX_POINT_LIGHTS = 32;
 }

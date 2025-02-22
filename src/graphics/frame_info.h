@@ -5,11 +5,6 @@
 
 namespace Aegix::Graphics
 {
-	struct GlobalLimits
-	{
-		static constexpr int MAX_LIGHTS = 10;
-	};
-
 	struct GlobalUbo
 	{
 		glm::mat4 projection{ 1.0f };

@@ -4,32 +4,33 @@
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
+#include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	struct LightingUBO
+	struct Lighting
 	{
-		glm::vec4 cameraPosition;
-
 		struct AmbientLight
 		{
 			glm::vec4 color;
 		};
-		AmbientLight ambient;
 
 		struct DirectionalLight
 		{
 			glm::vec4 direction;
 			glm::vec4 color;
 		};
-		DirectionalLight directional;
 
 		struct PointLight
 		{
 			glm::vec4 position;
 			glm::vec4 color;
 		};
-		std::array<PointLight, GlobalLimits::MAX_LIGHTS> pointLights;
+
+		glm::vec4 cameraPosition;
+		AmbientLight ambient;
+		DirectionalLight directional;
+		std::array<PointLight, MAX_POINT_LIGHTS> pointLights;
 		int32_t pointLightCount;
 	};
 
@@ -53,7 +54,7 @@ namespace Aegix::Graphics
 
 			m_descriptorSet = std::make_unique<DescriptorSet>(renderer.pool, *m_descriptorSetLayout);
 
-			m_ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
+			m_ubo = std::make_unique<UniformBufferData<Lighting>>(renderer.device);
 
 			m_pipelineLayout = PipelineLayout::Builder(renderer.device)
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
@@ -151,7 +152,7 @@ namespace Aegix::Graphics
 	private:
 		void updateLightingUBO(const FrameInfo& frameInfo)
 		{
-			LightingUBO ubo{};
+			Lighting ubo{};
 
 			ubo.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
 
@@ -168,8 +169,8 @@ namespace Aegix::Graphics
 			auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 			for (auto&& [entity, transform, pointLight] : view.each())
 			{
-				assert(lighIndex < GlobalLimits::MAX_LIGHTS && "Point lights exceed maximum number of point lights");
-				ubo.pointLights[lighIndex] = LightingUBO::PointLight{
+				assert(lighIndex < MAX_POINT_LIGHTS && "Point lights exceed maximum number of point lights");
+				ubo.pointLights[lighIndex] = Lighting::PointLight{
 					.position = glm::vec4(transform.location, 1.0f),
 					.color = glm::vec4(pointLight.color, pointLight.intensity)
 				};
@@ -194,6 +195,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
-		std::unique_ptr<UniformBufferData<LightingUBO>> m_ubo;
+		std::unique_ptr<UniformBufferData<Lighting>> m_ubo;
 	};
 }
