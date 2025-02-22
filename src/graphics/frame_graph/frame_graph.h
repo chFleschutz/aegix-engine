@@ -1,8 +1,6 @@
 #pragma once
 
 #include "graphics/descriptors.h"
-#include "graphics/frame_graph/frame_graph_node.h"
-#include "graphics/frame_graph/frame_graph_pass.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/vulkan_tools.h"
