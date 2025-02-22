@@ -3,6 +3,7 @@
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/g_buffer_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
+#include "graphics/render_passes/transparent_pass.h"
 #include "scene/scene.h"
 
 #include <cassert>
@@ -135,6 +136,7 @@ namespace Aegix::Graphics
 
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
+		m_frameGraph.add<TransparentPass>();
 
 		m_frameGraph.compile(m_device);
 	}
