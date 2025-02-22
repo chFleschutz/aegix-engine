@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 
 		// Print frame graph info
 		std::cout << "FrameGraph compiled with " << m_nodes.size() << " passes\n";
-		for (auto nodeHandle : m_nodes)
+		for (const auto& nodeHandle : m_nodes)
 		{
 			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
 		}
@@ -44,7 +44,19 @@ namespace Aegix::Graphics
 
 	void FrameGraph::swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height)
 	{
-		// TODO: Resize resources
+		for (auto& resource : m_resourcePool.m_resources)
+		{
+			if (resource.type != FrameGraphResourceType::Texture)
+				continue;
+
+			auto& info = std::get<FrameGraphResourceTextureInfo>(resource.info);
+			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
+			{
+				auto& texture = m_resourcePool.texture(resource.handle);
+				texture.resize(width, height, info.usage);
+				info.extent = { width, height };
+			}
+		}
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)

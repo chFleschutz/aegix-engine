@@ -121,6 +121,8 @@ namespace Aegix::Graphics
 	/// @brief Holds all resources and nodes for a frame graph
 	class FrameGraphResourcePool
 	{
+		friend class FrameGraph;
+
 	public:
 		FrameGraphResourcePool() = default;
 		FrameGraphResourcePool(const FrameGraphResourcePool&) = delete;
