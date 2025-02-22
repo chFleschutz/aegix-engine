@@ -4,6 +4,7 @@
 #include "core/input.h"
 #include "core/systems/system_manager.h"
 #include "graphics/device.h"
+#include "graphics/globals.h"
 #include "graphics/gui.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -17,8 +18,6 @@ namespace Aegix
 	class Engine
 	{
 	public:
-		static constexpr int WIDTH = 1920;
-		static constexpr int HEIGHT = 1080;
 		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
 
 		Engine();
@@ -57,7 +56,7 @@ namespace Aegix
 
 		inline static Engine* s_instance = nullptr;
 
-		Graphics::Window m_window{ WIDTH, HEIGHT, "Aegix" };
+		Graphics::Window m_window{ Graphics::DEFAULT_WIDTH, Graphics::DEFAULT_HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
 		Graphics::GUI m_gui;
