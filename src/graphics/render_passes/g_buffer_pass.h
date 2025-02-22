@@ -10,9 +10,18 @@
 
 namespace Aegix::Graphics
 {
+	struct GBufferUbo
+	{
+		glm::mat4 projection{ 1.0f };
+		glm::mat4 view{ 1.0f };
+		glm::mat4 inverseView{ 1.0f };
+	};
+
+
 	class GBufferPass : public FrameGraphRenderPass
 	{
 	public:
+
 		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
 			auto& renderer = blackboard.get<RendererData>();
@@ -22,7 +31,7 @@ namespace Aegix::Graphics
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 				.build();
 
-			stage.ubo = std::make_unique<UniformBuffer>(renderer.device, GlobalUbo{});
+			stage.ubo = std::make_unique<UniformBuffer>(renderer.device, GBufferUbo{});
 
 			stage.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
@@ -103,7 +112,6 @@ namespace Aegix::Graphics
 		{
 			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 			auto& stage = resources.renderStage(RenderStage::Type::Geometry);
-
 			updateUBO(stage, frameInfo);
 
 			auto& position = resources.texture(m_position);
@@ -155,7 +163,7 @@ namespace Aegix::Graphics
 			auto& camera = frameInfo.scene.camera().getComponent<Component::Camera>();
 			camera.aspect = frameInfo.aspectRatio;
 
-			GlobalUbo ubo{
+			GBufferUbo ubo{
 				.projection = camera.projectionMatrix,
 				.view = camera.viewMatrix,
 				.inverseView = camera.inverseViewMatrix

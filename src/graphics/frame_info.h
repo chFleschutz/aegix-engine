@@ -5,13 +5,6 @@
 
 namespace Aegix::Graphics
 {
-	struct GlobalUbo
-	{
-		glm::mat4 projection{ 1.0f };
-		glm::mat4 view{ 1.0f };
-		glm::mat4 inverseView{ 1.0f };
-	};
-
 	struct FrameInfo
 	{
 		int frameIndex;

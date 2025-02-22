@@ -40,7 +40,6 @@ namespace Aegix::Graphics
 	public:
 		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
-			const auto& resources = frameGraph.resourcePool();
 			const auto& renderer = blackboard.get<RendererData>();
 
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
@@ -78,7 +77,7 @@ namespace Aegix::Graphics
 			m_arm = pool.addResource({ "ARM", FrameGraphResourceType::Reference });
 			m_emissive = pool.addResource({ "Emissive", FrameGraphResourceType::Reference });
 			m_depth = pool.addResource({ "Depth", FrameGraphResourceType::Reference });
-
+			
 			m_sceneColor = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "SceneColor",
 				.type = FrameGraphResourceType::Texture,
