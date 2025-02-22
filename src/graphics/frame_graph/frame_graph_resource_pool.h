@@ -12,7 +12,34 @@
 
 namespace Aegix::Graphics
 {
-	using FrameGraphResourceID = uint32_t;
+	class FrameGraphRenderPass;
+
+	struct FrameGraphResourceHandle
+	{
+		uint32_t id;
+	};
+
+	struct FrameGraphNodeHandle
+	{
+		uint32_t id;
+	};
+
+	struct FrameGraphNodeCreateInfo
+	{
+		std::string name;
+		std::vector<FrameGraphResourceHandle> inputs;
+		std::vector<FrameGraphResourceHandle> outputs;
+	};
+
+	struct FrameGraphNode
+	{
+		std::string name;
+		std::unique_ptr<FrameGraphRenderPass> pass;
+		std::vector<FrameGraphResourceHandle> inputs;
+		std::vector<FrameGraphResourceHandle> outputs;
+	};
+
+
 
 	enum class ResizePolicy
 	{
@@ -53,11 +80,27 @@ namespace Aegix::Graphics
 		FrameGraphResourcePool& operator=(const FrameGraphResourcePool&) = delete;
 		FrameGraphResourcePool& operator=(FrameGraphResourcePool&&) = delete;
 
-		FrameGraphResourceID addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height, 
+		[[nodiscard]] auto node(FrameGraphNodeHandle handle) -> FrameGraphNode& { return m_nodes[handle.id]; }
+		[[nodiscard]] auto node(FrameGraphNodeHandle handle) const -> const FrameGraphNode& { return m_nodes[handle.id]; }
+		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) -> FrameGraphTexture& { return m_textures[handle.id]; }
+		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) const -> const FrameGraphTexture& { return m_textures[handle.id]; }
+
+
+		template<typename T, typename... Args>
+			requires std::is_base_of_v<FrameGraphRenderPass, T> && std::is_constructible_v<T, Args...>
+		auto addNode(Args&&... args) -> FrameGraphNodeHandle
+		{
+			auto pass = std::make_unique<T>(std::forward<Args>(args)...);
+			auto createInfo = pass->createInfo();
+			m_nodes.emplace_back(createInfo.name, std::move(pass), createInfo.inputs, createInfo.outputs);
+			return FrameGraphNodeHandle{ static_cast<uint32_t>(m_nodes.size() - 1) };
+		}
+
+		FrameGraphResourceHandle addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
 			VkFormat format, VkImageUsageFlags usage, ResizePolicy resizePolicy)
 		{
 			m_textures.emplace_back(name, Texture{ device, width, height, format, usage }, usage, resizePolicy);
-			return static_cast<FrameGraphResourceID>(m_textures.size() - 1);
+			return FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 		}
 
 		template<typename T>
@@ -77,14 +120,14 @@ namespace Aegix::Graphics
 			return *stage.renderSystems.back();
 		}
 
-		auto texture(FrameGraphResourceID id) -> FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
-		auto texture(FrameGraphResourceID id) const -> const FrameGraphTexture& { return m_textures[static_cast<size_t>(id)]; }
 		auto textures() -> std::vector<FrameGraphTexture>& { return m_textures; }
 
 		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 
 	private:
+		std::vector<FrameGraphNode> m_nodes;
+
 		std::vector<FrameGraphTexture> m_textures;
 		std::array<RenderStage, static_cast<size_t>(RenderStage::Type::Count)> m_renderStages;
 	};

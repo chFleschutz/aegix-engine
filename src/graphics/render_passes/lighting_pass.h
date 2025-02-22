@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
+#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
 
 namespace Aegix::Graphics
@@ -32,152 +33,131 @@ namespace Aegix::Graphics
 		int32_t pointLightCount;
 	};
 
-	struct LightingResources
-	{
-		FrameGraphResourceID sceneColor;
-		FrameGraphResourceID position;
-		FrameGraphResourceID normal;
-		FrameGraphResourceID albedo;
-		FrameGraphResourceID arm;
-		FrameGraphResourceID emissive;
-		FrameGraphResourceID depth;
-		std::unique_ptr<Pipeline> pipeline;
-		std::unique_ptr<PipelineLayout> pipelineLayout;
-		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
-		std::unique_ptr<DescriptorSet> descriptorSet;
-		std::unique_ptr<UniformBufferData<LightingUBO>> ubo;
-	};
 
-	struct LightingData
-	{
-		FrameGraphResourceID sceneColor;
-	};
-
-	class LightingPass
+	class LightingPass : public FrameGraphRenderPass
 	{
 	public:
-		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, FrameGraphResourceID sceneColor)
+		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard, 
+			FrameGraphResourceHandle position, FrameGraphResourceHandle normal, FrameGraphResourceHandle albedo,
+			FrameGraphResourceHandle arm, FrameGraphResourceHandle emissive, FrameGraphResourceHandle depth,
+			FrameGraphResourceHandle sceneColor)
+			: m_position{ position }, m_normal{ normal }, m_albedo{ albedo }, m_arm{ arm }, m_emissive{ emissive }, 
+			m_depth{ depth }, m_sceneColor{ sceneColor }
 		{
 			const auto& resources = frameGraph.resourcePool();
-			const auto& gBuffer = blackboard.get<GBufferData>();
 			const auto& renderer = blackboard.get<RendererData>();
 
-			const auto& lightingResources = frameGraph.addPass<LightingResources>("Lighting",
-				[&](FrameGraph::Builder& builder, LightingResources& data)
-				{
-					data.sceneColor = builder.declareWrite(sceneColor);
+			const auto& positionTex = resources.texture(position);
+			const auto& normalTex = resources.texture(normal);
+			const auto& albedoTex = resources.texture(albedo);
+			const auto& armTex = resources.texture(arm);
+			const auto& emissiveTex = resources.texture(emissive);
 
-					data.position = builder.declareRead(gBuffer.position);
-					data.normal = builder.declareRead(gBuffer.normal);
-					data.albedo = builder.declareRead(gBuffer.albedo);
-					data.arm = builder.declareRead(gBuffer.arm);
-					data.emissive = builder.declareRead(gBuffer.emissive);
-					data.depth = builder.declareRead(gBuffer.depth);
+			m_ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
 
-					const auto& position = resources.texture(gBuffer.position);
-					const auto& normal = resources.texture(gBuffer.normal);
-					const auto& albedo = resources.texture(gBuffer.albedo);
-					const auto& arm = resources.texture(gBuffer.arm);
-					const auto& emissive = resources.texture(gBuffer.emissive);
+			m_descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.build();
 
-					data.ubo = std::make_unique<UniformBufferData<LightingUBO>>(renderer.device);
+			m_descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *m_descriptorSetLayout)
+				.addTexture(0, positionTex.texture)
+				.addTexture(1, normalTex.texture)
+				.addTexture(2, albedoTex.texture)
+				.addTexture(3, armTex.texture)
+				.addTexture(4, emissiveTex.texture)
+				.addBuffer(5, *m_ubo)
+				.build();
 
-					data.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
-						.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
-						.build();
+			m_pipelineLayout = PipelineLayout::Builder(renderer.device)
+				.addDescriptorSetLayout(*m_descriptorSetLayout)
+				.build();
 
-					data.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *data.descriptorSetLayout)
-						.addTexture(0, position.texture)
-						.addTexture(1, normal.texture)
-						.addTexture(2, albedo.texture)
-						.addTexture(3, arm.texture)
-						.addTexture(4, emissive.texture)
-						.addBuffer(5, *data.ubo)
-						.build();
-
-					data.pipelineLayout = PipelineLayout::Builder(renderer.device)
-						.addDescriptorSetLayout(*data.descriptorSetLayout)
-						.build();
-
-					data.pipeline = Pipeline::Builder(renderer.device, *data.pipelineLayout)
-						.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
-						.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
-						.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)
-						.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-						.setVertexAttributeDescriptions({}) // Clear default vertex attributes
-						.setVertexBindingDescriptions({}) // Clear default vertex binding
-						.build();
-				},
-				[](const LightingResources& data, FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
-				{
-
-					VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
-
-					updateLightingUBO(frameInfo, const_cast<LightingResources&>(data));
-
-					auto positionInfo = resources.texture(data.position).texture.descriptorImageInfo();
-					auto normalInfo = resources.texture(data.normal).texture.descriptorImageInfo();
-					auto albedoInfo = resources.texture(data.albedo).texture.descriptorImageInfo();
-					auto armInfo = resources.texture(data.arm).texture.descriptorImageInfo();
-					auto emissiveInfo = resources.texture(data.emissive).texture.descriptorImageInfo();
-					auto uboInfo = data.ubo->descriptorBufferInfo(frameInfo.frameIndex);
-
-					DescriptorWriter{ *data.descriptorSetLayout }
-						.writeImage(0, &positionInfo)
-						.writeImage(1, &normalInfo)
-						.writeImage(2, &albedoInfo)
-						.writeImage(3, &armInfo)
-						.writeImage(4, &emissiveInfo)
-						.writeBuffer(5, &uboInfo)
-						.build(data.descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-					VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainColor, 
-						VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
-
-					VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainDepth, 
-						VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
-					
-					VkRenderingInfo renderInfo{};
-					renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-					renderInfo.renderArea.offset = { 0, 0 };
-					renderInfo.renderArea.extent = frameInfo.swapChainExtend;
-					renderInfo.layerCount = 1;
-					renderInfo.colorAttachmentCount = 1;
-					renderInfo.pColorAttachments = &colorAttachment;
-					renderInfo.pDepthAttachment = &depthAttachment;
-
-					vkCmdBeginRendering(commandBuffer, &renderInfo);
-
-					Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtend);
-					Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtend);
-
-					data.pipeline->bind(commandBuffer);
-
-					Tools::vk::cmdBindDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-						*data.pipelineLayout, data.descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-					// Draw Fullscreen Triangle
-					vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-					vkCmdEndRendering(commandBuffer);
-				});
-
-			blackboard.add<LightingData>(lightingResources.sceneColor);
+			m_pipeline = Pipeline::Builder(renderer.device, *m_pipelineLayout)
+				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
+				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
+				.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)
+				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
+				.setVertexAttributeDescriptions({}) // Clear default vertex attributes
+				.setVertexBindingDescriptions({}) // Clear default vertex binding
+				.build();
 		}
 
-		static void updateLightingUBO(const FrameInfo& frameInfo, LightingResources& data)
+		virtual auto createInfo() -> FrameGraphNodeCreateInfo override
+		{
+			FrameGraphNodeCreateInfo info{};
+			info.name = "Lighting Pass";
+			info.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
+			info.outputs = { m_sceneColor };
+			return info;
+		}
+
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		{
+			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
+
+			updateLightingUBO(frameInfo);
+
+			auto positionInfo = resources.texture(m_position).texture.descriptorImageInfo();
+			auto normalInfo = resources.texture(m_normal).texture.descriptorImageInfo();
+			auto albedoInfo = resources.texture(m_albedo).texture.descriptorImageInfo();
+			auto armInfo = resources.texture(m_arm).texture.descriptorImageInfo();
+			auto emissiveInfo = resources.texture(m_emissive).texture.descriptorImageInfo();
+			auto uboInfo = m_ubo->descriptorBufferInfo(frameInfo.frameIndex);
+
+			DescriptorWriter{ *m_descriptorSetLayout }
+				.writeImage(0, &positionInfo)
+				.writeImage(1, &normalInfo)
+				.writeImage(2, &albedoInfo)
+				.writeImage(3, &armInfo)
+				.writeImage(4, &emissiveInfo)
+				.writeBuffer(5, &uboInfo)
+				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+
+			VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainColor,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
+
+			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainDepth,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
+
+			VkRenderingInfo renderInfo{};
+			renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+			renderInfo.renderArea.offset = { 0, 0 };
+			renderInfo.renderArea.extent = frameInfo.swapChainExtend;
+			renderInfo.layerCount = 1;
+			renderInfo.colorAttachmentCount = 1;
+			renderInfo.pColorAttachments = &colorAttachment;
+			renderInfo.pDepthAttachment = &depthAttachment;
+
+			vkCmdBeginRendering(commandBuffer, &renderInfo);
+
+			Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtend);
+			Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtend);
+
+			m_pipeline->bind(commandBuffer);
+
+			Tools::vk::cmdBindDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+				*m_pipelineLayout, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+
+			// Draw Fullscreen Triangle
+			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+			vkCmdEndRendering(commandBuffer);
+		}
+
+	private:
+		void updateLightingUBO(const FrameInfo& frameInfo)
 		{
 			LightingUBO ubo{};
 
 			ubo.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
 
-			ubo.ambient = { 
-				.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f) 
+			ubo.ambient = {
+				.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
 			};
 
 			ubo.directional = {
@@ -200,7 +180,21 @@ namespace Aegix::Graphics
 			}
 			ubo.pointLightCount = lighIndex;
 
-			data.ubo->setData(frameInfo.frameIndex, ubo);
+			m_ubo->setData(frameInfo.frameIndex, ubo);
 		}
+
+	private:
+		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_position;
+		FrameGraphResourceHandle m_normal;
+		FrameGraphResourceHandle m_albedo;
+		FrameGraphResourceHandle m_arm;
+		FrameGraphResourceHandle m_emissive;
+		FrameGraphResourceHandle m_depth;
+		std::unique_ptr<Pipeline> m_pipeline;
+		std::unique_ptr<PipelineLayout> m_pipelineLayout;
+		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
+		std::unique_ptr<DescriptorSet> m_descriptorSet;
+		std::unique_ptr<UniformBufferData<LightingUBO>> m_ubo;
 	};
 }

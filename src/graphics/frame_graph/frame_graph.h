@@ -1,9 +1,10 @@
 #pragma once
 
+#include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_pass.h"
+#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
-#include "graphics/descriptors.h"
 #include "graphics/vulkan_tools.h"
 
 #include <functional>
@@ -23,20 +24,6 @@ namespace Aegix::Graphics
 	class FrameGraph
 	{
 	public:
-		struct NoData {};
-
-		class Builder
-		{
-		public:
-			Builder(FrameGraph& frameGraph, FrameGraphNode& node);
-			FrameGraphResourceID declareRead(FrameGraphResourceID resource);
-			FrameGraphResourceID declareWrite(FrameGraphResourceID resource);
-			
-		private:
-			FrameGraph& m_frameGraph;
-			FrameGraphNode& m_node;
-		};
-
 		FrameGraph() = default;
 		FrameGraph(const FrameGraph&) = delete;
 		FrameGraph(FrameGraph&&) = delete;
@@ -45,24 +32,18 @@ namespace Aegix::Graphics
 		FrameGraph& operator=(const FrameGraph&) = delete;
 		FrameGraph& operator=(FrameGraph&&) = delete;
 
-		template <typename Data = NoData, typename Setup, typename Execute>
-			requires std::is_invocable_v<Setup, Builder&, Data&> && 
-					 std::is_invocable_v<Execute, const Data&, FrameGraphResourcePool&, const FrameInfo&> &&
-					 (sizeof(Execute) < 1024)
-		[[nodiscard]] auto addPass(const std::string& name, Setup&& setup, Execute&& execute) -> const Data&
+		template<typename T, typename... Args>
+			requires std::is_base_of_v<FrameGraphRenderPass, T> && std::is_constructible_v<T, Args...>
+		void add(Args&&... args)
 		{
-			auto pass = std::make_unique<FrameGraphPass<Data, Execute>>(std::forward<Execute>(execute));
-			auto& data = pass->data;
-			auto& node = m_nodes.emplace_back(name, static_cast<FrameGraphNodeID>(m_nodes.size()), std::move(pass));
-			Builder builder{ *this, node };
-			std::invoke(std::forward<Setup>(setup), builder, data);
-			return data;
+			auto handle = m_resourcePool.addNode<T>(std::forward<Args>(args)...);
+			m_nodes.emplace_back(handle);
 		}
 
-		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
-			VkFormat format, VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceID;
+		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height, VkFormat format, 
+			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceHandle;
 		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, VkFormat format, 
-			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceID;
+			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceHandle;
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
@@ -79,10 +60,10 @@ namespace Aegix::Graphics
 		};
 
 		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
-		void placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceID>& resources,
+		void placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceHandle>& resources,
 			const BarrierPlacement& color, const BarrierPlacement& depth);
 
-		std::vector<FrameGraphNode> m_nodes;
+		std::vector<FrameGraphNodeHandle> m_nodes;
 		FrameGraphResourcePool m_resourcePool;
 	};
 }

@@ -4,37 +4,16 @@
 
 namespace Aegix::Graphics
 {
-	// FrameGraph::Builder -------------------------------------------------------
-
-	FrameGraph::Builder::Builder(FrameGraph& frameGraph, FrameGraphNode& node)
-		: m_frameGraph{ frameGraph }, m_node{ node }
-	{
-	}
-
-	FrameGraphResourceID FrameGraph::Builder::declareRead(FrameGraphResourceID resource)
-	{
-		m_node.addRead(resource);
-		return resource;
-	}
-
-	FrameGraphResourceID FrameGraph::Builder::declareWrite(FrameGraphResourceID resource)
-	{
-		m_node.addWrite(resource);
-		return resource;
-	}
-
-
-
 	// FrameGraph ----------------------------------------------------------------
 
-	FrameGraphResourceID FrameGraph::addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
-		VkFormat format, VkImageUsageFlags usage)
+	auto FrameGraph::addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height,
+		VkFormat format, VkImageUsageFlags usage) -> FrameGraphResourceHandle
 	{
 		return m_resourcePool.addTexture(device, name, width, height, format, usage, ResizePolicy::Fixed);
 	}
 
-	FrameGraphResourceID FrameGraph::addTexture(VulkanDevice& device, const std::string& name, VkFormat format, 
-		VkImageUsageFlags usage)
+	auto FrameGraph::addTexture(VulkanDevice& device, const std::string& name, VkFormat format,
+		VkImageUsageFlags usage) -> FrameGraphResourceHandle
 	{
 		return m_resourcePool.addTexture(device, name, Engine::WIDTH, Engine::HEIGHT, format, usage, ResizePolicy::SwapchainRelative);
 	}
@@ -46,11 +25,13 @@ namespace Aegix::Graphics
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
-		for (auto& node : m_nodes)
+		for (auto& nodeHandle : m_nodes)
 		{
+			auto& node = m_resourcePool.node(nodeHandle);
+
 			placeBarriers(frameInfo.commandBuffer, node);
 
-			node.executePass(m_resourcePool, frameInfo);
+			node.pass->execute(m_resourcePool, frameInfo);
 		}
 	}
 
@@ -77,7 +58,7 @@ namespace Aegix::Graphics
 			.srcStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
 			.dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
 		};
-		placeBarriers(commandBuffer, node.reads(), readColor, readDepth);
+		placeBarriers(commandBuffer, node.inputs, readColor, readDepth);
 
 		BarrierPlacement writeColor{
 			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -89,10 +70,10 @@ namespace Aegix::Graphics
 			.srcStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			.dstStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT
 		};
-		placeBarriers(commandBuffer, node.writes(), writeColor, writeDepth);
+		placeBarriers(commandBuffer, node.outputs, writeColor, writeDepth);
 	}
 
-	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceID>& resources,
+	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceHandle>& resources,
 		const BarrierPlacement& color, const BarrierPlacement& depth)
 	{
 		std::vector<VkImageMemoryBarrier> depthBarriers;

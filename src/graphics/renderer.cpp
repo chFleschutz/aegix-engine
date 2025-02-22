@@ -143,8 +143,8 @@ namespace Aegix::Graphics
 
 		auto sceneColor = m_frameGraph.addTexture(m_device, "SceneColor", VK_FORMAT_R8G8B8A8_UNORM);
 
-		GBufferPass{ m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth };
-		LightingPass{ m_frameGraph, blackboard, sceneColor };
+		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth);
+		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard, position, normal, albedo, arm, emissive, depth, sceneColor);
 
 		m_frameGraph.compile();
 	}
