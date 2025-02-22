@@ -1,12 +1,11 @@
 #pragma once
 
+#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/texture.h"
-#include "graphics/uniform_buffer.h"
 
 #include <array>
-#include <cassert>
 #include <limits>
 #include <memory>
 #include <string>
@@ -17,18 +16,14 @@ namespace Aegix::Graphics
 {
 	class FrameGraphRenderPass;
 
+
+	// FrameGraphResource --------------------------------------------------------
+
 	struct FrameGraphResourceHandle
 	{
 		uint32_t id;
 
 		constexpr auto operator<=>(const FrameGraphResourceHandle&) const = default;
-	};
-
-	struct FrameGraphNodeHandle
-	{
-		uint32_t id;
-
-		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
 	};
 
 	enum class FrameGraphResourceType
@@ -59,6 +54,13 @@ namespace Aegix::Graphics
 
 	using FrameGraphResourceInfo = std::variant<FrameGraphResourceBufferInfo, FrameGraphResourceTextureInfo>;
 
+	struct FrameGraphResourceCreateInfo
+	{
+		std::string name;
+		FrameGraphResourceType type;
+		FrameGraphResourceInfo info;
+	};
+
 	struct FrameGraphResource
 	{
 		static constexpr FrameGraphResourceHandle INVALID_HANDLE{ std::numeric_limits<uint32_t>::max() };
@@ -67,6 +69,23 @@ namespace Aegix::Graphics
 		FrameGraphResourceType type;
 		FrameGraphResourceInfo info;
 		FrameGraphResourceHandle handle;
+	};
+
+
+	// FrameGraphNode ------------------------------------------------------------
+
+	struct FrameGraphNodeHandle
+	{
+		uint32_t id;
+
+		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
+	};
+
+	struct FrameGraphNodeCreateInfo
+	{
+		std::string name;
+		std::vector<FrameGraphResourceHandle> inputs;
+		std::vector<FrameGraphResourceHandle> outputs;
 	};
 
 	struct FrameGraphNode
@@ -79,20 +98,8 @@ namespace Aegix::Graphics
 		std::vector<FrameGraphResourceHandle> outputs;
 	};
 
-	struct FrameGraphResourceCreateInfo
-	{
-		std::string name;
-		FrameGraphResourceType type;
-		FrameGraphResourceInfo info;
-	};
 
-	struct FrameGraphNodeCreateInfo
-	{
-		std::string name;
-		std::vector<FrameGraphResourceHandle> inputs;
-		std::vector<FrameGraphResourceHandle> outputs;
-	};
-
+	// RenderStage ---------------------------------------------------------------
 
 	struct RenderStage
 	{
@@ -108,6 +115,10 @@ namespace Aegix::Graphics
 		std::unique_ptr<UniformBuffer> ubo;
 	};
 
+
+	// FrameGraphResourcePool ----------------------------------------------------
+
+	/// @brief Holds all resources and nodes for a frame graph
 	class FrameGraphResourcePool
 	{
 	public:
@@ -119,84 +130,24 @@ namespace Aegix::Graphics
 		FrameGraphResourcePool& operator=(const FrameGraphResourcePool&) = delete;
 		FrameGraphResourcePool& operator=(FrameGraphResourcePool&&) = delete;
 
-		[[nodiscard]] auto node(FrameGraphNodeHandle handle) -> FrameGraphNode& 
-		{ 
-			assert(handle != FrameGraphNode::INVALID_HANDLE && "Invalid node handle");
-			assert(handle.id < m_nodes.size() && "Node handle out of range");
-			return m_nodes[handle.id]; 
-		}
-		[[nodiscard]] auto node(FrameGraphNodeHandle handle) const -> const FrameGraphNode& 
-		{
-			assert(handle != FrameGraphNode::INVALID_HANDLE && "Invalid node handle");
-			assert(handle.id < m_nodes.size() && "Node handle out of range");
-			return m_nodes[handle.id];
-		}
+		/// @brief Returns the node for the given handle
+		[[nodiscard]] auto node(FrameGraphNodeHandle handle) -> FrameGraphNode&;
+		[[nodiscard]] auto node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&;
 
-		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) -> FrameGraphResource& 
-		{ 
-			assert(handle != FrameGraphResource::INVALID_HANDLE && "Invalid resource handle");
-			assert(handle.id < m_resources.size() && "Resource handle out of range");
-			return m_resources[handle.id]; 
-		}
-		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource& 
-		{ 
-			assert(handle != FrameGraphResource::INVALID_HANDLE && "Invalid resource handle");
-			assert(handle.id < m_resources.size() && "Resource handle out of range");
-			return m_resources[handle.id]; 
-		}
-		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) -> FrameGraphResource&
-		{
-			auto& res = resource(handle);
-			if (res.type != FrameGraphResourceType::Reference)
-				return res;
+		/// @brief Returns the resource for the given handle
+		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) -> FrameGraphResource&;
+		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
 
-			auto& refRes = resource(res.handle);
-			assert(refRes.type != FrameGraphResourceType::Reference && "Reference to another reference is not allowed");
-			return refRes;
-		}
-		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&
-		{
-			const auto& res = resource(handle);
-			if (res.type != FrameGraphResourceType::Reference)
-				return res;
+		/// @brief Returns the resource for the given handle and resolves any references
+		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) -> FrameGraphResource&;
+		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
 
-			const auto& refRes = resource(res.handle);
-			assert(refRes.type != FrameGraphResourceType::Reference && "Reference to another reference is not allowed");
-			return refRes;
-		}
-		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) -> Texture& 
-		{ 
-			auto& res = finalResource(handle);
-			assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
-			assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle not created");
-			assert(res.handle.id < m_textures.size() && "Texture handle out of range");
-			return m_textures[res.handle.id];
-		}
-		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) const -> const Texture& 
-		{ 
-			const auto& res = finalResource(handle);
-			assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
-			assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle not created");
-			assert(res.handle.id < m_textures.size() && "Texture handle out of range");
-			return m_textures[res.handle.id];
-		}
+		/// @brief Returns the texture for the given handle (must be a texture resource)
+		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) -> Texture&;
+		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) const -> const Texture&;
 
-
-		template<typename T, typename... Args>
-			requires std::is_base_of_v<FrameGraphRenderPass, T>&& std::is_constructible_v<T, Args...>
-		auto addNode(Args&&... args) -> FrameGraphNodeHandle
-		{
-			auto pass = std::make_unique<T>(std::forward<Args>(args)...);
-			auto createInfo = pass->createInfo(*this);
-			m_nodes.emplace_back(createInfo.name, std::move(pass), createInfo.inputs, createInfo.outputs);
-			return FrameGraphNodeHandle{ static_cast<uint32_t>(m_nodes.size() - 1) };
-		}
-
-		auto addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
-		{
-			m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.info, FrameGraphResource::INVALID_HANDLE);
-			return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
-		}
+		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
+		auto addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
 
 		template<typename T>
 			requires std::is_base_of_v<RenderSystem, T>
@@ -218,76 +169,12 @@ namespace Aegix::Graphics
 		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 
-		void resolveReferences()
-		{
-			for (auto& resource : m_resources)
-			{
-				if (resource.type != FrameGraphResourceType::Reference)
-					continue;
-
-				// Find the resource to reference
-				for (uint32_t i = 0; i < m_resources.size(); i++)
-				{
-					auto& other = m_resources[i];
-					if (other.type != FrameGraphResourceType::Reference && other.name == resource.name)
-					{
-						resource.handle = FrameGraphResourceHandle{ i };
-						break;
-					}
-				}
-
-				if (resource.handle == FrameGraphResource::INVALID_HANDLE)
-				{
-
-				}
-
-				assert(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
-			}
-		}
-
-		void createResources(VulkanDevice& device)
-		{
-			for (auto& resource : m_resources)
-			{
-				switch (resource.type)
-				{
-				case FrameGraphResourceType::Texture:
-					createTexture(device, resource);
-					break;
-
-				case FrameGraphResourceType::Buffer:
-					createBuffer(device, resource);
-					break;
-
-				case FrameGraphResourceType::Reference:
-					break;
-				default:
-					[[unlikely]] break;
-				}
-			}
-		}
+		void resolveReferences();
+		void createResources(VulkanDevice& device);
 
 	private:
-		void createTexture(VulkanDevice& device, FrameGraphResource& resource)
-		{
-			auto& info = std::get<FrameGraphResourceTextureInfo>(resource.info);
-			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
-			{
-				info.extent = { DEFAULT_WIDTH, DEFAULT_HEIGHT };
-			}
-
-			m_textures.emplace_back(device, Texture::Config{
-				.extent = info.extent,
-				.format = info.format,
-				.usage = info.usage
-				});
-			resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
-		}
-
-		void createBuffer(VulkanDevice& device, FrameGraphResource& resource)
-		{
-			// TODO: Implement
-		}
+		void createTexture(VulkanDevice& device, FrameGraphResource& resource);
+		void createBuffer(VulkanDevice& device, FrameGraphResource& resource);
 
 		std::vector<FrameGraphNode> m_nodes;
 		std::vector<FrameGraphResource> m_resources;

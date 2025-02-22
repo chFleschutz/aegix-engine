@@ -32,16 +32,12 @@ namespace Aegix::Graphics
 
 		template<typename T, typename... Args>
 			requires std::is_base_of_v<FrameGraphRenderPass, T> && std::is_constructible_v<T, Args...>
-		void add(Args&&... args)
+		auto add(Args&&... args) -> FrameGraphNodeHandle
 		{
-			auto handle = m_resourcePool.addNode<T>(std::forward<Args>(args)...);
+			auto handle = m_resourcePool.addNode(std::make_unique<T>(std::forward<Args>(args)...));
 			m_nodes.emplace_back(handle);
+			return handle;
 		}
-
-		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, uint32_t width, uint32_t height, VkFormat format, 
-			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceHandle;
-		[[nodiscard]] auto addTexture(VulkanDevice& device, const std::string& name, VkFormat format, 
-			VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT) -> FrameGraphResourceHandle;
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
