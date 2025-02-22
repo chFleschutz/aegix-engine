@@ -1,12 +1,8 @@
 #pragma once
 
 #include "graphics/device.h"
-#include "graphics/globals.h"
-
-#include <vulkan/vulkan.h>
 
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -14,17 +10,15 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
-		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
-		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+		SwapChain(VulkanDevice& device, VkExtent2D windowExtent);
+		SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
 		~SwapChain();
 
 		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
 		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
-		VkImageView depthImageView(int index) const { return mDepthImageViews[index]; }
 		VkImage colorImage(int index) const { return mColorImages[index]; }
-		VkImage depthImage(int index) const { return mDepthImages[index]; }
 
 		uint32_t width() const { return mSwapChainExtent.width; }
 		uint32_t height() const { return mSwapChainExtent.height; }
@@ -40,8 +34,7 @@ namespace Aegix::Graphics
 
 		bool compareSwapFormats(const SwapChain& swapchain) const 
 		{
-			return swapchain.mSwapChainDepthFormat == mSwapChainDepthFormat &&
-				swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
+			return swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
 		}
 
 		void transitionColorAttachment(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -51,7 +44,6 @@ namespace Aegix::Graphics
 		void init();
 		void createSwapChain();
 		void createImageViews();
-		void createDepthResources();
 		void createSyncObjects();
 
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
@@ -60,12 +52,7 @@ namespace Aegix::Graphics
 		uint32_t chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const;
 
 		VkFormat mSwapChainImageFormat;
-		VkFormat mSwapChainDepthFormat;
 		VkExtent2D mSwapChainExtent;
-
-		std::vector<VkImage> mDepthImages;
-		std::vector<VkDeviceMemory> mDepthImageMemories;
-		std::vector<VkImageView> mDepthImageViews;
 
 		std::vector<VkImage> mColorImages;
 		std::vector<VkImageView> mColorImageViews;

@@ -1,24 +1,21 @@
 #include "swap_chain.h"
 
 #include <array>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <limits>
-#include <set>
 #include <stdexcept>
 #include <cassert>
 
 namespace Aegix::Graphics
 {
-	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
-		: m_device{ deviceRef }, m_windowExtent{ windowExtent }
+	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent)
+		: m_device{ device }, m_windowExtent{ windowExtent }
 	{
 		init();
 	}
 
-	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous)
-		: m_device{ deviceRef }, m_windowExtent{ windowExtent }, m_oldSwapChain{ previous }
+	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous)
+		: m_device{ device }, m_windowExtent{ windowExtent }, m_oldSwapChain{ previous }
 	{
 		init();
 		m_oldSwapChain = nullptr;
@@ -36,13 +33,6 @@ namespace Aegix::Graphics
 		{
 			vkDestroySwapchainKHR(m_device.device(), m_swapChain, nullptr);
 			m_swapChain = nullptr;
-		}
-
-		for (int i = 0; i < mDepthImages.size(); i++)
-		{
-			vkDestroyImageView(m_device.device(), mDepthImageViews[i], nullptr);
-			vkDestroyImage(m_device.device(), mDepthImages[i], nullptr);
-			vkFreeMemory(m_device.device(), mDepthImageMemories[i], nullptr);
 		}
 
 		// cleanup synchronization objects
@@ -176,7 +166,6 @@ namespace Aegix::Graphics
 	{
 		createSwapChain();
 		createImageViews();
-		createDepthResources();
 		createSyncObjects();
 	}
 
@@ -248,55 +237,6 @@ namespace Aegix::Graphics
 			viewInfo.subresourceRange.layerCount = 1;
 
 			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mColorImageViews[i]) != VK_SUCCESS)
-				throw std::runtime_error("failed to create texture image view!");
-		}
-	}
-
-	void SwapChain::createDepthResources()
-	{
-		VkFormat depthFormat = findDepthFormat();
-		mSwapChainDepthFormat = depthFormat;
-
-		mDepthImages.resize(imageCount());
-		mDepthImageMemories.resize(imageCount());
-		mDepthImageViews.resize(imageCount());
-
-		for (int i = 0; i < mDepthImages.size(); i++)
-		{
-			VkImageCreateInfo imageInfo{};
-			imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			imageInfo.imageType = VK_IMAGE_TYPE_2D;
-			imageInfo.extent.width = mSwapChainExtent.width;
-			imageInfo.extent.height = mSwapChainExtent.height;
-			imageInfo.extent.depth = 1;
-			imageInfo.mipLevels = 1;
-			imageInfo.arrayLayers = 1;
-			imageInfo.format = depthFormat;
-			imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-			imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			imageInfo.flags = 0;
-
-			m_device.createImage(
-				imageInfo,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				mDepthImages[i],
-				mDepthImageMemories[i]);
-
-			VkImageViewCreateInfo viewInfo{};
-			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image = mDepthImages[i];
-			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			viewInfo.format = depthFormat;
-			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-			viewInfo.subresourceRange.baseMipLevel = 0;
-			viewInfo.subresourceRange.levelCount = 1;
-			viewInfo.subresourceRange.baseArrayLayer = 0;
-			viewInfo.subresourceRange.layerCount = 1;
-
-			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mDepthImageViews[i]) != VK_SUCCESS)
 				throw std::runtime_error("failed to create texture image view!");
 		}
 	}

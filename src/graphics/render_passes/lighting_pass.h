@@ -120,7 +120,7 @@ namespace Aegix::Graphics
 			VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainColor,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
 
-			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainDepth,
+			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(resources.texture(m_depth).imageView(),
 				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
 
 			VkRenderingInfo renderInfo{};

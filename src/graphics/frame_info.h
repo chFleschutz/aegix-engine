@@ -15,6 +15,5 @@ namespace Aegix::Graphics
 		// TODO: Replace with a more general solution
 		VkExtent2D swapChainExtend;
 		VkImageView swapChainColor;
-		VkImageView swapChainDepth;
 	};
 }

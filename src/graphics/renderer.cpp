@@ -58,7 +58,6 @@ namespace Aegix::Graphics
 			m_swapChain->extentAspectRatio(),
 			m_swapChain->extend(),
 			m_swapChain->colorImageView(m_currentImageIndex),
-			m_swapChain->depthImageView(m_currentImageIndex)
 		};
 		
 		m_frameGraph.execute(frameInfo);
