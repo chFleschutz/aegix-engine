@@ -1,6 +1,8 @@
 #include "frame_graph.h"
 
-#include "core/engine.h"
+#include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan_tools.h"
+
 
 namespace Aegix::Graphics
 {

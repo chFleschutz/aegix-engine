@@ -95,7 +95,7 @@ namespace Aegix::Graphics
 			if (resource.type != FrameGraphResourceType::Reference)
 				continue;
 
-			// Find the resource to reference
+			// Find the resource for the reference by name
 			for (uint32_t i = 0; i < m_resources.size(); i++)
 			{
 				auto& other = m_resources[i];
@@ -104,11 +104,6 @@ namespace Aegix::Graphics
 					resource.handle = FrameGraphResourceHandle{ i };
 					break;
 				}
-			}
-
-			if (resource.handle == FrameGraphResource::INVALID_HANDLE)
-			{
-
 			}
 
 			assert(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");

@@ -1,14 +1,7 @@
 #pragma once
 
-#include "graphics/descriptors.h"
-#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
-#include "graphics/vulkan_tools.h"
 
-#include <functional>
-#include <memory>
-#include <string>
-#include <utility>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -19,6 +12,7 @@ namespace Aegix::Graphics
 		DescriptorPool& pool;
 	};
 
+	/// @brief Manages renderpasses and resources for rendering a frame
 	class FrameGraph
 	{
 	public:
@@ -41,8 +35,13 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
 
+		/// @brief Compiles the frame graph by sorting the nodes and creating resources
 		void compile(VulkanDevice& device);
+
+		/// @brief Executes the frame graph by executing each node in order
 		void execute(const FrameInfo& frameInfo);
+
+		/// @brief Resizes all swapchain relative resources textures
 		void swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height);
 
 	private:

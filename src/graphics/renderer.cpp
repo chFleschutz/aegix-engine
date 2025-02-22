@@ -1,10 +1,9 @@
 #include "renderer.h"
 
-#include "scene/scene.h"
-#include "scene/entity.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/g_buffer_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
+#include "scene/scene.h"
 
 #include <cassert>
 #include <stdexcept>

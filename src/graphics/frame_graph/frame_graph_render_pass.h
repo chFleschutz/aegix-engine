@@ -2,6 +2,9 @@
 
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 
+// Included here to avoid issues in child classes
+#include "scene/entity.h" 
+
 namespace Aegix::Graphics
 {
 	class FrameGraphRenderPass

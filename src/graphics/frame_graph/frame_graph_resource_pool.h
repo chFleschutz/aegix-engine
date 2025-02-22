@@ -169,6 +169,7 @@ namespace Aegix::Graphics
 		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
 
+		/// @brief For all reference resources, resolve the handle to the actual resource
 		void resolveReferences();
 		void createResources(VulkanDevice& device);
 
