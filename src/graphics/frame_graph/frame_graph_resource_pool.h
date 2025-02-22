@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 
 	struct FrameGraphResourceHandle
 	{
-		uint32_t id;
+		uint32_t id{ INVALID_HANDLE };
 
 		constexpr auto operator<=>(const FrameGraphResourceHandle&) const = default;
 	};
@@ -76,7 +76,7 @@ namespace Aegix::Graphics
 
 	struct FrameGraphNodeHandle
 	{
-		uint32_t id;
+		uint32_t id{ INVALID_HANDLE };
 
 		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
 	};
