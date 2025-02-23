@@ -25,8 +25,9 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto findDepthFormat() -> VkFormat;
+		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
 
-		auto acquireNextImage(uint32_t* imageIndex) -> VkResult;
+		auto acquireNextImage() -> VkResult;
 		auto submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) -> VkResult;
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
@@ -50,9 +51,10 @@ namespace Aegix::Graphics
 		VkExtent2D m_extent;
 		VkExtent2D m_windowExtent;
 
-		VkSwapchainKHR m_swapChain;
 		std::vector<VkImage> m_images;
 		std::vector<VkImageView> m_imageViews;
+		VkSwapchainKHR m_swapChain;
+		uint32_t m_currentImageIndex = 0;
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores;
 		std::vector<VkSemaphore> m_renderFinishedSemaphores;

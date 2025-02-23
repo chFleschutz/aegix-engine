@@ -40,22 +40,20 @@ namespace Aegix::Graphics
 		}
 	}
 
-	auto SwapChain::acquireNextImage(uint32_t* imageIndex) -> VkResult
+	auto SwapChain::acquireNextImage() -> VkResult
 	{
-		vkWaitForFences(
-			m_device.device(),
-			1,
+		vkWaitForFences(m_device.device(), 
+			1, 
 			&m_inFlightFences[m_currentFrame],
-			VK_TRUE,
+			VK_TRUE, 
 			std::numeric_limits<uint64_t>::max());
 
-		VkResult result = vkAcquireNextImageKHR(
-			m_device.device(),
+		VkResult result = vkAcquireNextImageKHR(m_device.device(),
 			m_swapChain,
 			std::numeric_limits<uint64_t>::max(),
 			m_imageAvailableSemaphores[m_currentFrame],  // must be a not signaled semaphore
 			VK_NULL_HANDLE,
-			imageIndex);
+			&m_currentImageIndex);
 
 		return result;
 	}

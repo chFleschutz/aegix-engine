@@ -2,9 +2,9 @@
 
 #include "graphics/buffer.h"
 #include "graphics/device.h"
-#include "utils/math_utils.h"
+#include "graphics/swap_chain.h"
 
-#include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
 
 #include <filesystem>
 
@@ -42,6 +42,9 @@ namespace Aegix::Graphics
 		/// @note The texture will be in VK_LAYOUT_UNDEFINED layout
 		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
 
+		/// @brief Wraps an existing image and view 
+		Texture(VulkanDevice& device, const SwapChain& swapChain);
+
 		Texture(const Texture&) = delete;
 		Texture(Texture&& other) noexcept;
 		~Texture();
@@ -71,6 +74,14 @@ namespace Aegix::Graphics
 		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
 
 		void resize(uint32_t width, uint32_t height, VkImageUsageFlags usage);
+
+		/// @brief Updates the texture with a new image and view from the swap chain (USE WITH CAUTION)
+		/// @note The old image and view will NOT be destroyed 
+		void update(const SwapChain& swapChain);
+
+		/// @brief Updates the texture with a new image and view (USE WITH CAUTION)
+		/// @note The old image and view will NOT be destroyed
+		void update(VkImage image, VkImageView imageView);
 
 	private:
 		void createImage(const Config& config);

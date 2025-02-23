@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <stdexcept>
+#include <cassert>
 
 namespace Aegix::Graphics
 {
@@ -24,8 +24,7 @@ namespace Aegix::Graphics
 		stbi_uc* pixels = stbi_load(texturePath.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
 
-		if (!pixels)
-			throw std::runtime_error("Failed to load texture image: " + texturePath.string());
+		assert(pixels && "Failed to load texture image");
 
 		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
@@ -73,6 +72,15 @@ namespace Aegix::Graphics
 
 		createImage(config);
 		createImageView(config);
+		createSampler(config);
+	}
+
+
+	Texture::Texture(VulkanDevice& device, const SwapChain& swapChain)
+		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extend() }, m_layout{ VK_IMAGE_LAYOUT_UNDEFINED },
+		m_image{ swapChain.image(0) }, m_imageView{ swapChain.imageView(0) }
+	{
+		Config config{};
 		createSampler(config);
 	}
 
@@ -199,6 +207,18 @@ namespace Aegix::Graphics
 
 		createImage(config);
 		createImageView(config);
+	}
+
+	void Texture::update(const SwapChain& swapChain)
+	{
+		uint32_t index = swapChain.currentImageIndex();
+		update(swapChain.image(index), swapChain.imageView(index));
+	}
+
+	void Texture::update(VkImage image, VkImageView imageView)
+	{
+		m_image = image;
+		m_imageView = imageView;
 	}
 
 	void Texture::createImage(const Config& config)
