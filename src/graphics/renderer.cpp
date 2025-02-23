@@ -133,25 +133,26 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
+		auto& pool = m_frameGraph.resourcePool();
+		
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		auto& pool = m_frameGraph.resourcePool();
+		// Add swap chain as an external resource
 		m_swapChainResource = pool.addExternalResource(
 			Texture{ m_device, *m_swapChain }, 
 			FrameGraphResourceCreateInfo{
-				.name = "Swapchain",
+				.name = "Final",
 				.type = FrameGraphResourceType::Texture,
 				.info = FrameGraphResourceTextureInfo{
 					.extent = m_swapChain->extend(),
 					.format = m_swapChain->format(),
 					.resizePolicy = ResizePolicy::Fixed
-					}
+				}
 			});
 
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
-		m_frameGraph.add<TransparentPass>();
 
 		m_frameGraph.compile(m_device);
 	}

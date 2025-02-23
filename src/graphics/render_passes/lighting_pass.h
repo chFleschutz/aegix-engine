@@ -77,16 +77,7 @@ namespace Aegix::Graphics
 			m_arm = pool.addResource({ "ARM", FrameGraphResourceType::Reference });
 			m_emissive = pool.addResource({ "Emissive", FrameGraphResourceType::Reference });
 			m_depth = pool.addResource({ "Depth", FrameGraphResourceType::Reference });
-			
-			m_sceneColor = pool.addResource(FrameGraphResourceCreateInfo{
-				.name = "SceneColor",
-				.type = FrameGraphResourceType::Texture,
-				.info = FrameGraphResourceTextureInfo{
-						.extent = { 0, 0 },
-						.format = VK_FORMAT_R8G8B8A8_UNORM,
-						.resizePolicy = ResizePolicy::SwapchainRelative
-					}
-				});
+			m_sceneColor = pool.addResource({ "Final", FrameGraphResourceType::Reference });
 
 			FrameGraphNodeCreateInfo info{};
 			info.name = "Lighting Pass";
@@ -117,8 +108,8 @@ namespace Aegix::Graphics
 				.writeBuffer(5, &uboInfo)
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
-			VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(frameInfo.swapChainColor,
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
+			VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(resources.texture(m_sceneColor), 
+				VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
 
 			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(resources.texture(m_depth).imageView(),
 				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
