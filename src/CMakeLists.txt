@@ -21,6 +21,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/globals.h"
 	"graphics/render_passes/g_buffer_pass.h" 
 	"graphics/render_passes/lighting_pass.h"
+	"graphics/render_passes/present_pass.h"
 	"graphics/render_passes/transparent_pass.h"
 	
 	"graphics/gui.cpp"

@@ -212,11 +212,12 @@ namespace Aegix::Graphics
 	void Texture::update(const SwapChain& swapChain)
 	{
 		uint32_t index = swapChain.currentImageIndex();
-		update(swapChain.image(index), swapChain.imageView(index));
+		update(swapChain.image(index), swapChain.imageView(index), VK_IMAGE_LAYOUT_UNDEFINED);
 	}
 
-	void Texture::update(VkImage image, VkImageView imageView)
+	void Texture::update(VkImage image, VkImageView imageView, VkImageLayout layout)
 	{
+		m_layout = layout;
 		m_image = image;
 		m_imageView = imageView;
 	}

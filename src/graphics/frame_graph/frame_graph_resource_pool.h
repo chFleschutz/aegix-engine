@@ -45,6 +45,7 @@ namespace Aegix::Graphics
 		Sampled,
 		ColorAttachment,
 		DepthStencilAttachment,
+		Present
 	};
 
 	struct FrameGraphResourceBufferInfo

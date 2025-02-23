@@ -3,6 +3,7 @@
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/g_buffer_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
+#include "graphics/render_passes/present_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "scene/scene.h"
 
@@ -154,6 +155,7 @@ namespace Aegix::Graphics
 
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
+		m_frameGraph.add<PresentPass>();
 
 		m_frameGraph.compile(m_device);
 	}
@@ -182,9 +184,6 @@ namespace Aegix::Graphics
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			throw std::runtime_error("Failed to begin recording command buffer");
 
-		// TODO: Let the frame graph handle this
-		m_swapChain->transitionColorAttachment(commandBuffer, m_currentImageIndex);
-
 		m_frameGraph.resourcePool().texture(m_swapChainResource).update(*m_swapChain);
 
 		return commandBuffer;
@@ -193,9 +192,6 @@ namespace Aegix::Graphics
 	void Renderer::endFrame(VkCommandBuffer commandBuffer)
 	{
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
-
-		// TODO: Let the frame graph handle this
-		m_swapChain->transitionPresent(commandBuffer, m_currentImageIndex);
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Failed to record command buffer");

@@ -81,7 +81,7 @@ namespace Aegix::Graphics
 
 		/// @brief Updates the texture with a new image and view (USE WITH CAUTION)
 		/// @note The old image and view will NOT be destroyed
-		void update(VkImage image, VkImageView imageView);
+		void update(VkImage image, VkImageView imageView, VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
 
 	private:
 		void createImage(const Config& config);

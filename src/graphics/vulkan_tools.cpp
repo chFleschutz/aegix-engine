@@ -89,6 +89,8 @@ namespace Aegix::Tools
 			return VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
 			return VK_ACCESS_SHADER_READ_BIT;
+		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+			return 0;
 		default:
 			assert(false && "Unsupported layout transition");
 			return 0;
@@ -107,6 +109,8 @@ namespace Aegix::Tools
 			return VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
 			return VK_ACCESS_SHADER_READ_BIT;
+		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+			return 0;
 		default:
 			assert(false && "Unsupported layout transition");
 			return 0;

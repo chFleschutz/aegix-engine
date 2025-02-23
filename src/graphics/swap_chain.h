@@ -32,9 +32,6 @@ namespace Aegix::Graphics
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 
-		void transitionColorAttachment(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-		void transitionPresent(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
 	private:
 		void createSwapChain(VkSwapchainKHR oldSwapChain);
 		void createImageViews();
