@@ -151,6 +151,9 @@ namespace Aegix::Graphics
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
 		auto addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
 
+		/// @brief Adds an existing texture as a resource
+		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
+
 		template<typename T>
 			requires std::is_base_of_v<RenderSystem, T>
 		RenderSystem& addRenderSystem(VulkanDevice& device, RenderStage::Type stageType)

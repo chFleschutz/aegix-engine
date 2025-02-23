@@ -88,6 +88,14 @@ namespace Aegix::Graphics
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
+	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+	{
+		auto ResourceHandle = addResource(createInfo);
+		m_textures.emplace_back(std::move(texture));
+		resource(ResourceHandle).handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
+		return ResourceHandle;
+	}
+
 	void FrameGraphResourcePool::resolveReferences()
 	{
 		for (auto& resource : m_resources)
@@ -114,6 +122,9 @@ namespace Aegix::Graphics
 	{
 		for (auto& resource : m_resources)
 		{
+			if (resource.handle != FrameGraphResource::INVALID_HANDLE) // Already created
+				continue;
+
 			switch (resource.type)
 			{
 			case FrameGraphResourceType::Texture:
