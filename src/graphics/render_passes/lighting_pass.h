@@ -71,19 +71,40 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
 		{
-			m_position = pool.addResource({ "Position", FrameGraphResourceType::Reference });
-			m_normal = pool.addResource({ "Normal", FrameGraphResourceType::Reference });
-			m_albedo = pool.addResource({ "Albedo", FrameGraphResourceType::Reference });
-			m_arm = pool.addResource({ "ARM", FrameGraphResourceType::Reference });
-			m_emissive = pool.addResource({ "Emissive", FrameGraphResourceType::Reference });
-			m_depth = pool.addResource({ "Depth", FrameGraphResourceType::Reference });
-			m_sceneColor = pool.addResource({ "Final", FrameGraphResourceType::Reference });
+			m_position = pool.addResource({ "Position", 
+				FrameGraphResourceType::Reference, 
+				FrameGraphResourceUsage::Sampled
+				});
+			m_normal = pool.addResource({ "Normal", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Sampled
+				});
+			m_albedo = pool.addResource({ "Albedo", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Sampled
+				});
+			m_arm = pool.addResource({ "ARM", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Sampled
+				});
+			m_emissive = pool.addResource({ "Emissive", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Sampled
+				});
+			m_depth = pool.addResource({ "Depth", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Sampled
+				});
+			m_sceneColor = pool.addResource({ "Final", 
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::ColorAttachment
+				});
 
-			FrameGraphNodeCreateInfo info{};
-			info.name = "Lighting Pass";
-			info.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
-			info.outputs = { m_sceneColor };
-			return info;
+			return FrameGraphNodeCreateInfo{
+				.name = "Lighting Pass",
+				.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth },
+				.outputs = { m_sceneColor }
+			};
 		}
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override

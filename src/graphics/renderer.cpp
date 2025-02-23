@@ -144,9 +144,10 @@ namespace Aegix::Graphics
 			FrameGraphResourceCreateInfo{
 				.name = "Final",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::None,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = m_swapChain->extend(),
 					.format = m_swapChain->format(),
+					.extent = m_swapChain->extend(),
 					.resizePolicy = ResizePolicy::Fixed
 				}
 			});

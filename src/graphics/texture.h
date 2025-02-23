@@ -65,7 +65,7 @@ namespace Aegix::Graphics
 
 		/// @brief Returns a VkImageMemoryBarrier for transitioning the image to the new layout
 		/// @note The internal layout will be changed to the new layout, make sure to submit the barrier to a command buffer
-		[[nodiscard]] auto imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier;
+		[[nodiscard]] auto transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier;
 
 		void fill(const glm::vec4& color);
 		void fill(const Buffer& buffer);

@@ -86,7 +86,7 @@ namespace Aegix::Graphics
 
 	Texture::Texture(Texture&& other) noexcept
 		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent }, m_layout{ other.m_layout },
-		m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, m_imageView{ other.m_imageView }, 
+		m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, m_imageView{ other.m_imageView },
 		m_sampler{ other.m_sampler }
 	{
 		other.m_image = VK_NULL_HANDLE;
@@ -132,7 +132,7 @@ namespace Aegix::Graphics
 		return info;
 	}
 
-	auto Texture::imageMemoryBarrier(VkImageLayout newLayout) -> VkImageMemoryBarrier
+	auto Texture::transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier
 	{
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

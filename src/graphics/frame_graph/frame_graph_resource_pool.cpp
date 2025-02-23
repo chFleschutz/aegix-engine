@@ -7,6 +7,24 @@
 
 namespace Aegix::Graphics
 {
+	static auto imageUsage(FrameGraphResourceUsage usage) -> VkImageUsageFlags
+	{
+		switch (usage)
+		{
+		case FrameGraphResourceUsage::None:
+			return 0;
+		case FrameGraphResourceUsage::Sampled:
+			return VK_IMAGE_USAGE_SAMPLED_BIT;
+		case FrameGraphResourceUsage::ColorAttachment:
+			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		case FrameGraphResourceUsage::DepthStencilAttachment:
+			return VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		default:
+			assert(false && "Invalid usage");
+			return 0;
+		}
+	}
+
 	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) -> FrameGraphNode&
 	{
 		assert(handle != FrameGraphNode::INVALID_HANDLE && "Invalid node handle");
@@ -84,7 +102,7 @@ namespace Aegix::Graphics
 
 	auto FrameGraphResourcePool::addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 	{
-		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.info, FrameGraphResource::INVALID_HANDLE);
+		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.usage, createInfo.info, FrameGraphResource::INVALID_HANDLE);
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
@@ -104,12 +122,12 @@ namespace Aegix::Graphics
 				continue;
 
 			// Find the resource for the reference by name
-			for (uint32_t i = 0; i < m_resources.size(); i++)
+			for (size_t i = 0; i < m_resources.size(); i++)
 			{
 				auto& other = m_resources[i];
 				if (other.type != FrameGraphResourceType::Reference && other.name == resource.name)
 				{
-					resource.handle = FrameGraphResourceHandle{ i };
+					resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(i) };
 					break;
 				}
 			}
@@ -120,6 +138,22 @@ namespace Aegix::Graphics
 
 	void FrameGraphResourcePool::createResources(VulkanDevice& device)
 	{
+		// Accumulate usage flags for each resource reference
+		for (auto& initialResource : m_resources)
+		{
+			FrameGraphResourceUsage usage = initialResource.usage;
+
+			FrameGraphResource* actualResource = &initialResource;
+			if (initialResource.type == FrameGraphResourceType::Reference)
+				actualResource = &resource(initialResource.handle);
+
+			if (actualResource->type == FrameGraphResourceType::Texture)
+			{
+				auto& info = std::get<FrameGraphResourceTextureInfo>(actualResource->info);
+				info.usage |= imageUsage(usage);
+			}
+		}
+
 		for (auto& resource : m_resources)
 		{
 			if (resource.handle != FrameGraphResource::INVALID_HANDLE) // Already created
@@ -137,6 +171,7 @@ namespace Aegix::Graphics
 
 			case FrameGraphResourceType::Reference:
 				break;
+
 			default:
 				[[unlikely]] break;
 			}

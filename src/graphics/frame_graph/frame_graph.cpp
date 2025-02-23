@@ -6,6 +6,25 @@
 
 namespace Aegix::Graphics
 {
+	static auto imageLayoutForUsage(FrameGraphResourceUsage usage) -> VkImageLayout
+	{
+		switch (usage)
+		{
+		case FrameGraphResourceUsage::None:
+			return VK_IMAGE_LAYOUT_UNDEFINED;
+		case FrameGraphResourceUsage::Sampled:
+			return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		case FrameGraphResourceUsage::ColorAttachment:
+			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		case FrameGraphResourceUsage::DepthStencilAttachment:
+			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		default:
+			assert(false && "Invalid usage");
+			return VK_IMAGE_LAYOUT_UNDEFINED;
+		}
+	}
+
+
 	// FrameGraph ----------------------------------------------------------------
 
 	void FrameGraph::compile(VulkanDevice& device)
@@ -61,55 +80,31 @@ namespace Aegix::Graphics
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)
 	{
-		BarrierPlacement readColor{
-			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.srcStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			.dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
-		};
-		BarrierPlacement readDepth{
-			.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			.srcStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-			.dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
-		};
-		placeBarriers(commandBuffer, node.inputs, readColor, readDepth);
+		std::vector<FrameGraphResourceHandle> resourceHandles;
+		resourceHandles.reserve(node.inputs.size() + node.outputs.size());
+		resourceHandles.insert(resourceHandles.end(), node.inputs.begin(), node.inputs.end());
+		resourceHandles.insert(resourceHandles.end(), node.outputs.begin(), node.outputs.end());
 
-		BarrierPlacement writeColor{
-			.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			.srcStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			.dstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-		};
-		BarrierPlacement writeDepth{
-			.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			.srcStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			.dstStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT
-		};
-		placeBarriers(commandBuffer, node.outputs, writeColor, writeDepth);
-	}
+		std::vector<VkImageMemoryBarrier> barriers;
+		VkPipelineStageFlags srcStage = 0;
+		VkPipelineStageFlags dstStage = 0;
 
-	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceHandle>& resources,
-		const BarrierPlacement& color, const BarrierPlacement& depth)
-	{
-		std::vector<VkImageMemoryBarrier> depthBarriers;
-		std::vector<VkImageMemoryBarrier> colorBarriers;
-		colorBarriers.reserve(resources.size());
-
-		for (auto& resource : resources)
+		for (const auto& resourceHandle : resourceHandles)
 		{
-			Texture& texture = m_resourcePool.texture(resource);
+			auto& resource = m_resourcePool.resource(resourceHandle);
+			auto& texture = m_resourcePool.texture(resourceHandle);
 
-			if (Tools::isDepthFormat(texture.format()))
-			{
-				if (texture.layout() != depth.newLayout)
-					depthBarriers.emplace_back(texture.imageMemoryBarrier(depth.newLayout));
-			}
-			else
-			{
-				if (texture.layout() != color.newLayout)
-					colorBarriers.emplace_back(texture.imageMemoryBarrier(color.newLayout));
-			}
+			VkImageLayout oldLayout = texture.layout();
+			VkImageLayout newLayout = imageLayoutForUsage(resource.usage);
+			if (oldLayout == newLayout)
+				continue;
+
+			VkImageMemoryBarrier barrier = texture.transitionLayoutDeferred(newLayout);
+			srcStage |= Tools::srcStage(barrier.srcAccessMask);
+			dstStage |= Tools::dstStage(barrier.dstAccessMask);
+			barriers.emplace_back(barrier);
 		}
 
-		Tools::vk::cmdPipelineBarrier(commandBuffer, depth.srcStage, depth.dstStage, depthBarriers);
-		Tools::vk::cmdPipelineBarrier(commandBuffer, color.srcStage, color.dstStage, colorBarriers);
+		Tools::vk::cmdPipelineBarrier(commandBuffer, srcStage, dstStage, barriers);
 	}
 }

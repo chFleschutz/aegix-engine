@@ -43,9 +43,10 @@ namespace Aegix::Graphics
 			m_position = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "Position",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					}
 				});
@@ -53,9 +54,10 @@ namespace Aegix::Graphics
 			m_normal = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "Normal",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					}
 				});
@@ -63,9 +65,10 @@ namespace Aegix::Graphics
 			m_albedo = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "Albedo",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					}
 				});
@@ -73,9 +76,10 @@ namespace Aegix::Graphics
 			m_arm = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "ARM",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					}
 				});
@@ -83,9 +87,10 @@ namespace Aegix::Graphics
 			m_emissive = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "Emissive",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_R8G8B8A8_UNORM,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					}
 				});
@@ -93,11 +98,11 @@ namespace Aegix::Graphics
 			m_depth = pool.addResource(FrameGraphResourceCreateInfo{
 				.name = "Depth",
 				.type = FrameGraphResourceType::Texture,
+				.usage = FrameGraphResourceUsage::DepthStencilAttachment,
 				.info = FrameGraphResourceTextureInfo{
-					.extent = { 0, 0 },
 					.format = VK_FORMAT_D32_SFLOAT,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative,
-					.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
 					}
 				});
 

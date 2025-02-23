@@ -39,6 +39,14 @@ namespace Aegix::Graphics
 		SwapchainRelative
 	};
 
+	enum class FrameGraphResourceUsage
+	{
+		None,
+		Sampled,
+		ColorAttachment,
+		DepthStencilAttachment,
+	};
+
 	struct FrameGraphResourceBufferInfo
 	{
 		// TODO: Add buffer info
@@ -46,10 +54,10 @@ namespace Aegix::Graphics
 
 	struct FrameGraphResourceTextureInfo
 	{
-		VkExtent2D extent;
 		VkFormat format;
+		VkExtent2D extent;
 		ResizePolicy resizePolicy = ResizePolicy::Fixed;
-		VkImageUsageFlags usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		VkImageUsageFlags usage = 0;
 	};
 
 	using FrameGraphResourceInfo = std::variant<FrameGraphResourceBufferInfo, FrameGraphResourceTextureInfo>;
@@ -58,6 +66,7 @@ namespace Aegix::Graphics
 	{
 		std::string name;
 		FrameGraphResourceType type;
+		FrameGraphResourceUsage usage;
 		FrameGraphResourceInfo info;
 	};
 
@@ -67,6 +76,7 @@ namespace Aegix::Graphics
 
 		std::string name;
 		FrameGraphResourceType type;
+		FrameGraphResourceUsage usage;
 		FrameGraphResourceInfo info;
 		FrameGraphResourceHandle handle;
 	};

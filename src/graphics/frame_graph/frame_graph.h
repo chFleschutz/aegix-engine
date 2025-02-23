@@ -45,16 +45,7 @@ namespace Aegix::Graphics
 		void swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height);
 
 	private:
-		struct BarrierPlacement
-		{
-			VkImageLayout newLayout;
-			VkPipelineStageFlagBits srcStage;
-			VkPipelineStageFlagBits dstStage;
-		};
-
 		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
-		void placeBarriers(VkCommandBuffer commandBuffer, const std::vector<FrameGraphResourceHandle>& resources,
-			const BarrierPlacement& color, const BarrierPlacement& depth);
 
 		std::vector<FrameGraphNodeHandle> m_nodes;
 		FrameGraphResourcePool m_resourcePool;

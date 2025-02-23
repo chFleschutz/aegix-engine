@@ -13,12 +13,18 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
 		{
-			m_sceneColor = pool.addResource({ "SceneColor", FrameGraphResourceType::Reference });
-			m_depth = pool.addResource({ "Depth", FrameGraphResourceType::Reference });
+			m_sceneColor = pool.addResource({ "SceneColor",
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::ColorAttachment
+				});
+			m_depth = pool.addResource({ "Depth",
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::DepthStencilAttachment
+				});
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Transparent Pass",
-				.inputs = { m_sceneColor },
+				.inputs = { m_sceneColor, m_depth },
 				.outputs = { m_sceneColor }
 			};
 		}
