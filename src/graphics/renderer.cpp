@@ -22,6 +22,9 @@ namespace Aegix::Graphics
 
 	Renderer::~Renderer()
 	{
+		// Prevent deletion of referenced swap chain resources
+		m_frameGraph.resourcePool().texture(m_swapChainResource).update(VK_NULL_HANDLE, VK_NULL_HANDLE);
+
 		vkFreeCommandBuffers(
 			m_device.device(),
 			m_device.commandPool(),
@@ -133,6 +136,19 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
+		auto& pool = m_frameGraph.resourcePool();
+		m_swapChainResource = pool.addExternalResource(
+			Texture{ m_device, *m_swapChain }, 
+			FrameGraphResourceCreateInfo{
+				.name = "Swapchain",
+				.type = FrameGraphResourceType::Texture,
+				.info = FrameGraphResourceTextureInfo{
+					.extent = m_swapChain->extend(),
+					.format = m_swapChain->format(),
+					.resizePolicy = ResizePolicy::Fixed
+					}
+			});
+
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<TransparentPass>();
@@ -144,7 +160,8 @@ namespace Aegix::Graphics
 	{
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
-		auto result = m_swapChain->acquireNextImage(&m_currentImageIndex);
+		auto result = m_swapChain->acquireNextImage();
+		m_currentImageIndex = m_swapChain->currentImageIndex();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
@@ -163,7 +180,10 @@ namespace Aegix::Graphics
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			throw std::runtime_error("Failed to begin recording command buffer");
 
+		// TODO: Let the frame graph handle this
 		m_swapChain->transitionColorAttachment(commandBuffer, m_currentImageIndex);
+
+		m_frameGraph.resourcePool().texture(m_swapChainResource).update(*m_swapChain);
 
 		return commandBuffer;
 	}
@@ -172,6 +192,7 @@ namespace Aegix::Graphics
 	{
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
+		// TODO: Let the frame graph handle this
 		m_swapChain->transitionPresent(commandBuffer, m_currentImageIndex);
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
