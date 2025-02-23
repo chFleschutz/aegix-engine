@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-#define VK_CHECK(f)																				\
+#define VK_CHECK(f)																						\
 {																										\
 	VkResult result = (f);																				\
 	if (result != VK_SUCCESS)																			\
@@ -30,10 +30,14 @@ namespace Aegix::Tools
 	auto srcAccessMask(VkImageLayout layout) -> VkAccessFlags;
 	auto dstAccessMask(VkImageLayout layout) -> VkAccessFlags;
 
+	auto srcStage(VkAccessFlags access) -> VkPipelineStageFlags;
+	auto dstStage(VkAccessFlags access) -> VkPipelineStageFlags;
+
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
 
 	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
 	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
+
 
 	namespace vk
 	{

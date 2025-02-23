@@ -112,6 +112,39 @@ namespace Aegix::Tools
 			return 0;
 		}
 	}
+
+	auto srcStage(VkAccessFlags access) -> VkPipelineStageFlags
+	{
+		if (access & VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)
+			return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		if (access & VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)
+			return VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		if (access & VK_ACCESS_SHADER_READ_BIT)
+			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		if (access & VK_ACCESS_SHADER_WRITE_BIT)
+			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
+			return VK_PIPELINE_STAGE_TRANSFER_BIT;
+		
+		return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	}
+
+	auto dstStage(VkAccessFlags access) -> VkPipelineStageFlags
+	{
+		if (access & VK_ACCESS_COLOR_ATTACHMENT_READ_BIT)
+			return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		if (access & VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT)
+			return VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		if (access & VK_ACCESS_SHADER_READ_BIT)
+			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		if (access & VK_ACCESS_SHADER_WRITE_BIT)
+			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (access & VK_ACCESS_TRANSFER_READ_BIT)
+			return VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+		return VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	}
+
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags
 	{
 		switch (format)
