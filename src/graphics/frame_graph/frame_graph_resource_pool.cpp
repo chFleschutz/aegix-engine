@@ -77,18 +77,18 @@ namespace Aegix::Graphics
 		return refRes;
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle handle) -> Texture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> Texture&
 	{
-		auto& res = finalResource(handle);
+		auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
 		assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle is invalid");
 		assert(res.handle.id < m_textures.size() && "Texture handle out of range");
 		return m_textures[res.handle.id];
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle handle) const -> const Texture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&
 	{
-		const auto& res = finalResource(handle);
+		const auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
 		assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle is invalid");
 		assert(res.handle.id < m_textures.size() && "Texture handle out of range");
@@ -188,6 +188,22 @@ namespace Aegix::Graphics
 
 			default:
 				[[unlikely]] break;
+			}
+		}
+	}
+
+	void FrameGraphResourcePool::resizeImages(uint32_t width, uint32_t height)
+	{
+		for (auto& res : m_resources)
+		{
+			if (res.type != FrameGraphResourceType::Texture)
+				continue;
+
+			auto& info = std::get<FrameGraphResourceTextureInfo>(res.info);
+			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
+			{
+				m_textures[res.handle.id].resize(width, height, info.usage);
+				info.extent = { width, height };
 			}
 		}
 	}

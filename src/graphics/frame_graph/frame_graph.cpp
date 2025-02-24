@@ -84,21 +84,9 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraph::swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height)
+	void FrameGraph::swapChainResized(uint32_t width, uint32_t height)
 	{
-		for (auto& resource : m_resourcePool.m_resources)
-		{
-			if (resource.type != FrameGraphResourceType::Texture)
-				continue;
-
-			auto& info = std::get<FrameGraphResourceTextureInfo>(resource.info);
-			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
-			{
-				auto& texture = m_resourcePool.texture(resource.handle);
-				texture.resize(width, height, info.usage);
-				info.extent = { width, height };
-			}
-		}
+		m_resourcePool.resizeImages(width, height);
 	}
 
 	void FrameGraph::sortNodes()

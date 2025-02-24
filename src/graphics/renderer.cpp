@@ -94,7 +94,7 @@ namespace Aegix::Graphics
 		waitIdle();
 		m_swapChain.resize(extend);
 
-		m_frameGraph.swapChainResized(m_device, extend.width, extend.height);
+		m_frameGraph.swapChainResized(extend.width, extend.height);
 	}
 
 	void Renderer::createDescriptorPool()
@@ -128,7 +128,6 @@ namespace Aegix::Graphics
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<PresentPass>(m_swapChain);
-		m_frameGraph.add<TransparentPass>();
 
 		m_frameGraph.compile(m_device);
 	}

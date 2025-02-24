@@ -157,8 +157,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
 
 		/// @brief Returns the texture for the given handle (must be a texture resource)
-		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) -> Texture&;
-		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) const -> const Texture&;
+		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> Texture&;
+		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&;
 
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
 		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
@@ -190,6 +190,8 @@ namespace Aegix::Graphics
 		/// @brief For all reference resources, resolve the handle to the actual resource
 		void resolveReferences();
 		void createResources(VulkanDevice& device);
+
+		void resizeImages(uint32_t width, uint32_t height);
 
 	private:
 		void createTexture(VulkanDevice& device, FrameGraphResource& resource);
