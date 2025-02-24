@@ -136,10 +136,10 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
-		m_frameGraph.add<TransparentPass>();
+		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<PresentPass>(*m_swapChain);
+		m_frameGraph.add<TransparentPass>();
 
 		m_frameGraph.compile(m_device);
 	}

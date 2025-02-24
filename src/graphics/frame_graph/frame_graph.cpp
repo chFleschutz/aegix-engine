@@ -169,18 +169,33 @@ namespace Aegix::Graphics
 		// Compute graph edges
 		std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>> edges;
 
+		// Cache resource producers (Possible for one resource to be modified by multiple passes)
+		std::unordered_map<std::string, std::vector<FrameGraphNodeHandle>> resourceProducers;
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			const auto& node = m_resourcePool.node(nodeHandle);
+			for (const auto& outputHandle : node.outputs)
+			{
+				const auto& outputResource = m_resourcePool.resource(outputHandle);
+				resourceProducers[outputResource.name].emplace_back(nodeHandle);
+			}
+		}
+
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			const auto& node = m_resourcePool.node(nodeHandle);
 			for (const auto& inputHandle : node.inputs)
 			{
 				const auto& inputResource = m_resourcePool.finalResource(inputHandle);
-				if (inputResource.producer == FrameGraphNode::INVALID_HANDLE)
-					continue;
+				for (const auto& producerHandle : resourceProducers[inputResource.name])
+				{
+					if (producerHandle == nodeHandle) // Avoid self connections
+						continue;
 
-				auto& edgeHandles = edges[inputResource.producer];
-				if (std::find(edgeHandles.begin(), edgeHandles.end(), nodeHandle) == edgeHandles.end())
-					edgeHandles.push_back(nodeHandle);
+					auto& edgeHandles = edges[producerHandle];
+					if (std::find(edgeHandles.begin(), edgeHandles.end(), nodeHandle) == edgeHandles.end())
+						edgeHandles.push_back(nodeHandle);
+				}
 			}
 		}
 
