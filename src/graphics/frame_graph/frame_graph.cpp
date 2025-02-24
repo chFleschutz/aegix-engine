@@ -3,6 +3,20 @@
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan_tools.h"
 
+#include <cassert>
+#include <iostream>
+
+namespace std
+{
+	template <>
+	struct hash<Aegix::Graphics::FrameGraphNodeHandle>
+	{
+		std::size_t operator()(const Aegix::Graphics::FrameGraphNodeHandle& v) const
+		{
+			return std::hash<uint32_t>()(v.id);
+		}
+	};
+}
 
 namespace Aegix::Graphics
 {
@@ -37,7 +51,7 @@ namespace Aegix::Graphics
 
 		// Aliasing
 		// TODO: Replace by proper aliasing
-		const auto& presentNode = m_resourcePool.node(m_nodes.back());
+		const auto& presentNode = m_resourcePool.node(m_nodeHandles.back());
 		const auto& presentResource = m_resourcePool.finalResource(presentNode.outputs[0]);
 		auto& sceneColorResource = m_resourcePool.finalResource(presentNode.inputs[0]);
 		sceneColorResource.handle = presentResource.handle;
@@ -45,8 +59,8 @@ namespace Aegix::Graphics
 		m_resourcePool.createResources(device);
 
 		// Print frame graph info
-		std::cout << "FrameGraph compiled with " << m_nodes.size() << " passes\n";
-		for (const auto& nodeHandle : m_nodes)
+		std::cout << "FrameGraph compiled with " << m_nodeHandles.size() << " passes\n";
+		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
 		}
@@ -54,13 +68,13 @@ namespace Aegix::Graphics
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
-		for (const auto& nodeHandle : m_nodes)
+		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 			node.pass->prepare(m_resourcePool, frameInfo);
 		}
 
-		for (const auto& nodeHandle : m_nodes)
+		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 
@@ -85,6 +99,92 @@ namespace Aegix::Graphics
 				info.extent = { width, height };
 			}
 		}
+	}
+
+	void FrameGraph::sortNodes()
+	{
+		// Topological sort
+		auto edges = computeEdges();
+
+		std::vector<FrameGraphNodeHandle> sortedNodes;
+		sortedNodes.reserve(m_nodeHandles.size());
+
+		std::vector<FrameGraphNodeHandle> stack;
+		stack.reserve(m_nodeHandles.size());
+
+		std::vector<uint8_t> visited(m_nodeHandles.size(), 0);
+		constexpr uint8_t VISITED = 1;
+		constexpr uint8_t ADDED = 2;
+
+		// Depth First Search starting at each node 
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			stack.emplace_back(nodeHandle);
+
+			while (stack.size() > 0)
+			{
+				FrameGraphNodeHandle currentHandle = stack.back();
+
+				if (visited[currentHandle.id] == ADDED)
+				{
+					stack.pop_back();
+					continue;
+				}
+
+				if (visited[currentHandle.id] == VISITED)
+				{
+					visited[currentHandle.id] = ADDED;
+					sortedNodes.emplace_back(currentHandle);
+					stack.pop_back();
+					continue;
+				}
+
+				visited[currentHandle.id] = VISITED;
+
+				if (!edges.contains(currentHandle))
+					continue;
+
+				for (const auto& nextNodeHandle : edges[currentHandle])
+				{
+					if (!visited[nextNodeHandle.id])
+						stack.emplace_back(nextNodeHandle);
+				}
+			}
+		}
+
+		assert(sortedNodes.size() == m_nodeHandles.size() && "Failed to sort nodes");
+
+		m_nodeHandles.assign(sortedNodes.rbegin(), sortedNodes.rend());
+
+		// Print frame graph info
+		std::cout << "FrameGraph compiled with " << m_nodeHandles.size() << " passes\n";
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
+		}
+	}
+
+	auto FrameGraph::computeEdges() -> std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>>
+	{
+		// Compute graph edges
+		std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>> edges;
+
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			const auto& node = m_resourcePool.node(nodeHandle);
+			for (const auto& inputHandle : node.inputs)
+			{
+				const auto& inputResource = m_resourcePool.finalResource(inputHandle);
+				if (inputResource.producer == FrameGraphNode::INVALID_HANDLE)
+					continue;
+
+				auto& edgeHandles = edges[inputResource.producer];
+				if (std::find(edgeHandles.begin(), edgeHandles.end(), nodeHandle) == edgeHandles.end())
+					edgeHandles.push_back(nodeHandle);
+			}
+		}
+
+		return edges;
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)

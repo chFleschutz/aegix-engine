@@ -3,6 +3,7 @@
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 
 #include <vector>
+#include <unordered_map>
 
 namespace Aegix::Graphics
 {
@@ -29,7 +30,7 @@ namespace Aegix::Graphics
 		auto add(Args&&... args) -> FrameGraphNodeHandle
 		{
 			auto handle = m_resourcePool.addNode(std::make_unique<T>(std::forward<Args>(args)...));
-			m_nodes.emplace_back(handle);
+			m_nodeHandles.emplace_back(handle);
 			return handle;
 		}
 
@@ -45,9 +46,11 @@ namespace Aegix::Graphics
 		void swapChainResized(VulkanDevice& device, uint32_t width, uint32_t height);
 
 	private:
+		void sortNodes();
+		auto computeEdges() -> std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>>;
 		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
 
-		std::vector<FrameGraphNodeHandle> m_nodes;
+		std::vector<FrameGraphNodeHandle> m_nodeHandles;
 		FrameGraphResourcePool m_resourcePool;
 	};
 }
