@@ -49,12 +49,12 @@ namespace Aegix::Graphics
 		return result;
 	}
 
-	auto SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) -> VkResult
+	auto SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult
 	{
-		if (m_imagesInFlight[*imageIndex] != VK_NULL_HANDLE)
-			vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+		if (m_imagesInFlight[m_currentImageIndex] != VK_NULL_HANDLE)
+			vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[m_currentImageIndex], VK_TRUE, UINT64_MAX);
 
-		m_imagesInFlight[*imageIndex] = m_inFlightFences[m_currentFrame];
+		m_imagesInFlight[m_currentImageIndex] = m_inFlightFences[m_currentFrame];
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -82,7 +82,7 @@ namespace Aegix::Graphics
 		presentInfo.pWaitSemaphores = signalSemaphores;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = imageIndex;
+		presentInfo.pImageIndices = &m_currentImageIndex;
 
 		auto result = vkQueuePresentKHR(m_device.presentQueue(), &presentInfo);
 

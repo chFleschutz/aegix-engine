@@ -62,7 +62,6 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 
-		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 

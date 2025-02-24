@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
 
 		auto acquireNextImage() -> VkResult;
-		auto submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) -> VkResult;
+		auto submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult;
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 

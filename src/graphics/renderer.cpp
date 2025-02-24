@@ -137,7 +137,6 @@ namespace Aegix::Graphics
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
 		auto result = m_swapChain.acquireNextImage();
-		m_currentImageIndex = m_swapChain.currentImageIndex();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
@@ -166,7 +165,7 @@ namespace Aegix::Graphics
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Failed to record command buffer");
 
-		auto result = m_swapChain.submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
+		auto result = m_swapChain.submitCommandBuffers(&commandBuffer);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
 		{
 			m_window.resetWindowResizedFlag();
