@@ -100,8 +100,8 @@ namespace Aegix::Graphics
 				FrameGraphResourceUsage::ColorAttachment,
 				FrameGraphResourceTextureInfo{
 					.format = VK_FORMAT_B8G8R8A8_SRGB,
-					.extent = { 0, 0 },
-					.resizePolicy = ResizePolicy::SwapchainRelative
+					.extent = { 1920, 1080 },
+					.resizePolicy = ResizePolicy::Fixed
 					} 
 				});
 
