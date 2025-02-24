@@ -38,9 +38,9 @@ namespace Aegix::Graphics
 				.build();
 		}
 
-		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_position = pool.addResource(FrameGraphResourceCreateInfo{
+			m_position = builder.add(FrameGraphResourceCreateInfo{
 				.name = "Position",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::ColorAttachment,
@@ -51,7 +51,7 @@ namespace Aegix::Graphics
 					}
 				});
 
-			m_normal = pool.addResource(FrameGraphResourceCreateInfo{
+			m_normal = builder.add(FrameGraphResourceCreateInfo{
 				.name = "Normal",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::ColorAttachment,
@@ -62,7 +62,7 @@ namespace Aegix::Graphics
 					}
 				});
 
-			m_albedo = pool.addResource(FrameGraphResourceCreateInfo{
+			m_albedo = builder.add(FrameGraphResourceCreateInfo{
 				.name = "Albedo",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::ColorAttachment,
@@ -73,7 +73,7 @@ namespace Aegix::Graphics
 					}
 				});
 
-			m_arm = pool.addResource(FrameGraphResourceCreateInfo{
+			m_arm = builder.add(FrameGraphResourceCreateInfo{
 				.name = "ARM",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::ColorAttachment,
@@ -84,7 +84,7 @@ namespace Aegix::Graphics
 					}
 				});
 
-			m_emissive = pool.addResource(FrameGraphResourceCreateInfo{
+			m_emissive = builder.add(FrameGraphResourceCreateInfo{
 				.name = "Emissive",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::ColorAttachment,
@@ -95,7 +95,7 @@ namespace Aegix::Graphics
 					}
 				});
 
-			m_depth = pool.addResource(FrameGraphResourceCreateInfo{
+			m_depth = builder.add(FrameGraphResourceCreateInfo{
 				.name = "Depth",
 				.type = FrameGraphResourceType::Texture,
 				.usage = FrameGraphResourceUsage::DepthStencilAttachment,

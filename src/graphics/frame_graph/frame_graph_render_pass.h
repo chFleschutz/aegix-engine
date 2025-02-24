@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 		FrameGraphRenderPass& operator=(FrameGraphRenderPass&&) = delete;
 
 		/// @brief Information required to create a FrameGraphNode (primarily for defining inputs and outputs)
-		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo = 0;
+		virtual auto createInfo(FrameGraphResourceBuilder& pool) -> FrameGraphNodeCreateInfo = 0;
 
 		/// @brief Execute the render pass
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;

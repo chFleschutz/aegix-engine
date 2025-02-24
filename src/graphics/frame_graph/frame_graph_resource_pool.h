@@ -16,15 +16,22 @@ namespace Aegix::Graphics
 {
 	class FrameGraphRenderPass;
 
-
-	// FrameGraphResource --------------------------------------------------------
-
 	struct FrameGraphResourceHandle
 	{
 		uint32_t id{ INVALID_HANDLE };
 
 		constexpr auto operator<=>(const FrameGraphResourceHandle&) const = default;
 	};
+
+	struct FrameGraphNodeHandle
+	{
+		uint32_t id{ INVALID_HANDLE };
+
+		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
+	};
+
+
+	// FrameGraphResource --------------------------------------------------------
 
 	enum class FrameGraphResourceType
 	{
@@ -80,17 +87,11 @@ namespace Aegix::Graphics
 		FrameGraphResourceUsage usage;
 		FrameGraphResourceInfo info;
 		FrameGraphResourceHandle handle;
+		FrameGraphNodeHandle producer;
 	};
 
 
 	// FrameGraphNode ------------------------------------------------------------
-
-	struct FrameGraphNodeHandle
-	{
-		uint32_t id{ INVALID_HANDLE };
-
-		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
-	};
 
 	struct FrameGraphNodeCreateInfo
 	{
@@ -160,7 +161,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto texture(FrameGraphResourceHandle handle) const -> const Texture&;
 
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
-		auto addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
+		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
 
 		/// @brief Adds an existing texture as a resource
 		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
@@ -199,5 +200,25 @@ namespace Aegix::Graphics
 		std::vector<Buffer> m_buffers;
 
 		std::array<RenderStage, static_cast<size_t>(RenderStage::Type::Count)> m_renderStages;
+	};
+
+
+	// FrameGraphResourceBuilder ------------------------------------------------
+
+	class FrameGraphResourceBuilder
+	{
+	public:
+		FrameGraphResourceBuilder(FrameGraphResourcePool& pool, FrameGraphNodeHandle node)
+			: m_pool{ pool }, m_node{ node } {
+		}
+
+		auto add(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+		{
+			return m_pool.addResource(createInfo, m_node);
+		}
+
+	private:
+		FrameGraphResourcePool& m_pool;
+		FrameGraphNodeHandle m_node;
 	};
 }

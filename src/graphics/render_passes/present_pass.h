@@ -11,9 +11,9 @@ namespace Aegix::Graphics
 		{
 		}
 
-		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_sceneColor = pool.addResource({ "Final",
+			m_sceneColor = builder.add({ "Final",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Present
 				});

@@ -97,20 +97,23 @@ namespace Aegix::Graphics
 
 	auto FrameGraphResourcePool::addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle
 	{
-		auto createInfo = pass->createInfo(*this);
+		FrameGraphNodeHandle handle{ static_cast<uint32_t>(m_nodes.size()) };
+		FrameGraphResourceBuilder builder{ *this, handle };
+		auto createInfo = pass->createInfo(builder);
 		m_nodes.emplace_back(createInfo.name, std::move(pass), createInfo.inputs, createInfo.outputs);
-		return FrameGraphNodeHandle{ static_cast<uint32_t>(m_nodes.size() - 1) };
+		return handle;
 	}
 
-	auto FrameGraphResourcePool::addResource(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+	auto FrameGraphResourcePool::addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
 	{
-		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.usage, createInfo.info, FrameGraphResource::INVALID_HANDLE);
+		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.usage, createInfo.info, 
+			FrameGraphResource::INVALID_HANDLE, producer);
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
 	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 	{
-		auto ResourceHandle = addResource(createInfo);
+		auto ResourceHandle = addResource(createInfo, FrameGraphNode::INVALID_HANDLE);
 		m_textures.emplace_back(std::move(texture));
 		resource(ResourceHandle).handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 		return ResourceHandle;

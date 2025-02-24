@@ -11,13 +11,13 @@ namespace Aegix::Graphics
 		{
 		}
 
-		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_sceneColor = pool.addResource({ "SceneColor",
+			m_sceneColor = builder.add({ "SceneColor",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::ColorAttachment
 				});
-			m_depth = pool.addResource({ "Depth",
+			m_depth = builder.add({ "Depth",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::DepthStencilAttachment
 				});

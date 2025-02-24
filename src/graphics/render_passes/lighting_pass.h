@@ -69,33 +69,33 @@ namespace Aegix::Graphics
 				.build();
 		}
 
-		virtual auto createInfo(FrameGraphResourcePool& pool) -> FrameGraphNodeCreateInfo override
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_position = pool.addResource({ "Position", 
+			m_position = builder.add({ "Position", 
 				FrameGraphResourceType::Reference, 
 				FrameGraphResourceUsage::Sampled
 				});
-			m_normal = pool.addResource({ "Normal", 
+			m_normal = builder.add({ "Normal",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_albedo = pool.addResource({ "Albedo", 
+			m_albedo = builder.add({ "Albedo",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_arm = pool.addResource({ "ARM", 
+			m_arm = builder.add({ "ARM",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_emissive = pool.addResource({ "Emissive", 
+			m_emissive = builder.add({ "Emissive",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_depth = pool.addResource({ "Depth", 
+			m_depth = builder.add({ "Depth",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_sceneColor = pool.addResource({ "Final", 
+			m_sceneColor = builder.add({ "Final",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::ColorAttachment
 				});
