@@ -148,6 +148,12 @@ namespace Aegix::Graphics
 
 		m_format = surfaceFormat.format;
 		m_extent = extent;
+
+		// At the beginning of a frame all swapchain images should be in present layout
+		for (const auto& image : m_images)
+		{
+			m_device.transitionImageLayout(image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		}
 	}
 
 	void SwapChain::createImageViews()
