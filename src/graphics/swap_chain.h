@@ -16,6 +16,7 @@ namespace Aegix::Graphics
 
 		void operator=(const SwapChain&) = delete;
 
+		[[nodiscard]] auto device() const -> VulkanDevice& { return m_device; }
 		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
 		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
 		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }

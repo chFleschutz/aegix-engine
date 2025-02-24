@@ -95,9 +95,14 @@ namespace Aegix::Graphics
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Sampled
 				});
-			m_sceneColor = builder.add({ "Final",
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::ColorAttachment
+			m_sceneColor = builder.add({ "SceneColor",
+				FrameGraphResourceType::Texture,
+				FrameGraphResourceUsage::ColorAttachment,
+				FrameGraphResourceTextureInfo{
+					.format = VK_FORMAT_B8G8R8A8_SRGB,
+					.extent = { 0, 0 },
+					.resizePolicy = ResizePolicy::SwapchainRelative
+					} 
 				});
 
 			return FrameGraphNodeCreateInfo{

@@ -23,9 +23,6 @@ namespace Aegix::Graphics
 
 	Renderer::~Renderer()
 	{
-		// Prevent deletion of referenced swap chain resources
-		m_frameGraph.resourcePool().texture(m_swapChainResource).update(VK_NULL_HANDLE, VK_NULL_HANDLE);
-
 		vkFreeCommandBuffers(
 			m_device.device(),
 			m_device.commandPool(),
@@ -139,23 +136,9 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		// Add swap chain as an external resource
-		m_swapChainResource = pool.addExternalResource(
-			Texture{ m_device, *m_swapChain }, 
-			FrameGraphResourceCreateInfo{
-				.name = "Final",
-				.type = FrameGraphResourceType::Texture,
-				.usage = FrameGraphResourceUsage::None,
-				.info = FrameGraphResourceTextureInfo{
-					.format = m_swapChain->format(),
-					.extent = m_swapChain->extend(),
-					.resizePolicy = ResizePolicy::Fixed
-				}
-			});
-
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
-		m_frameGraph.add<PresentPass>();
+		m_frameGraph.add<PresentPass>(*m_swapChain);
 
 		m_frameGraph.compile(m_device);
 	}
@@ -183,8 +166,6 @@ namespace Aegix::Graphics
 
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 			throw std::runtime_error("Failed to begin recording command buffer");
-
-		m_frameGraph.resourcePool().texture(m_swapChainResource).update(*m_swapChain);
 
 		return commandBuffer;
 	}

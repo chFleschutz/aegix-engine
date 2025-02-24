@@ -21,6 +21,9 @@ namespace Aegix::Graphics
 		/// @brief Information required to create a FrameGraphNode (primarily for defining inputs and outputs)
 		virtual auto createInfo(FrameGraphResourceBuilder& pool) -> FrameGraphNodeCreateInfo = 0;
 
+		/// @brief Called before any execution, used to prepare the render pass
+		virtual void prepare(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) {}
+
 		/// @brief Execute the render pass
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
 	};

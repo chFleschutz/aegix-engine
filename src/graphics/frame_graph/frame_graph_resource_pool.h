@@ -162,6 +162,7 @@ namespace Aegix::Graphics
 
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
 		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
+		auto addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
 
 		/// @brief Adds an existing texture as a resource
 		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
@@ -215,6 +216,11 @@ namespace Aegix::Graphics
 		auto add(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 		{
 			return m_pool.addResource(createInfo, m_node);
+		}
+
+		auto add(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+		{
+			return m_pool.addResource(std::move(texture), createInfo, m_node);
 		}
 
 	private:

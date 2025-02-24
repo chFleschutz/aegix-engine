@@ -31,16 +31,17 @@ namespace Aegix::Graphics
 
 	void FrameGraph::compile(VulkanDevice& device)
 	{
-		// Resolve references
 		m_resourcePool.resolveReferences();
 
-		// Compute graph edges
-
-		// Topological sort
+		sortNodes();
 
 		// Aliasing
+		// TODO: Replace by proper aliasing
+		const auto& presentNode = m_resourcePool.node(m_nodes.back());
+		const auto& presentResource = m_resourcePool.finalResource(presentNode.outputs[0]);
+		auto& sceneColorResource = m_resourcePool.finalResource(presentNode.inputs[0]);
+		sceneColorResource.handle = presentResource.handle;
 
-		// Create resources
 		m_resourcePool.createResources(device);
 
 		// Print frame graph info
@@ -53,7 +54,13 @@ namespace Aegix::Graphics
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
-		for (auto& nodeHandle : m_nodes)
+		for (const auto& nodeHandle : m_nodes)
+		{
+			auto& node = m_resourcePool.node(nodeHandle);
+			node.pass->prepare(m_resourcePool, frameInfo);
+		}
+
+		for (const auto& nodeHandle : m_nodes)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 

@@ -67,6 +67,5 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		FrameGraph m_frameGraph;
-		FrameGraphResourceHandle m_swapChainResource;
 	};
 }
