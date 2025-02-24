@@ -46,8 +46,8 @@ namespace Aegix::Graphics
 		void swapChainResized(uint32_t width, uint32_t height);
 
 	private:
+		void computeEdges();
 		void sortNodes();
-		auto computeEdges() -> std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>>;
 		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
 
 		std::vector<FrameGraphNodeHandle> m_nodeHandles;

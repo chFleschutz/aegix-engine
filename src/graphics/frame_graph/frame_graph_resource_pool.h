@@ -108,6 +108,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<FrameGraphRenderPass> pass;
 		std::vector<FrameGraphResourceHandle> inputs;
 		std::vector<FrameGraphResourceHandle> outputs;
+		std::vector<FrameGraphNodeHandle> edges;
 	};
 
 

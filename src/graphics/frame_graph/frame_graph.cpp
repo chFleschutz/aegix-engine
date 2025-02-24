@@ -47,6 +47,7 @@ namespace Aegix::Graphics
 	{
 		m_resourcePool.resolveReferences();
 
+		computeEdges();
 		sortNodes();
 
 		// Aliasing
@@ -89,11 +90,55 @@ namespace Aegix::Graphics
 		m_resourcePool.resizeImages(width, height);
 	}
 
+	void FrameGraph::computeEdges()
+	{
+		// Cache resource outputs (Possible for one resource to be modified by multiple passes)
+		std::unordered_map<std::string, std::vector<FrameGraphNodeHandle>> resourceOutputs;
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			const auto& node = m_resourcePool.node(nodeHandle);
+			for (const auto& outputHandle : node.outputs)
+			{
+				const auto& outputResource = m_resourcePool.resource(outputHandle);
+				resourceOutputs[outputResource.name].emplace_back(nodeHandle);
+			}
+		}
+
+		// Create edges
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			const auto& node = m_resourcePool.node(nodeHandle);
+			for (const auto& inputHandle : node.inputs)
+			{
+				const auto& inputResource = m_resourcePool.finalResource(inputHandle);
+				for (const auto& outputHandle : resourceOutputs[inputResource.name])
+				{
+					if (outputHandle == nodeHandle) // Avoid self connections
+						continue;
+
+					auto& edgeHandles = m_resourcePool.node(outputHandle).edges;
+					if (std::find(edgeHandles.begin(), edgeHandles.end(), nodeHandle) == edgeHandles.end())
+						edgeHandles.push_back(nodeHandle);
+				}
+			}
+		}
+
+		// DEBUG: Print edges
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			const auto& node = m_resourcePool.node(nodeHandle);
+			std::cout << "Node " << node.name << ":\n";
+			for (const auto& edgeHandle : node.edges)
+			{
+				const auto& edgeNode = m_resourcePool.node(edgeHandle);
+				std::cout << "\t- " << edgeNode.name << "\n";
+			}
+		}
+	}
+
 	void FrameGraph::sortNodes()
 	{
 		// Topological sort
-
-		auto edges = computeEdges();
 
 		// Contains the sorted nodes in reverse order at the end
 		std::vector<FrameGraphNodeHandle> sortedNodes; 
@@ -133,10 +178,8 @@ namespace Aegix::Graphics
 
 				visited[currentHandle.id] = VISITED_ONCE;
 
-				if (!edges.contains(currentHandle))
-					continue;
-
-				for (const auto& nextNodeHandle : edges[currentHandle])
+				const auto& currentNode = m_resourcePool.node(currentHandle);
+				for (const auto& nextNodeHandle : currentNode.edges)
 				{
 					if (!visited[nextNodeHandle.id])
 						stack.emplace_back(nextNodeHandle);
@@ -146,44 +189,6 @@ namespace Aegix::Graphics
 
 		assert(sortedNodes.size() == m_nodeHandles.size() && "Failed to sort nodes");
 		m_nodeHandles.assign(sortedNodes.rbegin(), sortedNodes.rend());
-	}
-
-	auto FrameGraph::computeEdges() -> std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>>
-	{
-		// Compute graph edges
-		std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>> edges;
-
-		// Cache resource producers (Possible for one resource to be modified by multiple passes)
-		std::unordered_map<std::string, std::vector<FrameGraphNodeHandle>> resourceProducers;
-		for (const auto& nodeHandle : m_nodeHandles)
-		{
-			const auto& node = m_resourcePool.node(nodeHandle);
-			for (const auto& outputHandle : node.outputs)
-			{
-				const auto& outputResource = m_resourcePool.resource(outputHandle);
-				resourceProducers[outputResource.name].emplace_back(nodeHandle);
-			}
-		}
-
-		for (const auto& nodeHandle : m_nodeHandles)
-		{
-			const auto& node = m_resourcePool.node(nodeHandle);
-			for (const auto& inputHandle : node.inputs)
-			{
-				const auto& inputResource = m_resourcePool.finalResource(inputHandle);
-				for (const auto& producerHandle : resourceProducers[inputResource.name])
-				{
-					if (producerHandle == nodeHandle) // Avoid self connections
-						continue;
-
-					auto& edgeHandles = edges[producerHandle];
-					if (std::find(edgeHandles.begin(), edgeHandles.end(), nodeHandle) == edgeHandles.end())
-						edgeHandles.push_back(nodeHandle);
-				}
-			}
-		}
-
-		return edges;
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node)
