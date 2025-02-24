@@ -7,12 +7,6 @@
 
 namespace Aegix::Graphics
 {
-	struct RendererData
-	{
-		VulkanDevice& device;
-		DescriptorPool& pool;
-	};
-
 	/// @brief Manages renderpasses and resources for rendering a frame
 	class FrameGraph
 	{

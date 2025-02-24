@@ -38,11 +38,9 @@ namespace Aegix::Graphics
 	class LightingPass : public FrameGraphRenderPass
 	{
 	public:
-		LightingPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
+		LightingPass(VulkanDevice& device, DescriptorPool& pool)
 		{
-			const auto& renderer = blackboard.get<RendererData>();
-
-			m_descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
+			m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
 				.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
@@ -51,15 +49,15 @@ namespace Aegix::Graphics
 				.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
 
-			m_descriptorSet = std::make_unique<DescriptorSet>(renderer.pool, *m_descriptorSetLayout);
+			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-			m_ubo = std::make_unique<UniformBufferData<Lighting>>(renderer.device);
+			m_ubo = std::make_unique<UniformBufferData<Lighting>>(device);
 
-			m_pipelineLayout = PipelineLayout::Builder(renderer.device)
+			m_pipelineLayout = PipelineLayout::Builder(device)
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
 				.build();
 
-			m_pipeline = Pipeline::Builder(renderer.device, *m_pipelineLayout)
+			m_pipeline = Pipeline::Builder(device, *m_pipelineLayout)
 				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
 				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
 				.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)

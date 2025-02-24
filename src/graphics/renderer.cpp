@@ -119,13 +119,8 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& pool = m_frameGraph.resourcePool();
-		
-		FrameGraphBlackboard blackboard;
-		blackboard.add<RendererData>(m_device, *m_globalPool);
-
-		m_frameGraph.add<GeometryPass>(m_frameGraph, blackboard);
-		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
+		m_frameGraph.add<GeometryPass>(m_frameGraph, m_device, *m_globalPool);
+		m_frameGraph.add<LightingPass>(m_device, *m_globalPool);
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<TransparentPass>();
 

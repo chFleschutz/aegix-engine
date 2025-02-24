@@ -22,18 +22,17 @@ namespace Aegix::Graphics
 	{
 	public:
 
-		GeometryPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
+		GeometryPass(FrameGraph& framegraph, VulkanDevice& device, DescriptorPool& pool)
 		{
-			auto& renderer = blackboard.get<RendererData>();
-			auto& stage = frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
+			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Geometry);
 
-			stage.descriptorSetLayout = DescriptorSetLayout::Builder(renderer.device)
+			stage.descriptorSetLayout = DescriptorSetLayout::Builder(device)
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 				.build();
 
-			stage.ubo = std::make_unique<UniformBuffer>(renderer.device, GBufferUbo{});
+			stage.ubo = std::make_unique<UniformBuffer>(device, GBufferUbo{});
 
-			stage.descriptorSet = DescriptorSet::Builder(renderer.device, renderer.pool, *stage.descriptorSetLayout)
+			stage.descriptorSet = DescriptorSet::Builder(device, pool, *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
 				.build();
 		}
