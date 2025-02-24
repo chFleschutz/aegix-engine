@@ -104,17 +104,21 @@ namespace Aegix::Graphics
 	void FrameGraph::sortNodes()
 	{
 		// Topological sort
+
 		auto edges = computeEdges();
 
-		std::vector<FrameGraphNodeHandle> sortedNodes;
+		// Contains the sorted nodes in reverse order at the end
+		std::vector<FrameGraphNodeHandle> sortedNodes; 
 		sortedNodes.reserve(m_nodeHandles.size());
 
-		std::vector<FrameGraphNodeHandle> stack;
+		// Stack for DFS
+		std::vector<FrameGraphNodeHandle> stack; 
 		stack.reserve(m_nodeHandles.size());
 
-		std::vector<uint8_t> visited(m_nodeHandles.size(), 0);
-		constexpr uint8_t VISITED = 1;
-		constexpr uint8_t ADDED = 2;
+		// Track nodes to avoid adding duplicates
+		constexpr uint8_t VISITED_ONCE = 1;
+		constexpr uint8_t ALREADY_ADDED = 2;
+		std::vector<uint8_t> visited(m_nodeHandles.size(), 0); 
 
 		// Depth First Search starting at each node 
 		for (const auto& nodeHandle : m_nodeHandles)
@@ -125,21 +129,21 @@ namespace Aegix::Graphics
 			{
 				FrameGraphNodeHandle currentHandle = stack.back();
 
-				if (visited[currentHandle.id] == ADDED)
+				if (visited[currentHandle.id] == ALREADY_ADDED)
 				{
 					stack.pop_back();
 					continue;
 				}
 
-				if (visited[currentHandle.id] == VISITED)
+				if (visited[currentHandle.id] == VISITED_ONCE)
 				{
-					visited[currentHandle.id] = ADDED;
+					visited[currentHandle.id] = ALREADY_ADDED;
 					sortedNodes.emplace_back(currentHandle);
 					stack.pop_back();
 					continue;
 				}
 
-				visited[currentHandle.id] = VISITED;
+				visited[currentHandle.id] = VISITED_ONCE;
 
 				if (!edges.contains(currentHandle))
 					continue;
@@ -153,15 +157,7 @@ namespace Aegix::Graphics
 		}
 
 		assert(sortedNodes.size() == m_nodeHandles.size() && "Failed to sort nodes");
-
 		m_nodeHandles.assign(sortedNodes.rbegin(), sortedNodes.rend());
-
-		// Print frame graph info
-		std::cout << "FrameGraph compiled with " << m_nodeHandles.size() << " passes\n";
-		for (const auto& nodeHandle : m_nodeHandles)
-		{
-			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
-		}
 	}
 
 	auto FrameGraph::computeEdges() -> std::unordered_map<FrameGraphNodeHandle, std::vector<FrameGraphNodeHandle>>
