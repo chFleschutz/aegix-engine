@@ -9,27 +9,18 @@
 
 namespace Aegix::Graphics
 {
-	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous)
+	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent)
 		: m_device{ device }, m_windowExtent{ windowExtent }
 	{
-		createSwapChain(previous ? previous->m_swapChain : VK_NULL_HANDLE);
+		createSwapChain();
 		createImageViews();
 		createSyncObjects();
 	}
 
 	SwapChain::~SwapChain()
 	{
-		for (auto imageView : m_imageViews)
-		{
-			vkDestroyImageView(m_device.device(), imageView, nullptr);
-		}
-		m_imageViews.clear();
-
-		if (m_swapChain != nullptr)
-		{
-			vkDestroySwapchainKHR(m_device.device(), m_swapChain, nullptr);
-			m_swapChain = nullptr;
-		}
+		destroyImageViews();
+		destroySwapChain(m_swapChain);
 
 		// cleanup synchronization objects
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -100,7 +91,17 @@ namespace Aegix::Graphics
 		return result;
 	}
 
-	void SwapChain::createSwapChain(VkSwapchainKHR oldSwapChain)
+	void SwapChain::resize(VkExtent2D extent)
+	{
+		destroyImageViews();
+
+		m_windowExtent = extent;
+
+		createSwapChain();
+		createImageViews();
+	}
+
+	void SwapChain::createSwapChain()
 	{
 		SwapChainSupportDetails swapChainSupport = m_device.querySwapChainSupport();
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -121,7 +122,7 @@ namespace Aegix::Graphics
 		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = oldSwapChain;
+		createInfo.oldSwapchain = m_swapChain;
 
 		QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
 		assert(indices.isComplete() && "Queue family indices are not complete");
@@ -141,6 +142,7 @@ namespace Aegix::Graphics
 		}
 
 		VK_CHECK(vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain));
+		destroySwapChain(createInfo.oldSwapchain);
 
 		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
 		m_images.resize(imageCount);
@@ -195,6 +197,23 @@ namespace Aegix::Graphics
 			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]));
 			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]));
 			VK_CHECK(vkCreateFence(m_device.device(), &fenceInfo, nullptr, &m_inFlightFences[i]));
+		}
+	}
+
+	void SwapChain::destroyImageViews()
+	{
+		for (auto imageView : m_imageViews)
+		{
+			vkDestroyImageView(m_device.device(), imageView, nullptr);
+		}
+		m_imageViews.clear();
+	}
+
+	void SwapChain::destroySwapChain(VkSwapchainKHR swapChain)
+	{
+		if (swapChain)
+		{
+			vkDestroySwapchainKHR(m_device.device(), swapChain, nullptr);
 		}
 	}
 

@@ -33,10 +33,10 @@ namespace Aegix::Graphics
 		}
 
 		VulkanDevice& device() { return m_device; }
-		SwapChain& swapChain() { return *m_swapChain; }
+		SwapChain& swapChain() { return m_swapChain; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
 		VkCommandBuffer currentCommandBuffer() const;
-		float aspectRatio() const { return m_swapChain->aspectRatio(); }
+		float aspectRatio() const { return m_swapChain.aspectRatio(); }
 		bool isFrameStarted() const { return m_isFrameStarted; }
 		int frameIndex() const;
 
@@ -58,7 +58,7 @@ namespace Aegix::Graphics
 		Window& m_window;
 		VulkanDevice& m_device;
 		
-		std::unique_ptr<SwapChain> m_swapChain;
+		SwapChain m_swapChain;
 		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 

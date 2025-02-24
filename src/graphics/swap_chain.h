@@ -10,7 +10,7 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
-		SwapChain(VulkanDevice& device, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous = nullptr);
+		SwapChain(VulkanDevice& device, VkExtent2D windowExtent);
 		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
 
@@ -33,10 +33,14 @@ namespace Aegix::Graphics
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 
+		void resize(VkExtent2D extent);
+
 	private:
-		void createSwapChain(VkSwapchainKHR oldSwapChain);
+		void createSwapChain();
 		void createImageViews();
 		void createSyncObjects();
+		void destroyImageViews();
+		void destroySwapChain(VkSwapchainKHR swapChain);
 
 		auto chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const -> VkSurfaceFormatKHR;
 		auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const -> VkPresentModeKHR;
@@ -49,9 +53,9 @@ namespace Aegix::Graphics
 		VkExtent2D m_extent;
 		VkExtent2D m_windowExtent;
 
+		VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
 		std::vector<VkImage> m_images;
 		std::vector<VkImageView> m_imageViews;
-		VkSwapchainKHR m_swapChain;
 		uint32_t m_currentImageIndex = 0;
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores;

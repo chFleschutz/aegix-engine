@@ -13,9 +13,8 @@
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Window& window, VulkanDevice& device)
-		: m_window{ window }, m_device{ device }
+		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extend() }
 	{
-		recreateSwapChain();
 		createCommandBuffers();
 		createDescriptorPool();
 		createFrameGraph();
@@ -56,9 +55,9 @@ namespace Aegix::Graphics
 			m_currentFrameIndex,
 			commandBuffer,
 			scene,
-			m_swapChain->aspectRatio(),
-			m_swapChain->extend(),
-			m_swapChain->imageView(m_currentImageIndex),
+			m_swapChain.aspectRatio(),
+			m_swapChain.extend(),
+			m_swapChain.imageView(m_currentImageIndex),
 		};
 		
 		m_frameGraph.execute(frameInfo);
@@ -85,25 +84,15 @@ namespace Aegix::Graphics
 
 	void Renderer::recreateSwapChain()
 	{
-		auto extend = m_window.extend();
+		VkExtent2D extend = m_window.extend();
 		while (extend.width == 0 || extend.height == 0) // minimized
 		{
 			glfwWaitEvents();
 			extend = m_window.extend();
 		}
-		vkDeviceWaitIdle(m_device.device());
-
-		if (m_swapChain)
-		{
-			std::shared_ptr<SwapChain> oldSwapChain = std::move(m_swapChain);
-			m_swapChain = std::make_unique<SwapChain>(m_device, extend, oldSwapChain);
-
-			assert(oldSwapChain->compareSwapFormats(*m_swapChain.get()) && "Swap chain image or depth format has changed");
-		}
-		else
-		{
-			m_swapChain = std::make_unique<SwapChain>(m_device, extend);
-		}
+		
+		waitIdle();
+		m_swapChain.resize(extend);
 
 		m_frameGraph.swapChainResized(m_device, extend.width, extend.height);
 	}
@@ -138,7 +127,7 @@ namespace Aegix::Graphics
 
 		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
-		m_frameGraph.add<PresentPass>(*m_swapChain);
+		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<TransparentPass>();
 
 		m_frameGraph.compile(m_device);
@@ -148,8 +137,8 @@ namespace Aegix::Graphics
 	{
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
-		auto result = m_swapChain->acquireNextImage();
-		m_currentImageIndex = m_swapChain->currentImageIndex();
+		auto result = m_swapChain.acquireNextImage();
+		m_currentImageIndex = m_swapChain.currentImageIndex();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
@@ -178,7 +167,7 @@ namespace Aegix::Graphics
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 			throw std::runtime_error("Failed to record command buffer");
 
-		auto result = m_swapChain->submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
+		auto result = m_swapChain.submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
 		{
 			m_window.resetWindowResizedFlag();
