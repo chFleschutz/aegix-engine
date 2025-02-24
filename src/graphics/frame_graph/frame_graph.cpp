@@ -122,18 +122,6 @@ namespace Aegix::Graphics
 				}
 			}
 		}
-
-		// DEBUG: Print edges
-		for (const auto& nodeHandle : m_nodeHandles)
-		{
-			const auto& node = m_resourcePool.node(nodeHandle);
-			std::cout << "Node " << node.name << ":\n";
-			for (const auto& edgeHandle : node.edges)
-			{
-				const auto& edgeNode = m_resourcePool.node(edgeHandle);
-				std::cout << "\t- " << edgeNode.name << "\n";
-			}
-		}
 	}
 
 	void FrameGraph::sortNodes()

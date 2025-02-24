@@ -18,11 +18,11 @@ namespace Aegix::Graphics
 	};
 
 
-	class GBufferPass : public FrameGraphRenderPass
+	class GeometryPass : public FrameGraphRenderPass
 	{
 	public:
 
-		GBufferPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
+		GeometryPass(FrameGraph& frameGraph, FrameGraphBlackboard& blackboard)
 		{
 			auto& renderer = blackboard.get<RendererData>();
 			auto& stage = frameGraph.resourcePool().renderStage(RenderStage::Type::Geometry);
@@ -107,7 +107,7 @@ namespace Aegix::Graphics
 				});
 
 			FrameGraphNodeCreateInfo info{};
-			info.name = "GBuffer Pass";
+			info.name = "Geometry Pass";
 			info.inputs = {};
 			info.outputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
 			return info;

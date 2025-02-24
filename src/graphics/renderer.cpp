@@ -1,7 +1,7 @@
 #include "renderer.h"
 
 #include "graphics/frame_graph/frame_graph_blackboard.h"
-#include "graphics/render_passes/g_buffer_pass.h"
+#include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/present_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
@@ -125,7 +125,7 @@ namespace Aegix::Graphics
 		FrameGraphBlackboard blackboard;
 		blackboard.add<RendererData>(m_device, *m_globalPool);
 
-		m_frameGraph.add<GBufferPass>(m_frameGraph, blackboard);
+		m_frameGraph.add<GeometryPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<LightingPass>(m_frameGraph, blackboard);
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<TransparentPass>();
