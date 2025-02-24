@@ -77,7 +77,7 @@ namespace Aegix::Graphics
 
 
 	Texture::Texture(VulkanDevice& device, const SwapChain& swapChain)
-		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extend() }, 
+		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extent() }, 
 		m_layout{ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR }, m_image{ swapChain.image(0) }, m_imageView{ swapChain.imageView(0) }
 	{
 		Config config{};

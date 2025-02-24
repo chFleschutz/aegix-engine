@@ -143,7 +143,7 @@ namespace Aegix::Graphics
 			VkRenderingInfo renderInfo{};
 			renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 			renderInfo.renderArea.offset = { 0, 0 };
-			renderInfo.renderArea.extent = frameInfo.swapChainExtend;
+			renderInfo.renderArea.extent = frameInfo.swapChainExtent;
 			renderInfo.layerCount = 1;
 			renderInfo.colorAttachmentCount = 1;
 			renderInfo.pColorAttachments = &colorAttachment;
@@ -151,8 +151,8 @@ namespace Aegix::Graphics
 
 			vkCmdBeginRendering(commandBuffer, &renderInfo);
 
-			Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtend);
-			Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtend);
+			Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtent);
+			Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtent);
 
 			m_pipeline->bind(commandBuffer);
 

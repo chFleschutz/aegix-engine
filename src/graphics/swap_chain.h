@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
 		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
 		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }
-		[[nodiscard]] auto extend() const -> VkExtent2D { return m_extent; }
+		[[nodiscard]] auto extent() const -> VkExtent2D { return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
 		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }

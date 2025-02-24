@@ -11,9 +11,6 @@ namespace Aegix::Graphics
 		VkCommandBuffer commandBuffer;
 		Scene::Scene& scene;
 		float aspectRatio;
-
-		// TODO: Replace with a more general solution
-		VkExtent2D swapChainExtend;
-		VkImageView swapChainColor;
+		VkExtent2D swapChainExtent;
 	};
 }

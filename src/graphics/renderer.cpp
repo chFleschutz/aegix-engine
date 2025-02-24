@@ -56,8 +56,7 @@ namespace Aegix::Graphics
 			commandBuffer,
 			scene,
 			m_swapChain.aspectRatio(),
-			m_swapChain.extend(),
-			m_swapChain.imageView(m_currentImageIndex),
+			m_swapChain.extent()
 		};
 		
 		m_frameGraph.execute(frameInfo);
