@@ -91,6 +91,10 @@ namespace Aegix::Tools
 			return VK_ACCESS_SHADER_READ_BIT;
 		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
 			return 0;
+		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+			return VK_ACCESS_TRANSFER_READ_BIT;
+		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+			return VK_ACCESS_TRANSFER_WRITE_BIT;
 		default:
 			assert(false && "Unsupported layout transition");
 			return 0;
@@ -111,6 +115,10 @@ namespace Aegix::Tools
 			return VK_ACCESS_SHADER_READ_BIT;
 		case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
 			return 0;
+		case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+			return VK_ACCESS_TRANSFER_READ_BIT;
+		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+			return VK_ACCESS_TRANSFER_WRITE_BIT;
 		default:
 			assert(false && "Unsupported layout transition");
 			return 0;
@@ -127,6 +135,8 @@ namespace Aegix::Tools
 			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		if (access & VK_ACCESS_SHADER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (access & VK_ACCESS_TRANSFER_READ_BIT)
+			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		
@@ -144,6 +154,8 @@ namespace Aegix::Tools
 		if (access & VK_ACCESS_SHADER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 		if (access & VK_ACCESS_TRANSFER_READ_BIT)
+			return VK_PIPELINE_STAGE_TRANSFER_BIT;
+		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 
 		return VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
