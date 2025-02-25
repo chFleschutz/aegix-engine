@@ -163,6 +163,14 @@ namespace Aegix::Graphics
 		m_config.pipelineLayout = pipelineLayout;
 	}
 
+	Pipeline::ComputeBuilder::~ComputeBuilder()
+	{
+		if (m_config.shaderStage.module)
+		{
+			vkDestroyShaderModule(m_device, m_config.shaderStage.module, nullptr);
+		}
+	}
+
 	Pipeline::ComputeBuilder& Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath)
 	{
 		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
@@ -198,8 +206,6 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineIndex = -1;
 
 		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
-
-		vkDestroyShaderModule(m_device, config.shaderStage.module, nullptr);
 	}
 
 	Pipeline::~Pipeline()

@@ -102,7 +102,7 @@ namespace Aegix::Graphics
 		{
 		public:
 			ComputeBuilder(VulkanDevice& device, VkPipelineLayout pipelineLayout);
-			~ComputeBuilder() = default;
+			~ComputeBuilder();
 
 			ComputeBuilder& setShaderStage(const std::filesystem::path& shaderPath);
 
