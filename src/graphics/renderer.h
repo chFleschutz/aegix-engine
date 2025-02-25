@@ -26,9 +26,11 @@ namespace Aegix::Graphics
 		Renderer& operator=(Renderer&&) = delete;
 
 		template<typename T>
-			requires std::is_base_of_v<RenderSystem, T>
-		RenderSystem& addRenderSystem(RenderStage::Type stageType = RenderStage::Type::Geometry)
+			requires std::is_base_of_v<RenderSystem, T> &&
+			requires { T::STAGE; }
+		RenderSystem& addRenderSystem()
 		{
+			constexpr RenderStage::Type stageType = T::STAGE;
 			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, stageType);
 		}
 

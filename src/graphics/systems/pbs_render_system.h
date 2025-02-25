@@ -53,6 +53,8 @@ namespace Aegix::Graphics
 			glm::mat4 normalMatrix{ 1.0f };
 		};
 
+		constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
+
 		PBSRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
 		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
