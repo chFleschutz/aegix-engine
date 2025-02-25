@@ -252,16 +252,6 @@ namespace Aegix::Graphics
 		configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE;
 		configInfo.multisampleInfo.alphaToOneEnable = VK_FALSE;
 
-		configInfo.colorBlendAttachments.push_back({});
-		configInfo.colorBlendAttachments[0].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		configInfo.colorBlendAttachments[0].blendEnable = VK_FALSE;
-		configInfo.colorBlendAttachments[0].srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-		configInfo.colorBlendAttachments[0].dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-		configInfo.colorBlendAttachments[0].colorBlendOp = VK_BLEND_OP_ADD;
-		configInfo.colorBlendAttachments[0].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		configInfo.colorBlendAttachments[0].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		configInfo.colorBlendAttachments[0].alphaBlendOp = VK_BLEND_OP_ADD;
-
 		configInfo.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
 		configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
