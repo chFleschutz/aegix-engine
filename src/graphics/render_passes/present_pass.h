@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_sceneColor = builder.add({ "SceneColor",
+			m_final = builder.add({ "Final",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::Present
 				});
@@ -34,7 +34,7 @@ namespace Aegix::Graphics
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Present Pass",
-				.inputs = { m_sceneColor },
+				.inputs = { m_final },
 				.outputs = { m_presentImage }
 			};
 		}
@@ -51,7 +51,7 @@ namespace Aegix::Graphics
 
 	private:
 		SwapChain& m_swapChain;
-		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_final;
 		FrameGraphResourceHandle m_presentImage;
 	};
 }

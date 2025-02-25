@@ -54,8 +54,8 @@ namespace Aegix::Graphics
 		// TODO: Replace by proper aliasing
 		const auto& presentNode = m_resourcePool.node(m_nodeHandles.back());
 		const auto& presentResource = m_resourcePool.finalResource(presentNode.outputs[0]);
-		auto& sceneColorResource = m_resourcePool.finalResource(presentNode.inputs[0]);
-		sceneColorResource.handle = presentResource.handle;
+		auto& finalResource = m_resourcePool.finalResource(presentNode.inputs[0]);
+		finalResource.handle = presentResource.handle;
 
 		m_resourcePool.createResources(device);
 
@@ -194,6 +194,9 @@ namespace Aegix::Graphics
 		{
 			auto& resource = m_resourcePool.resource(resourceHandle);
 			auto& texture = m_resourcePool.texture(resourceHandle);
+
+			if (resource.usage == FrameGraphResourceUsage::None)
+				continue;
 
 			VkImageLayout oldLayout = texture.layout();
 			VkImageLayout newLayout = imageLayoutForUsage(resource.usage);
