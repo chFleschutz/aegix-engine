@@ -53,6 +53,8 @@ namespace Aegix::Graphics
 		ColorAttachment,
 		DepthStencilAttachment,
 		Compute,
+		TransferSrc,
+		TransferDst,
 		Present
 	};
 

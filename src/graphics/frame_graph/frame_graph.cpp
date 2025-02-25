@@ -34,10 +34,14 @@ namespace Aegix::Graphics
 			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		case FrameGraphResourceUsage::Compute:
 			return VK_IMAGE_LAYOUT_GENERAL;
+		case FrameGraphResourceUsage::TransferSrc:
+			return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		case FrameGraphResourceUsage::TransferDst:
+			return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		case FrameGraphResourceUsage::Present:
 			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		default:
-			assert(false && "Invalid usage");
+			assert(false && "Undefined FrameGraphResourceUsage");
 			return VK_IMAGE_LAYOUT_UNDEFINED;
 		}
 	}
