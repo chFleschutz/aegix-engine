@@ -59,7 +59,7 @@ namespace Aegix
 		Graphics::Window m_window{ Graphics::DEFAULT_WIDTH, Graphics::DEFAULT_HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
-		Graphics::GUI m_gui;
+		Graphics::GUI m_gui{ m_window, m_renderer };
 		Input m_input{ m_window };
 		AssetManager m_assetManager{ m_renderer };
 		SystemManager m_systems;

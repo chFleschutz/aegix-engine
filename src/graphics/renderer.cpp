@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::renderFrame(Scene::Scene& scene)
+	void Renderer::renderFrame(Scene::Scene& scene, GUI& gui)
 	{
 		auto commandBuffer = beginFrame();
 
@@ -54,11 +54,12 @@ namespace Aegix::Graphics
 		assert(m_isFrameStarted && "Frame not started");
 
 		FrameInfo frameInfo{
+			scene,
+			gui,
 			m_currentFrameIndex,
 			commandBuffer,
-			scene,
-			m_swapChain.aspectRatio(),
-			m_swapChain.extent()
+			m_swapChain.extent(),
+			m_swapChain.aspectRatio()
 		};
 		
 		m_frameGraph.execute(frameInfo);

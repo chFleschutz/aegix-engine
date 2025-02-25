@@ -2,17 +2,22 @@
 
 #include "graphics/layers/layer.h"
 
+#include "vulkan/vulkan.h"
+
 #include <memory>
 #include <vector>
 
 namespace Aegix::Graphics
 {
+	class Window;
+	class Renderer;
+
 	/// @brief Manages all GUI Layers for displaying ImGui elements
 	/// @note This class is a wrapper around ImGui
 	class GUI
 	{
 	public:
-		GUI() = default;
+		GUI(const Window& window, Renderer& renderer);
 		GUI(const GUI&) = delete;
 		GUI(GUI&&) = delete;
 		~GUI();
@@ -24,7 +29,7 @@ namespace Aegix::Graphics
 		void update(float deltaTime);
 
 		/// @brief Renders all GUI elements
-		void renderGui();
+		void render(VkCommandBuffer commandBuffer);
 
 		/// @brief Pushes a layer to the stack
 		void pushLayer(std::shared_ptr<Layer> layer);

@@ -66,7 +66,7 @@ namespace Aegix
 			m_gui.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(*m_scene);
+			m_renderer.renderFrame(*m_scene, m_gui);
 
 			applyFrameBrake(frameBeginTime);
 		}
