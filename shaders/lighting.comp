@@ -1,14 +1,13 @@
 #version 450
 
-layout(location = 0) in vec2 inUV;
+layout(local_size_x = 16, local_size_y = 16) in;
 
-layout(location = 0) out vec4 outColor;
-
-layout(set = 0, binding = 0) uniform sampler2D positionMap;
-layout(set = 0, binding = 1) uniform sampler2D normalMap;
-layout(set = 0, binding = 2) uniform sampler2D albedoMap;
-layout(set = 0, binding = 3) uniform sampler2D armMap;
-layout(set = 0, binding = 4) uniform sampler2D emissiveMap;
+layout(set = 0, binding = 0, rgba16) uniform image2D sceneColorMap;
+layout(set = 0, binding = 1, rgba16) uniform image2D positionMap;
+layout(set = 0, binding = 2, rgba16) uniform image2D normalMap;
+layout(set = 0, binding = 3, rgba8) uniform image2D albedoMap;
+layout(set = 0, binding = 4, rgba8) uniform image2D armMap;
+layout(set = 0, binding = 5, rgba8) uniform image2D emissiveMap;
 
 struct AmbientLight
 {
@@ -27,7 +26,7 @@ struct PointLight
 	vec4 color;
 };
 
-layout(set = 0, binding = 5) uniform Lighting
+layout(set = 0, binding = 6) uniform Lighting
 {
 	vec4 cameraPosition;
 	AmbientLight ambientLight;
@@ -47,11 +46,13 @@ vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float met
 
 void main()
 {
-	vec3 position = texture(positionMap, inUV).rgb;
-    vec3 normal = texture(normalMap, inUV).rgb;
-	vec3 albedo = texture(albedoMap, inUV).rgb;
-	vec3 arm = texture(armMap, inUV).rgb;
-	vec3 emissive = texture(emissiveMap, inUV).rgb;
+	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+
+	vec3 position = imageLoad(positionMap, pixelCoords).rgb;
+    vec3 normal = imageLoad(normalMap, pixelCoords).rgb;
+	vec3 albedo = imageLoad(albedoMap, pixelCoords).rgb;
+	vec3 arm = imageLoad(armMap, pixelCoords).rgb;
+	vec3 emissive = imageLoad(emissiveMap, pixelCoords).rgb;
 
     float ambientOcclusion = arm.r;
     float roughness = arm.g;
@@ -88,7 +89,7 @@ void main()
     // Emissive material
     Lo += emissive;
 
-	outColor = vec4(Lo, 1.0);
+    imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
 }
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos)

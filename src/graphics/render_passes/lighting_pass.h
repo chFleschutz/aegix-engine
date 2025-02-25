@@ -41,12 +41,13 @@ namespace Aegix::Graphics
 		LightingPass(VulkanDevice& device, DescriptorPool& pool)
 		{
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
-				.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 				.build();
 
 			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
@@ -57,13 +58,8 @@ namespace Aegix::Graphics
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
 				.build();
 
-			m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
-				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
-				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
-				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-				.setVertexAttributeDescriptions({}) // Clear default vertex attributes
-				.setVertexBindingDescriptions({}) // Clear default vertex binding
+			m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
+				.setShaderStage(SHADER_DIR "lighting.comp.spv")
 				.build();
 		}
 
@@ -71,31 +67,27 @@ namespace Aegix::Graphics
 		{
 			m_position = builder.add({ "Position", 
 				FrameGraphResourceType::Reference, 
-				FrameGraphResourceUsage::Sampled
+				FrameGraphResourceUsage::Compute
 				});
 			m_normal = builder.add({ "Normal",
 				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::Sampled
+				FrameGraphResourceUsage::Compute
 				});
 			m_albedo = builder.add({ "Albedo",
 				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::Sampled
+				FrameGraphResourceUsage::Compute
 				});
 			m_arm = builder.add({ "ARM",
 				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::Sampled
+				FrameGraphResourceUsage::Compute
 				});
 			m_emissive = builder.add({ "Emissive",
 				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::Sampled
-				});
-			m_depth = builder.add({ "Depth",
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::Sampled
+				FrameGraphResourceUsage::Compute
 				});
 			m_sceneColor = builder.add({ "SceneColor",
 				FrameGraphResourceType::Texture,
-				FrameGraphResourceUsage::ColorAttachment,
+				FrameGraphResourceUsage::Compute,
 				FrameGraphResourceTextureInfo{
 					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 					.extent = { 0, 0 },
@@ -105,17 +97,18 @@ namespace Aegix::Graphics
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Lighting Pass",
-				.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth },
+				.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive },
 				.outputs = { m_sceneColor }
 			};
 		}
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
+			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			updateLightingUBO(frameInfo);
 
+			auto sceneColorInfo = resources.texture(m_sceneColor).descriptorImageInfo();
 			auto positionInfo = resources.texture(m_position).descriptorImageInfo();
 			auto normalInfo = resources.texture(m_normal).descriptorImageInfo();
 			auto albedoInfo = resources.texture(m_albedo).descriptorImageInfo();
@@ -123,44 +116,30 @@ namespace Aegix::Graphics
 			auto emissiveInfo = resources.texture(m_emissive).descriptorImageInfo();
 			auto uboInfo = m_ubo->descriptorBufferInfo(frameInfo.frameIndex);
 
+			sceneColorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			positionInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			normalInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			albedoInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			armInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			emissiveInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, &positionInfo)
-				.writeImage(1, &normalInfo)
-				.writeImage(2, &albedoInfo)
-				.writeImage(3, &armInfo)
-				.writeImage(4, &emissiveInfo)
-				.writeBuffer(5, &uboInfo)
+				.writeImage(0, &sceneColorInfo)
+				.writeImage(1, &positionInfo)
+				.writeImage(2, &normalInfo)
+				.writeImage(3, &albedoInfo)
+				.writeImage(4, &armInfo)
+				.writeImage(5, &emissiveInfo)
+				.writeBuffer(6, &uboInfo)
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
-			VkRenderingAttachmentInfo colorAttachment = Tools::renderingAttachmentInfo(resources.texture(m_sceneColor), 
-				VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 1.0f });
+			m_pipeline->bind(cmd);
+			m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			VkRenderingAttachmentInfo depthAttachment = Tools::renderingAttachmentInfo(resources.texture(m_depth).imageView(),
-				VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
-
-			VkRenderingInfo renderInfo{};
-			renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-			renderInfo.renderArea.offset = { 0, 0 };
-			renderInfo.renderArea.extent = frameInfo.swapChainExtent;
-			renderInfo.layerCount = 1;
-			renderInfo.colorAttachmentCount = 1;
-			renderInfo.pColorAttachments = &colorAttachment;
-			renderInfo.pDepthAttachment = &depthAttachment;
-
-			vkCmdBeginRendering(commandBuffer, &renderInfo);
-
-			Tools::vk::cmdViewport(commandBuffer, frameInfo.swapChainExtent);
-			Tools::vk::cmdScissor(commandBuffer, frameInfo.swapChainExtent);
-
-			m_pipeline->bind(commandBuffer);
-
-			Tools::vk::cmdBindDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-				*m_pipelineLayout, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-			// Draw Fullscreen Triangle
-			vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-			vkCmdEndRendering(commandBuffer);
+			auto extent = frameInfo.swapChainExtent;
+			uint32_t groupCountX = (extent.width + 15) / 16;
+			uint32_t groupCountY = (extent.height + 15) / 16;
+			vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
 		}
 
 	private:
@@ -204,7 +183,7 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_albedo;
 		FrameGraphResourceHandle m_arm;
 		FrameGraphResourceHandle m_emissive;
-		FrameGraphResourceHandle m_depth;
+
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
