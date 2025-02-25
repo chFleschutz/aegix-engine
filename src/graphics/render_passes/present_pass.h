@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
-			m_final = builder.add({ "SceneColor",
+			m_final = builder.add({ "Final",
 				FrameGraphResourceType::Reference,
 				FrameGraphResourceUsage::TransferSrc
 				});
@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 			return FrameGraphNodeCreateInfo{
 				.name = "Present Pass",
 				.inputs = { m_final },
-				.outputs = { }
+				.outputs = {}
 			};
 		}
 
