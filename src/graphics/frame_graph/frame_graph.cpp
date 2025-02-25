@@ -32,6 +32,8 @@ namespace Aegix::Graphics
 			return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		case FrameGraphResourceUsage::DepthStencilAttachment:
 			return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		case FrameGraphResourceUsage::Compute:
+			return VK_IMAGE_LAYOUT_GENERAL;
 		case FrameGraphResourceUsage::Present:
 			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		default:

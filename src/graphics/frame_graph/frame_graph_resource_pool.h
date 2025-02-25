@@ -52,6 +52,7 @@ namespace Aegix::Graphics
 		Sampled,
 		ColorAttachment,
 		DepthStencilAttachment,
+		Compute,
 		Present
 	};
 
