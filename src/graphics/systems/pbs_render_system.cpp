@@ -37,8 +37,8 @@ namespace Aegix::Graphics
 			.build();
 
 		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "gbuffer.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "gbuffer.frag.spv")
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "geometry.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "geometry.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
