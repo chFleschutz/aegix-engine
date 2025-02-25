@@ -56,12 +56,7 @@ namespace Aegix::Graphics
 		computeEdges();
 		sortNodes();
 
-		// Aliasing
-		// TODO: Replace by proper aliasing
-		const auto& presentNode = m_resourcePool.node(m_nodeHandles.back());
-		const auto& presentResource = m_resourcePool.finalResource(presentNode.outputs[0]);
-		auto& finalResource = m_resourcePool.finalResource(presentNode.inputs[0]);
-		finalResource.handle = presentResource.handle;
+		// TODO: Resource aliasing
 
 		m_resourcePool.createResources(device);
 

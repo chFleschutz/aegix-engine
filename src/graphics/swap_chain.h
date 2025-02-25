@@ -17,16 +17,22 @@ namespace Aegix::Graphics
 		void operator=(const SwapChain&) = delete;
 
 		[[nodiscard]] auto device() const -> VulkanDevice& { return m_device; }
+
 		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
+		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
+
+		[[nodiscard]] auto currentImageView() const -> VkImageView { return m_imageViews[m_currentImageIndex]; }
+		[[nodiscrad]] auto currentImage() const -> VkImage { return m_images[m_currentImageIndex]; }
 		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
 		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }
+
 		[[nodiscard]] auto extent() const -> VkExtent2D { return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
 		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
+
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto findDepthFormat() -> VkFormat;
-		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
 
 		auto acquireNextImage() -> VkResult;
 		auto submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult;
