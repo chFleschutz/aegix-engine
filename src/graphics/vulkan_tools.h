@@ -5,8 +5,8 @@
 #include "vulkan/vulkan.h"
 
 #include <cassert>
+#include <filesystem>
 #include <iostream>
-#include <string_view>
 #include <vector>
 
 #define VK_CHECK(f)																						\
@@ -38,6 +38,10 @@ namespace Aegix::Tools
 	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
 	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
 
+	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule;
+	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule;
+
+	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module) -> VkPipelineShaderStageCreateInfo;
 
 	namespace vk
 	{

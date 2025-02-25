@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
 			.build();
 
-		m_pipeline = Pipeline::Builder(m_device, *m_pipelineLayout)
+		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "gbuffer.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "gbuffer.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)

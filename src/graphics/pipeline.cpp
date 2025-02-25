@@ -1,6 +1,7 @@
 #include "pipeline.h"
 
 #include "graphics/static_mesh.h"
+#include "graphics/vulkan_tools.h"
 #include "utils/file.h"
 
 #include <cassert>
@@ -8,7 +9,7 @@
 
 namespace Aegix::Graphics
 {
-	// *************** PipelineLayout::Builder *********************
+	// PipelineLayout::Builder ---------------------------------------------------
 
 	PipelineLayout::Builder::Builder(VulkanDevice& device)
 		: m_device{ device }
@@ -44,7 +45,7 @@ namespace Aegix::Graphics
 	}
 
 
-	// *************** PipelineLayout *********************
+	// PipeLineLayout ------------------------------------------------------------
 
 	Graphics::PipelineLayout::PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
 		const std::vector<VkPushConstantRange>& pushConstants)
@@ -67,55 +68,36 @@ namespace Aegix::Graphics
 	}
 
 
-	// *************** Pipeline::Builder *********************
+	// Pipeline::GraphicsBuilder -------------------------------------------------
 
-	Pipeline::Builder::Builder(VulkanDevice& device, VkPipelineLayout pipelineLayout)
+	Pipeline::GraphicsBuilder::GraphicsBuilder(VulkanDevice& device, VkPipelineLayout pipelineLayout)
 		: m_device{ device }
 	{
-		Pipeline::defaultPipelineConfigInfo(m_configInfo);
-		m_configInfo.pipelineLayout = pipelineLayout;
+		Pipeline::defaultGraphicsPipelineConfig(m_config);
+		m_config.pipelineLayout = pipelineLayout;
 	}
 
-	Pipeline::Builder::~Builder()
+	Pipeline::GraphicsBuilder::~GraphicsBuilder()
 	{
-		for (auto& shaderStage : m_configInfo.shaderStges)
+		for (auto& shaderStage : m_config.shaderStges)
 		{
 			vkDestroyShaderModule(m_device.device(), shaderStage.module, nullptr);
 		}
 	}
 
-	Pipeline::Builder& Pipeline::Builder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
 	{
-		auto shaderCode = File::readBinary(shaderPath);
-		assert(!shaderCode.empty() && "Shader code is empty");
-
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = shaderCode.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
-
-		VkShaderModule shaderModule = nullptr;
-		if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-			throw std::runtime_error("failed to create shader module");
-
-		VkPipelineShaderStageCreateInfo shaderStage{};
-		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStage.stage = stage;
-		shaderStage.module = shaderModule;
-		shaderStage.pName = "main";
-		shaderStage.flags = 0;
-		shaderStage.pNext = nullptr;
-		shaderStage.pSpecializationInfo = nullptr;
-		m_configInfo.shaderStges.push_back(shaderStage);
+		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
+		m_config.shaderStges.emplace_back(Tools::createShaderStage(stage, shaderModule));
 
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::addColorAttachment(VkFormat colorFormat, bool alphaBlending)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::addColorAttachment(VkFormat colorFormat, bool alphaBlending)
 	{
-		m_configInfo.colorAttachmentFormats.emplace_back(colorFormat);
-		m_configInfo.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_configInfo.colorAttachmentFormats.size());
-		m_configInfo.renderingInfo.pColorAttachmentFormats = m_configInfo.colorAttachmentFormats.data();
+		m_config.colorAttachmentFormats.emplace_back(colorFormat);
+		m_config.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_config.colorAttachmentFormats.size());
+		m_config.renderingInfo.pColorAttachmentFormats = m_config.colorAttachmentFormats.data();
 
 		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -134,66 +116,100 @@ namespace Aegix::Graphics
 			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		}
 
-		m_configInfo.colorBlendAttachments.emplace_back(colorBlendAttachment);
+		m_config.colorBlendAttachments.emplace_back(colorBlendAttachment);
 		
-		m_configInfo.colorBlendInfo.attachmentCount = m_configInfo.renderingInfo.colorAttachmentCount;
-		m_configInfo.colorBlendInfo.pAttachments = m_configInfo.colorBlendAttachments.data();
+		m_config.colorBlendInfo.attachmentCount = m_config.renderingInfo.colorAttachmentCount;
+		m_config.colorBlendInfo.pAttachments = m_config.colorBlendAttachments.data();
 
 		return *this;
 	}
 
 
-	Pipeline::Builder& Pipeline::Builder::setDepthAttachment(VkFormat depthFormat)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setDepthAttachment(VkFormat depthFormat)
 	{
-		m_configInfo.renderingInfo.depthAttachmentFormat = depthFormat;
+		m_config.renderingInfo.depthAttachmentFormat = depthFormat;
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::setStencilFormat(VkFormat stencilFormat)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setStencilFormat(VkFormat stencilFormat)
 	{
-		m_configInfo.renderingInfo.stencilAttachmentFormat = stencilFormat;
+		m_config.renderingInfo.stencilAttachmentFormat = stencilFormat;
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
 	{
-		m_configInfo.bindingDescriptions = bindingDescriptions;
+		m_config.bindingDescriptions = bindingDescriptions;
 		return *this;
 	}
 
-	Pipeline::Builder& Pipeline::Builder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
 	{
-		m_configInfo.attributeDescriptions = attributeDescriptions;
+		m_config.attributeDescriptions = attributeDescriptions;
 		return *this;
 	}
 
-	std::unique_ptr<Pipeline> Pipeline::Builder::build()
+	std::unique_ptr<Pipeline> Pipeline::GraphicsBuilder::build()
 	{
-		assert(m_configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
-
-		return std::make_unique<Pipeline>(m_device, m_configInfo);
+		return std::make_unique<Pipeline>(m_device, m_config);
 	}
 
 
-	// *************** Pipeline *********************
+	// ComputeBuilder ------------------------------------------------------------
 
-	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::Config& configInfo)
+	Pipeline::ComputeBuilder::ComputeBuilder(VulkanDevice& device, VkPipelineLayout pipelineLayout)
 		: m_device{ device }
 	{
-		createGraphicsPipeline(configInfo);
+		m_config.pipelineLayout = pipelineLayout;
+	}
+
+	Pipeline::ComputeBuilder& Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath)
+	{
+		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
+		m_config.shaderStage = Tools::createShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule);
+		return *this;
+	}
+
+	std::unique_ptr<Pipeline> Pipeline::ComputeBuilder::build()
+	{
+		return std::make_unique<Pipeline>(m_device, m_config);
+	}
+
+
+	// Pipeline ------------------------------------------------------------------
+
+	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::GraphicsConfig& config)
+		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
+	{
+		createGraphicsPipeline(config);
+	}
+
+	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::ComputeConfig& config)
+		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_COMPUTE }
+	{
+		assert(config.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
+
+		VkComputePipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		pipelineInfo.stage = config.shaderStage;
+		pipelineInfo.layout = config.pipelineLayout;
+		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+		pipelineInfo.basePipelineIndex = -1;
+
+		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
 	Pipeline::~Pipeline()
 	{
-		vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
+		vkDestroyPipeline(m_device.device(), m_pipeline, nullptr);
 	}
 
-	void Pipeline::bind(VkCommandBuffer commandBuffer)
+	void Pipeline::bind(VkCommandBuffer commandBuffer) const
 	{
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+		vkCmdBindPipeline(commandBuffer, m_bindPoint, m_pipeline);
 	}
 
-	void Pipeline::defaultPipelineConfigInfo(Pipeline::Config& configInfo)
+	void Pipeline::defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo)
 	{
 		configInfo.renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 
@@ -268,7 +284,7 @@ namespace Aegix::Graphics
 		configInfo.attributeDescriptions = StaticMesh::defaultAttributeDescriptions();
 	}
 
-	void Pipeline::createGraphicsPipeline(const Pipeline::Config& configInfo)
+	void Pipeline::createGraphicsPipeline(const Pipeline::GraphicsConfig& configInfo)
 	{
 		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 
@@ -300,7 +316,6 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
-			throw std::runtime_error("failed to create graphics pipeline");
+		VK_CHECK(vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 }

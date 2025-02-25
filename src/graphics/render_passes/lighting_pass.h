@@ -57,7 +57,7 @@ namespace Aegix::Graphics
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
 				.build();
 
-			m_pipeline = Pipeline::Builder(device, *m_pipelineLayout)
+			m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
 				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
 				.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)

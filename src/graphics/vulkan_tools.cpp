@@ -1,5 +1,6 @@
 #include "vulkan_tools.h"
 
+#include "utils/file.h"
 
 namespace Aegix::Tools
 {
@@ -195,6 +196,40 @@ namespace Aegix::Tools
 	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
 	{
 		return renderingAttachmentInfo(texture.imageView(), texture.layout(), loadOp, clearValue);
+	}
+
+	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule
+	{
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = code.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+		VkShaderModule shaderModule = nullptr;
+		VK_CHECK(vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule));
+
+		return shaderModule;
+	}
+
+	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule
+	{
+		auto code = File::readBinary(path);
+		assert(!code.empty() && "Shader code is empty");
+
+		return createShaderModule(device, code);
+	}
+
+	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module) -> VkPipelineShaderStageCreateInfo
+	{
+		VkPipelineShaderStageCreateInfo shaderStage{};
+		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage.stage = stage;
+		shaderStage.module = module;
+		shaderStage.pName = "main";
+		shaderStage.flags = 0;
+		shaderStage.pNext = nullptr;
+		shaderStage.pSpecializationInfo = nullptr;
+		return shaderStage;
 	}
 
 	void vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, const std::vector<VkImageMemoryBarrier>& barriers)
