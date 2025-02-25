@@ -45,6 +45,9 @@ namespace Aegix::Tools
 
 	namespace vk
 	{
+		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+			VkImageAspectFlags aspectMask);
+
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
 

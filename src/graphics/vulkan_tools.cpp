@@ -236,6 +236,33 @@ namespace Aegix::Tools
 		return shaderStage;
 	}
 
+	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+		VkImageAspectFlags aspectMask)
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = aspectMask;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = srcAccessMask(oldLayout);
+		barrier.dstAccessMask = dstAccessMask(newLayout);
+
+		vkCmdPipelineBarrier(cmd,
+			srcStage(barrier.srcAccessMask), dstStage(barrier.dstAccessMask),
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+	}
+
 	void vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, const std::vector<VkImageMemoryBarrier>& barriers)
 	{
 		if (barriers.empty())
