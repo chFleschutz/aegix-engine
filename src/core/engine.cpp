@@ -9,8 +9,6 @@
 
 namespace Aegix
 {
-	Engine* Engine::s_instance = nullptr;
-
 	Engine::Engine()
 	{
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
@@ -68,17 +66,12 @@ namespace Aegix
 			m_gui.update(frameTimeSec);
 
 			// Rendering
-			auto commandBuffer = m_renderer.beginRenderFrame();
-			{
-				m_renderer.renderScene(commandBuffer, *m_scene);
-				m_gui.renderGui(commandBuffer);
-			}
-			m_renderer.endRenderFrame(commandBuffer);
+			m_renderer.renderFrame(*m_scene, m_gui);
 
 			applyFrameBrake(frameBeginTime);
 		}
 
-		m_renderer.shutdown();
+		m_renderer.waitIdle();
 		m_scene->runtimeEnd();
 	}
 

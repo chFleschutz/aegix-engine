@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/device.h"
-#include "graphics/swap_chain.h"
+#include "graphics/globals.h"
 #include "graphics/texture.h"
 #include "graphics/uniform_buffer.h"
 
@@ -93,7 +93,7 @@ namespace Aegix::Graphics
 	class DescriptorWriter
 	{
 	public:
-		DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
+		DescriptorWriter(DescriptorSetLayout& setLayout);
 		~DescriptorWriter() = default;
 
 		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
@@ -103,7 +103,6 @@ namespace Aegix::Graphics
 
 	private:
 		DescriptorSetLayout& m_setLayout;
-		DescriptorPool& m_pool;
 		std::vector<VkWriteDescriptorSet> m_writes;
 	};
 
@@ -121,7 +120,7 @@ namespace Aegix::Graphics
 			Builder& operator=(const Builder&) = delete;
 
 			template<typename T>
-			Builder& addBuffer(uint32_t binding, const UniformBuffer<T>& buffer)
+			Builder& addBuffer(uint32_t binding, const UniformBufferData<T>& buffer)
 			{
 				for (size_t i = 0; i < m_descriptorInfos.size(); i++)
 				{
@@ -130,6 +129,7 @@ namespace Aegix::Graphics
 				return *this;
 			}
 
+			Builder& addBuffer(uint32_t binding, const UniformBuffer& buffer);
 			Builder& addTexture(uint32_t binding, const Texture& texture);
 			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture);
 
@@ -145,15 +145,19 @@ namespace Aegix::Graphics
 			VulkanDevice& m_device;
 			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
-			std::array<DescriptorInfo, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
+			std::array<DescriptorInfo, MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
 		};
 
 		DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 		~DescriptorSet() = default;
 
+		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }
 
+		void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int index, 
+			VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
+
 	private:
-		std::array<VkDescriptorSet, SwapChain::MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
+		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
 	};
 }

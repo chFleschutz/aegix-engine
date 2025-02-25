@@ -31,8 +31,9 @@ namespace Aegix::Graphics
 	Buffer::~Buffer()
 	{
 		unmap();
-		vkDestroyBuffer(m_device.device(), m_buffer, nullptr);
-		vkFreeMemory(m_device.device(), m_memory, nullptr);
+
+		m_device.scheduleDeletion(m_buffer);
+		m_device.scheduleDeletion(m_memory);
 	}
 
 	VkResult Buffer::map(VkDeviceSize size, VkDeviceSize offset)

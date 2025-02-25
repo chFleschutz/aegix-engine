@@ -35,15 +35,15 @@ namespace Aegix::Graphics
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
 			.build();
 
-		m_pipeline = Pipeline::Builder(m_device, *m_pipelineLayout)
+		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default.frag.spv")
-			.setColorAttachmentFormats({ VK_FORMAT_B8G8R8A8_SRGB })
-			.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)
+			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.build();
 	}
 
-	void DefaultRenderSystem::render(const FrameInfo& frameInfo)
+	void DefaultRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
@@ -53,12 +53,12 @@ namespace Aegix::Graphics
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			m_pipelineLayout->pipelineLayout(),
 			0, 1,
-			&frameInfo.globalDescriptorSet,
+			&globalSet,
 			0, nullptr
 		);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
+		auto view = frameInfo.scene.viewEntities<Component::Transform, Component::Mesh, DefaultMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)

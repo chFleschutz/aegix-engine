@@ -2,10 +2,7 @@
 
 #include "graphics/device.h"
 
-#include <vulkan/vulkan.h>
-
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace Aegix::Graphics
@@ -13,66 +10,59 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
-		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
-
-		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
-		SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous);
+		SwapChain(VulkanDevice& device, VkExtent2D windowExtent);
+		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
 
-		SwapChain(const SwapChain&) = delete;
 		void operator=(const SwapChain&) = delete;
 
-		VkImageView colorImageView(int index) const { return mColorImageViews[index]; }
-		VkImageView depthImageView(int index) const { return mDepthImageViews[index]; }
-		VkImage colorImage(int index) const { return mColorImages[index]; }
-		VkImage depthImage(int index) const { return mDepthImages[index]; }
+		[[nodiscard]] auto device() const -> VulkanDevice& { return m_device; }
 
-		size_t imageCount() const { return mColorImages.size(); }
-		VkFormat swapChainImageFormat() const { return mSwapChainImageFormat; }
-		VkExtent2D swapChainExtent() const { return mSwapChainExtent; }
-		uint32_t width() const { return mSwapChainExtent.width; }
-		uint32_t height() const { return mSwapChainExtent.height; }
+		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
+		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
 
-		float extentAspectRatio() const { return static_cast<float>(mSwapChainExtent.width) / static_cast<float>(mSwapChainExtent.height); }
-		VkFormat findDepthFormat();
+		[[nodiscard]] auto currentImageView() const -> VkImageView { return m_imageViews[m_currentImageIndex]; }
+		[[nodiscrad]] auto currentImage() const -> VkImage { return m_images[m_currentImageIndex]; }
+		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
+		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }
 
-		VkResult acquireNextImage(uint32_t* imageIndex);
-		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+		[[nodiscard]] auto extent() const -> VkExtent2D { return m_extent; }
+		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
+		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
+		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
 
-		bool compareSwapFormats(const SwapChain& swapchain) const 
-		{
-			return swapchain.mSwapChainDepthFormat == mSwapChainDepthFormat &&
-				swapchain.mSwapChainImageFormat == mSwapChainImageFormat;
-		}
+		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
+		[[nodiscard]] auto findDepthFormat() -> VkFormat;
+
+		auto acquireNextImage() -> VkResult;
+		auto submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult;
+
+		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
+
+		void resize(VkExtent2D extent);
 
 	private:
-		void init();
 		void createSwapChain();
 		void createImageViews();
-		void createDepthResources();
 		void createSyncObjects();
+		void destroyImageViews();
+		void destroySwapChain(VkSwapchainKHR swapChain);
 
-		// Helper functions
-		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-		VkFormat mSwapChainImageFormat;
-		VkFormat mSwapChainDepthFormat;
-		VkExtent2D mSwapChainExtent;
-
-		std::vector<VkImage> mDepthImages;
-		std::vector<VkDeviceMemory> mDepthImageMemories;
-		std::vector<VkImageView> mDepthImageViews;
-
-		std::vector<VkImage> mColorImages;
-		std::vector<VkImageView> mColorImageViews;
+		auto chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const -> VkSurfaceFormatKHR;
+		auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const -> VkPresentModeKHR;
+		auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const -> VkExtent2D;
+		auto chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const -> uint32_t;
 
 		VulkanDevice& m_device;
+
+		VkFormat m_format;
+		VkExtent2D m_extent;
 		VkExtent2D m_windowExtent;
 
-		VkSwapchainKHR m_swapChain;
-		std::shared_ptr<SwapChain> m_oldSwapChain;
+		VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
+		std::vector<VkImage> m_images;
+		std::vector<VkImageView> m_imageViews;
+		uint32_t m_currentImageIndex = 0;
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores;
 		std::vector<VkSemaphore> m_renderFinishedSemaphores;

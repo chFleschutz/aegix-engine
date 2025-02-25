@@ -29,14 +29,14 @@ namespace Aegix
 		return Graphics::StaticMesh::createFromFile(m_renderer.device(), ASSETS_DIR / modelPath);
 	}
 
-	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const std::filesystem::path& texturePath, const Graphics::Texture::Config& config)
+	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const std::filesystem::path& texturePath, VkFormat format)
 	{
-		return std::make_shared<Graphics::Texture>(m_renderer.device(), ASSETS_DIR / texturePath, config);
+		return std::make_shared<Graphics::Texture>(m_renderer.device(), ASSETS_DIR / texturePath, format);
 	}
 
-	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const glm::vec4& color, uint32_t width, uint32_t height, const Graphics::Texture::Config& config)
+	std::shared_ptr<Graphics::Texture> AssetManager::createTexture(const glm::vec4& color, uint32_t width, uint32_t height, VkFormat format)
 	{
-		return std::make_shared<Graphics::Texture>(m_renderer.device(), color, width, height, config);
+		return std::make_shared<Graphics::Texture>(m_renderer.device(), width, height, color, format);
 	}
 
 }

@@ -46,8 +46,9 @@ add_subdirectory("lib/imgui")
 add_subdirectory("src")
 
 if(BUILD_EXAMPLES)
-    add_subdirectory("examples/simple-scene")
     add_subdirectory("examples/pbs-scene")
+    add_subdirectory("examples/simple-scene")
+    add_subdirectory("examples/template-scene")
 endif()
 
 

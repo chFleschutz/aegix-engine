@@ -6,7 +6,7 @@ namespace Aegix::Graphics
 		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data)
 		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
-		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer {	device, data }
+		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer{ device, data }
 	{
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
@@ -36,15 +36,19 @@ namespace Aegix::Graphics
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
 			.build();
 
-		m_pipeline = Pipeline::Builder(m_device, *m_pipelineLayout)
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "pbs.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbs.frag.spv")
-			.setColorAttachmentFormats({ VK_FORMAT_B8G8R8A8_SRGB })
-			.setDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "geometry.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "geometry.frag.spv")
+			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.build();
 	}
 
-	void PBSRenderSystem::render(const FrameInfo& frameInfo)
+	void PBSRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
 		m_pipeline->bind(frameInfo.commandBuffer);
 
@@ -54,12 +58,12 @@ namespace Aegix::Graphics
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			m_pipelineLayout->pipelineLayout(),
 			0, 1,
-			&frameInfo.globalDescriptorSet,
+			&globalSet,
 			0, nullptr
 		);
 
 		PBSMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene->viewEntities<Component::Transform, Component::Mesh, PBSMaterial>();
+		auto view = frameInfo.scene.viewEntities<Component::Transform, Component::Mesh, PBSMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)

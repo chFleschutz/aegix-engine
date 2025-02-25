@@ -16,8 +16,10 @@ namespace Aegix::Graphics
 			float radius;
 		};
 
+		static constexpr RenderStage::Type STAGE = RenderStage::Type::Transparency;
+
 		PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const FrameInfo& frameInfo) override;
+		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};
 } 

@@ -1,49 +1,26 @@
 #include "swap_chain.h"
 
+#include "graphics/vulkan_tools.h"
+
 #include <array>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 #include <limits>
-#include <set>
-#include <stdexcept>
 #include <cassert>
 
 namespace Aegix::Graphics
 {
-	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent)
-		: m_device{ deviceRef }, m_windowExtent{ windowExtent }
+	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent)
+		: m_device{ device }, m_windowExtent{ windowExtent }
 	{
-		init();
-	}
-
-	SwapChain::SwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previous)
-		: m_device{ deviceRef }, m_windowExtent{ windowExtent }, m_oldSwapChain{ previous }
-	{
-		init();
-		m_oldSwapChain = nullptr;
+		createSwapChain();
+		createImageViews();
+		createSyncObjects();
 	}
 
 	SwapChain::~SwapChain()
 	{
-		for (auto imageView : mColorImageViews)
-		{
-			vkDestroyImageView(m_device.device(), imageView, nullptr);
-		}
-		mColorImageViews.clear();
-
-		if (m_swapChain != nullptr)
-		{
-			vkDestroySwapchainKHR(m_device.device(), m_swapChain, nullptr);
-			m_swapChain = nullptr;
-		}
-
-		for (int i = 0; i < mDepthImages.size(); i++)
-		{
-			vkDestroyImageView(m_device.device(), mDepthImageViews[i], nullptr);
-			vkDestroyImage(m_device.device(), mDepthImages[i], nullptr);
-			vkFreeMemory(m_device.device(), mDepthImageMemories[i], nullptr);
-		}
+		destroyImageViews();
+		destroySwapChain(m_swapChain);
 
 		// cleanup synchronization objects
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -54,33 +31,30 @@ namespace Aegix::Graphics
 		}
 	}
 
-	VkResult SwapChain::acquireNextImage(uint32_t* imageIndex)
+	auto SwapChain::acquireNextImage() -> VkResult
 	{
-		vkWaitForFences(
-			m_device.device(),
-			1,
+		vkWaitForFences(m_device.device(), 
+			1, 
 			&m_inFlightFences[m_currentFrame],
-			VK_TRUE,
+			VK_TRUE, 
 			std::numeric_limits<uint64_t>::max());
 
-		VkResult result = vkAcquireNextImageKHR(
-			m_device.device(),
+		VkResult result = vkAcquireNextImageKHR(m_device.device(),
 			m_swapChain,
 			std::numeric_limits<uint64_t>::max(),
 			m_imageAvailableSemaphores[m_currentFrame],  // must be a not signaled semaphore
 			VK_NULL_HANDLE,
-			imageIndex);
+			&m_currentImageIndex);
 
 		return result;
 	}
 
-	VkResult SwapChain::submitCommandBuffers(
-		const VkCommandBuffer* buffers, uint32_t* imageIndex)
+	auto SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult
 	{
-		if (m_imagesInFlight[*imageIndex] != VK_NULL_HANDLE)
-			vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+		if (m_imagesInFlight[m_currentImageIndex] != VK_NULL_HANDLE)
+			vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[m_currentImageIndex], VK_TRUE, UINT64_MAX);
 
-		m_imagesInFlight[*imageIndex] = m_inFlightFences[m_currentFrame];
+		m_imagesInFlight[m_currentImageIndex] = m_inFlightFences[m_currentFrame];
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -99,8 +73,7 @@ namespace Aegix::Graphics
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
 		vkResetFences(m_device.device(), 1, &m_inFlightFences[m_currentFrame]);
-		if (vkQueueSubmit(m_device.graphicsQueue(), 1, &submitInfo, m_inFlightFences[m_currentFrame]) != VK_SUCCESS)
-			throw std::runtime_error("failed to submit draw command buffer!");
+		VK_CHECK(vkQueueSubmit(m_device.graphicsQueue(), 1, &submitInfo, m_inFlightFences[m_currentFrame]));
 
 		VkSwapchainKHR swapChains[] = { m_swapChain };
 		VkPresentInfoKHR presentInfo = {};
@@ -109,7 +82,7 @@ namespace Aegix::Graphics
 		presentInfo.pWaitSemaphores = signalSemaphores;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = imageIndex;
+		presentInfo.pImageIndices = &m_currentImageIndex;
 
 		auto result = vkQueuePresentKHR(m_device.presentQueue(), &presentInfo);
 
@@ -118,27 +91,23 @@ namespace Aegix::Graphics
 		return result;
 	}
 
-	void SwapChain::init()
+	void SwapChain::resize(VkExtent2D extent)
 	{
+		destroyImageViews();
+
+		m_windowExtent = extent;
+
 		createSwapChain();
 		createImageViews();
-		createDepthResources();
-		createSyncObjects();
 	}
 
 	void SwapChain::createSwapChain()
 	{
 		SwapChainSupportDetails swapChainSupport = m_device.querySwapChainSupport();
-
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-		if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-		{
-			imageCount = swapChainSupport.capabilities.maxImageCount;
-		}
+		uint32_t imageCount = chooseImageCount(swapChainSupport.capabilities);
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -148,17 +117,22 @@ namespace Aegix::Graphics
 		createInfo.imageColorSpace = surfaceFormat.colorSpace;
 		createInfo.imageExtent = extent;
 		createInfo.imageArrayLayers = 1;
-		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		createInfo.presentMode = presentMode;
+		createInfo.clipped = VK_TRUE;
+		createInfo.oldSwapchain = m_swapChain;
 
 		QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
 		assert(indices.isComplete() && "Queue family indices are not complete");
-		uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value()};
-
+		
+		std::array<uint32_t, 2> queueFamilyIndices{ indices.graphicsFamily.value(), indices.presentFamily.value() };
 		if (indices.graphicsFamily != indices.presentFamily)
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = 2;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
+			createInfo.queueFamilyIndexCount = queueFamilyIndices.size();
+			createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 		}
 		else
 		{
@@ -167,90 +141,40 @@ namespace Aegix::Graphics
 			createInfo.pQueueFamilyIndices = nullptr;
 		}
 
-		createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-		createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		createInfo.presentMode = presentMode;
-		createInfo.clipped = VK_TRUE;
-		createInfo.oldSwapchain = m_oldSwapChain == nullptr ? VK_NULL_HANDLE : m_oldSwapChain->m_swapChain;
-
-		if (vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS)
-			throw std::runtime_error("failed to create swap chain");
+		VK_CHECK(vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain));
+		destroySwapChain(createInfo.oldSwapchain);
 
 		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
-		mColorImages.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, mColorImages.data());
+		m_images.resize(imageCount);
+		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, m_images.data());
 
-		mSwapChainImageFormat = surfaceFormat.format;
-		mSwapChainExtent = extent;
+		m_format = surfaceFormat.format;
+		m_extent = extent;
+
+		// At the beginning of a frame all swapchain images should be in present layout
+		for (const auto& image : m_images)
+		{
+			m_device.transitionImageLayout(image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		}
 	}
 
 	void SwapChain::createImageViews()
 	{
-		mColorImageViews.resize(mColorImages.size());
-		for (size_t i = 0; i < mColorImages.size(); i++)
+		m_imageViews.resize(m_images.size());
+		for (size_t i = 0; i < m_images.size(); i++)
 		{
 			VkImageViewCreateInfo viewInfo{};
 			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image = mColorImages[i];
+			viewInfo.image = m_images[i];
 			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			viewInfo.format = mSwapChainImageFormat;
+			viewInfo.format = m_format;
 			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			viewInfo.subresourceRange.baseMipLevel = 0;
 			viewInfo.subresourceRange.levelCount = 1;
 			viewInfo.subresourceRange.baseArrayLayer = 0;
 			viewInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mColorImageViews[i]) != VK_SUCCESS)
-				throw std::runtime_error("failed to create texture image view!");
-		}
-	}
-
-	void SwapChain::createDepthResources()
-	{
-		VkFormat depthFormat = findDepthFormat();
-		mSwapChainDepthFormat = depthFormat;
-
-		mDepthImages.resize(imageCount());
-		mDepthImageMemories.resize(imageCount());
-		mDepthImageViews.resize(imageCount());
-
-		for (int i = 0; i < mDepthImages.size(); i++)
-		{
-			VkImageCreateInfo imageInfo{};
-			imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			imageInfo.imageType = VK_IMAGE_TYPE_2D;
-			imageInfo.extent.width = mSwapChainExtent.width;
-			imageInfo.extent.height = mSwapChainExtent.height;
-			imageInfo.extent.depth = 1;
-			imageInfo.mipLevels = 1;
-			imageInfo.arrayLayers = 1;
-			imageInfo.format = depthFormat;
-			imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-			imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-			imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			imageInfo.flags = 0;
-
-			m_device.createImage(
-				imageInfo,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-				mDepthImages[i],
-				mDepthImageMemories[i]);
-
-			VkImageViewCreateInfo viewInfo{};
-			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image = mDepthImages[i];
-			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			viewInfo.format = depthFormat;
-			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-			viewInfo.subresourceRange.baseMipLevel = 0;
-			viewInfo.subresourceRange.levelCount = 1;
-			viewInfo.subresourceRange.baseArrayLayer = 0;
-			viewInfo.subresourceRange.layerCount = 1;
-
-			if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &mDepthImageViews[i]) != VK_SUCCESS)
-				throw std::runtime_error("failed to create texture image view!");
+			VK_CHECK(vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageViews[i]));
 		}
 	}
 
@@ -270,16 +194,30 @@ namespace Aegix::Graphics
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			if (vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(m_device.device(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to create synchronization objects for a frame!");
-			}
+			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]));
+			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]));
+			VK_CHECK(vkCreateFence(m_device.device(), &fenceInfo, nullptr, &m_inFlightFences[i]));
 		}
 	}
 
-	VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+	void SwapChain::destroyImageViews()
+	{
+		for (auto imageView : m_imageViews)
+		{
+			vkDestroyImageView(m_device.device(), imageView, nullptr);
+		}
+		m_imageViews.clear();
+	}
+
+	void SwapChain::destroySwapChain(VkSwapchainKHR swapChain)
+	{
+		if (swapChain)
+		{
+			vkDestroySwapchainKHR(m_device.device(), swapChain, nullptr);
+		}
+	}
+
+	auto SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const -> VkSurfaceFormatKHR
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
@@ -295,7 +233,7 @@ namespace Aegix::Graphics
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+	auto SwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const -> VkPresentModeKHR
 	{
 		for (const auto& availablePresentMode : availablePresentModes)
 		{
@@ -310,7 +248,7 @@ namespace Aegix::Graphics
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+	auto SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const -> VkExtent2D
 	{
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 		{
@@ -330,7 +268,18 @@ namespace Aegix::Graphics
 		}
 	}
 
-	VkFormat SwapChain::findDepthFormat()
+	auto SwapChain::chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const -> uint32_t
+	{
+		auto imageCount = capabilities.minImageCount + 1;
+		if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+		{
+			imageCount = capabilities.maxImageCount;
+		}
+
+		return imageCount;
+	}
+
+	auto SwapChain::findDepthFormat() -> VkFormat
 	{
 		// TODO: Rendersystems assume VK_FORMAT_D32_SFLOAT as the depth format
 		return m_device.findSupportedFormat(

@@ -1,19 +1,16 @@
 #pragma once
 
-#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/device.h"
-#include "graphics/frame_info.h"
+#include "graphics/frame_graph/frame_graph.h"
+#include "graphics/globals.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
 
+#include <array>
 #include <memory>
-#include <type_traits>
-#include <typeindex>
-#include <unordered_map>
-#include <vector>
 
 namespace Aegix::Graphics
 {
@@ -22,63 +19,54 @@ namespace Aegix::Graphics
 	public:
 		Renderer(Window& window, VulkanDevice& device);
 		Renderer(const Renderer&) = delete;
-		Renderer& operator=(const Renderer&) = delete;
+		Renderer(Renderer&&) = delete;
 		~Renderer();
 
+		Renderer& operator=(const Renderer&) = delete;
+		Renderer& operator=(Renderer&&) = delete;
+
 		template<typename T>
+			requires std::is_base_of_v<RenderSystem, T> &&
+			requires { T::STAGE; }
 		RenderSystem& addRenderSystem()
 		{
-			static_assert(std::is_base_of_v<RenderSystem, T>, "T has to be a subclass of RenderSystem");
-			auto it = m_renderSystems.find(typeid(T));
-			if (it != m_renderSystems.end())
-				return *it->second;
-
-			auto newSystem = std::make_unique<T>(m_device, *m_globalSetLayout);
-			return *m_renderSystems.emplace(typeid(T), std::move(newSystem)).first->second;
+			constexpr RenderStage::Type stageType = T::STAGE;
+			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, stageType);
 		}
 
 		VulkanDevice& device() { return m_device; }
-		SwapChain& swapChain() { return *m_swapChain; }
+		SwapChain& swapChain() { return m_swapChain; }
 		DescriptorPool& globalPool() { return *m_globalPool; }
-		float aspectRatio() const { return m_swapChain->extentAspectRatio(); }
-		bool isFrameInProgress() const { return m_isFrameStarted; }
 		VkCommandBuffer currentCommandBuffer() const;
+		float aspectRatio() const { return m_swapChain.aspectRatio(); }
+		bool isFrameStarted() const { return m_isFrameStarted; }
 		int frameIndex() const;
 
-		VkCommandBuffer beginRenderFrame();
-		void renderScene(VkCommandBuffer commandBuffer, Scene::Scene& scene);
-		void endRenderFrame(VkCommandBuffer commandBuffer);
+		/// @brief Renders the given scene
+		void renderFrame(Scene::Scene& scene, GUI& gui);
 
-		void shutdown();
+		/// @brief Waits for the GPU to be idle
+		void waitIdle();
 
 	private:
 		void createCommandBuffers();
-		void freeCommandBuffers();
 		void recreateSwapChain();
-		void initializeDescriptorPool();
+		void createDescriptorPool();
+		void createFrameGraph();
 
 		VkCommandBuffer beginFrame();
-		void endFrame();
-		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
-
-		void initializeGlobalUBO();
-		void updateGlobalUBO(const FrameInfo& frameInfo);
+		void endFrame(VkCommandBuffer commandBuffer);
 
 		Window& m_window;
 		VulkanDevice& m_device;
-		std::unique_ptr<SwapChain> m_swapChain;
-		std::vector<VkCommandBuffer> m_commandBuffers;
+		
+		SwapChain m_swapChain;
+		std::unique_ptr<DescriptorPool> m_globalPool;
+		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 
-		uint32_t m_currentImageIndex;
 		int m_currentFrameIndex = 0;
 		bool m_isFrameStarted = false;
 
-		std::unique_ptr<DescriptorPool> m_globalPool;
-		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
-		std::unique_ptr<DescriptorSet> m_globalDescriptorSet;
-		std::unique_ptr<UniformBuffer<GlobalUbo>> m_globalUBO;
-
-		std::unordered_map<std::type_index, std::unique_ptr<RenderSystem>> m_renderSystems;
+		FrameGraph m_frameGraph;
 	};
 }

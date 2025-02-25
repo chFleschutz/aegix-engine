@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, PBSMaterial::Data data = {});
 
 	private:
-		UniformBuffer<PBSMaterial::Data> m_uniformBuffer;
+		UniformBufferData<PBSMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_albedoTexture;
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_metalRoughnessTexture;
@@ -53,8 +53,10 @@ namespace Aegix::Graphics
 			glm::mat4 normalMatrix{ 1.0f };
 		};
 
+		constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
+
 		PBSRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const FrameInfo& frameInfo) override;
+		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};
 }

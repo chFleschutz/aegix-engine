@@ -1,15 +1,20 @@
 #include "gui.h"
 
-#include "graphics/swap_chain.h"
+#include "graphics/renderer.h"
+#include "graphics/window.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#include <cassert>
+
 namespace Aegix::Graphics
 {
 	GUI::GUI(const Window& window, Renderer& renderer)
 	{
+		auto& device = renderer.device();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
@@ -21,26 +26,23 @@ namespace Aegix::Graphics
 
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
-		auto& device = renderer.device();
-		VkFormat colorFormat = renderer.swapChain().swapChainImageFormat();
-		VkFormat depthFormat = renderer.swapChain().findDepthFormat();
-
+		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = device.instance();
 		initInfo.PhysicalDevice = device.physicalDevice();
 		initInfo.Device = device.device();
 		initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
 		initInfo.Queue = device.graphicsQueue();
-		initInfo.DescriptorPool = renderer.globalPool().descriptorPool();
+		initInfo.PipelineCache = VK_NULL_HANDLE;
+		initInfo.DescriptorPool = renderer.globalPool();
 		initInfo.Subpass = 0;
-		initInfo.MinImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
-		initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+		initInfo.MinImageCount = MAX_FRAMES_IN_FLIGHT;
+		initInfo.ImageCount = MAX_FRAMES_IN_FLIGHT;
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		initInfo.UseDynamicRendering = true;
-		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
+		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 		initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
 		initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
-		initInfo.PipelineRenderingCreateInfo.depthAttachmentFormat = depthFormat;
 		ImGui_ImplVulkan_Init(&initInfo);
 
 		ImGui_ImplVulkan_CreateFontsTexture();
@@ -67,7 +69,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void GUI::renderGui(VkCommandBuffer commandBuffer)
+	void GUI::render(VkCommandBuffer commandBuffer)
 	{
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();

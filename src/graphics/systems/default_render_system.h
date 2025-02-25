@@ -35,9 +35,8 @@ namespace Aegix::Graphics
 		const DefaultMaterial::Data& data() const { return m_uniformBuffer.data(); }
 
 	private:
-		UniformBuffer<DefaultMaterial::Data> m_uniformBuffer;
+		UniformBufferData<DefaultMaterial::Data> m_uniformBuffer;
 		std::shared_ptr<Texture> m_texture;
-		
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend DefaultRenderSystem;
@@ -55,6 +54,6 @@ namespace Aegix::Graphics
 
 		DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const FrameInfo& frameInfo) override;
+		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};
 }
