@@ -60,7 +60,7 @@ namespace Aegix::Graphics
 			m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "deferred.vert.spv")
 				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "deferred.frag.spv")
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 				.setVertexAttributeDescriptions({}) // Clear default vertex attributes
 				.setVertexBindingDescriptions({}) // Clear default vertex binding
@@ -97,8 +97,8 @@ namespace Aegix::Graphics
 				FrameGraphResourceType::Texture,
 				FrameGraphResourceUsage::ColorAttachment,
 				FrameGraphResourceTextureInfo{
-					.format = VK_FORMAT_R8G8B8A8_UNORM,
-					.extent = { 1920, 1080 },
+					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative
 					} 
 				});
