@@ -18,6 +18,7 @@ target_sources(AegixEngine PRIVATE
 	"graphics/frame_graph/frame_graph_render_pass.h"
 	"graphics/frame_graph/frame_graph_resource_pool.h"
 	"graphics/frame_graph/frame_graph_resource_pool.cpp"
+	"graphics/frame_graph/render_stage.h"
 	"graphics/globals.h"
 	"graphics/render_passes/geometry_pass.h" 
 	"graphics/render_passes/gui_pass.h" 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
+#include "graphics/frame_info.h"
 
 #include <vector>
 #include <unordered_map>

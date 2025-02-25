@@ -1,8 +1,7 @@
 #pragma once
 
 #include "graphics/buffer.h"
-#include "graphics/descriptors.h"
-#include "graphics/systems/render_system.h"
+#include "graphics/frame_graph/render_stage.h"
 #include "graphics/texture.h"
 
 #include <array>
@@ -112,23 +111,6 @@ namespace Aegix::Graphics
 		std::vector<FrameGraphResourceHandle> inputs;
 		std::vector<FrameGraphResourceHandle> outputs;
 		std::vector<FrameGraphNodeHandle> edges;
-	};
-
-
-	// RenderStage ---------------------------------------------------------------
-
-	struct RenderStage
-	{
-		enum class Type
-		{
-			Geometry,
-			Count
-		};
-
-		std::vector<std::unique_ptr<RenderSystem>> renderSystems;
-		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
-		std::unique_ptr<DescriptorSet> descriptorSet;
-		std::unique_ptr<UniformBuffer> ubo;
 	};
 
 
