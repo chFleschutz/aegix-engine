@@ -154,6 +154,9 @@ namespace Aegix::Graphics
 		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }
 
+		void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int index, 
+			VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
+
 	private:
 		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
 	};

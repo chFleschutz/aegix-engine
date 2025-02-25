@@ -255,4 +255,9 @@ namespace Aegix::Graphics
 			assert(result && "Failed to allocate descriptor set");
 		}
 	}
+
+	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int index, VkPipelineBindPoint bindPoint) const
+	{
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
+	}
 }
