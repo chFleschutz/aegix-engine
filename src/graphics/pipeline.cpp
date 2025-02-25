@@ -188,6 +188,7 @@ namespace Aegix::Graphics
 		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_COMPUTE }
 	{
 		assert(config.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
+		assert(config.shaderStage.module != VK_NULL_HANDLE && "Cannot create pipeline: no shader provided");
 
 		VkComputePipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -197,6 +198,8 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineIndex = -1;
 
 		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
+
+		vkDestroyShaderModule(m_device, config.shaderStage.module, nullptr);
 	}
 
 	Pipeline::~Pipeline()
