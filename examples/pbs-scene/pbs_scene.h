@@ -16,7 +16,7 @@ public:
 		using namespace Aegix;
 
 		auto& assetManager = AssetManager::instance();
-		//assetManager.addRenderSystem<Graphics::PointLightSystem>(); // Uncomment to visualize point lights
+		assetManager.addRenderSystem<Graphics::PointLightSystem>(); 
 
 		// CAMERA
 		auto& cameraTransform = camera().getComponent<Component::Transform>();
