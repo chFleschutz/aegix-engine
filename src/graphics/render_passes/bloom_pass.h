@@ -41,7 +41,8 @@ namespace Aegix::Graphics
 				FrameGraphResourceTextureInfo{
 					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 					.extent = { 0, 0 },
-					.resizePolicy = ResizePolicy::SwapchainRelative
+					.resizePolicy = ResizePolicy::SwapchainRelative,
+					.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 					}
 				});
 
@@ -55,14 +56,14 @@ namespace Aegix::Graphics
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
 			auto& sceneColor = resources.texture(m_sceneColor);
-			auto& bloom = resources.texture(m_bloom);
+			auto& bloomImage = resources.texture(m_bloom);
 
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			// Extract bright regions
 			DescriptorWriter{ *m_descriptorSetLayout }
 				.writeImage(0, sceneColor)
-				.writeImage(1, bloom)
+				.writeImage(1, bloomImage)
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 			m_pipeline->bind(cmd);
@@ -71,6 +72,9 @@ namespace Aegix::Graphics
 			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 
 			// Downsample
+			bloomImage.transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+
 
 			// Upsample
 
