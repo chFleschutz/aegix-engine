@@ -37,6 +37,9 @@ layout(set = 0, binding = 6) uniform Lighting
 
 const float PI = 3.14159265359;
 
+// Settings
+const float EMISSIVE_FACTOR = 10.0;
+
 float lightAttenuation(vec3 lightPos, vec3 fragPos);
 float NormalDistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
@@ -87,7 +90,7 @@ void main()
     Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
 
     // Emissive material
-    Lo += emissive;
+    Lo += emissive * EMISSIVE_FACTOR;
 
     imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
 }
