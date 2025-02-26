@@ -62,26 +62,19 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			auto& sceneColor = resources.texture(m_sceneColor);
-			auto& final = resources.texture(m_final);
-
-			auto sceneColorInfo = sceneColor.descriptorImageInfo();
-			sceneColorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			auto finalInfo = final.descriptorImageInfo();
-			finalInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, &sceneColorInfo)
-				.writeImage(1, &finalInfo)
+				.writeImage(0, resources.texture(m_sceneColor))
+				.writeImage(1, resources.texture(m_final))
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			m_pipeline->bind(cmd);
 			m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			uint32_t groupCountX = (final.extent().width + 15) / 16;
-			uint32_t groupCountY = (final.extent().height + 15) / 16;
+			auto extent = frameInfo.swapChainExtent;
+			uint32_t groupCountX = (extent.width + 15) / 16;
+			uint32_t groupCountY = (extent.height + 15) / 16;
 			vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
 		}
 

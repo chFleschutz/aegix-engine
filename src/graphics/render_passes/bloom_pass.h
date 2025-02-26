@@ -59,15 +59,9 @@ namespace Aegix::Graphics
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			// Extract bright regions
-			auto sceneColorInfo = sceneColor.descriptorImageInfo();
-			auto bloomInfo = bloom.descriptorImageInfo();
-
-			sceneColorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			bloomInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, &sceneColorInfo)
-				.writeImage(1, &bloomInfo)
+				.writeImage(0, sceneColor)
+				.writeImage(1, bloom)
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 			m_pipeline->bind(cmd);
