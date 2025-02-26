@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph.h"
-#include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"
@@ -121,10 +119,7 @@ namespace Aegix::Graphics
 			m_pipeline->bind(cmd);
 			m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			auto extent = frameInfo.swapChainExtent;
-			uint32_t groupCountX = (extent.width + 15) / 16;
-			uint32_t groupCountY = (extent.height + 15) / 16;
-			vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 		}
 
 	private:
