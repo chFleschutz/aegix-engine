@@ -36,6 +36,12 @@ namespace Aegix::Graphics
 				FrameGraphResourceUsage::Compute
 				});
 
+			m_bloom = builder.add({
+				"Bloom",
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Compute,
+				});
+
 			m_final = builder.add({
 				"Final",
 				FrameGraphResourceType::Texture,
@@ -49,7 +55,7 @@ namespace Aegix::Graphics
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Post Processing Pass",
-				.inputs = { m_sceneColor },
+				.inputs = { m_sceneColor, m_bloom },
 				.outputs = { m_final }
 			};
 		}
@@ -86,6 +92,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<Pipeline> m_pipeline;
 
 		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_bloom;
 		FrameGraphResourceHandle m_final;
 	};
 }
