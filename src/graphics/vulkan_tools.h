@@ -56,5 +56,8 @@ namespace Aegix::Tools
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet);
+
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
 	}
 }

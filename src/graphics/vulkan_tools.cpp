@@ -299,4 +299,19 @@ namespace Aegix::Tools
 	{
 		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, 0, 1, &descriptorSet, 0, nullptr);
 	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
+	}
 }
