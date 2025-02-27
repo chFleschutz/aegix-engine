@@ -24,6 +24,7 @@ namespace Aegix::Graphics
 		ImageView& operator=(const ImageView&) = delete;
 		ImageView& operator=(ImageView&& other) noexcept;
 
+		operator VkImageView() const { return m_imageView; }
 		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
 
 	private:

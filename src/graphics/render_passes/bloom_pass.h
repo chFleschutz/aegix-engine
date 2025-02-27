@@ -41,20 +41,6 @@ namespace Aegix::Graphics
 				FrameGraphResourceUsage::Compute
 				});
 
-			m_bloomMips = builder.add({
-				"BloomMips",
-				FrameGraphResourceType::Texture,
-				FrameGraphResourceUsage::Compute,
-				FrameGraphResourceTextureInfo{
-					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-					.extent = { 0, 0 },
-					.resizePolicy = ResizePolicy::SwapchainRelative,
-					.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | 
-						VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-					.mipLevels = 6
-					}
-				});
-
 			m_bloom = builder.add({
 				"Bloom",
 				FrameGraphResourceType::Texture,
@@ -63,30 +49,30 @@ namespace Aegix::Graphics
 					.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 					.extent = { 0, 0 },
 					.resizePolicy = ResizePolicy::SwapchainRelative,
+					.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+					.mipLevels = BLOOM_MIP_LEVELS
 					}
 				});
-
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Bloom",
 				.inputs = { m_sceneColor },
-				.outputs = { m_bloom, m_bloomMips },
+				.outputs = { m_bloom },
 			};
 		}
 
 		virtual void createResources(FrameGraphResourcePool& resources) override
 		{
-			auto& bloomMips = resources.texture(m_bloomMips);
+			auto& bloom = resources.texture(m_bloom);
 			for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 			{
-				m_mipViews[i] = ImageView{ bloomMips, i, 1 };
+				m_mipViews[i] = ImageView{ bloom, i, 1 };
 			}
 		}
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
 			auto& sceneColor = resources.texture(m_sceneColor);
-			auto& bloomMips = resources.texture(m_bloomMips);
 			auto& bloom = resources.texture(m_bloom);
 
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
@@ -94,7 +80,7 @@ namespace Aegix::Graphics
 			// Extract bright regions
 			DescriptorWriter{ *m_thresholdSetLayout }
 				.writeImage(0, sceneColor)
-				.writeImage(1, bloomMips)
+				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], bloom.layout() })
 				.build(m_thresholdSet->descriptorSet(frameInfo.frameIndex));
 
 			m_thresholdPipeline->bind(cmd);
@@ -103,7 +89,7 @@ namespace Aegix::Graphics
 			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 
 			// Downsample
-			bloomMips.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			bloom.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 			// Upsample
 
@@ -111,7 +97,6 @@ namespace Aegix::Graphics
 
 	private:
 		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_bloomMips;
 		FrameGraphResourceHandle m_bloom;
 		std::vector<ImageView> m_mipViews;
 
