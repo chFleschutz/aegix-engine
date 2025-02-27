@@ -45,7 +45,7 @@ namespace Aegix::Graphics
 					.resizePolicy = ResizePolicy::SwapchainRelative,
 					.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | 
 						VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-					.mipmapping = true
+					.mipLevels = 6
 					}
 				});
 

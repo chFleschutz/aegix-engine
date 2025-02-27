@@ -68,7 +68,7 @@ namespace Aegix::Graphics
 		VkExtent2D extent;
 		ResizePolicy resizePolicy = ResizePolicy::Fixed;
 		VkImageUsageFlags usage = 0;
-		bool mipmapping = false;
+		uint32_t mipLevels = 1;
 	};
 
 	using FrameGraphResourceInfo = std::variant<FrameGraphResourceBufferInfo, FrameGraphResourceTextureInfo>;

@@ -16,11 +16,13 @@ namespace Aegix::Graphics
 	public:
 		struct Config
 		{
+			static constexpr uint32_t CALCULATE_MIP_LEVELS = 0;
+
 			// Image settings
 			VkExtent2D extent = { 1, 1 };
 			VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
 			VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
-			bool mipmapping = false;
+			uint32_t mipLevels = 1;
 
 			// Sampler settings
 			VkFilter magFilter = VK_FILTER_LINEAR;

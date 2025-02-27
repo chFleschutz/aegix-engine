@@ -306,15 +306,16 @@ namespace Aegix::Graphics
 
 	void Texture::createImage(const Config& config)
 	{
-		if (config.mipmapping)
+		m_format = config.format;
+		m_extent = config.extent;
+		m_mipLevels = config.mipLevels;
+		m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if (config.mipLevels == Config::CALCULATE_MIP_LEVELS)
 		{
 			uint32_t maxDim = std::max(config.extent.width, config.extent.height);
 			m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(maxDim))) + 1;
 		}
-
-		m_extent = config.extent;
-		m_format = config.format;
-		m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
