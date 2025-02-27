@@ -6,13 +6,15 @@ layout(binding = 0, rgba16f) uniform image2D outFinalMap;
 layout(binding = 1, rgba16f) uniform image2D sceneColorMap;
 layout(binding = 2, rgba16f) uniform image2D bloomMap;
 
+const float BLOOM_INTENSITY = 0.25;
+
 void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 
 	vec3 sceneColor = imageLoad(sceneColorMap, pixelCoords).rgb;
 	vec3 bloomColor = imageLoad(bloomMap, pixelCoords).rgb;
-	vec3 color = sceneColor + bloomColor;
+	vec3 color = sceneColor + (BLOOM_INTENSITY * bloomColor);
 
 	// Reinhard tone mapping
 	vec3 toneMapped = color / (color + vec3(1.0));
