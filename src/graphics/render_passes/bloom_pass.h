@@ -110,10 +110,17 @@ namespace Aegix::Graphics
 		virtual void createResources(FrameGraphResourcePool& resources) override
 		{
 			auto& bloom = resources.texture(m_bloom);
+			auto& sceneColor = resources.texture(m_sceneColor);
+
 			for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 			{
 				m_mipViews[i] = ImageView{ bloom, i, 1 };
 			}
+
+			DescriptorWriter{ *m_thresholdSetLayout }
+				.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, sceneColor.imageView(), VK_IMAGE_LAYOUT_GENERAL})
+				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], VK_IMAGE_LAYOUT_GENERAL })
+				.build(m_thresholdSet->descriptorSet(0));
 
 			for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 			{
@@ -131,27 +138,23 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			auto& sceneColor = resources.texture(m_sceneColor);
+			VkCommandBuffer cmd = frameInfo.commandBuffer;
 			auto& bloom = resources.texture(m_bloom);
 
-			VkCommandBuffer cmd = frameInfo.commandBuffer;
-
-			// Extract bright regions
-			DescriptorWriter{ *m_thresholdSetLayout }
-				.writeImage(0, sceneColor)
-				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], bloom.layout() })
-				.build(m_thresholdSet->descriptorSet(frameInfo.frameIndex));
-
-			m_thresholdPipeline->bind(cmd);
-			m_thresholdSet->bind(cmd, *m_thresholdPipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
-
-			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
-
+			extractBrightRegions(cmd, frameInfo);
 			downSample(cmd, bloom);
 			upSample(cmd, bloom);
 		}
 
 	private:
+		void extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo)
+		{
+			m_thresholdPipeline->bind(cmd);
+			m_thresholdSet->bind(cmd, *m_thresholdPipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+
+			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
+		}
+
 		void downSample(VkCommandBuffer cmd, const Texture& bloom)
 		{
 			assert(bloom.layout() == VK_IMAGE_LAYOUT_GENERAL);
