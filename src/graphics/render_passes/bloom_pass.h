@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/texture.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
@@ -11,6 +12,7 @@ namespace Aegix::Graphics
 		static constexpr uint32_t BLOOM_MIP_LEVELS = 6;
 
 		BloomPass(VulkanDevice& device, DescriptorPool& pool)
+			: m_sampler{ device, VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false }
 		{
 			for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 			{
@@ -92,7 +94,7 @@ namespace Aegix::Graphics
 			{
 				DescriptorWriter{ *m_upsampleSetLayout }
 					.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[i], VK_IMAGE_LAYOUT_GENERAL })
-					.writeImage(1, VkDescriptorImageInfo{ bloom.sampler(), m_mipViews[i + 1], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL})
+					.writeImage(1, VkDescriptorImageInfo{ m_sampler, m_mipViews[i + 1], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL})
 					.build(m_upsampleSets[i]->descriptorSet(0));
 			}
 		}
@@ -174,6 +176,7 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_bloom;
 		std::vector<ImageView> m_mipViews;
+		Sampler m_sampler;
 
 		std::unique_ptr<Pipeline> m_thresholdPipeline;
 		std::unique_ptr<PipelineLayout> m_thresholdPipelineLayout;
