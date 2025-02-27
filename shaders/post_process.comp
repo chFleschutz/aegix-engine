@@ -6,7 +6,7 @@ layout(binding = 0, rgba16f) uniform image2D outFinalMap;
 layout(binding = 1, rgba16f) uniform image2D sceneColorMap;
 layout(binding = 2, rgba16f) uniform image2D bloomMap;
 
-const float BLOOM_INTENSITY = 0.25;
+const float BLOOM_INTENSITY = 0.2;
 
 void main()
 {
