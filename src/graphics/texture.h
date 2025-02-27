@@ -85,6 +85,8 @@ namespace Aegix::Graphics
 		/// @note The old image and view will NOT be destroyed
 		void update(VkImage image, VkImageView imageView, VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
 
+		void generateMipmaps(VkCommandBuffer commandBuffer, VkImageLayout finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
 	private:
 		void createImage(const Config& config);
 		void createImageView(const Config& config);
@@ -93,8 +95,8 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 
-		VkExtent2D m_extent;
 		VkFormat m_format;
+		VkExtent2D m_extent;
 		uint32_t m_mipLevels = 1;
 		VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImage m_image = VK_NULL_HANDLE;

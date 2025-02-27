@@ -78,7 +78,7 @@ namespace Aegix::Graphics
 
 
 	Texture::Texture(VulkanDevice& device, const SwapChain& swapChain)
-		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extent() }, 
+		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extent() },
 		m_layout{ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR }, m_image{ swapChain.image(0) }, m_imageView{ swapChain.imageView(0) }
 	{
 		Config config{};
@@ -86,9 +86,9 @@ namespace Aegix::Graphics
 	}
 
 	Texture::Texture(Texture&& other) noexcept
-		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent }, m_layout{ other.m_layout },
-		m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, m_imageView{ other.m_imageView },
-		m_sampler{ other.m_sampler }
+		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent }, m_mipLevels{ other.m_mipLevels },
+		m_layout{ other.m_layout }, m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, 
+		m_imageView{ other.m_imageView }, m_sampler{ other.m_sampler }
 	{
 		other.m_image = VK_NULL_HANDLE;
 		other.m_imageMemory = VK_NULL_HANDLE;
@@ -109,6 +109,7 @@ namespace Aegix::Graphics
 
 			m_format = other.m_format;
 			m_extent = other.m_extent;
+			m_mipLevels = other.m_mipLevels;
 			m_layout = other.m_layout;
 			m_image = other.m_image;
 			m_imageMemory = other.m_imageMemory;
@@ -144,7 +145,7 @@ namespace Aegix::Graphics
 		barrier.image = m_image;
 		barrier.subresourceRange.aspectMask = Tools::aspectFlags(m_format);
 		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.levelCount = m_mipLevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
 		barrier.subresourceRange.layerCount = 1;
 		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
@@ -221,6 +222,86 @@ namespace Aegix::Graphics
 		m_layout = layout;
 		m_image = image;
 		m_imageView = imageView;
+	}
+
+	void Texture::generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout)
+	{
+		transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.image = m_image;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.levelCount = 1;
+
+		for (uint32_t i = 1; i < m_mipLevels; i++)
+		{
+			barrier.subresourceRange.baseMipLevel = i - 1;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+			vkCmdPipelineBarrier(cmd,
+				VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier
+			);
+
+			VkImageBlit blit{};
+			blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blit.srcSubresource.mipLevel = i - 1;
+			blit.srcSubresource.baseArrayLayer = 0;
+			blit.srcSubresource.layerCount = 1;
+			blit.srcOffsets[0] = { 0, 0, 0 };
+			blit.srcOffsets[1].x = static_cast<int32_t>(m_extent.width >> (i - 1));
+			blit.srcOffsets[1].y = static_cast<int32_t>(m_extent.height >> (i - 1));
+			blit.srcOffsets[1].z = 1;
+			blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			blit.dstSubresource.mipLevel = i;
+			blit.srcSubresource.baseArrayLayer = 0;
+			blit.dstSubresource.layerCount = 1;
+			blit.dstOffsets[0] = { 0, 0, 0 };
+			blit.dstOffsets[1].x = static_cast<int32_t>(m_extent.width >> i);
+			blit.dstOffsets[1].y = static_cast<int32_t>(m_extent.height >> i);
+			blit.dstOffsets[1].z = 1;
+
+			vkCmdBlitImage(cmd,
+				m_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				1, &blit,
+				VK_FILTER_LINEAR);
+
+			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			barrier.newLayout = finalLayout;
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+			barrier.dstAccessMask = Tools::dstAccessMask(finalLayout);
+
+			vkCmdPipelineBarrier(cmd,
+				VK_PIPELINE_STAGE_TRANSFER_BIT, Tools::dstStage(barrier.dstAccessMask), 0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier);
+		}
+
+		barrier.subresourceRange.baseMipLevel = m_mipLevels - 1;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrier.newLayout = finalLayout;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = Tools::dstAccessMask(finalLayout);
+
+		vkCmdPipelineBarrier(cmd,
+			VK_PIPELINE_STAGE_TRANSFER_BIT, Tools::dstStage(barrier.dstAccessMask), 0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier);
+
+		m_layout = finalLayout;
 	}
 
 	void Texture::createImage(const Config& config)
