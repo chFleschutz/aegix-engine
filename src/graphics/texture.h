@@ -10,9 +10,35 @@
 
 namespace Aegix::Graphics
 {
+	class Texture;
+
+	class ImageView
+	{
+	public:
+		explicit ImageView(VulkanDevice& device);
+		ImageView(const Texture& texture, uint32_t baseMipLevel, uint32_t levelCount);
+		ImageView(const ImageView&) = delete;
+		ImageView(ImageView&& other) noexcept;
+		~ImageView();
+
+		ImageView& operator=(const ImageView&) = delete;
+		ImageView& operator=(ImageView&& other) noexcept;
+
+		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
+
+	private:
+		void destroy();
+
+		VulkanDevice& m_device;
+		VkImageView m_imageView = VK_NULL_HANDLE;
+	};
+
+
 	/// @brief Represents a Texture on the gpu and wraps a VkImage, VkDeviceMemory and VkImageView
 	class Texture
 	{
+		friend class ImageView;
+
 	public:
 		struct Config
 		{

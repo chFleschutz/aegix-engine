@@ -10,6 +10,61 @@
 
 namespace Aegix::Graphics
 {
+	ImageView::ImageView(VulkanDevice& device)
+		: m_device{ device }
+	{
+	}
+
+	ImageView::ImageView(const Texture& texture, uint32_t baseMipLevel, uint32_t levelCount)
+		: m_device{ texture.m_device }
+	{
+		assert(baseMipLevel + levelCount <= texture.m_mipLevels && "Invalid mip level range");
+
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = texture.m_image;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = texture.m_format;
+		viewInfo.subresourceRange.aspectMask = m_device.findAspectFlags(texture.m_format);
+		viewInfo.subresourceRange.baseMipLevel = baseMipLevel;
+		viewInfo.subresourceRange.levelCount = levelCount;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		VK_CHECK(vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageView));
+	}
+	
+	ImageView::ImageView(ImageView&& other) noexcept
+		: m_device{ other.m_device }, m_imageView{ other.m_imageView }
+	{
+		other.m_imageView = VK_NULL_HANDLE;
+	}
+
+	ImageView::~ImageView()
+	{
+		destroy();
+	}
+
+	ImageView& ImageView::operator=(ImageView&& other) noexcept
+	{
+		if (this != &other)
+		{
+			destroy();
+			m_imageView = other.m_imageView;
+			other.m_imageView = VK_NULL_HANDLE;
+		}
+		return *this;
+	}
+
+	void ImageView::destroy()
+	{
+		if (m_imageView)
+		{
+			m_device.scheduleDeletion(m_imageView);
+		}
+	}
+
+
 	Texture::Texture(VulkanDevice& device, const Config& config)
 		: m_device{ device }
 	{
