@@ -21,8 +21,8 @@ namespace Aegix::Graphics
 		ImageView(ImageView&& other) noexcept;
 		~ImageView();
 
-		ImageView& operator=(const ImageView&) = delete;
-		ImageView& operator=(ImageView&& other) noexcept;
+		auto operator=(const ImageView&) -> ImageView& = delete;
+		auto operator=(ImageView&& other) noexcept -> ImageView&;
 
 		operator VkImageView() const { return m_imageView; }
 		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
@@ -32,6 +32,28 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 		VkImageView m_imageView = VK_NULL_HANDLE;
+	};
+
+
+	class Sampler
+	{
+	public:
+		Sampler(VulkanDevice& device, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy);
+		Sampler(const Sampler&) = delete;
+		Sampler(Sampler&& other) noexcept;
+		~Sampler();
+
+		auto operator=(const Sampler&) -> Sampler& = delete;
+		auto operator=(Sampler&& other) noexcept -> Sampler&;
+
+		operator VkSampler() const { return m_sampler; }
+		[[nodiscard]] auto sampler() const -> VkSampler { return m_sampler; }
+
+	private:
+		void destroy();
+
+		VulkanDevice& m_device;
+		VkSampler m_sampler = VK_NULL_HANDLE;
 	};
 
 
