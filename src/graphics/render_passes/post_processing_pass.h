@@ -14,6 +14,7 @@ namespace Aegix::Graphics
 			m_descriptorSetLayout = DescriptorSetLayout::Builder{ device }
 				.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 				.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 				.build();
 
 			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
@@ -64,8 +65,9 @@ namespace Aegix::Graphics
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, resources.texture(m_sceneColor))
-				.writeImage(1, resources.texture(m_final))
+				.writeImage(0, resources.texture(m_final))
+				.writeImage(1, resources.texture(m_sceneColor))
+				.writeImage(2, resources.texture(m_bloom))
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 			m_pipeline->bind(cmd);

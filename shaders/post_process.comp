@@ -2,15 +2,20 @@
 
 layout(local_size_x = 16, local_size_y = 16) in;
 
-layout(binding = 0, rgba16) uniform image2D inputImage;
-layout(binding = 1, rgba16) uniform image2D outputImage;
+layout(binding = 0, rgba16f) uniform image2D outFinalMap;
+layout(binding = 1, rgba16f) uniform image2D sceneColorMap;
+layout(binding = 2, rgba16f) uniform image2D bloomMap;
 
 void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-	vec4 color = imageLoad(inputImage, pixelCoords);
+
+	vec3 sceneColor = imageLoad(sceneColorMap, pixelCoords).rgb;
+	vec3 bloomColor = imageLoad(bloomMap, pixelCoords).rgb;
+	vec3 color = sceneColor + bloomColor;
 
 	// Reinhard tone mapping
-	vec3 toneMapped = color.rgb / (color.rgb + vec3(1.0));
-	imageStore(outputImage, pixelCoords, vec4(toneMapped, 1.0));
+	vec3 toneMapped = color / (color + vec3(1.0));
+
+	imageStore(outFinalMap, pixelCoords, vec4(toneMapped, 1.0));
 }
