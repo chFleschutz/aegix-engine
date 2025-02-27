@@ -6,6 +6,7 @@
 #include <stb_image.h>
 
 #include <cassert>
+#include <cmath>
 
 namespace Aegix::Graphics
 {
@@ -190,7 +191,7 @@ namespace Aegix::Graphics
 
 	void Texture::transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout)
 	{
-		m_device.transitionImageLayout(commandBuffer, m_image, m_layout, newLayout);
+		m_device.transitionImageLayout(commandBuffer, m_image, m_layout, newLayout, m_mipLevels);
 		m_layout = newLayout;
 	}
 
@@ -224,25 +225,31 @@ namespace Aegix::Graphics
 
 	void Texture::createImage(const Config& config)
 	{
+		if (config.mipmapping)
+		{
+			uint32_t maxDim = std::max(config.extent.width, config.extent.height);
+			m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(maxDim))) + 1;
+		}
+
+		m_extent = config.extent;
+		m_format = config.format;
+		m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = config.extent.width;
-		imageInfo.extent.height = config.extent.height;
+		imageInfo.extent.width = m_extent.width;
+		imageInfo.extent.height = m_extent.height;
 		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
+		imageInfo.mipLevels = m_mipLevels;
 		imageInfo.arrayLayers = 1;
-		imageInfo.format = config.format;
+		imageInfo.format = m_format;
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.initialLayout = m_layout;
 		imageInfo.usage = config.usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0;
-
-		m_extent = { imageInfo.extent.width, imageInfo.extent.height };
-		m_layout = imageInfo.initialLayout;
-		m_format = imageInfo.format;
 
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_imageMemory);
 	}
@@ -256,7 +263,7 @@ namespace Aegix::Graphics
 		viewInfo.format = m_format;
 		viewInfo.subresourceRange.aspectMask = m_device.findAspectFlags(m_format);
 		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.levelCount = m_mipLevels;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
 

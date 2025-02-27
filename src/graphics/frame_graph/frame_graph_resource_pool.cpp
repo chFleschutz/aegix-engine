@@ -225,7 +225,8 @@ namespace Aegix::Graphics
 		m_textures.emplace_back(device, Texture::Config{
 			.extent = info.extent,
 			.format = info.format,
-			.usage = info.usage
+			.usage = info.usage,
+			.mipmapping = info.mipmapping
 			});
 		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}

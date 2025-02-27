@@ -20,6 +20,7 @@ namespace Aegix::Graphics
 			VkExtent2D extent = { 1, 1 };
 			VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
 			VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+			bool mipmapping = false;
 
 			// Sampler settings
 			VkFilter magFilter = VK_FILTER_LINEAR;
@@ -55,6 +56,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto extent() const -> VkExtent2D{ return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
+		[[nodiscard]] auto mipLevels() const -> uint32_t { return m_mipLevels; }
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto layout() const -> VkImageLayout { return m_layout; }
 		[[nodiscard]] auto image() const -> VkImage { return m_image; }
@@ -93,6 +95,7 @@ namespace Aegix::Graphics
 
 		VkExtent2D m_extent;
 		VkFormat m_format;
+		uint32_t m_mipLevels = 1;
 		VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImage m_image = VK_NULL_HANDLE;
 		VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;
