@@ -316,6 +316,7 @@ namespace Aegix::Graphics
 		config.extent = { width, height };
 		config.format = m_format;
 		config.usage = usage;
+		config.mipLevels = m_mipLevels;
 
 		createImage(config);
 		createImageView(config);
