@@ -1,7 +1,8 @@
 #include "descriptors.h"
 
+#include "graphics/vulkan_tools.h"
+
 #include <cassert>
-#include <stdexcept>
 
 namespace Aegix::Graphics
 {
@@ -45,8 +46,7 @@ namespace Aegix::Graphics
 		descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
 		descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
-		if (vkCreateDescriptorSetLayout(device.device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
-			throw std::runtime_error("failed to create descriptor set layout!");
+		VK_CHECK(vkCreateDescriptorSetLayout(device.device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout))
 	}
 
 	DescriptorSetLayout::~DescriptorSetLayout()
@@ -96,8 +96,7 @@ namespace Aegix::Graphics
 		descriptorPoolInfo.maxSets = maxSets;
 		descriptorPoolInfo.flags = poolFlags;
 
-		if (vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
-			throw std::runtime_error("failed to create descriptor pool!");
+		VK_CHECK(vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &m_descriptorPool))
 	}
 
 	DescriptorPool::~DescriptorPool()

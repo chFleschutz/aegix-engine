@@ -11,7 +11,6 @@
 #include "scene/scene.h"
 
 #include <cassert>
-#include <stdexcept>
 
 namespace Aegix::Graphics
 {
@@ -81,8 +80,7 @@ namespace Aegix::Graphics
 		allocInfo.commandPool = m_device.commandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
 
-		if (vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS)
-			throw std::runtime_error("Failed to allocate command buffers");
+		VK_CHECK(vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()))
 	}
 
 	void Renderer::recreateSwapChain()
@@ -145,8 +143,7 @@ namespace Aegix::Graphics
 			return nullptr;
 		}
 
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-			throw std::runtime_error("Failed to aquire swap chain image");
+		assert(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR && "Failed to aquire swap chain image");
 
 		m_isFrameStarted = true;
 
@@ -154,8 +151,7 @@ namespace Aegix::Graphics
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-			throw std::runtime_error("Failed to begin recording command buffer");
+		VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo))
 
 		return commandBuffer;
 	}
@@ -164,8 +160,7 @@ namespace Aegix::Graphics
 	{
 		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
-		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-			throw std::runtime_error("Failed to record command buffer");
+		VK_CHECK(vkEndCommandBuffer(commandBuffer))
 
 		auto result = m_swapChain.submitCommandBuffers(&commandBuffer);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
@@ -175,7 +170,7 @@ namespace Aegix::Graphics
 		}
 		else if (result != VK_SUCCESS)
 		{
-			throw std::runtime_error("Failed to present swap chain image");
+			assert(false && "Failed to present swap chain image");
 		}
 
 		waitIdle();

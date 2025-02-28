@@ -5,7 +5,6 @@
 #include "utils/file.h"
 
 #include <cassert>
-#include <stdexcept>
 
 namespace Aegix::Graphics
 {
@@ -58,8 +57,7 @@ namespace Aegix::Graphics
 		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
 		pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
-		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
-			throw std::runtime_error("failed to create pipeline layout");
+		VK_CHECK(vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 	}
 
 	Graphics::PipelineLayout::~PipelineLayout()

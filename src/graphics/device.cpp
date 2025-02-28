@@ -83,8 +83,7 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createInstance()
 	{
-		if (enableValidationLayers && !checkValidationLayerSupport())
-			throw std::runtime_error("validation layers requested, but not available!");
+		assert(!enableValidationLayers || checkValidationLayerSupport() && "Validation layers requested, but not available!");
 
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -115,8 +114,7 @@ namespace Aegix::Graphics
 			std::cout << "Vulkan Validation Layer enabled\n";
 		}
 
-		if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
-			throw std::runtime_error("failed to create instance!");
+		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance))
 
 		hasGflwRequiredInstanceExtensions();
 	}
@@ -126,8 +124,7 @@ namespace Aegix::Graphics
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
-		if (deviceCount == 0)
-			throw std::runtime_error("failed to find GPUs with Vulkan support");
+		assert(deviceCount > 0 && "Failed to find GPUs with Vulkan support");
 
 		std::cout << "Device count: " << deviceCount << std::endl;
 		std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -142,8 +139,7 @@ namespace Aegix::Graphics
 			}
 		}
 
-		if (m_physicalDevice == VK_NULL_HANDLE)
-			throw std::runtime_error("failed to find a suitable GPU");
+		assert(m_physicalDevice != VK_NULL_HANDLE && "Failed to find a suitable GPU");
 
 		vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
 		std::cout << "Physical device: " << m_properties.deviceName << std::endl;
@@ -196,8 +192,7 @@ namespace Aegix::Graphics
 			createInfo.enabledLayerCount = 0;
 		}
 
-		if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
-			throw std::runtime_error("failed to create logical device!");
+		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device))
 
 		assert(indices.isComplete() && "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
@@ -214,8 +209,7 @@ namespace Aegix::Graphics
 		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-		if (vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
-			throw std::runtime_error("failed to create command pool!");
+		VK_CHECK(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool))
 	}
 
 	void VulkanDevice::createSurface()
@@ -260,10 +254,7 @@ namespace Aegix::Graphics
 		if (!enableValidationLayers) return;
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		populateDebugMessengerCreateInfo(createInfo);
-		if (CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to set up debug messenger!");
-		}
+		VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger))
 	}
 
 	bool VulkanDevice::checkValidationLayerSupport()
@@ -320,20 +311,15 @@ namespace Aegix::Graphics
 		std::vector<VkExtensionProperties> extensions(extensionCount);
 		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-		//std::cout << "available extensions:" << std::endl;
 		std::unordered_set<std::string> available;
 		for (const auto& extension : extensions)
 		{
-			//std::cout << "\t" << extension.extensionName << std::endl;
 			available.insert(extension.extensionName);
 		}
 
-		//std::cout << "required extensions:" << std::endl;
 		for (const auto& required : requiredExtensions())
 		{
-			//std::cout << "\t" << required << std::endl;
-			if (available.find(required) == available.end())
-				throw std::runtime_error("Missing required glfw extension");
+			assert(available.find(required) != available.end() && "Missing required glfw extension");
 		}
 	}
 
@@ -433,7 +419,8 @@ namespace Aegix::Graphics
 				return i;
 		}
 
-		throw std::runtime_error("failed to find suitable memory type!");
+		assert(false && "Failed to find suitable memory type!");
+		return 0;
 	}
 
 	QueueFamilyIndices VulkanDevice::findPhysicalQueueFamilies() const
@@ -459,7 +446,8 @@ namespace Aegix::Graphics
 			}
 		}
 
-		throw std::runtime_error("failed to find supported format!");
+		assert(false && "failed to find supported format!");
+		return VK_FORMAT_UNDEFINED;
 	}
 
 	VkImageAspectFlags VulkanDevice::findAspectFlags(VkFormat format) const
@@ -527,8 +515,7 @@ namespace Aegix::Graphics
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		if (vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-			throw std::runtime_error("failed to create vertex buffer!");
+		VK_CHECK(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer))
 
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
@@ -538,8 +525,7 @@ namespace Aegix::Graphics
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
-		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-			throw std::runtime_error("failed to allocate vertex buffer memory!");
+		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory))
 
 		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
 	}
@@ -585,8 +571,7 @@ namespace Aegix::Graphics
 	void VulkanDevice::createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties,
 		VkImage& image, VkDeviceMemory& imageMemory) const
 	{
-		if (vkCreateImage(m_device, &imageInfo, nullptr, &image) != VK_SUCCESS)
-			throw std::runtime_error("failed to create image");
+		VK_CHECK(vkCreateImage(m_device, &imageInfo, nullptr, &image))
 
 		VkMemoryRequirements memRequirements;
 		vkGetImageMemoryRequirements(m_device, image, &memRequirements);
@@ -596,11 +581,8 @@ namespace Aegix::Graphics
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
-		if (vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-			throw std::runtime_error("failed to allocate image memory");
-
-		if (vkBindImageMemory(m_device, image, imageMemory, 0) != VK_SUCCESS)
-			throw std::runtime_error("failed to bind image memory");
+		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory))
+		VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0))
 	}
 
 	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,

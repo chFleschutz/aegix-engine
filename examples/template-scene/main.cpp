@@ -2,22 +2,9 @@
 
 #include "template_scene.h"
 
-#include <iostream>
-#include <stdexcept>
-
-int main()
+auto main() -> int
 {
-	try
-	{
-		Aegix::Engine engine{};
-		engine.loadScene<TemplateScene>();
-		engine.run();
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << e.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
+	Aegix::Engine engine{};
+	engine.loadScene<TemplateScene>();
+	engine.run();
 }

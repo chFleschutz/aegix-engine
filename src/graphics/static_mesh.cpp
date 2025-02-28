@@ -146,8 +146,8 @@ namespace Aegix::Graphics
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str()))
-			throw std::runtime_error(warn + err);
+		bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str());
+		assert(result && "Failed to load OBJ file");
 
 		positions.clear();
 		colors.clear();

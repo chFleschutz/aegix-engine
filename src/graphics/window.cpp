@@ -1,6 +1,6 @@
 #include "window.h"
 
-#include <stdexcept>
+#include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
@@ -17,8 +17,7 @@ namespace Aegix::Graphics
 
 	void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
 	{
-		if (glfwCreateWindowSurface(instance, m_window, nullptr, surface) != VK_SUCCESS)
-			throw std::runtime_error("failed to create window surface");
+		VK_CHECK(glfwCreateWindowSurface(instance, m_window, nullptr, surface))
 	}
 
 	void Window::framebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height)
