@@ -22,13 +22,11 @@ add_subdirectory(lib)
 add_subdirectory(src)
 
 if(BUILD_EXAMPLES)
-    add_subdirectory("examples/pbs-scene")
-    add_subdirectory("examples/simple-scene")
-    add_subdirectory("examples/template-scene")
+    add_subdirectory(examples)
 endif()
 
 if(COMPILE_SHADERS)
-    add_subdirectory("shaders")
+    add_subdirectory(shaders)
 endif()
 
 # Print configuration
