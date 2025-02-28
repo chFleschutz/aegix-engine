@@ -37,15 +37,15 @@ layout(set = 0, binding = 6) uniform Lighting
 
 const float PI = 3.14159265359;
 const float EPSILON = 0.0001;
-const vec3 F_DIELECTRIC = vec3(0.04);
+const float F_DIELECTRIC = 0.04;
 
 const float EMISSIVE_FACTOR = 2.0;
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos);
-float NormalDistributionGGX(float NdotH, float roughness);
-float GeometrySchlickGGX(float NdotV, float roughness);
-float GeometrySmith(float NdotV, float NdotL, float roughness);
-vec3 FresnelSchlick(float cosTheta, vec3 F0);
+float normalDistribution(float NdotH, float alpha);
+float SchlickGGX(float NdotX, float alpha);
+float geometricOcclusion(float NdotV, float NdotL, float alpha);
+vec3 specularReflection(float VdotH, vec3 F0);
 vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float metallic, vec3 radiance, vec3 F0);
 
 void main()
@@ -66,7 +66,7 @@ void main()
 	vec3 V = normalize(lighting.cameraPosition.xyz - position);
 	
     // Tint reflection for metals
-    vec3 F0 = mix(F_DIELECTRIC, albedo, metallic);
+    vec3 F0 = mix(vec3(F_DIELECTRIC), albedo, metallic);
 
     // Emissive material
     vec3 Lo = emissive * EMISSIVE_FACTOR;
@@ -96,64 +96,62 @@ void main()
         Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }
 
-    Lo = clamp(Lo, 0.0, 100.0);
     imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
 }
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos)
 {
 	float d = length(lightPos - fragPos);
-    return 1.0 / max(EPSILON, d * d);
+    return 1.0 / max(d * d, EPSILON);
 }
 
-float NormalDistributionGGX(float NdotH, float roughness)
+float normalDistribution(float NdotH, float alpha)
 {
-    float a = roughness * roughness;
-    float a2 = a * a;
-    float NdotH2 = NdotH * NdotH;
-
-    float denum = NdotH2 * (a2 - 1.0) + 1.0;
-    return a2 / (PI * denum * denum);
+    // Trowbridge-Reitz GGX
+    float a2 = alpha * alpha;
+    float denum = NdotH * NdotH * (a2 - 1.0) + 1.0;
+    return a2 / max(PI * denum * denum, EPSILON);
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness)
+float SchlickGGX(float NdotX, float alpha)
 {
-    float r = roughness + 1.0;
-    float k = (r * r) / 8.0;
-    return NdotV / (NdotV * (1.0 - k) + k);
+    // Schlick-Beckman GGX
+    float k = alpha / 2.0;
+    return NdotX / max(NdotX * (1.0 - k) + k, EPSILON);
 }
 
-float GeometrySmith(float NdotV, float NdotL, float roughness)
+float geometricOcclusion(float NdotV, float NdotL, float alpha)
 {
-    float ggx1 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx2 = GeometrySchlickGGX(NdotL, roughness);
-    return ggx1 * ggx2;
+    // Smith Model 
+    return SchlickGGX(NdotV, alpha) * SchlickGGX(NdotL, alpha);
 }
 
-vec3 FresnelSchlick(float cosTheta, vec3 F0)
+vec3 specularReflection(float VdotH, vec3 F0)
 {
-    return F0 + (vec3(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    // Fresnel Schlick approximation
+    return F0 + (vec3(1.0) - F0) * pow(1.0 - VdotH, 5.0);
 }
 
 vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float metallic, vec3 radiance, vec3 F0)
 {
     vec3 H = normalize(V + L);
-    float NdotH = max(0.0, dot(N, H));
-    float NdotL = max(0.0, dot(N, L));
-    float NdotV = max(0.0, dot(N, V));
-    float HdotV = max(0.0, dot(H, V));
+    float alpha = roughness * roughness;
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotH = max(dot(N, H), 0.0);
+    float VdotH = max(dot(H, V), 0.0);
 
-    // Cook-Torrance BRDF
-    float D = NormalDistributionGGX(NdotH, roughness);
-    float G = GeometrySmith(NdotV, NdotL, roughness);
-    vec3 F = FresnelSchlick(HdotV, F0);
+    float D = normalDistribution(NdotH, roughness);
+    float G = geometricOcclusion(NdotV, NdotL, alpha);
+    vec3 F = specularReflection(VdotH, F0);
 
     vec3 kS = F;
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
-    vec3 DGF = D * G * F ;
-    vec3 specular = DGF / max(EPSILON, 4.0 * NdotV * NdotL);
+    // Lambert for diffuse
     vec3 diffuse = kD * albedo / PI;
+    // Cook-Torrance for specular
+    vec3 specular = D * G * F / max(4.0 * NdotV * NdotL, EPSILON);
 
     return (diffuse + specular) * radiance * NdotL;
 }
