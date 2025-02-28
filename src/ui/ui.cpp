@@ -24,6 +24,10 @@ namespace Aegix::UI
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+#ifndef NDEBUG
+		io.ConfigDebugIsDebuggerPresent = true;
+#endif // !NDEBUG
+
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
 		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
