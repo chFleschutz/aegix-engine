@@ -130,7 +130,7 @@ namespace Aegix::Graphics
 
 		FrameGraphResourcePool& operator=(const FrameGraphResourcePool&) = delete;
 		FrameGraphResourcePool& operator=(FrameGraphResourcePool&&) = delete;
-
+		
 		/// @brief Returns the node for the given handle
 		[[nodiscard]] auto node(FrameGraphNodeHandle handle) -> FrameGraphNode&;
 		[[nodiscard]] auto node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&;
@@ -146,6 +146,9 @@ namespace Aegix::Graphics
 		/// @brief Returns the texture for the given handle (must be a texture resource)
 		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> Texture&;
 		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&;
+
+		[[nodiscard]] auto resources() -> std::vector<FrameGraphResource>& { return m_resources; }
+		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNode>& { return m_nodes; }
 
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
 		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
