@@ -72,7 +72,7 @@ namespace Aegix::Graphics
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vkDestroyDevice(m_device, nullptr);
 
-		if (enableValidationLayers)
+		if (ENABLE_VALIDATION)
 		{
 			DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 		}
@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createInstance()
 	{
-		assert(!enableValidationLayers || checkValidationLayerSupport() && "Validation layers requested, but not available!");
+		assert(!ENABLE_VALIDATION || checkValidationLayerSupport() && "Validation layers requested, but not available!");
 
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -91,7 +91,7 @@ namespace Aegix::Graphics
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "Aegix Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_3; 
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		auto extensions = requiredExtensions();
 
@@ -104,7 +104,7 @@ namespace Aegix::Graphics
 		createInfo.pNext = nullptr;
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-		if (enableValidationLayers)
+		if constexpr (ENABLE_VALIDATION)
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -116,7 +116,7 @@ namespace Aegix::Graphics
 
 		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance))
 
-		hasGflwRequiredInstanceExtensions();
+			hasGflwRequiredInstanceExtensions();
 	}
 
 	void VulkanDevice::pickPhysicalDevice()
@@ -180,21 +180,18 @@ namespace Aegix::Graphics
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+		createInfo.enabledLayerCount = 0;
 
 		// might not really be necessary anymore because device specific validation layers have been deprecated
-		if (enableValidationLayers)
+		if constexpr (ENABLE_VALIDATION)
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
-		}
 
 		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device))
 
-		assert(indices.isComplete() && "Queue family indices are not complete");
+			assert(indices.isComplete() && "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
 		vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 	}
@@ -251,10 +248,12 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::setupDebugMessenger()
 	{
-		if (!enableValidationLayers) return;
-		VkDebugUtilsMessengerCreateInfoEXT createInfo;
-		populateDebugMessengerCreateInfo(createInfo);
-		VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger))
+		if constexpr (ENABLE_VALIDATION)
+		{
+			VkDebugUtilsMessengerCreateInfoEXT createInfo;
+			populateDebugMessengerCreateInfo(createInfo);
+			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger))
+		}
 	}
 
 	bool VulkanDevice::checkValidationLayerSupport()
@@ -295,8 +294,8 @@ namespace Aegix::Graphics
 		std::vector<const char*> extensions;
 		extensions.reserve(glfwExtensionCount);
 		extensions.insert(extensions.end(), glfwExtensions, glfwExtensions + glfwExtensionCount);
-		
-		if (enableValidationLayers)
+
+		if constexpr (ENABLE_VALIDATION)
 		{
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
@@ -517,7 +516,7 @@ namespace Aegix::Graphics
 
 		VK_CHECK(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer))
 
-		VkMemoryRequirements memRequirements;
+			VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
@@ -527,7 +526,7 @@ namespace Aegix::Graphics
 
 		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory))
 
-		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+			vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
 	}
 
 	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
@@ -573,7 +572,7 @@ namespace Aegix::Graphics
 	{
 		VK_CHECK(vkCreateImage(m_device, &imageInfo, nullptr, &image))
 
-		VkMemoryRequirements memRequirements;
+			VkMemoryRequirements memRequirements;
 		vkGetImageMemoryRequirements(m_device, image, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
@@ -582,7 +581,7 @@ namespace Aegix::Graphics
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
 		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory))
-		VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0))
+			VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0))
 	}
 
 	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,

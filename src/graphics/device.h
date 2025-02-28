@@ -32,12 +32,6 @@ namespace Aegix::Graphics
 	class VulkanDevice
 	{
 	public:
-#ifdef NDEBUG
-		const bool enableValidationLayers = false;
-#else
-		const bool enableValidationLayers = true;
-#endif
-
 		VulkanDevice(Window& window);
 		VulkanDevice(const VulkanDevice&) = delete;
 		VulkanDevice(VulkanDevice&&) = delete;
