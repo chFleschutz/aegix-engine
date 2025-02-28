@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::renderFrame(Scene::Scene& scene, UI& gui)
+	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
 	{
 		auto commandBuffer = beginFrame();
 
@@ -55,7 +55,7 @@ namespace Aegix::Graphics
 
 		FrameInfo frameInfo{
 			scene,
-			gui,
+			ui,
 			m_currentFrameIndex,
 			commandBuffer,
 			m_swapChain.extent(),

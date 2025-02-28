@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	/// @brief Base class for all GUI layers
 	class Layer

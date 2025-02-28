@@ -7,7 +7,7 @@
 
 #include <functional>
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	class ScenePropertiesLayer : public Layer
 	{

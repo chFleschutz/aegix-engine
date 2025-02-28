@@ -27,7 +27,7 @@ namespace Aegix
 			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
 			"\n\n";
 
-		m_ui.pushLayer<Graphics::MainMenuLayer>();
+		m_ui.pushLayer<UI::MainMenuLayer>();
 		m_systems.add<CameraSystem>();
 	}
 

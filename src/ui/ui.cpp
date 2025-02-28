@@ -9,9 +9,9 @@
 
 #include <cassert>
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
-	UI::UI(const Window& window, Renderer& renderer)
+	UI::UI(const Graphics::Window& window, Graphics::Renderer& renderer)
 	{
 		auto& device = renderer.device();
 
@@ -36,8 +36,8 @@ namespace Aegix::Graphics
 		initInfo.PipelineCache = VK_NULL_HANDLE;
 		initInfo.DescriptorPool = renderer.globalPool();
 		initInfo.Subpass = 0;
-		initInfo.MinImageCount = MAX_FRAMES_IN_FLIGHT;
-		initInfo.ImageCount = MAX_FRAMES_IN_FLIGHT;
+		initInfo.MinImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
+		initInfo.ImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		initInfo.UseDynamicRendering = true;
 		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

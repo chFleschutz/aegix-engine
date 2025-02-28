@@ -9,8 +9,7 @@ namespace Aegix::Graphics
 	struct FrameInfo
 	{
 		Scene::Scene& scene;
-		UI& ui;
-		
+		UI::UI& ui;
 		int frameIndex;
 		VkCommandBuffer commandBuffer;
 		VkExtent2D swapChainExtent;

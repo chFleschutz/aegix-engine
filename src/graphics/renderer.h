@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 		int frameIndex() const;
 
 		/// @brief Renders the given scene
-		void renderFrame(Scene::Scene& scene, UI& gui);
+		void renderFrame(Scene::Scene& scene, UI::UI& ui);
 
 		/// @brief Waits for the GPU to be idle
 		void waitIdle();

@@ -7,7 +7,7 @@
 
 #include "imgui.h"
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	/// @brief Shows the main menu bar of the application
 	class MainMenuLayer : public Layer

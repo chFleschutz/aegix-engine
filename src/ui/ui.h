@@ -9,15 +9,19 @@
 
 namespace Aegix::Graphics
 {
-	class Window;
 	class Renderer;
+	class Window;
+}
+
+namespace Aegix::UI
+{
 
 	/// @brief Manages all GUI Layers for displaying ImGui elements
 	/// @note This class is a wrapper around ImGui
 	class UI
 	{
 	public:
-		UI(const Window& window, Renderer& renderer);
+		UI(const Graphics::Window& window, Graphics::Renderer& renderer);
 		UI(const UI&) = delete;
 		UI(UI&&) = delete;
 		~UI();

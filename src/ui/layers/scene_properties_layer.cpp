@@ -7,7 +7,7 @@
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	void ScenePropertiesLayer::onGuiRender()
 	{

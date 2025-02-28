@@ -34,7 +34,7 @@ namespace Aegix
 		Graphics::Window& window() { return m_window; }
 		Graphics::VulkanDevice& device() { return m_device; }
 		Graphics::Renderer& renderer() { return m_renderer; }
-		Graphics::UI& ui() { return m_ui; }
+		UI::UI& ui() { return m_ui; }
 		AssetManager& assetManager() { return m_assetManager; }
 		SystemManager& systemManager() { return m_systems; }
 		Scene::Scene& scene() { assert(m_scene);  return *m_scene; }
@@ -59,7 +59,7 @@ namespace Aegix
 		Graphics::Window m_window{ Graphics::DEFAULT_WIDTH, Graphics::DEFAULT_HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
-		Graphics::UI m_ui{ m_window, m_renderer };
+		UI::UI m_ui{ m_window, m_renderer };
 		Input m_input{ m_window };
 		AssetManager m_assetManager{ m_renderer };
 		SystemManager m_systems;
