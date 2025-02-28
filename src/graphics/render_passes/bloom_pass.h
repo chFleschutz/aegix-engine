@@ -11,6 +11,8 @@
 
 namespace Aegix::Graphics
 {
+	/// @brief Bloom post-processing effect using a threshold, downsample, and upsample pass
+	/// @note Based on https://learnopengl.com/Guest-Articles/2022/Phys.-Based-Bloom and https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare/
 	class BloomPass : public FrameGraphRenderPass
 	{
 	public:
@@ -53,6 +55,7 @@ namespace Aegix::Graphics
 
 			m_downsamplePipelineLayout = PipelineLayout::Builder{ device }
 				.addDescriptorSetLayout(*m_downsampleSetLayout)
+				.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(uint32_t))
 				.build();
 
 			m_downsamplePipeline = Pipeline::ComputeBuilder{ device, *m_downsamplePipelineLayout }
@@ -190,6 +193,8 @@ namespace Aegix::Graphics
 				);
 
 				m_downsampleSets[srcMip]->bind(cmd, *m_downsamplePipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+
+				Tools::vk::cmdPushConstants(cmd, *m_downsamplePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, srcMip);
 
 				VkExtent2D mipExtent = { bloom.width() >> dstMip, bloom.height() >> dstMip };
 				Tools::vk::cmdDispatch(cmd, mipExtent, { 16, 16 });
