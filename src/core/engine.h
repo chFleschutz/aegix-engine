@@ -5,10 +5,10 @@
 #include "core/systems/system_manager.h"
 #include "graphics/device.h"
 #include "graphics/globals.h"
-#include "graphics/gui.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 #include "scene/scene.h"
+#include "ui/gui.h"
 
 #include <memory>
 #include <type_traits>

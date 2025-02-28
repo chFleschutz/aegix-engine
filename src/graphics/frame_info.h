@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/gui.h"
+#include "ui/gui.h"
 #include "scene/components.h"
 #include "scene/scene.h"
 
