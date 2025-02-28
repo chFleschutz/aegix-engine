@@ -40,14 +40,14 @@ namespace Aegix::Graphics
 		template<typename T>
 		void toggleLayer(bool& currentlyShown)
 		{
-			auto& gui = Engine::instance().gui();
+			auto& ui = Engine::instance().ui();
 			if (currentlyShown)
 			{
-				gui.popLayer<T>();
+				ui.popLayer<T>();
 			}
 			else
 			{
-				gui.pushLayerIfNotExist<T>();
+				ui.pushLayerIfNotExist<T>();
 			}
 			currentlyShown = !currentlyShown;
 		}

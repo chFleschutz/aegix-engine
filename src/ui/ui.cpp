@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "ui.h"
 
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -11,7 +11,7 @@
 
 namespace Aegix::Graphics
 {
-	GUI::GUI(const Window& window, Renderer& renderer)
+	UI::UI(const Window& window, Renderer& renderer)
 	{
 		auto& device = renderer.device();
 
@@ -48,7 +48,7 @@ namespace Aegix::Graphics
 		ImGui_ImplVulkan_CreateFontsTexture();
 	}
 
-	GUI::~GUI()
+	UI::~UI()
 	{
 		for (auto& layer : m_layers)
 		{
@@ -60,7 +60,7 @@ namespace Aegix::Graphics
 		ImGui::DestroyContext();
 	}
 
-	void GUI::update(float deltaTime)
+	void UI::update(float deltaTime)
 	{
 		// Cant use iterator because its possible to push/pop layers during update
 		for (int i = 0; i < m_layers.size(); i++)
@@ -69,7 +69,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void GUI::render(VkCommandBuffer commandBuffer)
+	void UI::render(VkCommandBuffer commandBuffer)
 	{
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -85,14 +85,14 @@ namespace Aegix::Graphics
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	}
 
-	void GUI::pushLayer(std::shared_ptr<Layer> layer)
+	void UI::pushLayer(std::shared_ptr<Layer> layer)
 	{
 		assert(layer != nullptr && "Adding Layer failed: Layer is nullptr");
 		m_layers.emplace_back(layer);
 		layer->onAttach();
 	}
 
-	void GUI::popLayer(std::shared_ptr<Layer> layer)
+	void UI::popLayer(std::shared_ptr<Layer> layer)
 	{
 		auto it = std::find(m_layers.begin(), m_layers.end(), layer);
 		if (it != m_layers.end())

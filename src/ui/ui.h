@@ -14,16 +14,16 @@ namespace Aegix::Graphics
 
 	/// @brief Manages all GUI Layers for displaying ImGui elements
 	/// @note This class is a wrapper around ImGui
-	class GUI
+	class UI
 	{
 	public:
-		GUI(const Window& window, Renderer& renderer);
-		GUI(const GUI&) = delete;
-		GUI(GUI&&) = delete;
-		~GUI();
+		UI(const Window& window, Renderer& renderer);
+		UI(const UI&) = delete;
+		UI(UI&&) = delete;
+		~UI();
 
-		GUI& operator=(const GUI&) = delete;
-		GUI& operator=(GUI&&) = delete;
+		UI& operator=(const UI&) = delete;
+		UI& operator=(UI&&) = delete;
 
 		/// @brief Updates all GUI layers
 		void update(float deltaTime);

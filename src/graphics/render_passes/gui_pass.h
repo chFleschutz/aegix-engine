@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 
 			vkCmdBeginRendering(cmd, &renderingInfo);
 
-			frameInfo.gui.render(cmd);
+			frameInfo.ui.render(cmd);
 
 			vkCmdEndRendering(cmd);
 		}

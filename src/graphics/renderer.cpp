@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::renderFrame(Scene::Scene& scene, GUI& gui)
+	void Renderer::renderFrame(Scene::Scene& scene, UI& gui)
 	{
 		auto commandBuffer = beginFrame();
 
