@@ -80,5 +80,5 @@ if(COMPILE_SHADERS)
         )
     endforeach()
 
-    add_dependencies(${PROJECT_NAME} compile_shaders)
+    add_dependencies(aegix-engine compile_shaders)
 endif()

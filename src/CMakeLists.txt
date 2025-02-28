@@ -1,7 +1,24 @@
+add_library(aegix-engine STATIC)
+add_library(Aegix::Engine ALIAS aegix-engine)
 
-add_library(AegixEngine STATIC)
+target_include_directories(aegix-engine 
+	PUBLIC 
+		"${CMAKE_CURRENT_SOURCE_DIR}"
+		"${CMAKE_SOURCE_DIR}/lib/entt/single_include"
+		"${CMAKE_SOURCE_DIR}/lib/glm"
+		"${CMAKE_SOURCE_DIR}/lib/stb"
+		"${CMAKE_SOURCE_DIR}/lib/tinyobjloader"
+)
 
-target_sources(AegixEngine PRIVATE
+target_link_libraries(aegix-engine 
+	PUBLIC 
+		Vulkan::Vulkan
+		glfw
+		imgui
+		Aegix::GLTF
+)
+
+target_sources(aegix-engine PRIVATE
 	"core/asset_manager.cpp"
 	"core/engine.cpp"
 	"core/input.cpp"
@@ -56,19 +73,4 @@ target_sources(AegixEngine PRIVATE
 	"utils/math_utils.cpp"
 	"utils/perlin_noise.cpp"
 	"utils/random.cpp"
-)
-
-target_include_directories(AegixEngine PUBLIC 
-	"${CMAKE_CURRENT_SOURCE_DIR}"
-	"${CMAKE_SOURCE_DIR}/lib/entt/single_include"
-	"${CMAKE_SOURCE_DIR}/lib/glm"
-	"${CMAKE_SOURCE_DIR}/lib/stb"
-	"${CMAKE_SOURCE_DIR}/lib/tinyobjloader"
-)
-
-target_link_libraries(AegixEngine PUBLIC 
-	Vulkan::Vulkan
-	glfw
-	imgui
-	Aegix::GLTF
 )
