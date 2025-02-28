@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 
 	void PointLightSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
-		constexpr float pointLightScale = 0.005f;
+		constexpr float pointLightScale = 0.002f;
 
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 

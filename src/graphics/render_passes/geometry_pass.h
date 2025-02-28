@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph.h"
-#include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/systems/render_system.h"
 #include "graphics/vulkan_tools.h"

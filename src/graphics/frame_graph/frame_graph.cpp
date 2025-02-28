@@ -59,6 +59,11 @@ namespace Aegix::Graphics
 		// TODO: Resource aliasing
 
 		m_resourcePool.createResources(device);
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			auto& node = m_resourcePool.node(nodeHandle);
+			node.pass->createResources(m_resourcePool);
+		}
 
 		// Print frame graph info
 		std::cout << "FrameGraph compiled with " << m_nodeHandles.size() << " passes\n";
@@ -89,6 +94,12 @@ namespace Aegix::Graphics
 	void FrameGraph::swapChainResized(uint32_t width, uint32_t height)
 	{
 		m_resourcePool.resizeImages(width, height);
+
+		for (const auto& nodeHandle : m_nodeHandles)
+		{
+			auto& node = m_resourcePool.node(nodeHandle);
+			node.pass->createResources(m_resourcePool);
+		}
 	}
 
 	void FrameGraph::computeEdges()

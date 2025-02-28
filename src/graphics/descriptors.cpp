@@ -140,50 +140,72 @@ namespace Aegix::Graphics
 	{
 	}
 
-	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture)
 	{
-		assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
-
-		auto& bindingDescription = m_setLayout.m_bindings[binding];
-		assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
-
-		VkWriteDescriptorSet write{};
-		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write.descriptorType = bindingDescription.descriptorType;
-		write.dstBinding = binding;
-		write.pBufferInfo = bufferInfo;
-		write.descriptorCount = 1;
-
-		m_writes.emplace_back(write);
+		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), texture.layout() });
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride)
 	{
-		assert(m_setLayout.m_bindings.contains(binding) && "Layout does not contain specified binding");
+		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), layoutOverride });
+		return *this;
+	}
 
-		auto& bindingDescription = m_setLayout.m_bindings[binding];
-		assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo)
+	{
+		m_imageInfos.emplace_back(binding, std::move(imageInfo));
+		return *this;
+	}
 
-		VkWriteDescriptorSet write{};
-		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write.descriptorType = bindingDescription.descriptorType;
-		write.dstBinding = binding;
-		write.pImageInfo = imageInfo;
-		write.descriptorCount = 1;
+	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer)
+	{
+		m_bufferInfos.emplace_back(binding, VkDescriptorBufferInfo{ buffer.buffer(), 0, VK_WHOLE_SIZE });
+		return *this;
+	}
 
-		m_writes.emplace_back(write);
+	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo)
+	{
+		m_bufferInfos.emplace_back(binding, std::move(bufferInfo));
 		return *this;
 	}
 
 	void DescriptorWriter::build(VkDescriptorSet set)
 	{
-		for (auto& write : m_writes)
+		std::vector<VkWriteDescriptorSet> writes;
+		writes.reserve(m_bufferInfos.size() + m_imageInfos.size());
+
+		for (const auto& [binding, info] : m_imageInfos)
 		{
+			auto& bindingDesc = m_setLayout.m_bindings[binding];
+			assert(bindingDesc.descriptorCount == 1 && "Cannot write multiple images to a single descriptor");
+
+			VkWriteDescriptorSet write{};
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.descriptorType = bindingDesc.descriptorType;
+			write.dstBinding = binding;
+			write.pImageInfo = &info;
+			write.descriptorCount = 1;
 			write.dstSet = set;
+			writes.emplace_back(write);
 		}
 
-		vkUpdateDescriptorSets(m_setLayout.m_device, static_cast<uint32_t>(m_writes.size()), m_writes.data(), 0, nullptr);
+		for (const auto& [binding, info] : m_bufferInfos)
+		{
+			auto& bindingDesc = m_setLayout.m_bindings[binding];
+			assert(bindingDesc.descriptorCount == 1 && "Cannot write multiple images to a single descriptor");
+
+			VkWriteDescriptorSet write{};
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.descriptorType = bindingDesc.descriptorType;
+			write.dstBinding = binding;
+			write.pBufferInfo = &info;
+			write.descriptorCount = 1;
+			write.dstSet = set;
+			writes.emplace_back(write);
+		}
+
+		vkUpdateDescriptorSets(m_setLayout.m_device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 	}
 
 
@@ -193,27 +215,27 @@ namespace Aegix::Graphics
 	DescriptorSet::Builder::Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout)
 		: m_device{ device }, m_pool{ pool }, m_setLayout{ setLayout }
 	{
+		m_writer.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_writer.emplace_back(DescriptorWriter{ setLayout });
+		}
 	}
-	
+
 	DescriptorSet::Builder& DescriptorSet::Builder::addBuffer(uint32_t binding, const UniformBuffer& buffer)
 	{
-		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
+		for (size_t i = 0; i < m_writer.size(); i++)
 		{
-			m_descriptorInfos[i].bufferInfos.emplace_back(binding, buffer.descriptorBufferInfo(i));
+			m_writer[i].writeBuffer(binding, buffer.descriptorBufferInfo(i));
 		}
 		return *this;
 	}
 
 	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
 	{
-		for (size_t i = 0; i < m_descriptorInfos.size(); i++)
+		for (size_t i = 0; i < m_writer.size(); i++)
 		{
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.sampler = texture.sampler();
-			imageInfo.imageView = texture.imageView();
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-			m_descriptorInfos[i].imageInfos.emplace_back(binding, imageInfo);
+			m_writer[i].writeImage(binding, texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		return *this;
 	}
@@ -230,18 +252,7 @@ namespace Aegix::Graphics
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			DescriptorWriter writer{ m_setLayout };
-			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].bufferInfos)
-			{
-				writer.writeBuffer(binding, &bufferInfo);
-			}
-
-			for (auto& [binding, bufferInfo] : m_descriptorInfos[i].imageInfos)
-			{
-				writer.writeImage(binding, &bufferInfo);
-			}
-
-			writer.build(set->m_descriptorSets[i]);
+			m_writer[i].build(set->m_descriptorSets[i]);
 		}
 
 		return set;

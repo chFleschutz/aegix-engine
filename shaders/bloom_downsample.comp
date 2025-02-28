@@ -1,0 +1,97 @@
+#version 450
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(set = 0, binding = 0, rgba16f) uniform writeonly image2D bloomMap;
+layout(set = 0, binding = 1) uniform sampler2D bloomMipMap;
+
+
+layout(push_constant, std140) uniform Push
+{
+	int mipLevel;
+} push;
+
+
+vec3 toSRGB(vec3 linearRGB)
+{
+	return pow(linearRGB, vec3(1.0 / 2.2));
+}
+
+float luminance(vec3 color)
+{
+	return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
+
+float KarisAverage(vec3 color)
+{
+	// Karis Average of 4 texels
+	float luma = luminance(toSRGB(color)) * 0.25; 
+	return 1.0 / (1.0 + luma);
+}
+
+void main()
+{
+	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+	vec2 texelSize = 1.0 / vec2(imageSize(bloomMap));
+	vec2 uv = (vec2(pixelCoords) + 0.5) * texelSize;
+
+	float xStep = texelSize.x;
+	float yStep = texelSize.y;
+
+	// Take 13 samples around the current texel (e)
+	// a - b - c
+	// - j - k -
+	// d - e - f
+	// - l - m -
+	// g - h - i
+	vec3 a = texture(bloomMipMap, vec2(uv.x - 2.0 * xStep, uv.y - 2.0 * yStep)).rgb;
+	vec3 b = texture(bloomMipMap, vec2(uv.x,               uv.y - 2.0 * yStep)).rgb;
+	vec3 c = texture(bloomMipMap, vec2(uv.x + 2.0 * xStep, uv.y - 2.0 * yStep)).rgb;
+
+	vec3 d = texture(bloomMipMap, vec2(uv.x - 2.0 * xStep, uv.y)).rgb;
+	vec3 e = texture(bloomMipMap, vec2(uv.x,               uv.y)).rgb;
+	vec3 f = texture(bloomMipMap, vec2(uv.x + 2.0 * xStep, uv.y)).rgb;
+
+	vec3 g = texture(bloomMipMap, vec2(uv.x - 2.0 * xStep, uv.y + 2.0 * yStep)).rgb;
+	vec3 h = texture(bloomMipMap, vec2(uv.x,               uv.y + 2.0 * yStep)).rgb;
+	vec3 i = texture(bloomMipMap, vec2(uv.x + 2.0 * xStep, uv.y + 2.0 * yStep)).rgb;
+
+	vec3 j = texture(bloomMipMap, vec2(uv.x - xStep, uv.y - yStep)).rgb;
+	vec3 k = texture(bloomMipMap, vec2(uv.x + xStep, uv.y - yStep)).rgb;
+
+	vec3 l = texture(bloomMipMap, vec2(uv.x - xStep, uv.y + yStep)).rgb;
+	vec3 m = texture(bloomMipMap, vec2(uv.x + xStep, uv.y + yStep)).rgb;
+
+	// Apply weighted average
+	//        | 1 - 2 - 1 |
+	//        | - 4 - 4 - |
+	// 1/32 * | 2 - 4 - 2 |
+	//        | - 4 - 4 - |
+	//        | 1 - 2 - 1 |
+	vec3 color = vec3(0.0);
+	switch (push.mipLevel)
+	{
+	case 0:
+		// Use Karis Average on first mip level to filter fireflies
+		vec3 group1 = (a + b + d + e) * (0.125 / 4.0);
+		vec3 group2 = (b + c + e + f) * (0.125 / 4.0);
+		vec3 group3 = (d + e + g + h) * (0.125 / 4.0);
+		vec3 group4 = (e + f + h + i) * (0.125 / 4.0);
+		vec3 group5 = (j + k + l + m) * (0.5 / 4.0);
+		group1 *= KarisAverage(group1);
+		group2 *= KarisAverage(group2);
+		group3 *= KarisAverage(group3);
+		group4 *= KarisAverage(group4);
+		group5 *= KarisAverage(group5);
+		color = group1 + group2 + group3 + group4 + group5;
+		break;
+	default:
+		color = e * 0.125;
+		color += (a + c + g + i) * 0.03125;
+		color += (b + d + f + h) * 0.0625;
+		color += (j + k + l + m) * 0.125;
+		break;
+	}
+
+	imageStore(bloomMap, pixelCoords, vec4(color, 1.0));
+}

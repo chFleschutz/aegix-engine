@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "graphics/frame_graph/frame_graph_blackboard.h"
+#include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/gui_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
@@ -128,6 +129,7 @@ namespace Aegix::Graphics
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<GUIPass>();
 		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
+		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
 
 		m_frameGraph.compile(m_device);
 	}

@@ -136,10 +136,10 @@ namespace Aegix::Tools
 			return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		if (access & VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)
 			return VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-		if (access & VK_ACCESS_SHADER_READ_BIT)
-			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		if (access & VK_ACCESS_SHADER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (access & VK_ACCESS_SHADER_READ_BIT)
+			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		if (access & VK_ACCESS_TRANSFER_READ_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -154,10 +154,10 @@ namespace Aegix::Tools
 			return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		if (access & VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT)
 			return VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		if (access & VK_ACCESS_SHADER_READ_BIT)
-			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		if (access & VK_ACCESS_SHADER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		if (access & VK_ACCESS_SHADER_READ_BIT)
+			return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		if (access & VK_ACCESS_TRANSFER_READ_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
@@ -298,5 +298,20 @@ namespace Aegix::Tools
 	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet)
 	{
 		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, 0, 1, &descriptorSet, 0, nullptr);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 }

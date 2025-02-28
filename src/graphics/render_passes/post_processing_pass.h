@@ -1,9 +1,8 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/descriptors.h"
-
-#include <array>
+#include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
@@ -15,6 +14,7 @@ namespace Aegix::Graphics
 			m_descriptorSetLayout = DescriptorSetLayout::Builder{ device }
 				.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 				.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+				.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 				.build();
 
 			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
@@ -36,6 +36,12 @@ namespace Aegix::Graphics
 				FrameGraphResourceUsage::Compute
 				});
 
+			m_bloom = builder.add({
+				"Bloom",
+				FrameGraphResourceType::Reference,
+				FrameGraphResourceUsage::Compute,
+				});
+
 			m_final = builder.add({
 				"Final",
 				FrameGraphResourceType::Texture,
@@ -49,34 +55,25 @@ namespace Aegix::Graphics
 
 			return FrameGraphNodeCreateInfo{
 				.name = "Post Processing Pass",
-				.inputs = { m_sceneColor },
+				.inputs = { m_sceneColor, m_bloom },
 				.outputs = { m_final }
 			};
 		}
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			auto& sceneColor = resources.texture(m_sceneColor);
-			auto& final = resources.texture(m_final);
-
-			auto sceneColorInfo = sceneColor.descriptorImageInfo();
-			sceneColorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			auto finalInfo = final.descriptorImageInfo();
-			finalInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, &sceneColorInfo)
-				.writeImage(1, &finalInfo)
+				.writeImage(0, resources.texture(m_final))
+				.writeImage(1, resources.texture(m_sceneColor))
+				.writeImage(2, resources.texture(m_bloom))
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			m_pipeline->bind(cmd);
 			m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			uint32_t groupCountX = (final.extent().width + 15) / 16;
-			uint32_t groupCountY = (final.extent().height + 15) / 16;
-			vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 		}
 
 	private:
@@ -86,6 +83,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<Pipeline> m_pipeline;
 
 		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_bloom;
 		FrameGraphResourceHandle m_final;
 	};
 }

@@ -10,16 +10,68 @@
 
 namespace Aegix::Graphics
 {
+	class Texture;
+
+	class ImageView
+	{
+	public:
+		explicit ImageView(VulkanDevice& device);
+		ImageView(const Texture& texture, uint32_t baseMipLevel, uint32_t levelCount);
+		ImageView(const ImageView&) = delete;
+		ImageView(ImageView&& other) noexcept;
+		~ImageView();
+
+		auto operator=(const ImageView&) -> ImageView& = delete;
+		auto operator=(ImageView&& other) noexcept -> ImageView&;
+
+		operator VkImageView() const { return m_imageView; }
+		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
+
+	private:
+		void destroy();
+
+		VulkanDevice& m_device;
+		VkImageView m_imageView = VK_NULL_HANDLE;
+	};
+
+
+	class Sampler
+	{
+	public:
+		Sampler(VulkanDevice& device, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy);
+		Sampler(const Sampler&) = delete;
+		Sampler(Sampler&& other) noexcept;
+		~Sampler();
+
+		auto operator=(const Sampler&) -> Sampler& = delete;
+		auto operator=(Sampler&& other) noexcept -> Sampler&;
+
+		operator VkSampler() const { return m_sampler; }
+		[[nodiscard]] auto sampler() const -> VkSampler { return m_sampler; }
+
+	private:
+		void destroy();
+
+		VulkanDevice& m_device;
+		VkSampler m_sampler = VK_NULL_HANDLE;
+	};
+
+
 	/// @brief Represents a Texture on the gpu and wraps a VkImage, VkDeviceMemory and VkImageView
 	class Texture
 	{
+		friend class ImageView;
+
 	public:
 		struct Config
 		{
+			static constexpr uint32_t CALCULATE_MIP_LEVELS = 0;
+
 			// Image settings
 			VkExtent2D extent = { 1, 1 };
 			VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
 			VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+			uint32_t mipLevels = 1;
 
 			// Sampler settings
 			VkFilter magFilter = VK_FILTER_LINEAR;
@@ -55,6 +107,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto extent() const -> VkExtent2D{ return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
+		[[nodiscard]] auto mipLevels() const -> uint32_t { return m_mipLevels; }
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto layout() const -> VkImageLayout { return m_layout; }
 		[[nodiscard]] auto image() const -> VkImage { return m_image; }
@@ -83,6 +136,8 @@ namespace Aegix::Graphics
 		/// @note The old image and view will NOT be destroyed
 		void update(VkImage image, VkImageView imageView, VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
 
+		void generateMipmaps(VkCommandBuffer commandBuffer, VkImageLayout finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
 	private:
 		void createImage(const Config& config);
 		void createImageView(const Config& config);
@@ -91,8 +146,9 @@ namespace Aegix::Graphics
 
 		VulkanDevice& m_device;
 
-		VkExtent2D m_extent;
 		VkFormat m_format;
+		VkExtent2D m_extent;
+		uint32_t m_mipLevels = 1;
 		VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkImage m_image = VK_NULL_HANDLE;
 		VkDeviceMemory m_imageMemory = VK_NULL_HANDLE;

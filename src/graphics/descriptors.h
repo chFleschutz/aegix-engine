@@ -94,16 +94,26 @@ namespace Aegix::Graphics
 	{
 	public:
 		DescriptorWriter(DescriptorSetLayout& setLayout);
+		DescriptorWriter(const DescriptorWriter&) = delete;
+		DescriptorWriter(DescriptorWriter&&) = default;
 		~DescriptorWriter() = default;
 
-		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+		DescriptorWriter& operator=(const DescriptorWriter&) = delete;
+		DescriptorWriter& operator=(DescriptorWriter&&) = default;
+
+		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture);
+		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride);
+		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo);
+
+		DescriptorWriter& writeBuffer(uint32_t binding, const Buffer& buffer);
+		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo);
 
 		void build(VkDescriptorSet set);
 
 	private:
 		DescriptorSetLayout& m_setLayout;
-		std::vector<VkWriteDescriptorSet> m_writes;
+		std::vector<std::pair<uint32_t, VkDescriptorImageInfo>> m_imageInfos;
+		std::vector<std::pair<uint32_t, VkDescriptorBufferInfo>> m_bufferInfos;
 	};
 
 
@@ -122,9 +132,9 @@ namespace Aegix::Graphics
 			template<typename T>
 			Builder& addBuffer(uint32_t binding, const UniformBufferData<T>& buffer)
 			{
-				for (size_t i = 0; i < m_descriptorInfos.size(); i++)
+				for (size_t i = 0; i < m_writer.size(); i++)
 				{
-					m_descriptorInfos[i].bufferInfos.emplace_back(binding, buffer.descriptorBufferInfo(i));
+					m_writer[i].writeBuffer(binding, buffer.descriptorBufferInfo(i));
 				}
 				return *this;
 			}
@@ -136,16 +146,10 @@ namespace Aegix::Graphics
 			std::unique_ptr<DescriptorSet> build();
 
 		private:
-			struct DescriptorInfo
-			{
-				std::vector<std::pair<uint32_t, VkDescriptorBufferInfo>> bufferInfos;
-				std::vector<std::pair<uint32_t, VkDescriptorImageInfo>> imageInfos;
-			};
-
 			VulkanDevice& m_device;
 			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
-			std::array<DescriptorInfo, MAX_FRAMES_IN_FLIGHT> m_descriptorInfos;
+			std::vector<DescriptorWriter> m_writer;
 		};
 
 		DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout);

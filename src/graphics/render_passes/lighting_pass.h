@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph.h"
-#include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"
@@ -108,38 +106,20 @@ namespace Aegix::Graphics
 
 			updateLightingUBO(frameInfo);
 
-			auto sceneColorInfo = resources.texture(m_sceneColor).descriptorImageInfo();
-			auto positionInfo = resources.texture(m_position).descriptorImageInfo();
-			auto normalInfo = resources.texture(m_normal).descriptorImageInfo();
-			auto albedoInfo = resources.texture(m_albedo).descriptorImageInfo();
-			auto armInfo = resources.texture(m_arm).descriptorImageInfo();
-			auto emissiveInfo = resources.texture(m_emissive).descriptorImageInfo();
-			auto uboInfo = m_ubo->descriptorBufferInfo(frameInfo.frameIndex);
-
-			sceneColorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			positionInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			normalInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			albedoInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			armInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-			emissiveInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
 			DescriptorWriter{ *m_descriptorSetLayout }
-				.writeImage(0, &sceneColorInfo)
-				.writeImage(1, &positionInfo)
-				.writeImage(2, &normalInfo)
-				.writeImage(3, &albedoInfo)
-				.writeImage(4, &armInfo)
-				.writeImage(5, &emissiveInfo)
-				.writeBuffer(6, &uboInfo)
+				.writeImage(0, resources.texture(m_sceneColor))
+				.writeImage(1, resources.texture(m_position))
+				.writeImage(2, resources.texture(m_normal))
+				.writeImage(3, resources.texture(m_albedo))
+				.writeImage(4, resources.texture(m_arm))
+				.writeImage(5, resources.texture(m_emissive))
+				.writeBuffer(6, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
 				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 			m_pipeline->bind(cmd);
 			m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			auto extent = frameInfo.swapChainExtent;
-			uint32_t groupCountX = (extent.width + 15) / 16;
-			uint32_t groupCountY = (extent.height + 15) / 16;
-			vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+			Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 		}
 
 	private:
