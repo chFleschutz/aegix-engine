@@ -22,25 +22,26 @@ namespace Aegix::Graphics
 		Renderer(Renderer&&) = delete;
 		~Renderer();
 
-		Renderer& operator=(const Renderer&) = delete;
-		Renderer& operator=(Renderer&&) = delete;
+		auto operator=(const Renderer&) -> Renderer& = delete;
+		auto operator=(Renderer&&) noexcept -> Renderer& = delete;
 
 		template<typename T>
 			requires std::is_base_of_v<RenderSystem, T> &&
 			requires { T::STAGE; }
-		RenderSystem& addRenderSystem()
+		auto addRenderSystem() -> RenderSystem&
 		{
 			constexpr RenderStage::Type stageType = T::STAGE;
 			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, stageType);
 		}
 
-		VulkanDevice& device() { return m_device; }
-		SwapChain& swapChain() { return m_swapChain; }
-		DescriptorPool& globalPool() { return *m_globalPool; }
-		VkCommandBuffer currentCommandBuffer() const;
-		float aspectRatio() const { return m_swapChain.aspectRatio(); }
-		bool isFrameStarted() const { return m_isFrameStarted; }
-		int frameIndex() const;
+		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
+		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
+		[[nodiscard]] auto globalPool() -> DescriptorPool& { return *m_globalPool; }
+		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
+		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
+		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }
+		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
+		[[nodiscard]] auto frameIndex() const -> uint32_t;
 
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);
@@ -54,7 +55,7 @@ namespace Aegix::Graphics
 		void createDescriptorPool();
 		void createFrameGraph();
 
-		VkCommandBuffer beginFrame();
+		auto beginFrame() -> VkCommandBuffer;
 		void endFrame(VkCommandBuffer commandBuffer);
 
 		Window& m_window;

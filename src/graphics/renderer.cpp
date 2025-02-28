@@ -32,7 +32,7 @@ namespace Aegix::Graphics
 		);
 	}
 
-	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
+	auto Graphics::Renderer::currentCommandBuffer() const -> VkCommandBuffer
 	{
 		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
 		assert(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE && "Command buffer not initialized");
@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 		return m_commandBuffers[m_currentFrameIndex];
 	}
 
-	int Graphics::Renderer::frameIndex() const
+	auto Graphics::Renderer::frameIndex() const -> uint32_t
 	{
 		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
 		return m_currentFrameIndex;
@@ -132,7 +132,7 @@ namespace Aegix::Graphics
 		m_frameGraph.compile(m_device);
 	}
 
-	VkCommandBuffer Renderer::beginFrame()
+	auto Renderer::beginFrame() -> VkCommandBuffer
 	{
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
