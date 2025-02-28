@@ -84,21 +84,4 @@ namespace Aegix::Graphics
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 	}
-
-	void UI::pushLayer(std::shared_ptr<Layer> layer)
-	{
-		assert(layer != nullptr && "Adding Layer failed: Layer is nullptr");
-		m_layers.emplace_back(layer);
-		layer->onAttach();
-	}
-
-	void UI::popLayer(std::shared_ptr<Layer> layer)
-	{
-		auto it = std::find(m_layers.begin(), m_layers.end(), layer);
-		if (it != m_layers.end())
-		{
-			(*it)->onDetach();
-			m_layers.erase(it);
-		}
-	}
 }

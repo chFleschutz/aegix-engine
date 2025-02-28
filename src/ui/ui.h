@@ -31,31 +31,24 @@ namespace Aegix::Graphics
 		/// @brief Renders all GUI elements
 		void render(VkCommandBuffer commandBuffer);
 
-		/// @brief Pushes a layer to the stack
-		void pushLayer(std::shared_ptr<Layer> layer);
-
-		/// @brief Pops a layer from the stack
-		void popLayer(std::shared_ptr<Layer> layer);
-
 		/// @brief Pushes a layer of type T to the stack
 		template<typename T, typename... Args>
-		std::shared_ptr<T> pushLayer(Args&&... args)
+		T& pushLayer(Args&&... args)
 		{
-			auto layer = std::make_shared<T>(std::forward<Args>(args)...);
-			pushLayer(layer);
-			return layer;
+			auto ptr = std::make_shared<T>(std::forward<Args>(args)...);
+			m_layers.push_back(ptr);
+			return *ptr;
 		}
 
 		/// @brief Pushes a layer of type T if it does not exist in the stack
 		template<typename T, typename... Args>
-		std::shared_ptr<T> pushLayerIfNotExist(Args&&... args)
+		T& pushLayerIfNotExist(Args&&... args)
 		{
 			for (auto& layer : m_layers)
 			{
-				if (std::dynamic_pointer_cast<T>(layer))
-					return std::dynamic_pointer_cast<T>(layer);
+				if (T* ptr = dynamic_cast<T*>(layer.get()))
+					return *ptr;
 			}
-
 			return pushLayer<T>(std::forward<Args>(args)...);
 		}
 
@@ -67,7 +60,7 @@ namespace Aegix::Graphics
 			{
 				if (std::dynamic_pointer_cast<T>(*it))
 				{
-					popLayer(*it);
+					m_layers.erase(std::next(it).base());
 					return;
 				}
 			}
