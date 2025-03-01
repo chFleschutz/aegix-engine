@@ -11,6 +11,23 @@
 
 namespace Aegix::Graphics
 {
+	struct BloomThreshold
+	{
+		float threshold = 0.0f;
+		float softThreshold = 0.5f;
+	};
+
+	struct BloomDownsample
+	{
+		int mipLevel = 0;
+		float filterScale = 1.0f;
+	};
+
+	struct BloomUpsample
+	{
+		float filterScale = 1.0f;
+	};
+
 	/// @brief Bloom post-processing effect using a threshold, downsample, and upsample pass
 	/// @note Based on: https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare/
 	class BloomPass : public FrameGraphRenderPass
@@ -29,10 +46,16 @@ namespace Aegix::Graphics
 		void downSample(VkCommandBuffer cmd, const Texture& bloom);
 		void upSample(VkCommandBuffer cmd, const Texture& bloom);
 
+
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_bloom;
+
 		std::vector<ImageView> m_mipViews;
 		Sampler m_sampler;
+
+		BloomThreshold m_threshold;
+		BloomDownsample m_downsample;
+		BloomUpsample m_upsample;
 
 		std::unique_ptr<Pipeline> m_thresholdPipeline;
 		std::unique_ptr<PipelineLayout> m_thresholdPipelineLayout;
