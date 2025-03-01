@@ -78,12 +78,6 @@ namespace Aegix::Graphics
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
-			node.pass->prepare(m_resourcePool, frameInfo);
-		}
-
-		for (const auto& nodeHandle : m_nodeHandles)
-		{
-			auto& node = m_resourcePool.node(nodeHandle);
 
 			placeBarriers(frameInfo.commandBuffer, node);
 

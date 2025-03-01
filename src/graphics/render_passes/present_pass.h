@@ -27,10 +27,6 @@ namespace Aegix::Graphics
 			};
 		}
 
-		virtual void prepare(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
-		{
-		}
-
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
 			Texture& srcTexture = resources.texture(m_final);

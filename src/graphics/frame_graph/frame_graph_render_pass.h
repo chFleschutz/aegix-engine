@@ -24,9 +24,6 @@ namespace Aegix::Graphics
 
 		virtual void createResources(FrameGraphResourcePool& resources) {}
 
-		/// @brief Called before any execution, used to prepare the render pass
-		virtual void prepare(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) {}
-
 		/// @brief Execute the render pass
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
 	};
