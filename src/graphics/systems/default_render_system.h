@@ -2,15 +2,12 @@
 
 #include "graphics/systems/render_system.h"
 #include "graphics/uniform_buffer.h"
-#include "graphics/texture.h"
 
 namespace Aegix::Graphics
 {
 	class DefaultRenderSystem;
 	class DefaultMaterialInstance;
 
-	/// @brief Component for the default material that holds the material instance
-	/// @note This struct also has to define the RenderSystem and Instance types
 	struct DefaultMaterial
 	{
 		using RenderSystem = DefaultRenderSystem;
@@ -18,31 +15,35 @@ namespace Aegix::Graphics
 
 		struct Data
 		{
-			float shininess = 32.0f;
+			alignas(16) glm::vec3 albedo{ 1.0f, 1.0f, 1.0f };
+			alignas(16) glm::vec3 emissive{ 1.0f, 1.0f, 1.0f };
+			alignas(4) float metallic = 1.0f;
+			alignas(4) float roughness = 1.0f;
+			alignas(4) float ambientOcclusion = 1.0f;
 		};
 
 		std::shared_ptr<DefaultMaterialInstance> instance;
 	};
 
-	/// @brief Instance of a DefaultMaterial that holds the uniform buffer with the material data
 	class DefaultMaterialInstance
 	{
 	public:
 		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-			std::shared_ptr<Texture> texture);
-
-		void setData(const DefaultMaterial::Data& data);
-		const DefaultMaterial::Data& data() const { return m_uniformBuffer.data(); }
+			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
+			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data = {});
 
 	private:
-		UniformBufferData<DefaultMaterial::Data> m_uniformBuffer;
-		std::shared_ptr<Texture> m_texture;
+		UniformBuffer m_uniformBuffer;
+		std::shared_ptr<Texture> m_albedoTexture;
+		std::shared_ptr<Texture> m_normalTexture;
+		std::shared_ptr<Texture> m_metalRoughnessTexture;
+		std::shared_ptr<Texture> m_aoTexture;
+		std::shared_ptr<Texture> m_emissiveTexture;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend DefaultRenderSystem;
 	};
 
-	/// @brief Render system for rendering entities with a DefaultMaterial component
 	class DefaultRenderSystem : public RenderSystem
 	{
 	public:
@@ -51,6 +52,8 @@ namespace Aegix::Graphics
 			glm::mat4 modelMatrix{ 1.0f };
 			glm::mat4 normalMatrix{ 1.0f };
 		};
+
+		constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
 
 		DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 

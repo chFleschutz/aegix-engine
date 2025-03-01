@@ -99,20 +99,6 @@ namespace Aegix::UI
 				ImGui::Text("Camera Component");
 			});
 
-		drawComponent<Graphics::DefaultMaterial>("Default Material", m_selectedEntity, [](Graphics::DefaultMaterial& material)
-			{
-				bool materialSet = material.instance != nullptr;
-				drawAssetSlot("Mat", "Default Material Instance", materialSet);
-
-				if (materialSet)
-				{
-					ImGui::Spacing();
-					auto materialData = material.instance->data();
-					if (ImGui::DragFloat("Shininess", &materialData.shininess, 0.5f))
-						material.instance->setData(materialData);
-				}
-			});
-
 		drawAddComponent();
 
 		ImGui::End();

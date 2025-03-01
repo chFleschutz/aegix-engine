@@ -1,24 +1,21 @@
 #include "default_render_system.h"
 
-#include "scene/components.h"
-
 namespace Aegix::Graphics
 {
 	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-		std::shared_ptr<Texture> texture) 
-		: m_uniformBuffer{ device }, m_texture{ texture }
+		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
+		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data)
+		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
+		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer{ device, data }
 	{
-		assert(m_texture != nullptr && "Texture is null");
-
 		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
-			.addTexture(1, *m_texture)
+			.addTexture(1, m_albedoTexture)
+			.addTexture(2, m_normalTexture)
+			.addTexture(3, m_metalRoughnessTexture)
+			.addTexture(4, m_aoTexture)
+			.addTexture(5, m_emissiveTexture)
 			.build();
-	}
-
-	void DefaultMaterialInstance::setData(const DefaultMaterial::Data& data)
-	{
-		m_uniformBuffer.setData(data);
 	}
 
 	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
@@ -27,6 +24,10 @@ namespace Aegix::Graphics
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
@@ -36,9 +37,13 @@ namespace Aegix::Graphics
 			.build();
 
 		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default.frag.spv")
-			.addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB)
+			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default_geometry.vert.spv")
+			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default_geometry.frag.spv")
+			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.build();
 	}
@@ -63,7 +68,7 @@ namespace Aegix::Graphics
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)
 				continue;
-			
+
 			// Material Descriptor Set
 			if (lastMaterial != material.instance.get())
 			{
