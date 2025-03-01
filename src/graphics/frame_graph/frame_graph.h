@@ -30,6 +30,7 @@ namespace Aegix::Graphics
 		}
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
+		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNodeHandle>& { return m_nodeHandles; }
 
 		/// @brief Compiles the frame graph by sorting the nodes and creating resources
 		void compile(VulkanDevice& device);

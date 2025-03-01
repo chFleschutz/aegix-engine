@@ -21,14 +21,10 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "Present Pass",
+				.name = "Present",
 				.inputs = { m_final },
 				.outputs = {}
 			};
-		}
-
-		virtual void prepare(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
-		{
 		}
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override

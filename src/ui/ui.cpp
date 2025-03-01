@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "ui.h"
 
 #include "graphics/renderer.h"
 #include "graphics/window.h"
@@ -9,9 +9,9 @@
 
 #include <cassert>
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
-	GUI::GUI(const Window& window, Renderer& renderer)
+	UI::UI(const Graphics::Window& window, Graphics::Renderer& renderer)
 	{
 		auto& device = renderer.device();
 
@@ -24,9 +24,13 @@ namespace Aegix::Graphics
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+#ifndef NDEBUG
+		io.ConfigDebugIsDebuggerPresent = true;
+#endif // !NDEBUG
+
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
-		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = device.instance();
 		initInfo.PhysicalDevice = device.physicalDevice();
@@ -36,8 +40,8 @@ namespace Aegix::Graphics
 		initInfo.PipelineCache = VK_NULL_HANDLE;
 		initInfo.DescriptorPool = renderer.globalPool();
 		initInfo.Subpass = 0;
-		initInfo.MinImageCount = MAX_FRAMES_IN_FLIGHT;
-		initInfo.ImageCount = MAX_FRAMES_IN_FLIGHT;
+		initInfo.MinImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
+		initInfo.ImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
 		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		initInfo.UseDynamicRendering = true;
 		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
@@ -48,7 +52,7 @@ namespace Aegix::Graphics
 		ImGui_ImplVulkan_CreateFontsTexture();
 	}
 
-	GUI::~GUI()
+	UI::~UI()
 	{
 		for (auto& layer : m_layers)
 		{
@@ -60,7 +64,7 @@ namespace Aegix::Graphics
 		ImGui::DestroyContext();
 	}
 
-	void GUI::update(float deltaTime)
+	void UI::update(float deltaTime)
 	{
 		// Cant use iterator because its possible to push/pop layers during update
 		for (int i = 0; i < m_layers.size(); i++)
@@ -69,7 +73,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void GUI::render(VkCommandBuffer commandBuffer)
+	void UI::render(VkCommandBuffer commandBuffer)
 	{
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -83,22 +87,5 @@ namespace Aegix::Graphics
 
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-	}
-
-	void GUI::pushLayer(std::shared_ptr<Layer> layer)
-	{
-		assert(layer != nullptr && "Adding Layer failed: Layer is nullptr");
-		m_layers.emplace_back(layer);
-		layer->onAttach();
-	}
-
-	void GUI::popLayer(std::shared_ptr<Layer> layer)
-	{
-		auto it = std::find(m_layers.begin(), m_layers.end(), layer);
-		if (it != m_layers.end())
-		{
-			(*it)->onDetach();
-			m_layers.erase(it);
-		}
 	}
 }

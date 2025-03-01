@@ -1,13 +1,14 @@
 #pragma once
 
 #include "core/engine.h"
-#include "graphics/layers/layer.h"
-#include "graphics/layers/scene_properties_layer.h"
-#include "graphics/layers/demo_layer.h"
+#include "ui/layer.h"
+#include "ui/layers/demo_layer.h"
+#include "ui/layers/renderer_layer.h"
+#include "ui/layers/scene_properties_layer.h"
 
 #include "imgui.h"
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	/// @brief Shows the main menu bar of the application
 	class MainMenuLayer : public Layer
@@ -19,6 +20,11 @@ namespace Aegix::Graphics
 			{
 				if (ImGui::BeginMenu("View"))
 				{
+					if (ImGui::MenuItem("Renderer", nullptr, m_rendererShown))
+					{
+						toggleLayer<RendererLayer>(m_rendererShown);
+					}
+
 					if (ImGui::MenuItem("Scene Properties", nullptr, m_scenePropertiesShown))
 					{
 						toggleLayer<ScenePropertiesLayer>(m_scenePropertiesShown);
@@ -40,19 +46,20 @@ namespace Aegix::Graphics
 		template<typename T>
 		void toggleLayer(bool& currentlyShown)
 		{
-			auto& gui = Engine::instance().gui();
+			auto& ui = Engine::instance().ui();
 			if (currentlyShown)
 			{
-				gui.popLayer<T>();
+				ui.popLayer<T>();
 			}
 			else
 			{
-				gui.pushLayerIfNotExist<T>();
+				ui.pushLayerIfNotExist<T>();
 			}
 			currentlyShown = !currentlyShown;
 		}
 
 		bool m_scenePropertiesShown = false;
+		bool m_rendererShown = false;
 		bool m_demoShown = false;
 	};
 }

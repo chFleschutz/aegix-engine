@@ -5,9 +5,13 @@ layout(local_size_x = 16, local_size_y = 16) in;
 layout(set = 0, binding = 0, rgba16f) uniform readonly image2D sceneColorMap;
 layout(set = 0, binding = 1, rgba16f) uniform writeonly image2D bloomMap;
 
+layout(push_constant) uniform BloomThreshold
+{
+	float threshold;
+	float softThreshold;
+} push;
+
 const float EPSILON = 0.0001;
-const float THRESHOLD = 0.0;
-const float SOFT_TRESHOLD = 0.5;
 
 void main()
 {
@@ -17,12 +21,12 @@ void main()
 
 	// From: https://catlikecoding.com/unity/tutorials/advanced-rendering/bloom/#3.4
 	float brightness = max(max(color.r, color.g), color.b);
-	float knee = THRESHOLD * SOFT_TRESHOLD;
-	float soft = brightness - THRESHOLD + knee;
+	float knee = push.threshold * push.softThreshold;
+	float soft = brightness - push.threshold + knee;
 	soft = clamp(soft, 0.0, 2.0 * knee);
-	soft = soft * soft / (4.0 * knee + EPSILON);
-	float contribution = max(soft, brightness - THRESHOLD);
-	contribution /= max(EPSILON, brightness);
+	soft = soft * soft / max(4.0 * knee, EPSILON);
+	float contribution = max(soft, brightness - push.threshold);
+	contribution /= max(brightness, EPSILON);
 	
 	color *= contribution;
 	imageStore(bloomMap, pixelCoords, vec4(color, 1.0));

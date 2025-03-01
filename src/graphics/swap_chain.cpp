@@ -221,15 +221,17 @@ namespace Aegix::Graphics
 	{
 		for (const auto& availableFormat : availableFormats)
 		{
-			if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && 
-				availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+			if (availableFormat.colorSpace != VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+				continue;
+
+			// Gamma correction is already handled during post-processing -> use linear color format
+			if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM || availableFormat.format == VK_FORMAT_R8G8B8A8_UNORM)
 			{
 				return availableFormat;
 			}
 		}
 
-		// TODO: Rendersystems assume VK_FORMAT_B8G8R8A8_SRGB as the swapchain format
-		assert(availableFormats[0].format == VK_FORMAT_B8G8R8A8_SRGB && "Currently the only supported format is VK_FORMAT_B8G8R8A8_SRGB");
+		assert(false && "No suitable surface format found");
 		return availableFormats[0];
 	}
 

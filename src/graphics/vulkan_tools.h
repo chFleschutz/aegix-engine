@@ -61,9 +61,9 @@ namespace Aegix::Tools
 		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
 
 		template<typename T>
-		void cmdPushConstants(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stage, uint32_t offset, const T& data)
+		void cmdPushConstants(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stage, const T& data)
 		{
-			vkCmdPushConstants(cmd, layout, stage, offset, sizeof(T), &data);
+			vkCmdPushConstants(cmd, layout, stage, 0, sizeof(T), &data);
 		}
 	}
 }

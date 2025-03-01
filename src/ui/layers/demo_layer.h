@@ -1,10 +1,10 @@
 #pragma once
 
-#include "graphics/layers/layer.h"
+#include "ui/layer.h"
 
 #include "imgui.h"
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	/// @brief A demo layer that shows the ImGui demo window
 	class DemoLayer : public Layer

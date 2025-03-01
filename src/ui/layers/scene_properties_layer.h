@@ -1,13 +1,13 @@
 #pragma once
 
-#include "graphics/layers/layer.h"
 #include "scene/entity.h"
+#include "ui/layer.h"
 
 #include "imgui.h"
 
 #include <functional>
 
-namespace Aegix::Graphics
+namespace Aegix::UI
 {
 	class ScenePropertiesLayer : public Layer
 	{

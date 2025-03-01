@@ -3,7 +3,7 @@
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
-#include "graphics/render_passes/gui_pass.h"
+#include "graphics/render_passes/ui_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
@@ -32,7 +32,7 @@ namespace Aegix::Graphics
 		);
 	}
 
-	VkCommandBuffer Graphics::Renderer::currentCommandBuffer() const
+	auto Graphics::Renderer::currentCommandBuffer() const -> VkCommandBuffer
 	{
 		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
 		assert(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE && "Command buffer not initialized");
@@ -40,13 +40,13 @@ namespace Aegix::Graphics
 		return m_commandBuffers[m_currentFrameIndex];
 	}
 
-	int Graphics::Renderer::frameIndex() const
+	auto Graphics::Renderer::frameIndex() const -> uint32_t
 	{
 		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::renderFrame(Scene::Scene& scene, GUI& gui)
+	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
 	{
 		auto commandBuffer = beginFrame();
 
@@ -55,7 +55,7 @@ namespace Aegix::Graphics
 
 		FrameInfo frameInfo{
 			scene,
-			gui,
+			ui,
 			m_currentFrameIndex,
 			commandBuffer,
 			m_swapChain.extent(),
@@ -125,14 +125,14 @@ namespace Aegix::Graphics
 		m_frameGraph.add<TransparentPass>(m_frameGraph, m_device, *m_globalPool);
 		m_frameGraph.add<LightingPass>(m_device, *m_globalPool);
 		m_frameGraph.add<PresentPass>(m_swapChain);
-		m_frameGraph.add<GUIPass>();
+		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
 		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
 
 		m_frameGraph.compile(m_device);
 	}
 
-	VkCommandBuffer Renderer::beginFrame()
+	auto Renderer::beginFrame() -> VkCommandBuffer
 	{
 		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
