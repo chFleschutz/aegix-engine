@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "Transparent Pass",
+				.name = "Transparent",
 				.inputs = { m_sceneColor, m_depth },
 				.outputs = { m_sceneColor }
 			};

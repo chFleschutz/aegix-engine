@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "GUI Pass",
+				.name = "GUI",
 				.inputs = { m_final },
 				.outputs = { m_final }
 			};

@@ -94,7 +94,7 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "Lighting Pass",
+				.name = "Lighting",
 				.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive },
 				.outputs = { m_sceneColor }
 			};

@@ -52,7 +52,7 @@ namespace Aegix::Graphics
 			});
 
 		return FrameGraphNodeCreateInfo{
-			.name = "Post Processing Pass",
+			.name = "Post Processing",
 			.inputs = { m_sceneColor, m_bloom },
 			.outputs = { m_final }
 		};

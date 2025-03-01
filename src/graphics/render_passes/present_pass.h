@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "Present Pass",
+				.name = "Present",
 				.inputs = { m_final },
 				.outputs = {}
 			};

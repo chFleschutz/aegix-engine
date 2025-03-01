@@ -104,7 +104,7 @@ namespace Aegix::Graphics
 				});
 
 			FrameGraphNodeCreateInfo info{};
-			info.name = "Geometry Pass";
+			info.name = "Geometry";
 			info.inputs = {};
 			info.outputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
 			return info;
