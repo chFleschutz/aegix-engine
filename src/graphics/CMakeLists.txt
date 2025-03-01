@@ -6,6 +6,7 @@ target_sources(aegix-engine PRIVATE
 	"frame_graph/frame_graph_resource_pool.cpp"
 	"frame_graph/frame_graph_resource_pool.h"
 	"frame_graph/render_stage.h"
+	"render_passes/bloom_pass.cpp"
 	"render_passes/bloom_pass.h"
 	"render_passes/geometry_pass.h"
 	"render_passes/gui_pass.h"
