@@ -11,6 +11,7 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/geometry_pass.h"
 	"render_passes/gui_pass.h"
 	"render_passes/lighting_pass.h"
+	"render_passes/post_processing_pass.cpp"
 	"render_passes/post_processing_pass.h"
 	"render_passes/present_pass.h"
 	"render_passes/transparent_pass.h"
