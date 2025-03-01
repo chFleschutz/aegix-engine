@@ -1,16 +1,13 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	class GUIPass : public FrameGraphRenderPass
+	class UIPass : public FrameGraphRenderPass
 	{
 	public:
-		GUIPass()
-		{
-		}
-
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
 		{
 			m_final = builder.add({
@@ -20,7 +17,7 @@ namespace Aegix::Graphics
 				});
 
 			return FrameGraphNodeCreateInfo{
-				.name = "GUI",
+				.name = "UI",
 				.inputs = { m_final },
 				.outputs = { m_final }
 			};

@@ -9,7 +9,7 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/bloom_pass.cpp"
 	"render_passes/bloom_pass.h"
 	"render_passes/geometry_pass.h"
-	"render_passes/gui_pass.h"
+	"render_passes/ui_pass.h"
 	"render_passes/lighting_pass.h"
 	"render_passes/post_processing_pass.cpp"
 	"render_passes/post_processing_pass.h"
