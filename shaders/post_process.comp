@@ -14,6 +14,8 @@ layout(push_constant) uniform PostProcess
 
 vec3 ToneMapReinhard(vec3 color);
 vec3 ToneMapACES(vec3 color);
+vec3 applyToneMapping(vec3 color);
+vec3 applyGammaCorrection(vec3 color);
 
 void main()
 {
@@ -23,17 +25,8 @@ void main()
 	vec3 bloomColor = imageLoad(bloomMap, pixelCoords).rgb;
 
 	vec3 color = sceneColor + (push.bloomIntensity * bloomColor);
-
-	switch (push.toneMappingMode)
-	{
-	case 0:
-		color = ToneMapReinhard(color);
-		break;
-	case 1:
-		color = ToneMapACES(color);
-		break;
-	}
-
+	color = applyToneMapping(color);
+	color = applyGammaCorrection(color);
 	imageStore(outFinalMap, pixelCoords, vec4(color, 1.0));
 }
 
@@ -50,4 +43,22 @@ vec3 ToneMapACES(vec3 color)
 	const float D = 0.59;
 	const float E = 0.14;
 	return clamp((color * (A * color + B)) / (color * (C * color + D) + E), 0.0, 1.0);
+}
+
+vec3 applyToneMapping(vec3 color)
+{
+	switch (push.toneMappingMode)
+	{
+	case 0:
+		return ToneMapReinhard(color);
+	case 1:
+		return ToneMapACES(color);
+	default:
+		return color;
+	}
+}
+
+vec3 applyGammaCorrection(vec3 color)
+{
+	return pow(color, vec3(1.0 / 2.2));
 }
