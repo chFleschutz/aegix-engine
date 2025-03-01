@@ -6,6 +6,18 @@
 
 namespace Aegix::Graphics
 {
+	enum class ToneMappingMode
+	{
+		Reinhard,
+		ACES
+	};
+
+	struct PostProcessingSettings
+	{
+		ToneMappingMode toneMappingMode = ToneMappingMode::ACES;
+		float bloomIntensity = 0.1f;
+	};
+
 	class PostProcessingPass : public FrameGraphRenderPass
 	{
 	public:
@@ -16,13 +28,15 @@ namespace Aegix::Graphics
 		virtual void drawUI() override;
 
 	private:
+		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_bloom;
+		FrameGraphResourceHandle m_final;
+
+		PostProcessingSettings m_settings;
+
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<Pipeline> m_pipeline;
-
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_bloom;
-		FrameGraphResourceHandle m_final;
 	};
 }

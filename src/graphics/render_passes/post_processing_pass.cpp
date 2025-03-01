@@ -18,6 +18,7 @@ namespace Aegix::Graphics
 
 		m_pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
+			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(PostProcessingSettings))
 			.build();
 
 		m_pipeline = Pipeline::ComputeBuilder{ device, *m_pipelineLayout }
@@ -70,11 +71,19 @@ namespace Aegix::Graphics
 		m_pipeline->bind(cmd);
 		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
+		Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
 	void PostProcessingPass::drawUI()
 	{
-		ImGui::Text("Post Processing Pass");
+		static constexpr auto toneMappingNames = std::array{ "Reinhard", "ACES" };
+		int currentMode = static_cast<int>(m_settings.toneMappingMode);
+		if (ImGui::Combo("Tone Mapping Mode", &currentMode, toneMappingNames.data(), toneMappingNames.size()))
+		{
+			m_settings.toneMappingMode = static_cast<ToneMappingMode>(currentMode);
+		}
+
+		ImGui::SliderFloat("Bloom Intensity", &m_settings.bloomIntensity, 0.0f, 2.0f);
 	}
 }

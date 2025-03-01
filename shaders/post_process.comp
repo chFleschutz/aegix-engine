@@ -6,7 +6,11 @@ layout(binding = 0, rgba16f) uniform image2D outFinalMap;
 layout(binding = 1, rgba16f) uniform image2D sceneColorMap;
 layout(binding = 2, rgba16f) uniform image2D bloomMap;
 
-const float BLOOM_INTENSITY = 0.2;
+layout(push_constant) uniform PostProcess
+{
+	int toneMappingMode;
+	float bloomIntensity;
+} push;
 
 vec3 ToneMapReinhard(vec3 color);
 vec3 ToneMapACES(vec3 color);
@@ -18,10 +22,17 @@ void main()
 	vec3 sceneColor = imageLoad(sceneColorMap, pixelCoords).rgb;
 	vec3 bloomColor = imageLoad(bloomMap, pixelCoords).rgb;
 
-	vec3 color = sceneColor + (BLOOM_INTENSITY * bloomColor);
+	vec3 color = sceneColor + (push.bloomIntensity * bloomColor);
 
-//	color = ToneMapReinhard(color);
-	color = ToneMapACES(color);
+	switch (push.toneMappingMode)
+	{
+	case 0:
+		color = ToneMapReinhard(color);
+		break;
+	case 1:
+		color = ToneMapACES(color);
+		break;
+	}
 
 	imageStore(outFinalMap, pixelCoords, vec4(color, 1.0));
 }
