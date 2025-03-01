@@ -7,7 +7,7 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 
-class PBSScene : public Aegix::Scene::Scene
+class HelmetScene : public Aegix::Scene::Scene
 {
 public:
 	/// @brief All objects in a scene are created here

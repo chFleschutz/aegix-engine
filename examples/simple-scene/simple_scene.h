@@ -7,6 +7,7 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 #include "scripting/script_base.h"
+#include "utils/random.h"
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
@@ -27,66 +28,53 @@ public:
 	/// @brief All objects in a scene are created here
 	void initialize() override
 	{
-		// TODO: Empty scene for testing
-		//auto& assetManager = Aegix::AssetManager::instance();
+		auto& assetManager = Aegix::AssetManager::instance();
 
-		//// MODELS
-		//auto teapotMesh = assetManager.createModel("models/teapot.obj");
-		//auto planeMesh = assetManager.createModel("models/plane.obj");
-		//auto helmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.glb");
+		// MODELS
+		auto teapotMesh = assetManager.createModel("models/teapot.obj");
+		auto planeMesh = assetManager.createModel("models/plane.obj");
 
-		//// MATERIALS
-		//auto paintingTexture = assetManager.createTexture("textures/painting.png");
-		//auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(paintingTexture);
-		//paintingMat->setData({
-		//	.shininess = 32.0f
-		//	});
+		// MATERIALS
+		auto textureBlack = assetManager.createTexture(glm::vec4{ 0.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureWhite = assetManager.createTexture(glm::vec4{ 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultNormal = assetManager.createTexture(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
 
-		//auto metalTexture = assetManager.createTexture("textures/brushed-metal.png");
-		//auto metalMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(metalTexture);
-		//metalMat->setData({
-		//	.shininess = 128.0f
-		//	});
+		auto paintingTexture = assetManager.createTexture("textures/painting.png");
+		auto paintingMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
+			paintingTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
-		//auto helmetTexture = assetManager.createTexture("damaged_helmet/Default_albedo.jpg");
-		//auto helmetMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(helmetTexture);
-		//helmetMat->setData({
-		//	.shininess = 32.0f
-		//	});
+		auto metalTexture = assetManager.createTexture("textures/brushed-metal.png");
+		auto metalMat = assetManager.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
+			metalTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
-		//// ENTITIES
-		//auto plane = createEntity("Plane");
-		//plane.addComponent<Aegix::Component::Mesh>(planeMesh);
-		//plane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
-		//auto& planeTransform = plane.getComponent<Aegix::Component::Transform>();
-		//planeTransform.location = { 0.0f, 5.0f, 5.0f };
-		//planeTransform.rotation = { glm::radians(90.0f), 0.0f, 0.0f };
+		// ENTITIES
+		auto floorPlane = createEntity("Floor Plane");
+		floorPlane.addComponent<Aegix::Component::Mesh>(planeMesh);
+		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
+		floorPlane.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
-		//auto floorPlane = createEntity("Floor Plane");
-		//floorPlane.addComponent<Aegix::Component::Mesh>(planeMesh);
-		//floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
+		auto teapot = createEntity("Teapot");
+		teapot.addComponent<Aegix::Component::Mesh>(teapotMesh);
+		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
+		teapot.addComponent<Rotator>();
+		teapot.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
-		//auto teapot = createEntity("Teapot");
-		//teapot.addComponent<Aegix::Component::Mesh>(teapotMesh);
-		//teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
-		//teapot.addComponent<Rotator>();
-		//auto& teapotTransform = teapot.getComponent<Aegix::Component::Transform>();
-		//teapotTransform.scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		// LIGHTS
+		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
-		//auto helmet = createEntity("Helmet");
-		//helmet.addComponent<Aegix::Component::Mesh>(helmetMesh);
-		//helmet.addComponent<Aegix::Graphics::DefaultMaterial>(helmetMat);
-		//auto& helmetTransform = helmet.getComponent<Aegix::Component::Transform>();
-		//helmetTransform.location = { 0.0f, 0.0f, 5.0f };
-		//helmetTransform.rotation = { glm::radians(180.0f), 0.0f, 0.0f };
+		constexpr int lightCount = 32;
+		constexpr float lightRadius = 10.0f;
+		// Ring of lights
+		for (int i = 0; i < lightCount; i++)
+		{
+			float x = lightRadius * cos(glm::radians(360.0f / lightCount * i));
+			float y = lightRadius * sin(glm::radians(360.0f / lightCount * i));
+			auto light = createEntity("Light " + std::to_string(i), { x, y, 3.0f });
 
-		//// LIGHTS
-		//assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
-
-		//auto light1 = createEntity("Light 1", { -7.0f, -5.0f, 5.0f });
-		//light1.addComponent<Aegix::Component::PointLight>(Aegix::Color::blue(), 100.0f);
-
-		//auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
-		//light2.addComponent<Aegix::Component::PointLight>(Aegix::Color::green(), 100.0f);
+			float r = Aegix::Random::uniformFloat(0.0f, 1.0f);
+			float g = Aegix::Random::uniformFloat(0.0f, 1.0f);
+			float b = Aegix::Random::uniformFloat(0.0f, 1.0f);
+			light.addComponent<Aegix::Component::PointLight>(glm::vec3{ r, g, b }, 200.0f);
+		}
 	}
 };
