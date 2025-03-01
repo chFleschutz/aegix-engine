@@ -1,6 +1,7 @@
 #include "renderer_layer.h"
 
 #include "core/engine.h"
+#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/renderer.h"
 
@@ -53,6 +54,8 @@ namespace Aegix::UI
 			auto& node = resourcePool.node(nodeHandle);
 			if (ImGui::CollapsingHeader(node.name.c_str(), ImGuiTreeNodeFlags_None))
 			{
+				node.pass->drawUI();
+
 				if (!node.inputs.empty() && ImGui::TreeNode("Inputs"))
 				{
 					for (const auto& inputHandle : node.inputs)
