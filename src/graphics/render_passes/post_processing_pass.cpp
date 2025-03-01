@@ -45,7 +45,7 @@ namespace Aegix::Graphics
 			FrameGraphResourceType::Texture,
 			FrameGraphResourceUsage::Compute,
 			FrameGraphResourceTextureInfo{
-				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+				.format = VK_FORMAT_B8G8R8A8_UNORM,
 				.extent = { 0, 0},
 				.resizePolicy = ResizePolicy::SwapchainRelative
 				}
