@@ -10,6 +10,7 @@ layout(push_constant) uniform PostProcess
 {
 	int toneMappingMode;
 	float bloomIntensity;
+	float gamma;
 } push;
 
 vec3 ToneMapReinhard(vec3 color);
@@ -60,5 +61,5 @@ vec3 applyToneMapping(vec3 color)
 
 vec3 applyGammaCorrection(vec3 color)
 {
-	return pow(color, vec3(1.0 / 2.2));
+	return pow(color, vec3(1.0 / push.gamma));
 }

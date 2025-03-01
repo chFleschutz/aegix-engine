@@ -16,6 +16,7 @@ namespace Aegix::Graphics
 	{
 		ToneMappingMode toneMappingMode = ToneMappingMode::ACES;
 		float bloomIntensity = 0.1f;
+		float gamma = 2.2f;
 	};
 
 	class PostProcessingPass : public FrameGraphRenderPass
