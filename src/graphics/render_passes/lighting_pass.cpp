@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_ubo = std::make_unique<UniformBufferData<Lighting>>(device);
+		m_ubo = std::make_unique<UniformBuffer>(device, m_lighting);
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
@@ -94,39 +94,37 @@ namespace Aegix::Graphics
 
 	void LightingPass::drawUI()
 	{
-		ImGui::Text("Lighting Pass");
+		ImGui::Text("Ambient Light");
+		ImGui::ColorEdit3("Color##Ambient", &m_lighting.ambient.color.r);
+		ImGui::DragFloat("Intensity##Ambient", &m_lighting.ambient.color.a, 0.01f, 0.0f, 10.0f);
+
+		ImGui::Spacing();
+
+		ImGui::Text("Directional Light");
+		ImGui::ColorEdit3("Color##Directional", &m_lighting.directional.color.r);
+		ImGui::DragFloat("Intensity##Directional", &m_lighting.directional.color.a, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat3("Direction##Directional", &m_lighting.directional.direction.x, 0.01f);
+
+		ImGui::Spacing();
 	}
 
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
 	{
-		Lighting ubo{};
-
-		ubo.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
-
-		ubo.ambient = {
-			.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
-		};
-
-		ubo.directional = {
-			.direction = glm::vec4(glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f)), 0.0f),
-			.color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)
-		};
+		m_lighting.cameraPosition = glm::vec4(frameInfo.scene.camera().getComponent<Component::Transform>().location, 1.0f);
 
 		int32_t lighIndex = 0;
 		auto view = frameInfo.scene.viewEntities<Aegix::Component::Transform, Aegix::Component::PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < MAX_POINT_LIGHTS && "Point lights exceed maximum number of point lights");
-			ubo.pointLights[lighIndex] = Lighting::PointLight{
+			m_lighting.pointLights[lighIndex] = LightingUniforms::PointLight{
 				.position = glm::vec4(transform.location, 1.0f),
 				.color = glm::vec4(pointLight.color, pointLight.intensity)
 			};
 			lighIndex++;
-
-			assert(lighIndex < 4);
 		}
-		ubo.pointLightCount = lighIndex;
+		m_lighting.pointLightCount = lighIndex;
 
-		m_ubo->setData(frameInfo.frameIndex, ubo);
+		m_ubo->setData(frameInfo.frameIndex, m_lighting);
 	}
 }

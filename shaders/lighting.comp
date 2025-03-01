@@ -79,7 +79,7 @@ void main()
 
     // Directional light
     {
-        vec3 L = normalize(-lighting.directionalLight.direction.xyz);
+        vec3 L = normalize(lighting.directionalLight.direction.xyz);
         vec3 radiance = lighting.directionalLight.color.rgb * lighting.directionalLight.color.w;
         Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }

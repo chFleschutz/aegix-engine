@@ -5,17 +5,17 @@
 
 namespace Aegix::Graphics
 {
-	struct Lighting
+	struct LightingUniforms
 	{
 		struct AmbientLight
 		{
-			glm::vec4 color;
+			glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 0.0);
 		};
 
 		struct DirectionalLight
 		{
-			glm::vec4 direction;
-			glm::vec4 color;
+			glm::vec4 direction = glm::vec4(1.0, 1.0, 1.0, 0.0);
+			glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 0.0);
 		};
 
 		struct PointLight
@@ -51,10 +51,12 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_arm;
 		FrameGraphResourceHandle m_emissive;
 
+		LightingUniforms m_lighting;
+
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
-		std::unique_ptr<UniformBufferData<Lighting>> m_ubo;
+		std::unique_ptr<UniformBuffer> m_ubo;
 	};
 }
