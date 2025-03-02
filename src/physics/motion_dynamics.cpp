@@ -88,7 +88,7 @@ namespace Aegix::Physics
 
 		applyForces(deltaSeconds);
 		// Update transform
-		auto& transform = component<Aegix::Component::Transform>();
+		auto& transform = component<Transform>();
 		transform.location += m_linearVelocity * deltaSeconds;
 		transform.rotation += m_angularVelocity * deltaSeconds;
 	}

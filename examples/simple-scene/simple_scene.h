@@ -16,7 +16,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		getComponent<Aegix::Component::Transform>().rotation += glm::vec3{ 0.0f, 0.0f, 1.0f } * deltaSeconds;
+		component<Aegix::Transform>().rotation += glm::vec3{ 0.0f, 0.0f, 1.0f } * deltaSeconds;
 	}
 };
 
@@ -49,15 +49,15 @@ public:
 
 		// ENTITIES
 		auto floorPlane = createEntity("Floor Plane");
-		floorPlane.addComponent<Aegix::Component::Mesh>(planeMesh);
+		floorPlane.addComponent<Aegix::Mesh>(planeMesh);
 		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
-		floorPlane.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		floorPlane.component<Aegix::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
 		auto teapot = createEntity("Teapot");
-		teapot.addComponent<Aegix::Component::Mesh>(teapotMesh);
+		teapot.addComponent<Aegix::Mesh>(teapotMesh);
 		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		teapot.addComponent<Rotator>();
-		teapot.getComponent<Aegix::Component::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		teapot.component<Aegix::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
 		// LIGHTS
 		assetManager.addRenderSystem<Aegix::Graphics::PointLightSystem>();
@@ -74,7 +74,7 @@ public:
 			float r = Aegix::Random::uniformFloat(0.0f, 1.0f);
 			float g = Aegix::Random::uniformFloat(0.0f, 1.0f);
 			float b = Aegix::Random::uniformFloat(0.0f, 1.0f);
-			light.addComponent<Aegix::Component::PointLight>(glm::vec3{ r, g, b }, 200.0f);
+			light.addComponent<Aegix::PointLight>(glm::vec3{ r, g, b }, 200.0f);
 		}
 	}
 };

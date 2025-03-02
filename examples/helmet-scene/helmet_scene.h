@@ -19,7 +19,7 @@ public:
 		assetManager.addRenderSystem<Graphics::PointLightSystem>(); 
 
 		// CAMERA
-		auto& cameraTransform = camera().component<Component::Transform>();
+		auto& cameraTransform = camera().component<Transform>();
 		cameraTransform.location = { -3.0f, -6.0f, 3.0f };
 		cameraTransform.rotation = { glm::radians(-8.0f), 0.0f, glm::radians(335.0f) };
 
@@ -54,28 +54,28 @@ public:
 
 		// ENTITIES
 		auto plane = createEntity("Plane");
-		plane.addComponent<Component::Mesh>(planeMesh);
+		plane.addComponent<Mesh>(planeMesh);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
-		plane.component<Component::Transform>().scale = { 20.0f, 20.0f, 20.0f };
+		plane.component<Transform>().scale = { 20.0f, 20.0f, 20.0f };
 
 		auto damagedHelmet = createEntity("Damaged Helmet", { -2.0f, 0.0f, 2.0f });
-		damagedHelmet.addComponent<Component::Mesh>(damagedHelmetMesh);
+		damagedHelmet.addComponent<Mesh>(damagedHelmetMesh);
 		damagedHelmet.addComponent<Graphics::DefaultMaterial>(damagedHelmetMat);
-		damagedHelmet.component<Component::Transform>().rotation = { glm::radians(180.0f), 0.0f, 0.0f };
+		damagedHelmet.component<Transform>().rotation = { glm::radians(180.0f), 0.0f, 0.0f };
 
 		auto scifiHelmet = createEntity("SciFi Helmet", { 2.0f, 0.0f, 2.0f });
-		scifiHelmet.addComponent<Component::Mesh>(scifiHelmetMesh);
+		scifiHelmet.addComponent<Mesh>(scifiHelmetMesh);
 		scifiHelmet.addComponent<Graphics::DefaultMaterial>(scifiHelmetMat);
-		scifiHelmet.component<Component::Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
+		scifiHelmet.component<Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
 
 		// LIGHTS
 		auto light1 = createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
-		light1.addComponent<Component::PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
+		light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
 
 		auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
-		light2.addComponent<Component::PointLight>(Color::blue(), 200.0f);
+		light2.addComponent<PointLight>(Color::blue(), 200.0f);
 
 		auto light3 = createEntity("Light 3", { -8.0f, -5.0f, 5.0f });
-		light3.addComponent<Component::PointLight>(Color::white(), 200.0f);
+		light3.addComponent<PointLight>(Color::white(), 200.0f);
 	}
 };

@@ -12,7 +12,7 @@ namespace Aegix::Scripting
 	class ScriptBase;
 }
 
-namespace Aegix::Component
+namespace Aegix
 {
 	/// @brief Gives a name to the entity
 	struct Name

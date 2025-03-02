@@ -10,7 +10,7 @@ namespace Aegix
 	public:
 		virtual void onUpdate(float deltaSeconds, Scene::Scene& scene) override
 		{
-			auto view = scene.viewEntities<Component::Transform, Component::Camera>();
+			auto view = scene.viewEntities<Transform, Camera>();
 			for (auto&& [entity, transform, camera] : view.each())
 			{
 				calcViewMatrix(camera, transform);
@@ -19,7 +19,7 @@ namespace Aegix
 		}
 
 	private:
-		void calcViewMatrix(Component::Camera& camera, Component::Transform& transform);
-		void calcPerspectiveProjection(Component::Camera& camera);
+		void calcViewMatrix(Camera& camera, Transform& transform);
+		void calcPerspectiveProjection(Camera& camera);
 	};
 }

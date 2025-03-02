@@ -9,8 +9,8 @@ namespace Aegix::Scripting
 {
 	void DynamicMovementController::update(float deltaSeconds)
 	{
-		auto& transform = component<Aegix::Component::Transform>();
-		auto& dynamics = component<Aegix::Physics::MotionDynamics>();
+		auto& transform = component<Transform>();
+		auto& dynamics = component<Physics::MotionDynamics>();
 
 		bool forwardPressed = Input::instance().keyPressed(m_keys.moveForward);
 		bool backwardPressed = Input::instance().keyPressed(m_keys.moveBackward);

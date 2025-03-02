@@ -11,16 +11,16 @@ namespace Aegix::Scene
 	Scene::Scene() 
 	{
 		auto camera = createEntity("Main Camera");
-		camera.addComponent<Component::Camera>();
-		camera.addComponent<Aegix::Scripting::KinematcMovementController>();
-		auto& cameraTransform = camera.component<Component::Transform>();
+		camera.addComponent<Camera>();
+		camera.addComponent<Scripting::KinematcMovementController>();
+		auto& cameraTransform = camera.component<Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, 10.0f };
 		cameraTransform.rotation = { glm::radians(-30.0f), 0.0f, 0.0f};
 	}
 
 	Entity Scene::camera()
 	{
-		auto group = m_registry.group<Component::Camera>();
+		auto group = m_registry.group<Camera>();
 		assert(group.size() == 1 && "Scene has to contain exactly one camera");
 		return { group.front(), this };
 	}
@@ -28,8 +28,8 @@ namespace Aegix::Scene
 	Entity Scene::createEntity(const std::string& name, const glm::vec3& location)
 	{
 		Entity entity = { m_registry.create(), this };
-		entity.addComponent<Component::Transform>(location);
-		entity.addComponent<Component::Name>(name.empty() ? "Entity" : name);
+		entity.addComponent<Transform>(location);
+		entity.addComponent<Name>(name.empty() ? "Entity" : name);
 		return entity;
 	}
 

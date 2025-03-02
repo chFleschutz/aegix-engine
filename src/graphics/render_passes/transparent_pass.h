@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 	private:
 		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
 		{
-			auto& camera = frameInfo.scene.camera().component<Component::Camera>();
+			auto& camera = frameInfo.scene.camera().component<Camera>();
 
 			TransparentUbo ubo{
 				.view = camera.viewMatrix,

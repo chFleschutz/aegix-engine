@@ -66,12 +66,12 @@ namespace Aegix::UI
 			return;
 		}
 
-		drawComponent<Component::Name>("Name", m_selectedEntity, [](Component::Name& nameComponent)
+		drawComponent<Name>("Name", m_selectedEntity, [](Name& nameComponent)
 			{
 				ImGui::InputText("Entity Name", &nameComponent.name);
 			});
 
-		drawComponent<Component::Transform>("Transform", m_selectedEntity, [](Component::Transform& transform)
+		drawComponent<Transform>("Transform", m_selectedEntity, [](Transform& transform)
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
 
@@ -83,18 +83,18 @@ namespace Aegix::UI
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 			});
 
-		drawComponent<Component::Mesh>("Mesh", m_selectedEntity, [](Component::Mesh& mesh)
+		drawComponent<Mesh>("Mesh", m_selectedEntity, [](Mesh& mesh)
 			{
 				drawAssetSlot("Mesh", "Mesh Asset", mesh.staticMesh != nullptr);
 			});
 
-		drawComponent<Component::PointLight>("Pointlight", m_selectedEntity, [](Component::PointLight& pointlight)
+		drawComponent<PointLight>("Pointlight", m_selectedEntity, [](PointLight& pointlight)
 			{
 				ImGui::ColorEdit3("Color", &pointlight.color.r);
 				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f);
 			});
 
-		drawComponent<Component::Camera>("Camera", m_selectedEntity, [](Component::Camera& camera)
+		drawComponent<Camera>("Camera", m_selectedEntity, [](Camera& camera)
 			{
 				ImGui::Text("Camera Component");
 			});
@@ -107,8 +107,8 @@ namespace Aegix::UI
 	void ScenePropertiesLayer::drawEntityNode(Scene::Entity entity)
 	{
 		const char* name = "Entity";
-		if (entity.hasComponent<Component::Name>())
-			name = entity.component<Component::Name>().name.c_str();
+		if (entity.hasComponent<Name>())
+			name = entity.component<Name>().name.c_str();
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // For leaf nodes
@@ -144,11 +144,11 @@ namespace Aegix::UI
 
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			drawAddComponentItem<Component::Name>("Name");
-			drawAddComponentItem<Component::Transform>("Transform");
-			drawAddComponentItem<Component::Mesh>("Mesh");
-			drawAddComponentItem<Component::PointLight>("Point Light");
-			drawAddComponentItem<Component::Camera>("Camera");
+			drawAddComponentItem<Name>("Name");
+			drawAddComponentItem<Transform>("Transform");
+			drawAddComponentItem<Mesh>("Mesh");
+			drawAddComponentItem<PointLight>("Point Light");
+			drawAddComponentItem<Camera>("Camera");
 			drawAddComponentItem<Graphics::DefaultMaterial>("Default Material");
 			ImGui::EndPopup();
 		}

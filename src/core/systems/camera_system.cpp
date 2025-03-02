@@ -4,7 +4,7 @@
 
 namespace Aegix
 {
-	void CameraSystem::calcViewMatrix(Component::Camera& camera, Component::Transform& transform)
+	void CameraSystem::calcViewMatrix(Camera& camera, Transform& transform)
 	{
 		// Calculate the view matrix based on the camera's transform
 		// see: https://www.3dgep.com/understanding-the-view-matrix/
@@ -45,7 +45,7 @@ namespace Aegix
 		camera.inverseViewMatrix = inverseViewMat;
 	}
 
-	void CameraSystem::calcPerspectiveProjection(Component::Camera& camera)
+	void CameraSystem::calcPerspectiveProjection(Camera& camera)
 	{
 		assert(abs(camera.aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
 
