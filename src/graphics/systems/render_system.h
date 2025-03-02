@@ -13,8 +13,9 @@ namespace Aegix::Graphics
 	public:
 		RenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
 		RenderSystem(const RenderSystem&) = delete;
-		RenderSystem& operator=(const RenderSystem&) = delete;
 		virtual ~RenderSystem() = default;
+
+		RenderSystem& operator=(const RenderSystem&) = delete;
 
 		DescriptorSetLayout& descriptorSetLayout() { return *m_descriptorSetLayout; }
 
@@ -26,4 +27,18 @@ namespace Aegix::Graphics
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<Pipeline> m_pipeline;
 	};
+
+	template<typename T>
+	concept RenderSystemDerived = std::derived_from<T, RenderSystem>;
+
+	template <typename T>
+	concept ValidRenderSystem = 
+		RenderSystemDerived<T> &&
+		requires { { T::STAGE } -> std::convertible_to<RenderStage::Type>; };
+
+	template<typename T>
+	concept ValidMaterial = 
+		requires { typename T::Instance; } && 
+		requires { typename T::RenderSystem; } &&
+		RenderSystemDerived<typename T::RenderSystem>;
 }
