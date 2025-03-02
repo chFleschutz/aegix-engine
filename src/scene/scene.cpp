@@ -3,8 +3,7 @@
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scripting/movement/kinematic_movement_controller.h"
-
-#include <cassert>
+#include "scene/systems/camera_system.h"
 
 namespace Aegix::Scene
 {
@@ -16,6 +15,8 @@ namespace Aegix::Scene
 		auto& cameraTransform = m_mainCamera.component<Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, 10.0f };
 		cameraTransform.rotation = { glm::radians(-30.0f), 0.0f, 0.0f};
+
+		addSystem<CameraSystem>();
 	}
 
 	Entity Scene::createEntity(const std::string& name, const glm::vec3& location)
