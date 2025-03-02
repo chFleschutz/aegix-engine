@@ -15,7 +15,6 @@ public:
 
 		auto& renderer = Engine::instance().renderer();
 		renderer.addRenderSystem<Graphics::PointLightSystem>();
-		renderer.addRenderSystem<Graphics::DefaultRenderSystem>();
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{

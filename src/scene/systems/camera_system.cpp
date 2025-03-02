@@ -4,6 +4,16 @@
 
 namespace Aegix::Scene
 {
+	void CameraSystem::onUpdate(float deltaSeconds, Scene& scene)
+	{
+		auto view = scene.registry().view<Transform, Camera>();
+		for (auto&& [entity, transform, camera] : view.each())
+		{
+			calcViewMatrix(camera, transform);
+			calcPerspectiveProjection(camera);
+		}
+	}
+
 	void CameraSystem::calcViewMatrix(Camera& camera, Transform& transform)
 	{
 		// Calculate the view matrix based on the camera's transform
@@ -29,7 +39,7 @@ namespace Aegix::Scene
 		viewMatrix[3][2] = glm::dot(f, transform.location);
 		camera.viewMatrix = viewMatrix;
 
-		glm::mat4 inverseViewMat{ 1.f };
+		glm::mat4 inverseViewMat{ 1.0f };
 		inverseViewMat[0][0] = s.x;
 		inverseViewMat[0][1] = s.y;
 		inverseViewMat[0][2] = s.z;
