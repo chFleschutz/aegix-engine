@@ -1,5 +1,6 @@
 #pragma once
 
+#include "scene/entity.h"
 #include "scripting/script_manager.h"
 #include "utils/math_utils.h"
 
@@ -12,8 +13,6 @@ namespace Aegix::Scripting
 
 namespace Aegix::Scene
 {
-	class Entity;
-
 	/// @brief Base class for representation of a scene with objects
 	/// @note For example subclass view DefaultScene
 	/// @see default_scene.h
