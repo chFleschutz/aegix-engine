@@ -110,7 +110,11 @@ namespace Aegix::Graphics
 
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
 	{
-		m_lighting.cameraPosition = glm::vec4(frameInfo.scene.camera().component<Transform>().location, 1.0f);
+		if (Scene::Entity mainCamera = frameInfo.scene.mainCamera())
+		{
+			auto& cameraTransform = mainCamera.component<Transform>();
+			m_lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
+		}
 
 		int32_t lighIndex = 0;
 		auto view = frameInfo.scene.registry().view<Transform, PointLight>();

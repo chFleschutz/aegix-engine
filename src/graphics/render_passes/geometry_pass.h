@@ -162,7 +162,11 @@ namespace Aegix::Graphics
 	private:
 		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
 		{
-			auto& camera = frameInfo.scene.camera().component<Camera>();
+			Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+			if (!mainCamera)
+				return;
+
+			auto& camera = mainCamera.component<Camera>();
 			camera.aspect = frameInfo.aspectRatio;
 
 			GBufferUbo ubo{

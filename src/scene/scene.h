@@ -26,11 +26,10 @@ namespace Aegix::Scene
 		auto operator=(Scene&&) -> Scene& = delete;
 
 		/// @brief Returns the registry
-		entt::registry& registry() { return m_registry; }
+		[[nodiscard]] auto registry() -> entt::registry& { return m_registry; }
+		[[nodiscard]] auto mainCamera() const -> Entity { return m_mainCamera; }
 
-		// Todo: save camera somehow and allow multiple cameras
-		/// @brief Returns the camera
-		Entity camera();
+		void setMainCamera(Entity camera) { m_mainCamera = camera; }
 
 		/// @brief Adds tracking for a script component to call its virtual functions
 		void addScript(Aegix::Scripting::ScriptBase* script) { m_scriptManager.addScript(script); }
@@ -50,6 +49,7 @@ namespace Aegix::Scene
 
 	private:
 		entt::registry m_registry;
+		Entity m_mainCamera;
 
 		Aegix::Scripting::ScriptManager m_scriptManager;
 
