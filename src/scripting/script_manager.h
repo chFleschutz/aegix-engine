@@ -9,15 +9,20 @@ namespace Aegix::Scripting
 	class ScriptManager
 	{
 	public:
+		ScriptManager() = default;
+		ScriptManager(const ScriptManager&) = delete;
+		ScriptManager(ScriptManager&&) = delete;
+		~ScriptManager();
+
+		ScriptManager& operator=(const ScriptManager&) = delete;
+		ScriptManager& operator=(ScriptManager&&) = delete;
+
 		/// @brief Adds a script to call its virtual functions
 		/// @param script The script to add
 		void addScript(ScriptBase* script);
 
 		/// @brief Calls the update function of each script
 		void update(float deltaSeconds);
-
-		/// @brief Calls the end function of each script
-		void runtimeEnd();
 
 	private:
 		/// @brief Calls the begin function of each script once

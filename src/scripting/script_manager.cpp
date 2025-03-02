@@ -4,6 +4,16 @@
 
 namespace Aegix::Scripting
 {
+	ScriptManager::~ScriptManager()
+	{
+		handleNewScripts(); // just in case
+
+		for (auto& script : m_scripts)
+		{
+			script->end();
+		}
+	}
+
 	void ScriptManager::addScript(ScriptBase* script)
 	{
 		m_newScripts.emplace_back(script);
@@ -16,16 +26,6 @@ namespace Aegix::Scripting
 		for (auto& script : m_scripts)
 		{
 			script->update(deltaSeconds);
-		}
-	}
-
-	void ScriptManager::runtimeEnd()
-	{
-		handleNewScripts(); // just in case
-
-		for (auto& script : m_scripts)
-		{
-			script->end();
 		}
 	}
 

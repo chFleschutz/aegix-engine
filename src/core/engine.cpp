@@ -64,7 +64,6 @@ namespace Aegix
 		}
 
 		m_renderer.waitIdle();
-		m_scene.runtimeEnd();
 	}
 
 	void Engine::applyFrameBrake(std::chrono::high_resolution_clock::time_point lastFrameBegin)

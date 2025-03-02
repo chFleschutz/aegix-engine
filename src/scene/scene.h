@@ -53,7 +53,6 @@ namespace Aegix::Scene
 		void addScript(Scripting::ScriptBase* script) { m_scriptManager.addScript(script); }
 
 		void update(float deltaSeconds);
-		void runtimeEnd() { m_scriptManager.runtimeEnd(); }
 
 	private:
 		entt::registry m_registry;
