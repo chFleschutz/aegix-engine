@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 namespace Aegix
 {
@@ -40,15 +41,15 @@ namespace Aegix
 
 	void Engine::run()
 	{
-		auto currentTime = std::chrono::high_resolution_clock::now();
+		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
 
 		// Main Update loop
 		while (!m_window.shouldClose())
 		{
 			// Calculate time
-			auto frameBeginTime = std::chrono::high_resolution_clock::now();
-			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(frameBeginTime - currentTime).count();
-			currentTime = frameBeginTime;
+			auto currentFrameBegin = std::chrono::high_resolution_clock::now();
+			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(currentFrameBegin - lastFrameBegin).count();
+			lastFrameBegin = currentFrameBegin;
 
 			glfwPollEvents();
 
@@ -59,22 +60,25 @@ namespace Aegix
 			// Rendering
 			m_renderer.renderFrame(m_scene, m_ui);
 
-			applyFrameBrake(frameBeginTime);
+			applyFrameBrake(currentFrameBegin);
 		}
 
 		m_renderer.waitIdle();
 		m_scene.runtimeEnd();
 	}
 
-	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime)
+	void Engine::applyFrameBrake(std::chrono::high_resolution_clock::time_point lastFrameBegin)
 	{
-		// FPS
-		//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - frameBeginTime) << std::endl;
-
 		if (MAX_FPS <= 0)
 			return;
 
-		auto desiredFrameTime = std::chrono::round<std::chrono::nanoseconds>(std::chrono::duration<float>(1.0f / MAX_FPS));
-		while (std::chrono::high_resolution_clock::now() < frameBeginTime + desiredFrameTime);
+		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
+		std::chrono::milliseconds frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameBegin);
+
+		static constexpr auto targetFrameTime = std::chrono::milliseconds(1000 / MAX_FPS);
+		if (frameTime < targetFrameTime)
+		{
+			std::this_thread::sleep_for(targetFrameTime - frameTime);
+		}
 	}
 }
