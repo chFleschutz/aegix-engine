@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 		m_pipeline->bind(cmd);
 		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout, globalSet);
 
-		auto view = frameInfo.scene.viewEntities<Transform, PointLight>();
+		auto view = frameInfo.scene.registry().view<Transform, PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{

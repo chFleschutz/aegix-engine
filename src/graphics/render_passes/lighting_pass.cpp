@@ -113,7 +113,7 @@ namespace Aegix::Graphics
 		m_lighting.cameraPosition = glm::vec4(frameInfo.scene.camera().component<Transform>().location, 1.0f);
 
 		int32_t lighIndex = 0;
-		auto view = frameInfo.scene.viewEntities<Transform, PointLight>();
+		auto view = frameInfo.scene.registry().view<Transform, PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < MAX_POINT_LIGHTS && "Point lights exceed maximum number of point lights");

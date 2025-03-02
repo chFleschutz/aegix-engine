@@ -13,9 +13,7 @@ namespace Aegix::Scripting
 
 namespace Aegix::Scene
 {
-	/// @brief Base class for representation of a scene with objects
-	/// @note For example subclass view DefaultScene
-	/// @see default_scene.h
+	/// @brief Scene contains all entities and systems
 	class Scene
 	{
 	public:
@@ -26,15 +24,6 @@ namespace Aegix::Scene
 
 		auto operator=(const Scene&) -> Scene& = delete;
 		auto operator=(Scene&&) -> Scene& = delete;
-
-		/// @brief Creates a view of entities with components of type T
-		/// @tparam ...T The components of the entities
-		/// @return A view containing all entities with the given component types
-		template<typename... T>
-		auto viewEntities()
-		{
-			return m_registry.view<T...>();
-		}
 
 		/// @brief Returns the registry
 		entt::registry& registry() { return m_registry; }

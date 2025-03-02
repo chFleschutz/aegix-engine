@@ -63,7 +63,7 @@ namespace Aegix::Graphics
 		);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene.viewEntities<Transform, Mesh, DefaultMaterial>();
+		auto view = frameInfo.scene.registry().view<Transform, Mesh, DefaultMaterial>();
 		for (auto&& [entity, transform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)
