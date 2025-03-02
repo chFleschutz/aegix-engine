@@ -9,26 +9,26 @@ namespace Aegix::Graphics
 	{
 		struct AmbientLight
 		{
-			glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 0.0);
+			glm::vec4 color{ 1.0, 1.0, 1.0, 0.0 };
 		};
 
 		struct DirectionalLight
 		{
-			glm::vec4 direction = glm::vec4(1.0, 1.0, 1.0, 0.0);
-			glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 0.0);
+			glm::vec4 direction{ 1.0, 1.0, 1.0, 0.0 };
+			glm::vec4 color{ 1.0, 1.0, 1.0, 0.0 };
 		};
 
 		struct PointLight
 		{
-			glm::vec4 position;
-			glm::vec4 color;
+			glm::vec4 position{ 0.0f };
+			glm::vec4 color{ 0.0f };
 		};
 
-		glm::vec4 cameraPosition;
+		glm::vec4 cameraPosition{ 0.0f };
 		AmbientLight ambient;
 		DirectionalLight directional;
-		std::array<PointLight, MAX_POINT_LIGHTS> pointLights;
-		int32_t pointLightCount;
+		std::array<PointLight, MAX_POINT_LIGHTS> pointLights{};
+		int32_t pointLightCount = 0;
 	};
 
 
