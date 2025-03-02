@@ -1,10 +1,8 @@
 #pragma once
 
-#include "core/asset_manager.h"
 #include "graphics/systems/default_render_system.h"
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
-#include "scene/entity.h"
 #include "scene/description.h"
 
 class HelmetScene : public Aegix::Scene::Description
@@ -15,8 +13,9 @@ public:
 	{
 		using namespace Aegix;
 
-		auto& assetManager = AssetManager::instance();
-		assetManager.addRenderSystem<Graphics::PointLightSystem>();
+		auto& renderer = Engine::instance().renderer();
+		renderer.addRenderSystem<Graphics::PointLightSystem>();
+		renderer.addRenderSystem<Graphics::DefaultRenderSystem>();
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
@@ -25,33 +24,30 @@ public:
 		};
 
 		// MODELS
-		auto damagedHelmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
-		auto scifiHelmetMesh = assetManager.createModel("scifi_helmet/ScifiHelmet.gltf");
-		auto planeMesh = assetManager.createModel("models/plane.obj");
+		auto damagedHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "damaged_helmet/DamagedHelmet.gltf");
+		auto scifiHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "scifi_helmet/ScifiHelmet.gltf");
+		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "models/plane.obj");
 
 		// MATERIALS
-		auto textureBlack = assetManager.createTexture(glm::vec4{ 0.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
-		auto textureWhite = assetManager.createTexture(glm::vec4{ 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
-		auto defaultNormal = assetManager.createTexture(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, 1, 1, VK_FORMAT_R8G8B8A8_UNORM);
-		auto planeMat = assetManager.createMaterialInstance<Graphics::DefaultMaterial>(
-			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack
-		);
+		auto textureBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
+			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack);
 
-		auto damagedHelmetMat = assetManager.createMaterialInstance<Graphics::DefaultMaterial>(
-			assetManager.createTexture("damaged_helmet/Default_albedo.jpg"),
-			assetManager.createTexture("damaged_helmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			assetManager.createTexture("damaged_helmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			assetManager.createTexture("damaged_helmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			assetManager.createTexture("damaged_helmet/Default_emissive.jpg")
-		);
+		auto damagedHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
+			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_albedo.jpg", VK_FORMAT_R8G8B8A8_SRGB),
+			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_emissive.jpg", VK_FORMAT_R8G8B8A8_SRGB));
 
-		auto scifiHelmetMat = assetManager.createMaterialInstance<Graphics::DefaultMaterial>(
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_BaseColor.png"),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
-			assetManager.createTexture("scifi_helmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
-			textureBlack
-		);
+		auto scifiHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
+			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_BaseColor.png", VK_FORMAT_R8G8B8A8_SRGB),
+			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
+			textureBlack);
 
 		// ENTITIES
 		auto plane = scene.createEntity("Plane");

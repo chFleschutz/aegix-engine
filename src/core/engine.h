@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/asset_manager.h"
 #include "core/input.h"
 #include "graphics/device.h"
 #include "graphics/globals.h"
@@ -32,7 +31,6 @@ namespace Aegix
 		Graphics::VulkanDevice& device() { return m_device; }
 		Graphics::Renderer& renderer() { return m_renderer; }
 		UI::UI& ui() { return m_ui; }
-		AssetManager& assetManager() { return m_assetManager; }
 		Scene::Scene& scene() { return m_scene; }
 
 		void run();
@@ -42,7 +40,6 @@ namespace Aegix
 		template<Scene::DescriptionDerived T>
 		void loadScene()
 		{
-			// TODO: Clear old scene
 			T description{};
 			description.initialize(m_scene);
 		}
@@ -57,7 +54,6 @@ namespace Aegix
 		Graphics::Renderer m_renderer{ m_window, m_device };
 		UI::UI m_ui{ m_window, m_renderer };
 		Input m_input{ m_window };
-		AssetManager m_assetManager{ m_renderer };
 		Scene::Scene m_scene;
 	};
 }

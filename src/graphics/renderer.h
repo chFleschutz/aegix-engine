@@ -25,13 +25,19 @@ namespace Aegix::Graphics
 		auto operator=(const Renderer&) -> Renderer& = delete;
 		auto operator=(Renderer&&) noexcept -> Renderer& = delete;
 
-		template<typename T>
-			requires std::is_base_of_v<RenderSystem, T> &&
-			requires { T::STAGE; }
+		template<ValidRenderSystem T>
 		auto addRenderSystem() -> RenderSystem&
 		{
-			constexpr RenderStage::Type stageType = T::STAGE;
-			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, stageType);
+			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, T::STAGE);
+		}
+
+		template<ValidMaterial T, typename... Args>
+			requires std::constructible_from<typename T::Instance, VulkanDevice&, DescriptorSetLayout&, DescriptorPool&, Args...>
+		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
+		{
+			auto& system = addRenderSystem<typename T::RenderSystem>();
+			return std::make_shared<typename T::Instance>(m_device, system.descriptorSetLayout(),
+				*m_globalPool, std::forward<Args>(args)...);
 		}
 
 		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }

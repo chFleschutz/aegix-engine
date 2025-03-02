@@ -1,5 +1,6 @@
 #include "static_mesh.h"
 
+#include "core/engine.h"
 #include "utils/file.h"
 
 #include "gltf.h"
@@ -68,7 +69,7 @@ namespace Aegix::Graphics
 		return attributeDescriptions;
 	}
 
-	std::unique_ptr<StaticMesh> StaticMesh::createFromFile(VulkanDevice& device, const std::filesystem::path& filepath)
+	std::shared_ptr<StaticMesh> StaticMesh::create(const std::filesystem::path& filepath)
 	{
 		MeshInfo info{};
 		
@@ -85,7 +86,7 @@ namespace Aegix::Graphics
 			assert(false && "Unsupported file format");
 		}
 
-		return std::make_unique<StaticMesh>(device, info);
+		return std::make_shared<StaticMesh>(Engine::instance().device(), info);
 	}
 
 	void StaticMesh::bind(VkCommandBuffer commandBuffer)

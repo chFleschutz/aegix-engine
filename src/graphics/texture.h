@@ -80,6 +80,9 @@ namespace Aegix::Graphics
 			bool anisotropy = true;
 		};
 
+		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
+		static auto create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
+
 		Texture(VulkanDevice& device, const Config& config);
 
 		/// @brief Creates a texture from a file, supports: jpeg, png, tga, bmp, psd, gif, hdr, pic, pnm (see: https://github.com/nothings/stb/blob/master/stb_image.h)

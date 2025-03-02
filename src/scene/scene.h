@@ -45,7 +45,7 @@ namespace Aegix::Scene
 
 		/// @brief Creates an entity with a NameComponent and TransformComponent
 		/// @note Scene::Entity can be passed by value
-		Entity createEntity(const std::string& name = std::string(), const glm::vec3& location = { 0.0f, 0.0f, 0.0f });
+		auto createEntity(const std::string& name = std::string(), const glm::vec3& location = glm::vec3{ 0.0f }) -> Entity;
 
 		void destroyEntity(Entity entity);
 

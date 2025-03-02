@@ -1,5 +1,6 @@
 #include "texture.h"
 
+#include "core/engine.h"
 #include "graphics/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -119,6 +120,18 @@ namespace Aegix::Graphics
 		}
 	}
 
+
+	// Texture -------------------------------------------------------------------
+
+	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
+	{
+		return std::make_shared<Texture>(Engine::instance().device(), texturePath, format);
+	}
+
+	auto Texture::create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
+	{
+		return std::make_shared<Texture>(Engine::instance().device(), extent.width, extent.height, color, format);
+	}
 
 	Texture::Texture(VulkanDevice& device, const Config& config)
 		: m_device{ device }
