@@ -29,7 +29,7 @@ namespace Aegix::UI
 
 			bool keepComponent = true;
 			if (ImGui::CollapsingHeader(componentName, &keepComponent, ImGuiTreeNodeFlags_DefaultOpen))
-				drawFunc(entity.getComponent<T>());
+				drawFunc(entity.component<T>());
 
 			if (!keepComponent)
 				entity.removeComponent<T>();

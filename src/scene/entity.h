@@ -32,7 +32,7 @@ namespace Aegix::Scene
 
 		/// @brief Acces to the component of type T
 		template<typename T>
-		T& getComponent() const
+		auto component() const -> T&
 		{
 			assert(hasComponent<T>() && "Cannot get Component: Entity does not have the component");
 			return m_scene->m_registry.get<T>(m_entityID);

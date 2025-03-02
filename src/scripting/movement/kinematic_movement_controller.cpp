@@ -18,7 +18,7 @@ namespace Aegix::Scripting
 
 	void KinematcMovementController::applyRotation(float deltaSeconds)
 	{
-		auto& transform = getComponent<Aegix::Component::Transform>();
+		auto& transform = component<Aegix::Component::Transform>();
 
 		// Key input rotation
 		glm::vec3 rotate{0.0f};
@@ -53,7 +53,7 @@ namespace Aegix::Scripting
 
 	void KinematcMovementController::applyMovement(float deltaSeconds)
 	{
-		auto& transform = getComponent<Aegix::Component::Transform>();
+		auto& transform = component<Aegix::Component::Transform>();
 		auto forwardDir = transform.forward();
 		auto rightDir = transform.right();
 		auto upDir = MathLib::UP;

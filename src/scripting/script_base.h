@@ -30,9 +30,9 @@ namespace Aegix::Scripting
 		/// @brief Returns a reference of the component of type T
 		/// @note Component of type T must exist
 		template<typename T>
-		T& getComponent() const
+		T& component() const
 		{
-			return m_entity.getComponent<T>();
+			return m_entity.component<T>();
 		}
 
 		/// @brief Adds a component of type T to the entity and returns a reference to it

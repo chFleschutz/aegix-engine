@@ -13,7 +13,7 @@ namespace Aegix::Scene
 		auto camera = createEntity("Main Camera");
 		camera.addComponent<Component::Camera>();
 		camera.addComponent<Aegix::Scripting::KinematcMovementController>();
-		auto& cameraTransform = camera.getComponent<Component::Transform>();
+		auto& cameraTransform = camera.component<Component::Transform>();
 		cameraTransform.location = { 0.0f, -15.0f, 10.0f };
 		cameraTransform.rotation = { glm::radians(-30.0f), 0.0f, 0.0f};
 	}

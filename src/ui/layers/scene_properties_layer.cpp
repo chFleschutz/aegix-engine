@@ -108,7 +108,7 @@ namespace Aegix::UI
 	{
 		const char* name = "Entity";
 		if (entity.hasComponent<Component::Name>())
-			name = entity.getComponent<Component::Name>().name.c_str();
+			name = entity.component<Component::Name>().name.c_str();
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // For leaf nodes
