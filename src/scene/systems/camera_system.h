@@ -1,14 +1,15 @@
 #pragma once
 
-#include "core/systems/system.h"
 #include "scene/components.h"
+#include "scene/scene.h"
+#include "scene/system.h"
 
-namespace Aegix
+namespace Aegix::Scene
 {
 	class CameraSystem : public System
 	{
 	public:
-		virtual void onUpdate(float deltaSeconds, Scene::Scene& scene) override
+		virtual void onUpdate(float deltaSeconds, Scene& scene) override
 		{
 			auto view = scene.registry().view<Transform, Camera>();
 			for (auto&& [entity, transform, camera] : view.each())

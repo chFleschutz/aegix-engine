@@ -1,7 +1,7 @@
 #include "engine.h"
 
 #include "core/input.h"
-#include "core/systems/camera_system.h"
+#include "scene/systems/camera_system.h"
 #include "ui/layers/main_menu_layer.h"
 
 #include <chrono>
@@ -28,7 +28,7 @@ namespace Aegix
 			"\n\n";
 
 		m_ui.pushLayer<UI::MainMenuLayer>();
-		m_systems.add<CameraSystem>();
+		m_scene.addSystem<Scene::CameraSystem>();
 	}
 
 	Engine::~Engine()
@@ -58,7 +58,6 @@ namespace Aegix
 
 			// Update 
 			m_scene.update(frameTimeSec);
-			m_systems.update(frameTimeSec, m_scene);
 			m_ui.update(frameTimeSec);
 
 			// Rendering

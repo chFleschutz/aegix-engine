@@ -2,7 +2,7 @@
 
 #include "utils/math_utils.h"
 
-namespace Aegix
+namespace Aegix::Scene
 {
 	void CameraSystem::calcViewMatrix(Camera& camera, Transform& transform)
 	{

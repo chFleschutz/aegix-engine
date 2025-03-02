@@ -32,4 +32,14 @@ namespace Aegix::Scene
 		// TODO: Destroy mesh after rendering finished and its not used anymore
 		m_registry.destroy(entity);
 	}
+
+	void Scene::update(float deltaSeconds)
+	{
+		for (auto& system : m_systems)
+		{
+			system->onUpdate(deltaSeconds, *this);
+		}
+
+		m_scriptManager.update(deltaSeconds);
+	}
 }

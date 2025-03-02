@@ -2,7 +2,6 @@
 
 #include "core/asset_manager.h"
 #include "core/input.h"
-#include "core/systems/system_manager.h"
 #include "graphics/device.h"
 #include "graphics/globals.h"
 #include "graphics/renderer.h"
@@ -10,9 +9,6 @@
 #include "scene/description.h"
 #include "scene/scene.h"
 #include "ui/ui.h"
-
-#include <memory>
-#include <type_traits>
 
 namespace Aegix
 {
@@ -37,7 +33,6 @@ namespace Aegix
 		Graphics::Renderer& renderer() { return m_renderer; }
 		UI::UI& ui() { return m_ui; }
 		AssetManager& assetManager() { return m_assetManager; }
-		SystemManager& systemManager() { return m_systems; }
 		Scene::Scene& scene() { return m_scene; }
 
 		void run();
@@ -63,7 +58,6 @@ namespace Aegix
 		UI::UI m_ui{ m_window, m_renderer };
 		Input m_input{ m_window };
 		AssetManager m_assetManager{ m_renderer };
-		SystemManager m_systems;
 		Scene::Scene m_scene;
 	};
 }
