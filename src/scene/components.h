@@ -27,11 +27,6 @@ namespace Aegix
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
-		Transform() = default;
-		Transform(const Transform&) = default;
-		Transform(const glm::vec3& entityLocation)
-			: location(entityLocation) {}
-
 		glm::vec3 forward() const { return Aegix::MathLib::forward(rotation); }
 		glm::vec3 right() const { return Aegix::MathLib::right(rotation);  }
 		glm::vec3 up() const { return Aegix::MathLib::up(rotation); }

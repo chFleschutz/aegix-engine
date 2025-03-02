@@ -7,14 +7,15 @@
 
 namespace Aegix::Scene
 {
-	Scene::Scene() 
+	Scene::Scene()
 	{
 		m_mainCamera = createEntity("Main Camera");
 		m_mainCamera.addComponent<Camera>();
 		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
-		auto& cameraTransform = m_mainCamera.component<Transform>();
-		cameraTransform.location = { 0.0f, -15.0f, 10.0f };
-		cameraTransform.rotation = { glm::radians(-30.0f), 0.0f, 0.0f};
+		m_mainCamera.component<Transform>() = Transform{
+			.location = { 0.0f, -15.0f, 10.0f },
+			.rotation = { glm::radians(-30.0f), 0.0f, 0.0f}
+		};
 
 		addSystem<CameraSystem>();
 	}

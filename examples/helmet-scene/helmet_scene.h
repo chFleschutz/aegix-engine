@@ -19,9 +19,10 @@ public:
 		assetManager.addRenderSystem<Graphics::PointLightSystem>();
 
 		// CAMERA
-		auto& cameraTransform = scene.mainCamera().component<Transform>();
-		cameraTransform.location = { -3.0f, -6.0f, 3.0f };
-		cameraTransform.rotation = { glm::radians(-8.0f), 0.0f, glm::radians(335.0f) };
+		scene.mainCamera().component<Transform>() = Transform{
+			.location = { -3.0f, -6.0f, 3.0f},
+			.rotation = { glm::radians(-8.0f), 0.0f, glm::radians(335.0f) }
+		};
 
 		// MODELS
 		auto damagedHelmetMesh = assetManager.createModel("damaged_helmet/DamagedHelmet.gltf");
