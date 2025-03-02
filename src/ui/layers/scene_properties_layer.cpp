@@ -39,10 +39,10 @@ namespace Aegix::UI
 			return;
 		}
 		auto& scene = Engine::instance().scene();
-		scene.registry().each([&](auto entity)
-			{
-				drawEntityNode(Scene::Entity(entity, &scene));
-			});
+		for (auto entity : scene.registry().view<entt::entity>())
+		{
+			drawEntityNode(Scene::Entity{ entity, &scene });
+		}
 
 		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 			m_selectedEntity = {};
