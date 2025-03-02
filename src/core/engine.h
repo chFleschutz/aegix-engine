@@ -7,6 +7,7 @@
 #include "graphics/globals.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
+#include "scene/description.h"
 #include "scene/scene.h"
 #include "ui/ui.h"
 
@@ -37,18 +38,18 @@ namespace Aegix
 		UI::UI& ui() { return m_ui; }
 		AssetManager& assetManager() { return m_assetManager; }
 		SystemManager& systemManager() { return m_systems; }
-		Scene::Scene& scene() { assert(m_scene);  return *m_scene; }
+		Scene::Scene& scene() { return m_scene; }
 
 		void run();
 
-		/// @brief Creates a scene of T 
-		/// @tparam T Subclass of Scene which should be loaded
-		/// @note T has to be a subclass of Scene otherwise compile will fail
-		template<typename T>
+		/// @brief Creates a scene from a description
+		/// @tparam T Description of the scene (Derived from Scene::Description)
+		template<Scene::DescriptionDerived T>
 		void loadScene()
 		{
-			static_assert(std::is_base_of_v<Scene::Scene, T>, "T has to be a subclass of Scene");
-			m_scene = std::make_unique<T>();
+			// TODO: Clear old scene
+			T description{};
+			description.initialize(m_scene);
 		}
 
 	private:
@@ -63,7 +64,6 @@ namespace Aegix
 		Input m_input{ m_window };
 		AssetManager m_assetManager{ m_renderer };
 		SystemManager m_systems;
-
-		std::unique_ptr<Scene::Scene> m_scene;
+		Scene::Scene m_scene;
 	};
 }

@@ -20,10 +20,12 @@ namespace Aegix::Scene
 	{
 	public:
 		Scene();
-		virtual ~Scene() = default;
+		Scene(const Scene&) = delete;
+		Scene(Scene&&) = delete;
+		~Scene() = default;
 
-		/// @brief Abstract method for creating the scene in a subclass
-		virtual void initialize() = 0;
+		auto operator=(const Scene&) -> Scene& = delete;
+		auto operator=(Scene&&) -> Scene& = delete;
 
 		/// @brief Creates a view of entities with components of type T
 		/// @tparam ...T The components of the entities

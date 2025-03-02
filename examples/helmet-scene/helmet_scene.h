@@ -5,21 +5,21 @@
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
-#include "scene/scene.h"
+#include "scene/description.h"
 
-class HelmetScene : public Aegix::Scene::Scene
+class HelmetScene : public Aegix::Scene::Description
 {
 public:
 	/// @brief All objects in a scene are created here
-	void initialize() override
+	void initialize(Aegix::Scene::Scene& scene) override
 	{
 		using namespace Aegix;
 
 		auto& assetManager = AssetManager::instance();
-		assetManager.addRenderSystem<Graphics::PointLightSystem>(); 
+		assetManager.addRenderSystem<Graphics::PointLightSystem>();
 
 		// CAMERA
-		auto& cameraTransform = camera().component<Transform>();
+		auto& cameraTransform = scene.camera().component<Transform>();
 		cameraTransform.location = { -3.0f, -6.0f, 3.0f };
 		cameraTransform.rotation = { glm::radians(-8.0f), 0.0f, glm::radians(335.0f) };
 
@@ -53,29 +53,29 @@ public:
 		);
 
 		// ENTITIES
-		auto plane = createEntity("Plane");
+		auto plane = scene.createEntity("Plane");
 		plane.addComponent<Mesh>(planeMesh);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
 		plane.component<Transform>().scale = { 20.0f, 20.0f, 20.0f };
 
-		auto damagedHelmet = createEntity("Damaged Helmet", { -2.0f, 0.0f, 2.0f });
+		auto damagedHelmet = scene.createEntity("Damaged Helmet", { -2.0f, 0.0f, 2.0f });
 		damagedHelmet.addComponent<Mesh>(damagedHelmetMesh);
 		damagedHelmet.addComponent<Graphics::DefaultMaterial>(damagedHelmetMat);
 		damagedHelmet.component<Transform>().rotation = { glm::radians(180.0f), 0.0f, 0.0f };
 
-		auto scifiHelmet = createEntity("SciFi Helmet", { 2.0f, 0.0f, 2.0f });
+		auto scifiHelmet = scene.createEntity("SciFi Helmet", { 2.0f, 0.0f, 2.0f });
 		scifiHelmet.addComponent<Mesh>(scifiHelmetMesh);
 		scifiHelmet.addComponent<Graphics::DefaultMaterial>(scifiHelmetMat);
 		scifiHelmet.component<Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
 
 		// LIGHTS
-		auto light1 = createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
+		auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
 		light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
 
-		auto light2 = createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
+		auto light2 = scene.createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
 		light2.addComponent<PointLight>(Color::blue(), 200.0f);
 
-		auto light3 = createEntity("Light 3", { -8.0f, -5.0f, 5.0f });
+		auto light3 = scene.createEntity("Light 3", { -8.0f, -5.0f, 5.0f });
 		light3.addComponent<PointLight>(Color::white(), 200.0f);
 	}
 };

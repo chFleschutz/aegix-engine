@@ -1,16 +1,14 @@
 #pragma once
 
-#include "core/asset_manager.h"
-#include "scene/components.h"
-#include "scene/entity.h"
-#include "scene/scene.h"
+#include "scene/description.h"
 
-class TemplateScene : public Aegix::Scene::Scene
+class TemplateScene : public Aegix::Scene::Description
 {
 public:
 	/// @brief All objects in a scene are created here
-	void initialize() override
+	void initialize(Aegix::Scene::Scene& scene) override
 	{
+		using namespace Aegix;
 
 	}
 };

@@ -44,10 +44,6 @@ namespace Aegix
 
 	void Engine::run()
 	{
-		assert(m_scene != nullptr && "Cannot run engine without a scene");
-
-		m_scene->initialize();
-
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// Main Update loop
@@ -61,18 +57,18 @@ namespace Aegix
 			glfwPollEvents();
 
 			// Update 
-			m_scene->update(frameTimeSec);
-			m_systems.update(frameTimeSec, *m_scene);
+			m_scene.update(frameTimeSec);
+			m_systems.update(frameTimeSec, m_scene);
 			m_ui.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(*m_scene, m_ui);
+			m_renderer.renderFrame(m_scene, m_ui);
 
 			applyFrameBrake(frameBeginTime);
 		}
 
 		m_renderer.waitIdle();
-		m_scene->runtimeEnd();
+		m_scene.runtimeEnd();
 	}
 
 	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime)

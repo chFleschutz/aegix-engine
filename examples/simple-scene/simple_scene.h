@@ -22,12 +22,14 @@ protected:
 
 /// @brief Scene with a teapot on a plane
 /// @note Example of a custom scene
-class SimpleScene : public Aegix::Scene::Scene
+class SimpleScene : public Aegix::Scene::Description
 {
 public:
 	/// @brief All objects in a scene are created here
-	void initialize() override
+	void initialize(Aegix::Scene::Scene& scene) override
 	{
+		using namespace Aegix;
+
 		auto& assetManager = Aegix::AssetManager::instance();
 
 		// MODELS
@@ -48,12 +50,12 @@ public:
 			metalTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
 		// ENTITIES
-		auto floorPlane = createEntity("Floor Plane");
+		auto floorPlane = scene.createEntity("Floor Plane");
 		floorPlane.addComponent<Aegix::Mesh>(planeMesh);
 		floorPlane.addComponent<Aegix::Graphics::DefaultMaterial>(paintingMat);
 		floorPlane.component<Aegix::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
-		auto teapot = createEntity("Teapot");
+		auto teapot = scene.createEntity("Teapot");
 		teapot.addComponent<Aegix::Mesh>(teapotMesh);
 		teapot.addComponent<Aegix::Graphics::DefaultMaterial>(metalMat);
 		teapot.addComponent<Rotator>();
@@ -69,7 +71,7 @@ public:
 		{
 			float x = lightRadius * cos(glm::radians(360.0f / lightCount * i));
 			float y = lightRadius * sin(glm::radians(360.0f / lightCount * i));
-			auto light = createEntity("Light " + std::to_string(i), { x, y, 3.0f });
+			auto light = scene.createEntity("Light " + std::to_string(i), { x, y, 3.0f });
 
 			float r = Aegix::Random::uniformFloat(0.0f, 1.0f);
 			float g = Aegix::Random::uniformFloat(0.0f, 1.0f);
