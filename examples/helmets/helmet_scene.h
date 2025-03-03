@@ -4,6 +4,7 @@
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
 #include "scene/description.h"
+#include "utils/color.h"
 
 class HelmetScene : public Aegix::Scene::Description
 {
@@ -22,50 +23,28 @@ public:
 			.rotation = { glm::radians(-8.0f), 0.0f, glm::radians(335.0f) }
 		};
 
-		// MODELS
-		auto damagedHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "DamagedHelmet/DamagedHelmet.gltf");
-		auto scifiHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
-		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
+		// ENTITIES
+		auto damagedHelmet = scene.load(ASSETS_DIR "DamagedHelmet/DamagedHelmet.gltf");
+		damagedHelmet.component<Transform>().location = { -2.0f, 0.0f, 2.0f };
 
-		// MATERIALS
+		auto scifiHelmet = scene.load(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
+		scifiHelmet.component<Transform>().location = { 2.0f, 0.0f, 2.0f };
+
+		auto plane = scene.createEntity("Plane");
+		plane.component<Transform>().scale = { 20.0f, 20.0f, 20.0f };
+
+		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
+		plane.addComponent<Mesh>(planeMesh);
+
 		auto textureBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto textureWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
 			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack);
-
-		auto damagedHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_albedo.jpg", VK_FORMAT_R8G8B8A8_SRGB),
-			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_emissive.jpg", VK_FORMAT_R8G8B8A8_SRGB));
-
-		auto scifiHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_BaseColor.png", VK_FORMAT_R8G8B8A8_SRGB),
-			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
-			textureBlack);
-
-		// ENTITIES
-		auto plane = scene.createEntity("Plane");
-		plane.addComponent<Mesh>(planeMesh);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
-		plane.component<Transform>().scale = { 20.0f, 20.0f, 20.0f };
-
-		auto damagedHelmet = scene.createEntity("Damaged Helmet", { -2.0f, 0.0f, 2.0f });
-		damagedHelmet.addComponent<Mesh>(damagedHelmetMesh);
-		damagedHelmet.addComponent<Graphics::DefaultMaterial>(damagedHelmetMat);
-		damagedHelmet.component<Transform>().rotation = { glm::radians(180.0f), 0.0f, 0.0f };
-
-		auto scifiHelmet = scene.createEntity("SciFi Helmet", { 2.0f, 0.0f, 2.0f });
-		scifiHelmet.addComponent<Mesh>(scifiHelmetMesh);
-		scifiHelmet.addComponent<Graphics::DefaultMaterial>(scifiHelmetMat);
-		scifiHelmet.component<Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
 
 		// LIGHTS
-		scene.ambientLight().component<AmbientLight>().intensity = 0.0f;
+		scene.ambientLight().component<AmbientLight>().intensity = 0.1f;
 		scene.directionalLight().component<DirectionalLight>().intensity = 0.0f;
 
 		auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
