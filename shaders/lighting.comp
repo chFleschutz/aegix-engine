@@ -74,7 +74,7 @@ void main()
     // Ambient light
     {
         vec3 ambientLight = lighting.ambientLight.color.rgb * lighting.ambientLight.color.w;
-        Lo += albedo * ambientLight;
+        Lo += albedo * ambientLight * ambientOcclusion;
     }
 
     // Directional light
@@ -96,6 +96,7 @@ void main()
         Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }
 
+    Lo = max(Lo, 0.0); 
     imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
 }
 
