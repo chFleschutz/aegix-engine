@@ -5,6 +5,8 @@ target_sources(aegix-engine PRIVATE
 	"description.h"
 	"entity.cpp"
 	"entity.h"
+	"gltf_loader.cpp"
+	"gltf_loader.h"
 	"scene.cpp"
 	"scene.h"
 	"system.h"

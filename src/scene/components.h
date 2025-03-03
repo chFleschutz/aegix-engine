@@ -27,9 +27,9 @@ namespace Aegix
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
-		glm::vec3 forward() const { return Aegix::MathLib::forward(rotation); }
-		glm::vec3 right() const { return Aegix::MathLib::right(rotation);  }
-		glm::vec3 up() const { return Aegix::MathLib::up(rotation); }
+		auto forward() const -> glm::vec3 { return Aegix::MathLib::forward(rotation); }
+		auto right() const -> glm::vec3 { return Aegix::MathLib::right(rotation); }
+		auto up() const -> glm::vec3 { return Aegix::MathLib::up(rotation); }
 	};
 
 	/// @brief Holds a pointer to a static mesh
