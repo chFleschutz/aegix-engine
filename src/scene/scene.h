@@ -34,6 +34,8 @@ namespace Aegix::Scene
 
 		[[nodiscard]] auto registry() -> entt::registry& { return m_registry; }
 		[[nodiscard]] auto mainCamera() const -> Entity { return m_mainCamera; }
+		[[nodiscard]] auto ambientLight() const -> Entity { return m_ambientLight; }
+		[[nodiscard]] auto directionalLight() const -> Entity { return m_directionalLight; }
 
 		void setMainCamera(Entity camera) { m_mainCamera = camera; }
 
@@ -64,6 +66,9 @@ namespace Aegix::Scene
 		entt::registry m_registry;
 		std::vector<std::unique_ptr<System>> m_systems;
 		Scripting::ScriptManager m_scriptManager;
+
 		Entity m_mainCamera;
+		Entity m_ambientLight;
+		Entity m_directionalLight;
 	};
 }

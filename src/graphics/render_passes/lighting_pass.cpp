@@ -92,28 +92,26 @@ namespace Aegix::Graphics
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
-	void LightingPass::drawUI()
-	{
-		ImGui::Text("Ambient Light");
-		ImGui::ColorEdit3("Color##Ambient", &m_lighting.ambient.color.r);
-		ImGui::DragFloat("Intensity##Ambient", &m_lighting.ambient.color.a, 0.01f, 0.0f, 10.0f);
-
-		ImGui::Spacing();
-
-		ImGui::Text("Directional Light");
-		ImGui::ColorEdit3("Color##Directional", &m_lighting.directional.color.r);
-		ImGui::DragFloat("Intensity##Directional", &m_lighting.directional.color.a, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat3("Direction##Directional", &m_lighting.directional.direction.x, 0.01f);
-
-		ImGui::Spacing();
-	}
-
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
 	{
 		if (Scene::Entity mainCamera = frameInfo.scene.mainCamera())
 		{
 			auto& cameraTransform = mainCamera.component<Transform>();
 			m_lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
+		}
+
+		if (Scene::Entity ambientLight = frameInfo.scene.ambientLight())
+		{
+			auto& ambient = ambientLight.component<AmbientLight>();
+			m_lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
+		}
+
+		if (Scene::Entity directionalLight = frameInfo.scene.directionalLight())
+		{
+			auto& directional = directionalLight.component<DirectionalLight>();
+			auto& transform = directionalLight.component<Transform>();
+			m_lighting.directional.color = glm::vec4(directional.color, directional.intensity);
+			m_lighting.directional.direction = glm::vec4(glm::normalize(transform.forward()), 0.0f);
 		}
 
 		int32_t lighIndex = 0;

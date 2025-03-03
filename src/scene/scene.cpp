@@ -23,6 +23,8 @@ namespace Aegix::Scene
 {
 	Scene::Scene()
 	{
+		addSystem<CameraSystem>();
+		
 		m_mainCamera = createEntity("Main Camera");
 		m_mainCamera.addComponent<Camera>();
 		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
@@ -31,7 +33,12 @@ namespace Aegix::Scene
 			.rotation = { glm::radians(-30.0f), 0.0f, 0.0f}
 		};
 
-		addSystem<CameraSystem>();
+		m_ambientLight = createEntity("Ambient Light");
+		m_ambientLight.addComponent<AmbientLight>();
+
+		m_directionalLight = createEntity("Directional Light");
+		m_directionalLight.addComponent<DirectionalLight>();
+		m_directionalLight.component<Transform>().rotation = { glm::radians(60.0f), 0.0f, glm::radians(45.0f) };
 	}
 
 	Entity Scene::createEntity(const std::string& name, const glm::vec3& location)

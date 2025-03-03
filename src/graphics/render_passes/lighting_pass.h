@@ -39,7 +39,6 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
-		virtual void drawUI() override;
 
 	private:
 		void updateLightingUBO(const FrameInfo& frameInfo);

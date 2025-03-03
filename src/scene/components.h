@@ -38,6 +38,18 @@ namespace Aegix
 		std::shared_ptr<Graphics::StaticMesh> staticMesh;
 	};
 
+	struct AmbientLight
+	{
+		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		float intensity = 0.1f;
+	};
+
+	struct DirectionalLight
+	{
+		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		float intensity = 1.0f;
+	};
+
 	/// @brief Creates a light 
 	struct PointLight
 	{
