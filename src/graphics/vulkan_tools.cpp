@@ -295,9 +295,10 @@ namespace Aegix::Tools
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet)
+	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, 
+		VkDescriptorSet descriptorSet, uint32_t firstSet)
 	{
-		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, 0, 1, &descriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
 	}
 
 	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
