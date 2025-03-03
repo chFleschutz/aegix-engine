@@ -41,7 +41,8 @@ namespace Aegix::Scene
 		m_directionalLight.component<Transform>().rotation = { glm::radians(60.0f), 0.0f, glm::radians(45.0f) };
 	}
 
-	Entity Scene::createEntity(const std::string& name, const glm::vec3& location)
+	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation, 
+		const glm::vec3& scale) -> Entity
 	{
 		Entity entity = { m_registry.create(), this };
 		entity.addComponent<Transform>(location);
