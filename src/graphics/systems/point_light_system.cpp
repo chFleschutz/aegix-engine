@@ -33,22 +33,17 @@ namespace Aegix::Graphics
 		m_pipeline->bind(cmd);
 		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout, globalSet);
 
-		auto view = frameInfo.scene.registry().view<Transform, PointLight>();
-		for (auto&& [entity, transform, pointLight] : view.each())
+		auto view = frameInfo.scene.registry().view<GlobalTransform, PointLight>();
+		for (auto&& [entity, globalTransform, pointLight] : view.each())
 		{
 			PointLightPushConstants push{
-				.position = glm::vec4(transform.location, 1.0f),
+				.position = glm::vec4(globalTransform.location, 1.0f),
 				.color = glm::vec4(pointLight.color, 1.0f),
-				.radius = pointLight.intensity * pointLightScale * transform.scale.x
+				.radius = pointLight.intensity * pointLightScale * globalTransform.scale.x
 			};
 
-			vkCmdPushConstants(cmd,
-				*m_pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(PointLightPushConstants),
-				&push
-			);
+			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, 
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
 
 			vkCmdDraw(cmd, 6, 1, 0, 0);
 		}
