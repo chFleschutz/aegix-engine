@@ -1,4 +1,4 @@
-project(Helmet-Scene)
+project(Helmets)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
