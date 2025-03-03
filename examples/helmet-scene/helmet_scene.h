@@ -23,9 +23,9 @@ public:
 		};
 
 		// MODELS
-		auto damagedHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "damaged_helmet/DamagedHelmet.gltf");
-		auto scifiHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "scifi_helmet/ScifiHelmet.gltf");
-		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "models/plane.obj");
+		auto damagedHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "DamagedHelmet/DamagedHelmet.gltf");
+		auto scifiHelmetMesh = Graphics::StaticMesh::create(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
+		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
 
 		// MATERIALS
 		auto textureBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
@@ -35,17 +35,17 @@ public:
 			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack);
 
 		auto damagedHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_albedo.jpg", VK_FORMAT_R8G8B8A8_SRGB),
-			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "damaged_helmet/Default_emissive.jpg", VK_FORMAT_R8G8B8A8_SRGB));
+			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_albedo.jpg", VK_FORMAT_R8G8B8A8_SRGB),
+			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_normal.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_metalRoughness.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_AO.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "DamagedHelmet/Default_emissive.jpg", VK_FORMAT_R8G8B8A8_SRGB));
 
 		auto scifiHelmetMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_BaseColor.png", VK_FORMAT_R8G8B8A8_SRGB),
-			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
-			Graphics::Texture::create(ASSETS_DIR "scifi_helmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_BaseColor.png", VK_FORMAT_R8G8B8A8_SRGB),
+			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_Normal.png", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_MetallicRoughness.png", VK_FORMAT_R8G8B8A8_UNORM),
+			Graphics::Texture::create(ASSETS_DIR "SciFiHelmet/SciFiHelmet_AmbientOcclusion.png", VK_FORMAT_R8G8B8A8_UNORM),
 			textureBlack);
 
 		// ENTITIES

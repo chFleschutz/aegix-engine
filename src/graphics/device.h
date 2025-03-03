@@ -2,9 +2,7 @@
 
 #define ENGINE_DIR PROJECT_DIR "/"
 #define SHADER_DIR ENGINE_DIR "shaders/"
-#define ASSETS_DIR ENGINE_DIR "assets/"
-#define MODELS_DIR ENGINE_DIR "assets/models/"
-#define TEXTURES_DIR ENGINE_DIR "assets/textures/"
+#define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
 
 #include "window.h"
 #include "graphics/deletion_queue.h"
