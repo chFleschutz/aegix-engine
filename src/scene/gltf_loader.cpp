@@ -164,7 +164,7 @@ namespace Aegix::Scene
 		std::shared_ptr<Graphics::Texture> baseColorTexture = m_defaultWhite;
 		std::shared_ptr<Graphics::Texture> normalTexture = m_defaultNormal;
 		std::shared_ptr<Graphics::Texture> metallicRoughnessTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> occlusionTexture = m_defaultBlack;
+		std::shared_ptr<Graphics::Texture> occlusionTexture = m_defaultWhite;
 		std::shared_ptr<Graphics::Texture> emissiveTexture = m_defaultBlack;
 
 		if (auto& pbr = material.pbrMetallicRoughness)
