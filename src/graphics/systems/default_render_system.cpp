@@ -86,10 +86,25 @@ namespace Aegix::Graphics
 				);
 			}
 
+			Transform globalTransform{};
+			Scene::Entity current = Scene::Entity{ entity, &frameInfo.scene };
+			while (current)
+			{
+				auto& currentTransform = current.component<Transform>();
+				globalTransform.location += currentTransform.location;
+				globalTransform.rotation += currentTransform.rotation;
+				globalTransform.scale *= currentTransform.scale;
+
+				if (!current.hasComponent<Parent>())
+					break;
+
+				current = current.component<Parent>().entity;
+			}
+
 			// Push Constants
 			PushConstantData push{};
-			push.modelMatrix = MathLib::tranformationMatrix(transform.location, transform.rotation, transform.scale);
-			push.normalMatrix = MathLib::normalMatrix(transform.rotation, transform.scale);
+			push.modelMatrix = MathLib::tranformationMatrix(globalTransform.location, globalTransform.rotation, globalTransform.scale);
+			push.normalMatrix = MathLib::normalMatrix(globalTransform.rotation, globalTransform.scale);
 			vkCmdPushConstants(frameInfo.commandBuffer,
 				m_pipelineLayout->pipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,

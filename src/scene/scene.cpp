@@ -47,6 +47,7 @@ namespace Aegix::Scene
 		Entity entity = { m_registry.create(), this };
 		entity.addComponent<Transform>(location);
 		entity.addComponent<Name>(name.empty() ? "Entity" : name);
+		entity.addComponent<Parent>();
 		return entity;
 	}
 

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "graphics/static_mesh.h"
-#include "utils/color.h"
+#include "scene/entity.h"
 #include "utils/math_utils.h"
+
+#include <glm/glm.hpp>
 
 #include <memory>
 #include <string>
@@ -30,6 +32,12 @@ namespace Aegix
 		auto forward() const -> glm::vec3 { return Aegix::MathLib::forward(rotation); }
 		auto right() const -> glm::vec3 { return Aegix::MathLib::right(rotation); }
 		auto up() const -> glm::vec3 { return Aegix::MathLib::up(rotation); }
+	};
+
+	/// @brief Stores the parent entity
+	struct Parent
+	{
+		Scene::Entity entity{};
 	};
 
 	/// @brief Holds a pointer to a static mesh
