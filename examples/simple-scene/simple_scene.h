@@ -33,19 +33,19 @@ public:
 		renderer.addRenderSystem<Aegix::Graphics::PointLightSystem>();
 
 		// MODELS
-		auto teapotMesh = Graphics::StaticMesh::create("models/teapot.obj");
-		auto planeMesh = Graphics::StaticMesh::create("models/plane.obj");
+		auto teapotMesh = Graphics::StaticMesh::create(ASSETS_DIR "models/teapot.obj");
+		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "models/plane.obj");
 
 		// MATERIALS
 		auto textureBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto textureWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 
-		auto paintingTexture = Graphics::Texture::create("textures/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto paintingTexture = Graphics::Texture::create(ASSETS_DIR "textures/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
 		auto paintingMat = renderer.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
 			paintingTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
-		auto metalTexture = Graphics::Texture::create("textures/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto metalTexture = Graphics::Texture::create(ASSETS_DIR "textures/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
 		auto metalMat = renderer.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
 			metalTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
