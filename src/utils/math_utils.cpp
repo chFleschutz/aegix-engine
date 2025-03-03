@@ -104,6 +104,19 @@ namespace Aegix
 			} };
 	}
 
+	void MathLib::decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
+	{
+		translation = glm::vec3(matrix[3]);
+		scale.x = glm::length(glm::vec3(matrix[0]));
+		scale.y = glm::length(glm::vec3(matrix[1]));
+		scale.z = glm::length(glm::vec3(matrix[2]));
+		glm::mat3 rotationMat = glm::mat3(matrix);
+		rotationMat[0] /= scale.x;
+		rotationMat[1] /= scale.y;
+		rotationMat[2] /= scale.z;
+		rotation = glm::eulerAngles(glm::quat_cast(rotationMat));
+	}
+
 	glm::vec3 MathLib::forward(const glm::vec3& rotation)
 	{
 		const float sx = glm::sin(rotation.x);

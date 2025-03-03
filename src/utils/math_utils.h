@@ -50,6 +50,10 @@ namespace Aegix
 		/// @return Composed normal matrix
 		static glm::mat3 normalMatrix(const glm::vec3& rotation, const glm::vec3& scale);
 
+		/// @brief Decomposes a transformation matrix into location, rotation and scale
+		/// @note The matrix has to consist of only translation, rotation and scale (M = T * R * S)
+		static void decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
+
 		/// @brief Returns the global forward direction
 		static glm::vec3 forward() { return { 0.0f, 0.0f, 1.0f }; }
 
