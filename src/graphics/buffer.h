@@ -10,10 +10,12 @@ namespace Aegix::Graphics
 	public:
 		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags usageFlags,
 			VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize minOffsetAlignment = 1);
+		Buffer(const Buffer&) = delete;
 		~Buffer();
 
-		Buffer(const Buffer&) = delete;
 		Buffer& operator=(const Buffer&) = delete;
+		
+		operator VkBuffer() const { return m_buffer; }
 
 		/// @brief Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
 		/// @param size (Optional) Size of the memory range to map. Pass VK_WHOLE_SIZE to map the complete buffer range.
