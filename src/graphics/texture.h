@@ -126,7 +126,6 @@ namespace Aegix::Graphics
 		void fill(const glm::vec4& color);
 		void fill(const Buffer& buffer);
 
-		void transitionLayout(VkImageLayout newLayout);
 		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
 
 		void resize(uint32_t width, uint32_t height, VkImageUsageFlags usage);
@@ -139,7 +138,9 @@ namespace Aegix::Graphics
 		/// @note The old image and view will NOT be destroyed
 		void update(VkImage image, VkImageView imageView, VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED);
 
-		void generateMipmaps(VkCommandBuffer commandBuffer, VkImageLayout finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		/// @brief Fills the textures mip levels by downsampling the base level
+		/// @note Afterwards the texture will be in 'finalLayout'
+		void generateMipmaps(VkCommandBuffer commandBuffer, VkImageLayout finalLayout);
 
 	private:
 		void createImage(const Config& config);

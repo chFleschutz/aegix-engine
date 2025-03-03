@@ -163,6 +163,7 @@ namespace Aegix::Graphics
 		config.extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight) };
 		config.format = format;
 		config.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		config.mipLevels = Config::CALCULATE_MIP_LEVELS;
 
 		createImage(config);
 		createImageView(config);
@@ -302,20 +303,21 @@ namespace Aegix::Graphics
 
 	void Texture::fill(const Buffer& buffer)
 	{
-		m_device.transitionImageLayout(m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		m_device.copyBufferToImage(buffer.buffer(), m_image, m_extent.width, m_extent.height, 1);
-		m_device.transitionImageLayout(m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels);
+		Tools::vk::cmdCopyBufferToImage(cmd, buffer, m_image, m_extent);
+		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		
+		m_device.endSingleTimeCommands(cmd);
 	}
 
-	void Texture::transitionLayout(VkImageLayout newLayout)
+	void Texture::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)
 	{
-		m_device.transitionImageLayout(m_image, m_format, m_layout, newLayout);
-		m_layout = newLayout;
-	}
+		if (m_layout == newLayout)
+			return;
 
-	void Texture::transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout)
-	{
-		m_device.transitionImageLayout(commandBuffer, m_image, m_layout, newLayout, m_mipLevels);
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, newLayout, m_mipLevels);
 		m_layout = newLayout;
 	}
 
@@ -497,9 +499,9 @@ namespace Aegix::Graphics
 		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		samplerInfo.mipLodBias = 0.0f;
 		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
+		samplerInfo.maxLod = static_cast<float>(m_mipLevels);
 
-		VK_CHECK(vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler))
+		VK_CHECK(vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler));
 	}
 
 	void Texture::destroy()
