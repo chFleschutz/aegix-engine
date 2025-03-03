@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 namespace Aegix::Scene
 {
 	class Scene;

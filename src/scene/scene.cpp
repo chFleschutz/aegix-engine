@@ -1,29 +1,19 @@
 #include "Scene.h"
 
-#include "core/engine.h"
 #include "graphics/static_mesh.h"
-#include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
-#include "scene/systems/camera_system.h"
-#include "scripting/movement/kinematic_movement_controller.h"
-#include "utils/math_utils.h"
 #include "scene/gltf_loader.h"
-
-#include <gltf.h>
-#include <gltf_utils.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/euler_angles.hpp>
-
-#include <chrono>
+#include "scene/systems/camera_system.h"
+#include "scene/systems/transform_system.h"
+#include "scripting/movement/kinematic_movement_controller.h"
 
 namespace Aegix::Scene
 {
 	Scene::Scene()
 	{
 		addSystem<CameraSystem>();
+		addSystem<TransformSystem>();
 		
 		m_mainCamera = createEntity("Main Camera");
 		m_mainCamera.addComponent<Camera>();
@@ -45,8 +35,9 @@ namespace Aegix::Scene
 		const glm::vec3& scale) -> Entity
 	{
 		Entity entity = { m_registry.create(), this };
-		entity.addComponent<Transform>(location);
 		entity.addComponent<Name>(name.empty() ? "Entity" : name);
+		entity.addComponent<Transform>(location);
+		entity.addComponent<GlobalTransform>();
 		entity.addComponent<Parent>();
 		return entity;
 	}

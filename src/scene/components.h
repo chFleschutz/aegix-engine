@@ -22,16 +22,30 @@ namespace Aegix
 		std::string name = "Entity";
 	};
 
-	/// @brief Stores the transformation of the entity
+	/// @brief Stores the local transformation of the entity
 	struct Transform
 	{
 		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
-		auto forward() const -> glm::vec3 { return Aegix::MathLib::forward(rotation); }
-		auto right() const -> glm::vec3 { return Aegix::MathLib::right(rotation); }
-		auto up() const -> glm::vec3 { return Aegix::MathLib::up(rotation); }
+		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
+		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
+		auto up() const -> glm::vec3 { return MathLib::up(rotation); }
+		auto matrix() const -> glm::mat4 { return MathLib::tranformationMatrix(location, rotation, scale); }
+	};
+
+	/// @brief Transformation of the entity in world space (including parent transforms)
+	struct GlobalTransform
+	{
+		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+
+		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
+		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
+		auto up() const -> glm::vec3 { return MathLib::up(rotation); }
+		auto matrix() const -> glm::mat4 { return MathLib::tranformationMatrix(location, rotation, scale); }
 	};
 
 	/// @brief Stores the parent entity

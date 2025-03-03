@@ -1,5 +1,7 @@
 #include "default_render_system.h"
 
+#include "graphics/vulkan_tools.h"
+
 namespace Aegix::Graphics
 {
 	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
@@ -50,21 +52,17 @@ namespace Aegix::Graphics
 
 	void DefaultRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
 	{
-		m_pipeline->bind(frameInfo.commandBuffer);
+		VkCommandBuffer cmd = frameInfo.commandBuffer;
+
+		m_pipeline->bind(cmd);
 
 		// Global Descriptor Set
-		vkCmdBindDescriptorSets(
-			frameInfo.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			m_pipelineLayout->pipelineLayout(),
-			0, 1,
-			&globalSet,
-			0, nullptr
-		);
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			*m_pipelineLayout, globalSet);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene.registry().view<Transform, Mesh, DefaultMaterial>();
-		for (auto&& [entity, transform, mesh, material] : view.each())
+		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, DefaultMaterial>();
+		for (auto&& [entity, globalTransform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)
 				continue;
@@ -76,46 +74,21 @@ namespace Aegix::Graphics
 				auto& descriptorSet = material.instance->m_descriptorSet;
 				assert(descriptorSet != nullptr && "Material descriptor set is null");
 
-				vkCmdBindDescriptorSets(
-					frameInfo.commandBuffer,
-					VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_pipelineLayout->pipelineLayout(),
-					1, 1,
-					&descriptorSet->descriptorSet(frameInfo.frameIndex),
-					0, nullptr
-				);
-			}
-
-			Transform globalTransform{};
-			Scene::Entity current = Scene::Entity{ entity, &frameInfo.scene };
-			while (current)
-			{
-				auto& currentTransform = current.component<Transform>();
-				globalTransform.location += currentTransform.location;
-				globalTransform.rotation += currentTransform.rotation;
-				globalTransform.scale *= currentTransform.scale;
-
-				if (!current.hasComponent<Parent>())
-					break;
-
-				current = current.component<Parent>().entity;
+				Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+					*m_pipelineLayout, descriptorSet->descriptorSet(frameInfo.frameIndex), 1);
 			}
 
 			// Push Constants
 			PushConstantData push{};
-			push.modelMatrix = MathLib::tranformationMatrix(globalTransform.location, globalTransform.rotation, globalTransform.scale);
+			push.modelMatrix = globalTransform.matrix();
 			push.normalMatrix = MathLib::normalMatrix(globalTransform.rotation, globalTransform.scale);
-			vkCmdPushConstants(frameInfo.commandBuffer,
-				m_pipelineLayout->pipelineLayout(),
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(push),
-				&push
-			);
 
+			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
+			
 			// Draw
-			mesh.staticMesh->bind(frameInfo.commandBuffer);
-			mesh.staticMesh->draw(frameInfo.commandBuffer);
+			mesh.staticMesh->bind(cmd);
+			mesh.staticMesh->draw(cmd);
 		}
 	}
 }

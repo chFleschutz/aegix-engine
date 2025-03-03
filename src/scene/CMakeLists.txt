@@ -1,6 +1,8 @@
 target_sources(aegix-engine PRIVATE
 	"systems/camera_system.cpp"
 	"systems/camera_system.h"
+	"systems/transform_system.cpp"
+	"systems/transform_system.h"
 	"components.h"
 	"description.h"
 	"entity.cpp"
