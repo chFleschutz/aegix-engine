@@ -17,5 +17,5 @@ namespace Aegix::Graphics
 
 	constexpr uint32_t INVALID_HANDLE = std::numeric_limits<uint32_t>::max();
 
-	constexpr uint32_t MAX_POINT_LIGHTS = 32;
+	constexpr uint32_t MAX_POINT_LIGHTS = 128;
 }

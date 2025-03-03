@@ -31,7 +31,7 @@ layout(set = 0, binding = 6) uniform Lighting
 	vec4 cameraPosition;
 	AmbientLight ambientLight;
 	DirectionalLight directionalLight;
-	PointLight pointLights[32];
+	PointLight pointLights[128];
 	int numPointLights;
 } lighting;
 
