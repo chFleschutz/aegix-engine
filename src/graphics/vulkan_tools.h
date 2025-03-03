@@ -65,5 +65,10 @@ namespace Aegix::Tools
 		{
 			vkCmdPushConstants(cmd, layout, stage, 0, sizeof(T), &data);
 		}
+
+		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout, 
+			VkImageLayout newLayout, uint32_t miplevels = 1);
+
+		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
 	}
 }

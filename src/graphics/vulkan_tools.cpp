@@ -314,4 +314,55 @@ namespace Aegix::Tools
 		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
 		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
+
+	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
+		VkImageLayout newLayout, uint32_t miplevels)
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = aspectFlags(format);
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = miplevels;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
+		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
+
+		VkPipelineStageFlags srcStage = Tools::srcStage(barrier.srcAccessMask);
+		VkPipelineStageFlags dstStage = Tools::dstStage(barrier.dstAccessMask);
+
+		vkCmdPipelineBarrier(cmd,
+			srcStage, dstStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+	}
+
+	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
+	{
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { extent.width, extent.height, 1 };
+
+		vkCmdCopyBufferToImage(cmd,
+			buffer,
+			image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&region);
+	}
 }
