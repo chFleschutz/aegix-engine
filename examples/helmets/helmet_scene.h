@@ -65,6 +65,9 @@ public:
 		scifiHelmet.component<Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
 
 		// LIGHTS
+		scene.ambientLight().component<AmbientLight>().intensity = 0.0f;
+		scene.directionalLight().component<DirectionalLight>().intensity = 0.0f;
+
 		auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
 		light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
 
