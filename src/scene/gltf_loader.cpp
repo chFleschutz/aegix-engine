@@ -63,16 +63,19 @@ namespace Aegix::Scene
 			auto& [nodeIndex, parentTransform] = nodeStack.back();
 			auto& node = m_gltf->nodes[nodeIndex];
 
-			// Add all children to stack
-			nodeStack.insert(nodeStack.end(), node.children.begin(), node.children.end());
-
+			// Create entity for node
 			auto entity = scene.createEntity(node.name.value_or("Node" + std::to_string(nodeCounter++)));
 			auto& transform = entity.component<Transform>();
 			transform = toTransform(node.transform);
 			transform.location += parentTransform.location;
 			transform.rotation += parentTransform.rotation;
 			transform.scale *= parentTransform.scale;
+			
+			nodeStack.pop_back();
 
+			for (auto& childIndex : node.children)
+				nodeStack.emplace_back(Node{ childIndex, transform });
+			
 			// Mesh
 			if (!node.mesh.has_value())
 				continue;
@@ -92,8 +95,6 @@ namespace Aegix::Scene
 				auto material = primitive.material ? loadMaterial(*primitive.material) : m_defaultMaterial;
 				meshEntity.addComponent<Graphics::DefaultMaterial>(material);
 			}
-
-			nodeStack.pop_back();
 		}
 	}
 
