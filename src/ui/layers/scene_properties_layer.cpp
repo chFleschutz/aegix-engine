@@ -88,10 +88,22 @@ namespace Aegix::UI
 				drawAssetSlot("Mesh", "Mesh Asset", mesh.staticMesh != nullptr);
 			});
 
+		drawComponent<AmbientLight>("Ambient Light", m_selectedEntity, [](AmbientLight& ambientLight)
+			{
+				ImGui::ColorEdit3("Color", &ambientLight.color.r);
+				ImGui::DragFloat("Intensity", &ambientLight.intensity, 0.01f, 0.0f, 1.0f);
+			});
+
+		drawComponent<DirectionalLight>("Directional Light", m_selectedEntity, [](DirectionalLight& directionalLight)
+			{
+				ImGui::ColorEdit3("Color", &directionalLight.color.r);
+				ImGui::DragFloat("Intensity", &directionalLight.intensity, 0.1f, 0.0f, 10.0f);
+			});
+
 		drawComponent<PointLight>("Pointlight", m_selectedEntity, [](PointLight& pointlight)
 			{
 				ImGui::ColorEdit3("Color", &pointlight.color.r);
-				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f);
+				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f, 0.0f, 1000.0f);
 			});
 
 		drawComponent<Camera>("Camera", m_selectedEntity, [](Camera& camera)
