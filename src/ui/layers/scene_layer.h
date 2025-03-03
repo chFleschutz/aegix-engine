@@ -18,7 +18,7 @@ namespace Aegix::UI
 		void drawAllEntities();
 		void drawSceneSettings();
 		void drawEntityProperties();
-		void drawEntityNode(Scene::Entity entity);
+		void drawEntityNode(Scene::Entity entity, bool destroyPopup = true);
 		void drawAddComponent();
 		static void drawAssetSlot(const char* assetName, const char* description, bool assetSet = true);
 

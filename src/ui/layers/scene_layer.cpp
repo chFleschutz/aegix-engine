@@ -72,9 +72,9 @@ namespace Aegix::UI
 		}
 
 		auto& scene = Engine::instance().scene();
-		drawEntityNode(scene.mainCamera());
-		drawEntityNode(scene.ambientLight());
-		drawEntityNode(scene.directionalLight());
+		drawEntityNode(scene.mainCamera(), false);
+		drawEntityNode(scene.ambientLight(), false);
+		drawEntityNode(scene.directionalLight(), false);
 
 		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 			m_selectedEntity = {};
@@ -99,7 +99,6 @@ namespace Aegix::UI
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
 
-				// Display rotation in degrees
 				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
 				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, 0.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
 				transform.rotation = glm::radians(rotationDeg);
@@ -135,6 +134,7 @@ namespace Aegix::UI
 				float fovDeg = glm::degrees(camera.fov);
 				ImGui::DragFloat("FOV", &fovDeg, 0.1f, 0.0f, 180.0f);
 				camera.fov = glm::radians(fovDeg);
+
 				ImGui::DragFloat("Near", &camera.near, 0.01f, 0.0f, 100.0f);
 				ImGui::DragFloat("Far", &camera.far, 0.1f, 0.0f, 1000.0f);
 				ImGui::Text("Aspect Ratio: %.2f", camera.aspect);
@@ -145,7 +145,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawEntityNode(Scene::Entity entity)
+	void SceneLayer::drawEntityNode(Scene::Entity entity, bool destroyPopup)
 	{
 		const char* name = "Entity";
 		if (entity.hasComponent<Name>())
@@ -160,7 +160,7 @@ namespace Aegix::UI
 		if (ImGui::IsItemClicked())
 			m_selectedEntity = entity;
 
-		if (ImGui::BeginPopupContextItem())
+		if (destroyPopup && ImGui::BeginPopupContextItem())
 		{
 			m_selectedEntity = entity;
 			if (ImGui::MenuItem("Destroy Selected Entity"))
