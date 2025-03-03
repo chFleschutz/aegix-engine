@@ -45,6 +45,7 @@ layout(push_constant) uniform Push
 } push;
 
 const float PI = 3.14159265359;
+const float EPSILON = 0.001;
 
 mat3 calcTBN();
 
@@ -74,8 +75,8 @@ mat3 calcTBN()
     vec2 st2 = dFdy(inUV);
 
     vec3 N = normalize(inWorldNormal);
-    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-    vec3 B = -normalize(cross(N, T));
+    vec3 T = normalize(Q1 * st2.t - Q2 * st1.t + EPSILON);
+    vec3 B = normalize(cross(N, T));
 
     return mat3(T, B, N);
 }
