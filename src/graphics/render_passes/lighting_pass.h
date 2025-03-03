@@ -9,13 +9,13 @@ namespace Aegix::Graphics
 	{
 		struct AmbientLight
 		{
-			glm::vec4 color{ 1.0, 1.0, 1.0, 0.0 };
+			glm::vec4 color{ 0.0 };
 		};
 
 		struct DirectionalLight
 		{
-			glm::vec4 direction{ 1.0, 1.0, 1.0, 0.0 };
-			glm::vec4 color{ 1.0, 1.0, 1.0, 0.0 };
+			glm::vec4 direction{ 0.0, 0.0, 1.0, 0.0 };
+			glm::vec4 color{ 0.0 };
 		};
 
 		struct PointLight
@@ -25,10 +25,10 @@ namespace Aegix::Graphics
 		};
 
 		glm::vec4 cameraPosition{ 0.0f };
-		AmbientLight ambient;
-		DirectionalLight directional;
+		AmbientLight ambient{};
+		DirectionalLight directional{};
 		std::array<PointLight, MAX_POINT_LIGHTS> pointLights{};
-		int32_t pointLightCount = 0;
+		int32_t pointLightCount{ 0 };
 	};
 
 
@@ -49,8 +49,6 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_albedo;
 		FrameGraphResourceHandle m_arm;
 		FrameGraphResourceHandle m_emissive;
-
-		LightingUniforms m_lighting;
 
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;

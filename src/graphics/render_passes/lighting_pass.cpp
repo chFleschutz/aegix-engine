@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_ubo = std::make_unique<UniformBuffer>(device, m_lighting);
+		m_ubo = std::make_unique<UniformBuffer>(device, LightingUniforms{});
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
@@ -94,24 +94,29 @@ namespace Aegix::Graphics
 
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
 	{
-		if (Scene::Entity mainCamera = frameInfo.scene.mainCamera())
+		LightingUniforms lighting;
+
+		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+		if (mainCamera && mainCamera.hasComponent<Transform>())
 		{
 			auto& cameraTransform = mainCamera.component<Transform>();
-			m_lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
+			lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
 		}
 
-		if (Scene::Entity ambientLight = frameInfo.scene.ambientLight())
+		Scene::Entity ambientLight = frameInfo.scene.ambientLight();
+		if (ambientLight && ambientLight.hasComponent<AmbientLight>())
 		{
 			auto& ambient = ambientLight.component<AmbientLight>();
-			m_lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
+			lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
 		}
 
-		if (Scene::Entity directionalLight = frameInfo.scene.directionalLight())
+		Scene::Entity directionalLight = frameInfo.scene.directionalLight();
+		if (directionalLight && directionalLight.hasComponent<DirectionalLight, Transform>())
 		{
 			auto& directional = directionalLight.component<DirectionalLight>();
 			auto& transform = directionalLight.component<Transform>();
-			m_lighting.directional.color = glm::vec4(directional.color, directional.intensity);
-			m_lighting.directional.direction = glm::vec4(glm::normalize(transform.forward()), 0.0f);
+			lighting.directional.color = glm::vec4(directional.color, directional.intensity);
+			lighting.directional.direction = glm::vec4(glm::normalize(transform.forward()), 0.0f);
 		}
 
 		int32_t lighIndex = 0;
@@ -119,14 +124,14 @@ namespace Aegix::Graphics
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			assert(lighIndex < MAX_POINT_LIGHTS && "Point lights exceed maximum number of point lights");
-			m_lighting.pointLights[lighIndex] = LightingUniforms::PointLight{
+			lighting.pointLights[lighIndex] = LightingUniforms::PointLight{
 				.position = glm::vec4(transform.location, 1.0f),
 				.color = glm::vec4(pointLight.color, pointLight.intensity)
 			};
 			lighIndex++;
 		}
-		m_lighting.pointLightCount = lighIndex;
+		lighting.pointLightCount = lighIndex;
 
-		m_ubo->setData(frameInfo.frameIndex, m_lighting);
+		m_ubo->setData(frameInfo.frameIndex, lighting);
 	}
 }
