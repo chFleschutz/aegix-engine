@@ -7,6 +7,7 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 
@@ -54,7 +55,12 @@ namespace Aegix::Scene
 
 		void update(float deltaSeconds);
 
+		/// @brief Loads a scene from a file and returns the root entity
+		auto load(const std::filesystem::path& path) -> Entity;
+
 	private:
+		auto loadGLTF(const std::filesystem::path& path) -> Entity;
+
 		entt::registry m_registry;
 		std::vector<std::unique_ptr<System>> m_systems;
 		Scripting::ScriptManager m_scriptManager;
