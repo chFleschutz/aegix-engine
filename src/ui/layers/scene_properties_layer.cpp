@@ -108,7 +108,12 @@ namespace Aegix::UI
 
 		drawComponent<Camera>("Camera", m_selectedEntity, [](Camera& camera)
 			{
-				ImGui::Text("Camera Component");
+				float fovDeg = glm::degrees(camera.fov);
+				ImGui::DragFloat("FOV", &fovDeg, 0.1f, 0.0f, 180.0f);
+				camera.fov = glm::radians(fovDeg);
+				ImGui::DragFloat("Near", &camera.near, 0.01f, 0.0f, 100.0f);
+				ImGui::DragFloat("Far", &camera.far, 0.1f, 0.0f, 1000.0f);
+				ImGui::Text("Aspect Ratio: %.2f", camera.aspect);
 			});
 
 		drawAddComponent();
