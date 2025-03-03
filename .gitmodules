@@ -19,3 +19,6 @@
 [submodule "lib/aegix-gltf"]
 	path = lib/aegix-gltf
 	url = https://github.com/chFleschutz/aegix-gltf.git
+[submodule "modules/aegix-assets"]
+	path = modules/aegix-assets
+	url = https://github.com/chFleschutz/aegix-assets.git
