@@ -4,7 +4,7 @@
 #include "ui/layer.h"
 #include "ui/layers/demo_layer.h"
 #include "ui/layers/renderer_layer.h"
-#include "ui/layers/scene_properties_layer.h"
+#include "ui/layers/scene_layer.h"
 
 #include "imgui.h"
 
@@ -25,9 +25,9 @@ namespace Aegix::UI
 						toggleLayer<RendererLayer>(m_rendererShown);
 					}
 
-					if (ImGui::MenuItem("Scene Properties", nullptr, m_scenePropertiesShown))
+					if (ImGui::MenuItem("Scene", nullptr, m_scenePropertiesShown))
 					{
-						toggleLayer<ScenePropertiesLayer>(m_scenePropertiesShown);
+						toggleLayer<SceneLayer>(m_scenePropertiesShown);
 					}
 
 					if (ImGui::MenuItem("ImGui Demo", nullptr, m_demoShown))

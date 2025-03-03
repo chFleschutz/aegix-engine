@@ -1,4 +1,4 @@
-#include "scene_properties_layer.h"
+#include "scene_layer.h"
 
 #include "core/engine.h"
 #include "graphics/systems/default_render_system.h"
@@ -9,35 +9,40 @@
 
 namespace Aegix::UI
 {
-	void ScenePropertiesLayer::onGuiRender()
+	void SceneLayer::onGuiRender()
 	{
-		drawEntityView();
+		drawAllEntities();
+		drawSceneSettings();
 		drawEntityProperties();
 
 		// Docking
-		auto dockSpaceID = ImGui::GetID("ScenePropertyLayer");
+		ImGuiID dockSpaceID = ImGui::GetID("SceneLayer");
 		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
 		{
 			ImGui::DockBuilderRemoveNode(dockSpaceID); // Clear out existing layout
 			ImGui::DockBuilderAddNode(dockSpaceID);
+			ImGui::DockBuilderSetNodePos(dockSpaceID, ImVec2(10, 30));
 			ImGui::DockBuilderSetNodeSize(dockSpaceID, ImVec2(400, 600));
 
-			ImGuiID entityDockID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Up, 0.50f, NULL, &dockSpaceID);
-			ImGuiID propDockID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Down, 0.50f, NULL, &dockSpaceID);
+			ImGuiID dockMainID = dockSpaceID;
+			ImGuiID dockBottomID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Down, 0.50f, NULL, &dockMainID);
 
-			ImGui::DockBuilderDockWindow("Entity View", dockSpaceID);
-			ImGui::DockBuilderDockWindow("Properties", propDockID);
+			ImGui::DockBuilderDockWindow("All Entities", dockMainID);
+			ImGui::DockBuilderDockWindow("Scene Settings", dockMainID);
+			ImGui::DockBuilderDockWindow("Properties", dockBottomID);
 			ImGui::DockBuilderFinish(dockSpaceID);
 		}
 	}
 
-	void ScenePropertiesLayer::drawEntityView()
+	void SceneLayer::drawAllEntities()
 	{
-		if (!ImGui::Begin("Entity View"))
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(400, 600));
+		if (!ImGui::Begin("All Entities"))
 		{
 			ImGui::End();
 			return;
 		}
+
 		auto& scene = Engine::instance().scene();
 		for (auto entity : scene.registry().view<entt::entity>())
 		{
@@ -58,7 +63,26 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void ScenePropertiesLayer::drawEntityProperties()
+	void SceneLayer::drawSceneSettings()
+	{
+		if (!ImGui::Begin("Scene Settings"))
+		{
+			ImGui::End();
+			return;
+		}
+
+		auto& scene = Engine::instance().scene();
+		drawEntityNode(scene.mainCamera());
+		drawEntityNode(scene.ambientLight());
+		drawEntityNode(scene.directionalLight());
+
+		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
+			m_selectedEntity = {};
+
+		ImGui::End();
+	}
+
+	void SceneLayer::drawEntityProperties()
 	{
 		if (!ImGui::Begin("Properties") || !m_selectedEntity)
 		{
@@ -121,7 +145,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void ScenePropertiesLayer::drawEntityNode(Scene::Entity entity)
+	void SceneLayer::drawEntityNode(Scene::Entity entity)
 	{
 		const char* name = "Entity";
 		if (entity.hasComponent<Name>())
@@ -149,7 +173,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void ScenePropertiesLayer::drawAddComponent()
+	void SceneLayer::drawAddComponent()
 	{
 		ImGui::Spacing();
 
@@ -163,15 +187,17 @@ namespace Aegix::UI
 		{
 			drawAddComponentItem<Name>("Name");
 			drawAddComponentItem<Transform>("Transform");
-			drawAddComponentItem<Mesh>("Mesh");
+			drawAddComponentItem<AmbientLight>("Ambient Light");
+			drawAddComponentItem<DirectionalLight>("Directional Light");
 			drawAddComponentItem<PointLight>("Point Light");
 			drawAddComponentItem<Camera>("Camera");
+			drawAddComponentItem<Mesh>("Mesh");
 			drawAddComponentItem<Graphics::DefaultMaterial>("Default Material");
 			ImGui::EndPopup();
 		}
 	}
 
-	void ScenePropertiesLayer::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
+	void SceneLayer::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 		if (!assetSet)

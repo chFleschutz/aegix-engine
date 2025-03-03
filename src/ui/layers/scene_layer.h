@@ -9,13 +9,14 @@
 
 namespace Aegix::UI
 {
-	class ScenePropertiesLayer : public Layer
+	class SceneLayer : public Layer
 	{
 	public:
 		virtual void onGuiRender() override;
 
 	private:
-		void drawEntityView();
+		void drawAllEntities();
+		void drawSceneSettings();
 		void drawEntityProperties();
 		void drawEntityNode(Scene::Entity entity);
 		void drawAddComponent();
