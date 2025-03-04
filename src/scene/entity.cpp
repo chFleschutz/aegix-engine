@@ -100,8 +100,26 @@ namespace Aegix::Scene
 		{
 			children.last = siblings.next;
 		}
-		
-		siblings.prev = Entity{};
-		siblings.next = Entity{};
+	}
+
+	void Entity::removeChildren()
+	{
+		assert(hasComponent<Children>() && "Cannot remove children: Entity does not have children");
+
+		// This needs to be done in two steps to avoid invalidating the iterator
+		auto& children = component<Children>();
+		std::vector<Entity> childrenToRemove;
+		childrenToRemove.reserve(children.count);
+		for (auto child : children)
+		{
+			childrenToRemove.emplace_back(child);
+		}
+
+		children = Children{};
+		for (auto& child : childrenToRemove)
+		{
+			child.component<Parent>() = Parent{};
+			child.component<Siblings>() = Siblings{};
+		}
 	}
 }

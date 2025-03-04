@@ -100,6 +100,9 @@ namespace Aegix::Scene
 		/// @note Make sure that 'child' is an actual child of this entity
 		void removeChild(Entity child);
 
+		/// @brief Removes all children from the entity
+		void removeChildren();
+
 	private:
 		void addScript(Scripting::ScriptBase* script);
 

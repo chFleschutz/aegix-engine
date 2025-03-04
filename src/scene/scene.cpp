@@ -14,7 +14,7 @@ namespace Aegix::Scene
 	{
 		addSystem<CameraSystem>();
 		addSystem<TransformSystem>();
-		
+
 		m_mainCamera = createEntity("Main Camera");
 		m_mainCamera.addComponent<Camera>();
 		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
@@ -31,7 +31,7 @@ namespace Aegix::Scene
 		m_directionalLight.component<Transform>().rotation = { glm::radians(60.0f), 0.0f, glm::radians(45.0f) };
 	}
 
-	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation, 
+	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation,
 		const glm::vec3& scale) -> Entity
 	{
 		Entity entity = { m_registry.create(), this };
@@ -47,6 +47,10 @@ namespace Aegix::Scene
 	void Scene::destroyEntity(Entity entity)
 	{
 		// TODO: Destroy all scripts attached to the entity
+
+		entity.removeParent();
+		entity.removeChildren();
+
 		m_registry.destroy(entity);
 	}
 
