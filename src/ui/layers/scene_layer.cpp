@@ -44,9 +44,15 @@ namespace Aegix::UI
 		}
 
 		auto& scene = Engine::instance().scene();
-		for (auto entity : scene.registry().view<entt::entity>())
+		auto view = scene.registry().view<entt::entity>();
+
+		for (auto entt : view)
 		{
-			drawEntityNode(Scene::Entity{ entity, &scene });
+			Scene::Entity entity{ entt, &scene };
+			if (entity.hasComponent<Parent>() && entity.component<Parent>().entity)
+				continue;
+
+			drawEntity(entity);
 		}
 
 		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
@@ -72,9 +78,9 @@ namespace Aegix::UI
 		}
 
 		auto& scene = Engine::instance().scene();
-		drawEntityNode(scene.mainCamera(), false);
-		drawEntityNode(scene.ambientLight(), false);
-		drawEntityNode(scene.directionalLight(), false);
+		drawSingleEntity(scene.mainCamera());
+		drawSingleEntity(scene.ambientLight());
+		drawSingleEntity(scene.directionalLight());
 
 		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 			m_selectedEntity = {};
@@ -145,22 +151,22 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawEntityNode(Scene::Entity entity, bool destroyPopup)
+	void SceneLayer::drawEntity(Scene::Entity entity)
 	{
-		const char* name = "Entity";
-		if (entity.hasComponent<Name>())
-			name = entity.component<Name>().name.c_str();
+		auto& children = entity.getOrAddComponent<Children>();
 
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-		flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // For leaf nodes
-		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Draw Selection
+		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
+		auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		flags |= (children.count == 0) ? ImGuiTreeNodeFlags_Leaf : 0;
+		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
 
-		ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
+		if (!ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name))
+			return;
 
 		if (ImGui::IsItemClicked())
 			m_selectedEntity = entity;
 
-		if (destroyPopup && ImGui::BeginPopupContextItem())
+		if (ImGui::BeginPopupContextItem())
 		{
 			m_selectedEntity = entity;
 			if (ImGui::MenuItem("Destroy Selected Entity"))
@@ -171,6 +177,26 @@ namespace Aegix::UI
 
 			ImGui::EndPopup();
 		}
+
+		for (auto child : children)
+		{
+			drawEntity(child);
+		}
+
+		ImGui::TreePop();
+	}
+
+	void SceneLayer::drawSingleEntity(Scene::Entity entity)
+	{
+		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
+		auto flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
+		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
+
+		if (ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name))
+			ImGui::TreePop();
+
+		if (ImGui::IsItemClicked())
+			m_selectedEntity = entity;
 	}
 
 	void SceneLayer::drawAddComponent()
