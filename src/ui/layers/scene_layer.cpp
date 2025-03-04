@@ -160,8 +160,7 @@ namespace Aegix::UI
 		flags |= (children.count == 0) ? ImGuiTreeNodeFlags_Leaf : 0;
 		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
 
-		if (!ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name))
-			return;
+		auto isOpen = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
 
 		if (ImGui::IsItemClicked())
 			m_selectedEntity = entity;
@@ -178,12 +177,15 @@ namespace Aegix::UI
 			ImGui::EndPopup();
 		}
 
-		for (auto child : children)
+		if (isOpen)
 		{
-			drawEntity(child);
-		}
+			for (auto child : children)
+			{
+				drawEntity(child);
+			}
 
-		ImGui::TreePop();
+			ImGui::TreePop();
+		}
 	}
 
 	void SceneLayer::drawSingleEntity(Scene::Entity entity)
