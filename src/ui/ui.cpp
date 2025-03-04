@@ -50,6 +50,17 @@ namespace Aegix::UI
 		ImGui_ImplVulkan_Init(&initInfo);
 
 		ImGui_ImplVulkan_CreateFontsTexture();
+
+		// Adjust Style
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 4.0f;
+		style.WindowBorderSize = 0.0f;
+		style.PopupRounding = 4.0f;
+		style.FrameRounding = 2.0f;
+		style.TouchExtraPadding = ImVec2(2.0f, 2.0f);
+		style.TabBarBorderSize = 0.0f;
+		style.TabRounding = 4.0f;
+		style.DockingSeparatorSize = 0.0f;
 	}
 
 	UI::~UI()

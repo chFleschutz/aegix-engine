@@ -48,12 +48,12 @@ namespace Aegix::UI
 			return "D32_SFLOAT";
 		case VK_FORMAT_D32_SFLOAT_S8_UINT:
 			return "D32_SFLOAT_S8_UINT";
-
 		}
 	}
 
 	void RendererLayer::onGuiRender()
 	{
+		ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 10, 30), ImGuiCond_FirstUseEver, ImVec2(1.0f, 0.0f));
 		if (!ImGui::Begin("Renderer"))
 		{
 			ImGui::End();
