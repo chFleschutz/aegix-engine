@@ -76,29 +76,33 @@ namespace Aegix::Scene
 		assert(child.hasComponent<Parent>() && "Cannot remove child: Entity does not have a parent");
 		assert(child.component<Parent>().entity == *this && "Cannot remove child: Entity is not a child of this entity");
 
-		child.component<Parent>().entity = Entity{};
+		// Remove parent
+		child.component<Parent>() = Parent{};
 
 		auto& children = component<Children>();
 		children.count--;
+		
+		auto& siblings = child.component<Siblings>();
+		Entity prevSibling = siblings.prev; 
+		Entity nextSibling = siblings.next;
+		
+		// Update siblings and first/last child
+		if (prevSibling)
+		{
+			prevSibling.component<Siblings>().next = nextSibling;
+		}
+		else // First Child
+		{
+			children.first = siblings.next;
+		}
 
-		// Remove child from siblings linked list
-		auto& siblings = child.getOrAddComponent<Siblings>();
-		if (siblings.prev)
+		if (nextSibling)
 		{
-			siblings.prev.getOrAddComponent<Siblings>().next = siblings.next;
+			nextSibling.component<Siblings>().prev = prevSibling;
 		}
-		else // first child
+		else // Last Child
 		{
-			children.first = siblings.prev;
-		}
-
-		if (siblings.next)
-		{
-			siblings.next.getOrAddComponent<Siblings>().prev = siblings.prev;
-		}
-		else // last child
-		{
-			children.last = siblings.next;
+			children.last = siblings.prev;
 		}
 	}
 
