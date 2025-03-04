@@ -27,6 +27,7 @@ namespace Aegix::UI
 		static void drawAssetSlot(const char* assetName, const char* description, bool assetSet = true);
 
 		template<typename T>
+			requires OptionalComponent<T>
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags, 
 			std::function<void(T&)> drawFunc)
 		{
@@ -39,6 +40,20 @@ namespace Aegix::UI
 
 			if (!keepComponent)
 				entity.removeComponent<T>();
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+		}
+
+		template<typename T>
+			requires RequiredComponent<T>
+		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags,
+			std::function<void(T&)> drawFunc)
+		{
+			assert(entity.hasComponent<T>() && "Entity does not have the required component");
+
+			if (ImGui::CollapsingHeader(componentName, nullptr, flags))
+				drawFunc(entity.component<T>());
 
 			ImGui::Spacing();
 			ImGui::Spacing();

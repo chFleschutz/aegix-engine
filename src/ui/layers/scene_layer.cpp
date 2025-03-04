@@ -147,7 +147,7 @@ namespace Aegix::UI
 			return;
 		}
 
-		drawComponent<Name>("Name", m_selectedEntity, ImGuiSliderFlags_WrapAround,
+		drawComponent<Name>("Name", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
 			[](Name& nameComponent)
 			{
 				ImGui::InputText("Entity Name", &nameComponent.name);

@@ -81,6 +81,7 @@ namespace Aegix::Scene
 
 		/// @brief Removes a component of type T from the entity
 		template<typename T>
+			requires OptionalComponent<T>
 		void removeComponent()
 		{
 			assert(hasComponent<T>() && "Cannot remove Component: Entity does not have the component");
