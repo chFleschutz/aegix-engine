@@ -11,11 +11,13 @@ namespace Aegix::UI
 {
 	void SceneLayer::onGuiRender()
 	{
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(400, 800));
+
+		drawHierachy();
 		drawAllEntities();
 		drawSceneSettings();
 		drawEntityProperties();
 
-		// Docking
 		ImGuiID dockSpaceID = ImGui::GetID("SceneLayer");
 		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
 		{
@@ -27,6 +29,7 @@ namespace Aegix::UI
 			ImGuiID dockMainID = dockSpaceID;
 			ImGuiID dockBottomID = ImGui::DockBuilderSplitNode(dockSpaceID, ImGuiDir_Down, 0.50f, NULL, &dockMainID);
 
+			ImGui::DockBuilderDockWindow("Hierachy", dockMainID);
 			ImGui::DockBuilderDockWindow("All Entities", dockMainID);
 			ImGui::DockBuilderDockWindow("Scene Settings", dockMainID);
 			ImGui::DockBuilderDockWindow("Properties", dockBottomID);
@@ -34,9 +37,68 @@ namespace Aegix::UI
 		}
 	}
 
+	void SceneLayer::drawHierachy()
+	{
+		if (!ImGui::Begin("Hierachy"))
+		{
+			ImGui::End();
+			return;
+		}
+
+		constexpr uint8_t NODE_OPENED = 1 << 0;
+		constexpr uint8_t VISITED = 1 << 1;
+		std::vector<std::pair<Scene::Entity, uint8_t>> stack;
+
+		auto& scene = Engine::instance().scene();
+		auto view = scene.registry().view<entt::entity>();
+		stack.reserve(view.size());
+
+		for (auto entt : view)
+		{
+			Scene::Entity entity{ entt, &scene };
+			if (entity.hasComponent<Parent>() && entity.component<Parent>().entity)
+				continue;
+
+			stack.emplace_back(entity, 0);
+		}
+
+		while (!stack.empty())
+		{
+			auto& [entity, flags] = stack.back();
+
+			if (flags & NODE_OPENED)
+				ImGui::TreePop();
+
+			if (flags & VISITED)
+			{
+				stack.pop_back();
+				continue;
+			}
+
+			flags |= VISITED;
+
+			auto& children = entity.component<Children>();
+			ImGuiTreeNodeFlags treeNodeflags = (children.count == 0) ? ImGuiTreeNodeFlags_Leaf : 0;
+			if (drawEntityTreeNode(entity, treeNodeflags))
+			{
+				flags |= NODE_OPENED;
+				for (auto it = children.rbegin(); it != children.rend(); ++it)
+				{
+					stack.emplace_back(*it, 0);
+				}
+			}
+		}
+
+		drawEntityActions();
+
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
+			m_selectedEntity = {};
+
+		ImGui::End();
+	}
+
 	void SceneLayer::drawAllEntities()
 	{
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(400, 600));
 		if (!ImGui::Begin("All Entities"))
 		{
 			ImGui::End();
@@ -45,27 +107,16 @@ namespace Aegix::UI
 
 		auto& scene = Engine::instance().scene();
 		auto view = scene.registry().view<entt::entity>();
-
 		for (auto entt : view)
 		{
-			Scene::Entity entity{ entt, &scene };
-			if (entity.hasComponent<Parent>() && entity.component<Parent>().entity)
-				continue;
-
-			drawEntity(entity);
+			if (drawEntityTreeNode(Scene::Entity{ entt, &scene }, ImGuiTreeNodeFlags_Leaf))
+				ImGui::TreePop();
 		}
 
 		if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered())
 			m_selectedEntity = {};
 
-		// Right click on window to create entity
-		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
-		{
-			if (ImGui::MenuItem("Create Entity"))
-				m_selectedEntity = scene.createEntity("Empty Entity");
-
-			ImGui::EndPopup();
-		}
+		drawEntityActions();
 		ImGui::End();
 	}
 
@@ -96,46 +147,53 @@ namespace Aegix::UI
 			return;
 		}
 
-		drawComponent<Name>("Name", m_selectedEntity, [](Name& nameComponent)
+		drawComponent<Name>("Name", m_selectedEntity, ImGuiSliderFlags_WrapAround,
+			[](Name& nameComponent)
 			{
 				ImGui::InputText("Entity Name", &nameComponent.name);
 			});
 
-		drawComponent<Transform>("Transform", m_selectedEntity, [](Transform& transform)
+		drawComponent<Transform>("Transform", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](Transform& transform)
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
 
 				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
-				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, 0.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
+				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, -360.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
 				transform.rotation = glm::radians(rotationDeg);
 
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 			});
 
-		drawComponent<Mesh>("Mesh", m_selectedEntity, [](Mesh& mesh)
+		drawComponent<Mesh>("Mesh", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](Mesh& mesh)
 			{
 				drawAssetSlot("Mesh", "Mesh Asset", mesh.staticMesh != nullptr);
 			});
 
-		drawComponent<AmbientLight>("Ambient Light", m_selectedEntity, [](AmbientLight& ambientLight)
+		drawComponent<AmbientLight>("Ambient Light", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](AmbientLight& ambientLight)
 			{
 				ImGui::ColorEdit3("Color", &ambientLight.color.r);
 				ImGui::DragFloat("Intensity", &ambientLight.intensity, 0.01f, 0.0f, 1.0f);
 			});
 
-		drawComponent<DirectionalLight>("Directional Light", m_selectedEntity, [](DirectionalLight& directionalLight)
+		drawComponent<DirectionalLight>("Directional Light", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](DirectionalLight& directionalLight)
 			{
 				ImGui::ColorEdit3("Color", &directionalLight.color.r);
 				ImGui::DragFloat("Intensity", &directionalLight.intensity, 0.1f, 0.0f, 10.0f);
 			});
 
-		drawComponent<PointLight>("Pointlight", m_selectedEntity, [](PointLight& pointlight)
+		drawComponent<PointLight>("Pointlight", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](PointLight& pointlight)
 			{
 				ImGui::ColorEdit3("Color", &pointlight.color.r);
 				ImGui::DragFloat("Intensity", &pointlight.intensity, 0.1f, 0.0f, 1000.0f);
 			});
 
-		drawComponent<Camera>("Camera", m_selectedEntity, [](Camera& camera)
+		drawComponent<Camera>("Camera", m_selectedEntity, ImGuiTreeNodeFlags_DefaultOpen,
+			[](Camera& camera)
 			{
 				float fovDeg = glm::degrees(camera.fov);
 				ImGui::DragFloat("FOV", &fovDeg, 0.1f, 0.0f, 180.0f);
@@ -183,6 +241,40 @@ namespace Aegix::UI
 
 		if (ImGui::IsItemClicked())
 			m_selectedEntity = entity;
+	}
+
+	auto SceneLayer::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
+	{
+		auto& children = entity.getOrAddComponent<Children>();
+
+		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
+		flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
+
+		auto isOpen = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
+
+		if (ImGui::IsItemClicked())
+			m_selectedEntity = entity;
+
+		return isOpen;
+	}
+
+	void SceneLayer::drawEntityActions()
+	{
+		// Right click on window to create entity
+		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight))
+		{
+			if (ImGui::MenuItem("Create Entity"))
+				m_selectedEntity = Engine().scene().createEntity("Empty Entity");
+
+			if (m_selectedEntity && ImGui::MenuItem("Destroy Selected Entity"))
+			{
+				Engine::instance().scene().destroyEntity(m_selectedEntity);
+				m_selectedEntity = {};
+			}
+
+			ImGui::EndPopup();
+		}
 	}
 
 	void SceneLayer::drawAddComponent()

@@ -15,22 +15,26 @@ namespace Aegix::UI
 		virtual void onGuiRender() override;
 
 	private:
+		void drawHierachy();
 		void drawAllEntities();
 		void drawSceneSettings();
 		void drawEntityProperties();
-		void drawEntity(Scene::Entity entity);
 		void drawSingleEntity(Scene::Entity entity);
+		auto drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool;
+		void drawEntityActions();
 		void drawAddComponent();
+
 		static void drawAssetSlot(const char* assetName, const char* description, bool assetSet = true);
 
 		template<typename T>
-		void drawComponent(const char* componentName, Scene::Entity entity, std::function<void(T&)> drawFunc)
+		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags, 
+			std::function<void(T&)> drawFunc)
 		{
 			if (!entity.hasComponent<T>())
 				return;
 
 			bool keepComponent = true;
-			if (ImGui::CollapsingHeader(componentName, &keepComponent, ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader(componentName, &keepComponent, flags))
 				drawFunc(entity.component<T>());
 
 			if (!keepComponent)
