@@ -49,12 +49,14 @@ namespace Aegix
 	};
 
 	/// @brief Stores the parent entity
+	/// @note Use Entity::setParent to set the parent of an entity 
 	struct Parent
 	{
 		Scene::Entity entity{};
 	};
 
 	/// @brief Stores the next and previous sibling of the entity (for linked list)
+	/// @note Use Entity::addChild to add a child to an entity (siblings are automatically updated)
 	struct Siblings
 	{
 		Scene::Entity next{};
@@ -62,6 +64,7 @@ namespace Aegix
 	};
 
 	/// @brief Stores the children entities as the first and last child of a linked list
+	/// @note Use Entity::addChild to add a child to an entity
 	struct Children
 	{
 		struct Iterator
