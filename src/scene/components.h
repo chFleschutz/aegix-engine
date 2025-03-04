@@ -132,4 +132,17 @@ namespace Aegix
 		glm::mat4 inverseViewMatrix = glm::mat4{ 1.0f };
 		glm::mat4 projectionMatrix = glm::mat4{ 1.0f };
 	};
+
+
+
+	template<typename T, typename... Ts>
+	concept IsAnyOf = (std::is_same_v<T, Ts> || ...);
+
+	/// @brief Defines all required components for an entity (Each entity MUST have these components)
+	template<typename T>
+	concept RequiredComponent = IsAnyOf<T, Name, Transform, GlobalTransform, Parent, Siblings, Children>;
+
+	/// @brief Defines all optional components for an entity (Each entity MAY have these components)
+	template<typename T>
+	concept OptionalComponent = !RequiredComponent<T>;
 }
