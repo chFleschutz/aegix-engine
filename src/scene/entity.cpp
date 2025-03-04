@@ -33,11 +33,18 @@ namespace Aegix::Scene
 
 	void Entity::setParent(Entity parent)
 	{
+		assert(*this && "Cannot set parent: Entity is null");
+		assert(parent && "Cannot set parent: Parent entity is null");
+		assert(parent != *this && "Cannot set parent: Entity cannot be its own parent");
+
 		parent.addChild(*this);
 	}
 
 	void Entity::addChild(Entity child)
 	{
+		assert(*this && "Cannot add child: Entity is null");
+		assert(child && "Cannot add child: Child entity is null");
+
 		auto& parent = child.getOrAddComponent<Parent>();
 		if (parent.entity == *this) // Already added as a child
 			return;
@@ -60,24 +67,24 @@ namespace Aegix::Scene
 
 	void Entity::removeParent()
 	{
+		assert(*this && "Cannot remove parent: Entity is null");
 		assert(hasComponent<Parent>() && "Cannot remove parent: Entity does not have a parent");
 
 		auto& parent = component<Parent>();
 		if (!parent.entity)
 			return;
 
-		parent.entity.removeChild(*this);
+		parent.entity.removeChild(Entity{ *this });
 		parent.entity = Entity{};
 	}
 
 	void Entity::removeChild(Entity child)
 	{
+		assert(*this && "Cannot remove child: Entity is null");
 		assert(hasComponent<Children>() && "Cannot remove child: Entity does not have children");
+		assert(child && "Cannot remove child: Child entity is null");
 		assert(child.hasComponent<Parent>() && "Cannot remove child: Entity does not have a parent");
 		assert(child.component<Parent>().entity == *this && "Cannot remove child: Entity is not a child of this entity");
-
-		// Remove parent
-		child.component<Parent>() = Parent{};
 
 		auto& children = component<Children>();
 		children.count--;
@@ -104,10 +111,14 @@ namespace Aegix::Scene
 		{
 			children.last = siblings.prev;
 		}
+
+		// Remove parent at the end
+		child.component<Parent>() = Parent{};
 	}
 
 	void Entity::removeChildren()
 	{
+		assert(*this && "Cannot remove children: Entity is null");
 		assert(hasComponent<Children>() && "Cannot remove children: Entity does not have children");
 
 		// This needs to be done in two steps to avoid invalidating the iterator
