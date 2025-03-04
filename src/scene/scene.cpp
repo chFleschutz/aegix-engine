@@ -39,6 +39,8 @@ namespace Aegix::Scene
 		entity.addComponent<Transform>(location);
 		entity.addComponent<GlobalTransform>();
 		entity.addComponent<Parent>();
+		entity.addComponent<Siblings>();
+		entity.addComponent<Children>();
 		return entity;
 	}
 
