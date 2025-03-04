@@ -146,46 +146,30 @@ namespace Aegix::UI
 				ImGui::Text("Aspect Ratio: %.2f", camera.aspect);
 			});
 
+		drawComponent<Parent>("Parent", m_selectedEntity, 0,
+			[](Parent& parent)
+			{
+				ImGui::Text("Parent: %s", parent.entity ? parent.entity.component<Name>().name.c_str() : "None");
+			});
+
+		drawComponent<Siblings>("Siblings", m_selectedEntity, 0,
+			[](Siblings& siblings)
+			{
+				ImGui::Text("Next: %s", siblings.next ? siblings.next.component<Name>().name.c_str() : "None");
+				ImGui::Text("Prev: %s", siblings.prev ? siblings.prev.component<Name>().name.c_str() : "None");
+			});
+
+		drawComponent<Children>("Children", m_selectedEntity, 0,
+			[](Children& children)
+			{
+				ImGui::Text("Children: %d", children.count);
+				ImGui::Text("First: %s", children.first ? children.first.component<Name>().name.c_str() : "None");
+				ImGui::Text("Last: %s", children.last ? children.last.component<Name>().name.c_str() : "None");
+			});
+
 		drawAddComponent();
 
 		ImGui::End();
-	}
-
-	void SceneLayer::drawEntity(Scene::Entity entity)
-	{
-		auto& children = entity.getOrAddComponent<Children>();
-
-		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
-		auto flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-		flags |= (children.count == 0) ? ImGuiTreeNodeFlags_Leaf : 0;
-		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
-
-		auto isOpen = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, name);
-
-		if (ImGui::IsItemClicked())
-			m_selectedEntity = entity;
-
-		if (ImGui::BeginPopupContextItem())
-		{
-			m_selectedEntity = entity;
-			if (ImGui::MenuItem("Destroy Selected Entity"))
-			{
-				m_selectedEntity = {};
-				Engine::instance().scene().destroyEntity(entity);
-			}
-
-			ImGui::EndPopup();
-		}
-
-		if (isOpen)
-		{
-			for (auto child : children)
-			{
-				drawEntity(child);
-			}
-
-			ImGui::TreePop();
-		}
 	}
 
 	void SceneLayer::drawSingleEntity(Scene::Entity entity)
