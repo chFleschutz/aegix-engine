@@ -265,7 +265,7 @@ namespace Aegix::UI
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight))
 		{
 			if (ImGui::MenuItem("Create Entity"))
-				m_selectedEntity = Engine().scene().createEntity("Empty Entity");
+				m_selectedEntity = Engine::instance().scene().createEntity("Empty Entity");
 
 			if (m_selectedEntity && ImGui::MenuItem("Destroy Selected Entity"))
 			{
