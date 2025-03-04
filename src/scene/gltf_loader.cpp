@@ -66,7 +66,7 @@ namespace Aegix::Scene
 			// Create entity for node
 			auto nodeEntity = scene.createEntity(node.name.value_or("Node" + std::to_string(nodeCounter++)));
 			nodeEntity.component<Transform>() = toTransform(node.transform);
-			nodeEntity.component<Parent>().entity = parent;
+			nodeEntity.setParent(parent);
 
 			nodeStack.pop_back();
 
@@ -88,7 +88,7 @@ namespace Aegix::Scene
 				auto meshEntity = scene.createEntity(mesh.name.value_or("Mesh") + std::to_string(i));
 				meshEntity.addComponent<Graphics::DefaultMaterial>(material);
 				meshEntity.addComponent<Mesh>(loadMesh(meshIndex, i));
-				meshEntity.component<Parent>().entity = nodeEntity;
+				meshEntity.setParent(nodeEntity);
 			}
 		}
 	}
