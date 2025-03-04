@@ -45,17 +45,17 @@ namespace Aegix::Scene
 		assert(*this && "Cannot add child: Entity is null");
 		assert(child && "Cannot add child: Child entity is null");
 
-		auto& parent = child.getOrAddComponent<Parent>();
+		auto& parent = child.component<Parent>();
 		if (parent.entity == *this) // Already added as a child
 			return;
 
 		parent.entity = *this;
 
-		auto& children = getOrAddComponent<Children>();
+		auto& children = component<Children>();
 		if (children.first)
 		{
-			children.last.getOrAddComponent<Siblings>().next = child;
-			child.getOrAddComponent<Siblings>().prev = children.last;
+			children.last.component<Siblings>().next = child;
+			child.component<Siblings>().prev = children.last;
 		}
 		else // No children yet
 		{
