@@ -68,6 +68,12 @@ namespace Aegix::Scene
 			return script;
 		}
 
+		template<typename T>
+		auto getOrAddComponent() -> T&
+		{
+			return registry().get_or_emplace<T>(m_entityID);
+		}
+
 		/// @brief Removes a component of type T from the entity
 		template<typename T>
 		void removeComponent()
@@ -75,6 +81,16 @@ namespace Aegix::Scene
 			assert(hasComponent<T>() && "Cannot remove Component: Entity does not have the component");
 			registry().remove<T>(m_entityID);
 		}
+
+		/// @brief Sets the parent of the entity
+		void setParent(Entity parent);
+
+		/// @brief Adds a child to the entity
+		void addChild(Entity child);
+
+		/// @brief Removes a child from the entity
+		/// @note Make sure that 'child' is an actual child of this entity
+		void removeChild(Entity child);
 
 	private:
 		void addScript(Scripting::ScriptBase* script);

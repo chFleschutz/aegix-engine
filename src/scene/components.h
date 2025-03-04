@@ -54,6 +54,21 @@ namespace Aegix
 		Scene::Entity entity{};
 	};
 
+	/// @brief Stores the children entities as the first and last child of a linked list
+	struct Children
+	{
+		Scene::Entity first{};
+		Scene::Entity last{};
+		size_t count = 0;
+	};
+
+	/// @brief Stores the next and previous sibling of the entity (for linked list)
+	struct Siblings
+	{
+		Scene::Entity next{};
+		Scene::Entity prev{};
+	};
+
 	/// @brief Holds a pointer to a static mesh
 	struct Mesh
 	{
