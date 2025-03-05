@@ -12,19 +12,20 @@ Aegix is a small game engine written in modern C++. It uses the Vulkan Graphics 
 
 - Physically based rendering
 - GLTF and OBJ mesh loading
-- Immediate mode editor GUI
-- Entity Component System
+- Immediate mode editor UI
+- Entity component system
 - Framegraph for multi pass rendering
 - Deferred rendering
 
 ## Prerequisites <a name="prerequisites"></a>
 
-- Before you can run Aegix, you'll need to have the [Vulkan SDK](https://vulkan.lunarg.com/) installed on your system.
-- CMake functions as the build system, so make sure it's installed or use an IDE with CMake support (Visual Studio is the recommended choice).
+Before building ensure you have the following installed:
+- [Vulkan SDK](https://vulkan.lunarg.com/) - Download an install the latest version (at least version 1.3).
+- CMake - Used for building the project. Either install it manually or use an IDE with built-in CMake support (Visual Studio is the recommended choice)
 
 ## Getting Started <a name="getting-started"></a>
 
-Follow these steps to get started with the Aegix Engine:
+Follow these steps to get started:
 
 1. Clone the repository and its submodules:
 
@@ -32,7 +33,7 @@ Follow these steps to get started with the Aegix Engine:
     git clone --recurse-submodules https://github.com/chFleschutz/aegix-engine.git
     ```
 
-2. Open the folder in Visual Studio and CMake will automatically set up the project.
+2. Open the folder in a CMake supported IDE (e.g. Visual Studio) or generate project files for your preferred platform using CMake.
 
 4. Build and run the project to view an example scene.
 
