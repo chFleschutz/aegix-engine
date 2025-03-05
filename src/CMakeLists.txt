@@ -4,10 +4,10 @@ add_library(Aegix::Engine ALIAS aegix-engine)
 target_include_directories(aegix-engine 
 	PUBLIC 
 		"${CMAKE_CURRENT_SOURCE_DIR}"
-		"${CMAKE_SOURCE_DIR}/lib/entt/single_include"
-		"${CMAKE_SOURCE_DIR}/lib/glm"
-		"${CMAKE_SOURCE_DIR}/lib/stb"
-		"${CMAKE_SOURCE_DIR}/lib/tinyobjloader"
+		"${CMAKE_SOURCE_DIR}/external/entt/single_include"
+		"${CMAKE_SOURCE_DIR}/external/glm"
+		"${CMAKE_SOURCE_DIR}/external/stb"
+		"${CMAKE_SOURCE_DIR}/external/tinyobjloader"
 )
 
 target_link_libraries(aegix-engine 

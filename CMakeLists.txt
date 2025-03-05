@@ -18,7 +18,7 @@ if(NOT Vulkan_glslc_FOUND)
 endif()
 
 add_definitions(-DPROJECT_DIR="${CMAKE_SOURCE_DIR}")
-add_subdirectory(lib)
+add_subdirectory(external)
 add_subdirectory(modules)
 add_subdirectory(src)
 
