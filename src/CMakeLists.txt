@@ -4,8 +4,7 @@ add_library(Aegix::Engine ALIAS aegix-engine)
 target_include_directories(aegix-engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}
-		"${CMAKE_SOURCE_DIR}/external/stb"
-		"${CMAKE_SOURCE_DIR}/external/tinyobjloader"
+		${CMAKE_SOURCE_DIR}/external/stb
 )
 
 target_link_libraries(aegix-engine 
@@ -15,6 +14,7 @@ target_link_libraries(aegix-engine
 		glfw
 		glm::glm
 		imgui
+		tinyobjloader
 		Aegix::GLTF
 		Aegix::Log
 )
