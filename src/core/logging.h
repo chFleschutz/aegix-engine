@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef NDEBUG
+#define AEGIX_LOG_DISABLE_DEBUG
+#define AEGIX_LOG_DISABLE_TRACE
+#endif // NDEBUG
+
 #include <aegix-log/log.h>
 #include <aegix-log/sinks/console_sink.h>
 
