@@ -16,6 +16,7 @@ target_link_libraries(aegix-engine
 		glfw
 		imgui
 		Aegix::GLTF
+		Aegix::Log
 )
 
 add_subdirectory(core)
