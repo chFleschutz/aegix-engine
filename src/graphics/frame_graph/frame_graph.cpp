@@ -1,10 +1,10 @@
 #include "frame_graph.h"
 
+#include "core/logging.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan_tools.h"
 
 #include <cassert>
-#include <iostream>
 
 namespace std
 {
@@ -66,10 +66,10 @@ namespace Aegix::Graphics
 		}
 
 		// Print frame graph info
-		std::cout << "FrameGraph compiled with " << m_nodeHandles.size() << " passes\n";
+		ALOG::info("FrameGraph compiled with {} passes", m_nodeHandles.size());
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
-			std::cout << "\t- " << m_resourcePool.node(nodeHandle).name << "\n";
+			ALOG::info("\t- {}", m_resourcePool.node(nodeHandle).name);
 		}
 	}
 

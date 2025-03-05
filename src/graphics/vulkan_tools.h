@@ -1,8 +1,9 @@
 #pragma once
 
 #include "graphics/texture.h"
+#include "core/logging.h"
 
-#include "vulkan/vulkan.h"
+#include <vulkan/vulkan.h>
 
 #include <cassert>
 #include <filesystem>
@@ -14,8 +15,9 @@
 	VkResult result = (f);																				\
 	if (result != VK_SUCCESS)																			\
 	{																									\
-		std::cout << "Vulkan Error: " << Aegix::Tools::resultString(result) << " at " << __FILE__ << ", line " << __LINE__ << "\n"; \
-		assert(result == VK_SUCCESS);																	\
+		ALOG::fatal("Vulkan Error: {} in function '{}' at {}, line {}\nExpression: {}",					\
+			Aegix::Tools::resultString(result), __FUNCTION__, __FILE__, __LINE__, #f);					\
+		std::terminate();																				\
 	}																									\
 }
 
@@ -45,7 +47,7 @@ namespace Aegix::Tools
 
 	namespace vk
 	{
-		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 			VkImageAspectFlags aspectMask);
 
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
@@ -66,7 +68,7 @@ namespace Aegix::Tools
 			vkCmdPushConstants(cmd, layout, stage, 0, sizeof(T), &data);
 		}
 
-		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout, 
+		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
 			VkImageLayout newLayout, uint32_t miplevels = 1);
 
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);

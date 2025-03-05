@@ -22,3 +22,6 @@
 [submodule "modules/aegix-gltf"]
 	path = modules/aegix-gltf
 	url = https://github.com/chFleschutz/aegix-gltf.git
+[submodule "modules/aegix-log"]
+	path = modules/aegix-log
+	url = https://github.com/chFleschutz/aegix-log.git

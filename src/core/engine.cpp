@@ -1,11 +1,8 @@
 #include "engine.h"
 
-#include "core/input.h"
 #include "ui/layers/main_menu_layer.h"
 
 #include <chrono>
-#include <iostream>
-#include <thread>
 
 namespace Aegix
 {
@@ -14,18 +11,10 @@ namespace Aegix
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
 		s_instance = this;
 
-		std::cout << "Engine Initialized!\n"
-			"\n\n"
-			"\t\t\t\t      ###  ########  ######   ##  ##     ##\n"
-			"\t\t\t\t     ## ## ##       ##    ##  ##   ##   ## \n"
-			"\t\t\t\t    ##  ## ##       ##        ##    ## ##  \n"
-			"\t\t\t\t   ##   ## ######   ##        ##     ###   \n"
-			"\t\t\t\t  ######## ##       ##  ####  ##    ## ##  \n"
-			"\t\t\t\t ##     ## ##       ##    ##  ##   ##   ## \n"
-			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
-			"\n\n";
-
 		m_ui.pushLayer<UI::MainMenuLayer>();
+		
+		ALOG::info("Engine Initialized!");
+		Logging::logo();
 	}
 
 	Engine::~Engine()
