@@ -11,18 +11,10 @@ namespace Aegix
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
 		s_instance = this;
 
-		ALOG::info() << "Engine Initialized!\n"
-			"\n\n"
-			"\t\t\t\t      ###  ########  ######   ##  ##     ##\n"
-			"\t\t\t\t     ## ## ##       ##    ##  ##   ##   ## \n"
-			"\t\t\t\t    ##  ## ##       ##        ##    ## ##  \n"
-			"\t\t\t\t   ##   ## ######   ##        ##     ###   \n"
-			"\t\t\t\t  ######## ##       ##  ####  ##    ## ##  \n"
-			"\t\t\t\t ##     ## ##       ##    ##  ##   ##   ## \n"
-			"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
-			"\n\n";
-
 		m_ui.pushLayer<UI::MainMenuLayer>();
+		
+		ALOG::info("Engine Initialized!");
+		Logging::logo();
 	}
 
 	Engine::~Engine()
