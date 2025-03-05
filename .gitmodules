@@ -1,21 +1,21 @@
-[submodule "lib/tinyobjloader"]
-	path = lib/tinyobjloader
-	url = https://github.com/tinyobjloader/tinyobjloader.git
-[submodule "lib/stb"]
-	path = lib/stb
-	url = https://github.com/nothings/stb.git
-[submodule "lib/glm"]
-	path = lib/glm
-	url = https://github.com/g-truc/glm.git
-[submodule "lib/entt"]
-	path = lib/entt
+[submodule "external/entt"]
+	path = external/entt
 	url = https://github.com/skypjack/entt.git
-[submodule "lib/glfw"]
-	path = lib/glfw
+[submodule "external/glm"]
+	path = external/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "external/glfw"]
+	path = external/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "lib/imgui"]
-	path = lib/imgui
+[submodule "external/imgui"]
+	path = external/imgui
 	url = https://github.com/chFleschutz/imgui.git
+[submodule "external/stb"]
+	path = external/stb
+	url = https://github.com/nothings/stb.git
+[submodule "external/tinyobjloader"]
+	path = external/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader.git
 [submodule "modules/aegix-assets"]
 	path = modules/aegix-assets
 	url = https://github.com/chFleschutz/aegix-assets.git
