@@ -1,8 +1,7 @@
 #pragma once
 
 #include "scripting/script_base.h"
-
-#include <iostream>
+#include "core/logging.h"
 
 namespace Aegix::Scripting
 {
@@ -14,27 +13,26 @@ namespace Aegix::Scripting
 		TestScript(int x)
 			: m_x(x)
 		{
-			std::cout << "TestScript::TestScript(" << m_x << ")" << std::endl;
+			ALOG::info("TestScript::TestScript({})", m_x);
 		}
 
 		/// @brief Acces protected methods and other components here.
 		virtual void begin() override
 		{
-			auto& name = getComponent<Aegix::Component::Name>();
-			std::cout << "TestScript::begin() " << name.name << " " << m_x << std::endl;
+			ALOG::info("TestScript::begin({})", component<Name>().name);
 		}
 
 		/// @brief Update the script each frame here.
 		/// @param deltaSeconds Time between last two frames in seconds.
 		virtual void update(float deltaSeconds) override
 		{
-			std::cout << "TestScript::update(" << deltaSeconds << ")" << std::endl;
+			ALOG::info("TestScript::update({})", deltaSeconds);
 		}
 
 		/// @brief Clean up here.
 		virtual void end() override
 		{
-			std::cout << "TestScript::end()" << std::endl;
+			ALOG::info("TestScript::end()");
 		}
 
 	private:

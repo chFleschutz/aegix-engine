@@ -1,6 +1,7 @@
 #include "device.h"
 
 #include "graphics/vulkan_tools.h"
+#include "core/logging.h"
 
 #include <cstring>
 #include <iostream>
@@ -17,7 +18,7 @@ namespace Aegix::Graphics
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
 	{
-		std::cerr << "Vulkan Validation: " << pCallbackData->pMessage << "\n\n";
+		ALOG::warn("Vulkan Validation: \n{}\n", pCallbackData->pMessage);
 		return VK_FALSE;
 	}
 
@@ -111,7 +112,7 @@ namespace Aegix::Graphics
 
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
-			std::cout << "Vulkan Validation Layer enabled\n";
+			ALOG::info("Vulkan Validation Layer enabled");
 		}
 
 		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance))
@@ -126,7 +127,7 @@ namespace Aegix::Graphics
 
 		assert(deviceCount > 0 && "Failed to find GPUs with Vulkan support");
 
-		std::cout << "Device count: " << deviceCount << std::endl;
+		ALOG::info("Available GPUs: {}", deviceCount);
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
 
@@ -142,7 +143,10 @@ namespace Aegix::Graphics
 		assert(m_physicalDevice != VK_NULL_HANDLE && "Failed to find a suitable GPU");
 
 		vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
-		std::cout << "Physical device: " << m_properties.deviceName << std::endl;
+		uint32_t major = VK_VERSION_MAJOR(m_properties.apiVersion);
+		uint32_t minor = VK_VERSION_MINOR(m_properties.apiVersion);
+		uint32_t patch = VK_VERSION_PATCH(m_properties.apiVersion);
+		ALOG::info("{} (Vulkan {}.{}.{})", m_properties.deviceName, major, minor, patch);
 	}
 
 	void VulkanDevice::createLogicalDevice()
