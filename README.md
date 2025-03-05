@@ -1,6 +1,6 @@
 # Aegix Engine
 
-Aegix is a small game engine written in modern C++. It uses the Vulkan Graphics API for rendering, aiming to provide a foundation for advanced graphics programming. 
+A small Vulkan game engine written in modern C++. 
 
 ###
 
@@ -10,12 +10,14 @@ Aegix is a small game engine written in modern C++. It uses the Vulkan Graphics 
 
 # Features
 
-- Physically based rendering
-- GLTF and OBJ mesh loading
-- Immediate mode editor UI
-- Entity component system
-- Framegraph for multi pass rendering
-- Deferred rendering
+- **Physically Based Rendering (PBR)** - Realistic lighting and materials 
+- **GLTF & OBJ Loading** - Loading of custom 3D models 
+- **Immediate Mode Editor UI** - Editor tools using Dear ImGui
+- **Entity Component System (ECS)** - Efficient object management using EnTT
+- **Framegraph** - Multipass rendering with automatic renderpass sorting
+- **Deferred Rendering** - Improved lighting performance
+- **HDR Rendering and Tone Mapping** - Enables wider color range for more visible details
+- **Physically Based Bloom** - Realistic glow effect around bright areas created using convolution
 
 ## Prerequisites <a name="prerequisites"></a>
 
