@@ -36,15 +36,18 @@ Follow these steps to get started with the Aegix Engine:
 
 4. Build and run the project to view an example scene.
 
-## External Libraries <a name="external-libraries"></a>
+## Modules and External Libraries <a name="external-libraries"></a>
 
-This project uses several external libraries:
+This project is structured into several independent modules:
+- [aegix-assets](https://github.com/chFleschutz/aegix-assets): A collection of sample assest
+- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf): GLTF 3D model loader
+- [aegix-log](https://github.com/chFleschutz/aegix-log): Logging library
 
-- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf.git): Loading GLTF 3D-Models
-- [entt](https://github.com/skypjack/entt): Entity Component System
-- [glfw](https://github.com/glfw/glfw): Windowing
-- [glm](https://github.com/g-truc/glm): Math Library
-- [imgui](https://github.com/ocornut/imgui): UI
-- [stb](https://github.com/nothings/stb): Image Loading
-- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): Loading OBJ 3D-Models
+The engine relies on the following external libraries:
+- [entt](https://github.com/skypjack/entt): Entity component system (ECS)
+- [glfw](https://github.com/glfw/glfw): Window management
+- [glm](https://github.com/g-truc/glm): Math library
+- [imgui](https://github.com/ocornut/imgui): Immediate mode UI 
+- [stb](https://github.com/nothings/stb): Image loading
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): OBJ 3D model loader
 - [Vulkan](https://www.vulkan.org/): Graphics API
