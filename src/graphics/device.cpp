@@ -3,8 +3,6 @@
 #include "graphics/vulkan_tools.h"
 #include "core/logging.h"
 
-#include <cstring>
-#include <iostream>
 #include <set>
 #include <unordered_set>
 #include <cassert>
@@ -12,33 +10,22 @@
 namespace Aegix::Graphics
 {
 	// local callback functions
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		VkDebugUtilsMessageTypeFlagsEXT messageType,
-		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
 	{
 		ALOG::warn("Vulkan Validation: \n{}\n", pCallbackData->pMessage);
 		return VK_FALSE;
 	}
 
-	VkResult CreateDebugUtilsMessengerEXT(
-		VkInstance instance,
-		const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-		const VkAllocationCallbacks* pAllocator,
-		VkDebugUtilsMessengerEXT* pDebugMessenger)
+	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
-			instance,
-			"vkCreateDebugUtilsMessengerEXT");
-		if (func != nullptr)
-		{
+		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+		if (func)
 			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-		}
-		else
-		{
-			return VK_ERROR_EXTENSION_NOT_PRESENT;
-		}
+
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
 	}
 
 	void DestroyDebugUtilsMessengerEXT(
@@ -59,7 +46,7 @@ namespace Aegix::Graphics
 	VulkanDevice::VulkanDevice(Window& window) : m_window{ window }
 	{
 		createInstance();
-		setupDebugMessenger();
+		setupDebugUtils();
 		createSurface();
 		pickPhysicalDevice();
 		createLogicalDevice();
@@ -86,7 +73,7 @@ namespace Aegix::Graphics
 	{
 		assert(!ENABLE_VALIDATION || checkValidationLayerSupport() && "Validation layers requested, but not available!");
 
-		VkApplicationInfo appInfo = {};
+		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Aegix App";
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -94,9 +81,9 @@ namespace Aegix::Graphics
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_3;
 
-		auto extensions = requiredExtensions();
+		auto extensions = queryRequiredInstanceExtensions();
 
-		VkInstanceCreateInfo createInfo = {};
+		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -104,20 +91,20 @@ namespace Aegix::Graphics
 		createInfo.enabledLayerCount = 0;
 		createInfo.pNext = nullptr;
 
-		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if constexpr (ENABLE_VALIDATION)
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-			createInfo.ppEnabledLayerNames = validationLayers.data();
+			createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
+			createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 
-			populateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = debugMessengerCreateInfo();
+			createInfo.pNext = &debugCreateInfo;
 			ALOG::info("Vulkan Validation Layer enabled");
 		}
 
-		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance))
+		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance));
 
-			hasGflwRequiredInstanceExtensions();
+		checkGflwRequiredInstanceExtensions();
+		Tools::loadFunctionPointers(m_instance);
 	}
 
 	void VulkanDevice::pickPhysicalDevice()
@@ -182,15 +169,15 @@ namespace Aegix::Graphics
 		createInfo.pNext = &deviceFeatures;
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
+		createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
 		createInfo.enabledLayerCount = 0;
 
 		// might not really be necessary anymore because device specific validation layers have been deprecated
 		if constexpr (ENABLE_VALIDATION)
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-			createInfo.ppEnabledLayerNames = validationLayers.data();
+			createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
+			createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 		}
 
 		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device))
@@ -237,26 +224,26 @@ namespace Aegix::Graphics
 		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
-	void VulkanDevice::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+	auto VulkanDevice::debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT
 	{
-		createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+		VkDebugUtilsMessengerCreateInfoEXT info{};
+		info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+		info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		createInfo.pfnUserCallback = debugCallback;
-		createInfo.pUserData = nullptr;  // Optional
+		info.pfnUserCallback = debugCallback;
+
+		return info;
 	}
 
-	void VulkanDevice::setupDebugMessenger()
+	void VulkanDevice::setupDebugUtils()
 	{
 		if constexpr (ENABLE_VALIDATION)
 		{
-			VkDebugUtilsMessengerCreateInfoEXT createInfo;
-			populateDebugMessengerCreateInfo(createInfo);
-			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger))
+			VkDebugUtilsMessengerCreateInfoEXT createInfo = debugMessengerCreateInfo();
+			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
 		}
 	}
 
@@ -268,10 +255,9 @@ namespace Aegix::Graphics
 		std::vector<VkLayerProperties> availableLayers(layerCount);
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-		for (const char* layerName : validationLayers)
+		for (auto layerName : VALIDATION_LAYERS)
 		{
 			bool layerFound = false;
-
 			for (const auto& layerProperties : availableLayers)
 			{
 				if (strcmp(layerName, layerProperties.layerName) == 0)
@@ -282,15 +268,13 @@ namespace Aegix::Graphics
 			}
 
 			if (!layerFound)
-			{
 				return false;
-			}
 		}
 
 		return true;
 	}
 
-	std::vector<const char*> VulkanDevice::requiredExtensions() const
+	std::vector<const char*> VulkanDevice::queryRequiredInstanceExtensions() const
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -301,13 +285,13 @@ namespace Aegix::Graphics
 
 		if constexpr (ENABLE_VALIDATION)
 		{
-			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			extensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 
 		return extensions;
 	}
 
-	void VulkanDevice::hasGflwRequiredInstanceExtensions()
+	void VulkanDevice::checkGflwRequiredInstanceExtensions()
 	{
 		uint32_t extensionCount = 0;
 		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -320,7 +304,7 @@ namespace Aegix::Graphics
 			available.insert(extension.extensionName);
 		}
 
-		for (const auto& required : requiredExtensions())
+		for (const auto& required : queryRequiredInstanceExtensions())
 		{
 			assert(available.find(required) != available.end() && "Missing required glfw extension");
 		}
@@ -332,14 +316,9 @@ namespace Aegix::Graphics
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(
-			device,
-			nullptr,
-			&extensionCount,
-			availableExtensions.data());
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-		std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-
+		std::set<std::string> requiredExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
 		for (const auto& extension : availableExtensions)
 		{
 			requiredExtensions.erase(extension.extensionName);

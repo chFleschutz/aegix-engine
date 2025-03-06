@@ -1,5 +1,6 @@
 #include "ui.h"
 
+#include "core/profiler.h"
 #include "graphics/renderer.h"
 #include "graphics/window.h"
 
@@ -23,6 +24,7 @@ namespace Aegix::UI
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.IniFilename = nullptr;
 
 #ifndef NDEBUG
 		io.ConfigDebugIsDebuggerPresent = true;
@@ -77,6 +79,8 @@ namespace Aegix::UI
 
 	void UI::update(float deltaTime)
 	{
+		AGX_PROFILE_FUNCTION();
+
 		// Cant use iterator because its possible to push/pop layers during update
 		for (int i = 0; i < m_layers.size(); i++)
 		{

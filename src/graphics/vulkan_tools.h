@@ -23,6 +23,8 @@
 
 namespace Aegix::Tools
 {
+	void loadFunctionPointers(VkInstance instance);
+
 	/// @brief Returns the result as a string
 	std::string_view resultString(VkResult result);
 
@@ -47,20 +49,18 @@ namespace Aegix::Tools
 
 	namespace vk
 	{
+		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet, uint32_t firstSet = 0);
+
+		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
+
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
+
 		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 			VkImageAspectFlags aspectMask);
 
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
-
-		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
-
-		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
-
-		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet, uint32_t firstSet = 0);
-
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
 
 		template<typename T>
 		void cmdPushConstants(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stage, const T& data)
@@ -68,9 +68,18 @@ namespace Aegix::Tools
 			vkCmdPushConstants(cmd, layout, stage, 0, sizeof(T), &data);
 		}
 
+		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
+
 		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
 			VkImageLayout newLayout, uint32_t miplevels = 1);
 
-		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
+		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
+
+
+		// Extensions
+
+		void cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color = glm::vec4{ 1.0f });
+
+		void cmdEndDebugUtilsLabel(VkCommandBuffer cmd);
 	}
 }

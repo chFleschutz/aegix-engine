@@ -4,4 +4,5 @@ target_sources(aegix-engine PRIVATE
 	"input.cpp"
 	"input.h"
 	"logging.h"
+	"profiler.h"
 )

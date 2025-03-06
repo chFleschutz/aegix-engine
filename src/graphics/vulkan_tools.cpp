@@ -1,9 +1,27 @@
 #include "vulkan_tools.h"
 
+#include "graphics/globals.h"
 #include "utils/file.h"
+
+PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT_ = nullptr;
+PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT_ = nullptr;
 
 namespace Aegix::Tools
 {
+	void loadFunctionPointers(VkInstance instance)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			vkCmdBeginDebugUtilsLabelEXT_ = (PFN_vkCmdBeginDebugUtilsLabelEXT)
+				vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT");
+			assert(vkCmdBeginDebugUtilsLabelEXT_ && "Failed to load vkCmdBeginDebugUtilsLabelEXT");
+
+			vkCmdEndDebugUtilsLabelEXT_ = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(
+				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT"));
+			assert(vkCmdEndDebugUtilsLabelEXT_ && "Failed to load vkCmdEndDebugUtilsLabelEXT");
+		}
+	}
+
 	std::string_view resultString(VkResult result)
 	{
 		switch (result)
@@ -144,7 +162,7 @@ namespace Aegix::Tools
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
-		
+
 		return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	}
 
@@ -236,7 +254,49 @@ namespace Aegix::Tools
 		return shaderStage;
 	}
 
-	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout,
+		VkDescriptorSet descriptorSet, uint32_t firstSet)
+	{
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
+	}
+
+	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
+	{
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { extent.width, extent.height, 1 };
+
+		vkCmdCopyBufferToImage(cmd,
+			buffer,
+			image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&region);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
+	}
+
+	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 		VkImageAspectFlags aspectMask)
 	{
 		VkImageMemoryBarrier barrier{};
@@ -277,43 +337,12 @@ namespace Aegix::Tools
 		);
 	}
 
-	void vk::cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent)
-	{
-		VkViewport viewport{};
-		viewport.width = static_cast<float>(extent.width);
-		viewport.height = static_cast<float>(extent.height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	}
-
 	void vk::cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-	}
-
-	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, 
-		VkDescriptorSet descriptorSet, uint32_t firstSet)
-	{
-		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
-	}
-
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
-	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
-	}
-
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
-	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
-		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 
 	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
@@ -346,24 +375,36 @@ namespace Aegix::Tools
 		);
 	}
 
-	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
+	void vk::cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = { extent.width, extent.height, 1 };
+		VkViewport viewport{};
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	}
 
-		vkCmdCopyBufferToImage(cmd,
-			buffer,
-			image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1,
-			&region);
+	void vk::cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsLabelEXT labelInfo{};
+			labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+			labelInfo.pLabelName = label;
+			labelInfo.color[0] = color.r;
+			labelInfo.color[1] = color.g;
+			labelInfo.color[2] = color.b;
+			labelInfo.color[3] = color.a;
+			vkCmdBeginDebugUtilsLabelEXT_(cmd, &labelInfo);
+		}
+	}
+
+	void vk::cmdEndDebugUtilsLabel(VkCommandBuffer cmd)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			vkCmdEndDebugUtilsLabelEXT_(cmd);
+		}
 	}
 }
