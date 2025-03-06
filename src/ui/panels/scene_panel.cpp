@@ -264,7 +264,7 @@ namespace Aegix::UI
 		if (ImGuizmo::IsUsing())
 		{
 			glm::vec3 translation, rotation, scale;
-			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transformMatrix), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
+			MathLib::decomposeTRS(transformMatrix, translation, rotation, scale);
 			transform.location = translation;
 			transform.rotation += rotation - transform.rotation; // Prevent gimbal lock
 			transform.scale = scale;
