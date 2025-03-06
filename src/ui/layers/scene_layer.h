@@ -19,6 +19,8 @@ namespace Aegix::UI
 		void drawAllEntities();
 		void drawSceneSettings();
 		void drawEntityProperties();
+		void drawGizmo();
+
 		void drawSingleEntity(Scene::Entity entity);
 		auto drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool;
 		void drawEntityActions();

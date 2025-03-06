@@ -10,6 +10,9 @@
 [submodule "external/imgui"]
 	path = external/imgui
 	url = https://github.com/chFleschutz/imgui.git
+[submodule "external/imguizmo"]
+	path = external/imguizmo
+	url = https://github.com/chFleschutz/ImGuizmo.git
 [submodule "external/stb"]
 	path = external/stb
 	url = https://github.com/nothings/stb.git

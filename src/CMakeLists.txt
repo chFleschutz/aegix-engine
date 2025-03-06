@@ -14,6 +14,7 @@ target_link_libraries(aegix-engine
 		glfw
 		glm::glm
 		imgui
+		imguizmo
 		tinyobjloader
 		Aegix::GLTF
 		Aegix::Log
