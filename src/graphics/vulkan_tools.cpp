@@ -235,6 +235,48 @@ namespace Aegix::Tools
 		shaderStage.pSpecializationInfo = nullptr;
 		return shaderStage;
 	}
+	
+	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, 
+		VkDescriptorSet descriptorSet, uint32_t firstSet)
+	{
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
+	}
+
+	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
+	{
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { extent.width, extent.height, 1 };
+
+		vkCmdCopyBufferToImage(cmd,
+			buffer,
+			image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&region);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	{
+		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
+	}
 
 	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
 		VkImageAspectFlags aspectMask)
@@ -277,43 +319,12 @@ namespace Aegix::Tools
 		);
 	}
 
-	void vk::cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent)
-	{
-		VkViewport viewport{};
-		viewport.width = static_cast<float>(extent.width);
-		viewport.height = static_cast<float>(extent.height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	}
-
 	void vk::cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
 		VkRect2D scissor{};
 		scissor.offset = { 0, 0 };
 		scissor.extent = extent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-	}
-
-	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, 
-		VkDescriptorSet descriptorSet, uint32_t firstSet)
-	{
-		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
-	}
-
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
-	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
-	}
-
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
-	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
-		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 
 	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
@@ -346,24 +357,13 @@ namespace Aegix::Tools
 		);
 	}
 
-	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
+	void vk::cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = { extent.width, extent.height, 1 };
-
-		vkCmdCopyBufferToImage(cmd,
-			buffer,
-			image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1,
-			&region);
+		VkViewport viewport{};
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 }
