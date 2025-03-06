@@ -1,9 +1,27 @@
 #include "vulkan_tools.h"
 
+#include "graphics/globals.h"
 #include "utils/file.h"
+
+PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT_ = nullptr;
+PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT_ = nullptr;
 
 namespace Aegix::Tools
 {
+	void loadFunctionPointers(VkInstance instance)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			vkCmdBeginDebugUtilsLabelEXT_ = (PFN_vkCmdBeginDebugUtilsLabelEXT)
+				vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT");
+			assert(vkCmdBeginDebugUtilsLabelEXT_ && "Failed to load vkCmdBeginDebugUtilsLabelEXT");
+
+			vkCmdEndDebugUtilsLabelEXT_ = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(
+				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT"));
+			assert(vkCmdEndDebugUtilsLabelEXT_ && "Failed to load vkCmdEndDebugUtilsLabelEXT");
+		}
+	}
+
 	std::string_view resultString(VkResult result)
 	{
 		switch (result)
@@ -144,7 +162,7 @@ namespace Aegix::Tools
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
 		if (access & VK_ACCESS_TRANSFER_WRITE_BIT)
 			return VK_PIPELINE_STAGE_TRANSFER_BIT;
-		
+
 		return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	}
 
@@ -235,8 +253,8 @@ namespace Aegix::Tools
 		shaderStage.pSpecializationInfo = nullptr;
 		return shaderStage;
 	}
-	
-	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, 
+
+	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout,
 		VkDescriptorSet descriptorSet, uint32_t firstSet)
 	{
 		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
@@ -278,7 +296,7 @@ namespace Aegix::Tools
 		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
+	void vk::cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 		VkImageAspectFlags aspectMask)
 	{
 		VkImageMemoryBarrier barrier{};
@@ -365,5 +383,28 @@ namespace Aegix::Tools
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+	}
+
+	void vk::cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsLabelEXT labelInfo{};
+			labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+			labelInfo.pLabelName = label;
+			labelInfo.color[0] = color.r;
+			labelInfo.color[1] = color.g;
+			labelInfo.color[2] = color.b;
+			labelInfo.color[3] = color.a;
+			vkCmdBeginDebugUtilsLabelEXT_(cmd, &labelInfo);
+		}
+	}
+
+	void vk::cmdEndDebugUtilsLabel(VkCommandBuffer cmd)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			vkCmdEndDebugUtilsLabelEXT_(cmd);
+		}
 	}
 }

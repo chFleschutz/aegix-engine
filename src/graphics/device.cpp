@@ -104,6 +104,7 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance));
 
 		checkGflwRequiredInstanceExtensions();
+		Tools::loadFunctionPointers(m_instance);
 	}
 
 	void VulkanDevice::pickPhysicalDevice()

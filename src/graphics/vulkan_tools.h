@@ -23,6 +23,8 @@
 
 namespace Aegix::Tools
 {
+	void loadFunctionPointers(VkInstance instance);
+
 	/// @brief Returns the result as a string
 	std::string_view resultString(VkResult result);
 
@@ -72,5 +74,12 @@ namespace Aegix::Tools
 			VkImageLayout newLayout, uint32_t miplevels = 1);
 
 		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
+
+
+		// Extensions
+
+		void cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color = glm::vec4{ 1.0f });
+
+		void cmdEndDebugUtilsLabel(VkCommandBuffer cmd);
 	}
 }

@@ -79,9 +79,10 @@ namespace Aegix::Graphics
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 
+			Tools::vk::cmdBeginDebugUtilsLabel(frameInfo.commandBuffer, node.name.c_str());
 			placeBarriers(frameInfo.commandBuffer, node);
-
 			node.pass->execute(m_resourcePool, frameInfo);
+			Tools::vk::cmdEndDebugUtilsLabel(frameInfo.commandBuffer);
 		}
 	}
 
