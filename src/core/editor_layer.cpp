@@ -11,14 +11,17 @@ namespace Aegix::Core
 {
 	void EditorLayer::onUpdate(float deltaSeconds)
 	{
-		if (Input::instance().keyPressed(Input::Q))
-			m_gizmoType = -1;
-		else if (Input::instance().keyPressed(Input::W))
-			m_gizmoType = ImGuizmo::OPERATION::TRANSLATE;
-		else if (Input::instance().keyPressed(Input::E))
-			m_gizmoType = ImGuizmo::OPERATION::ROTATE;
-		else if (Input::instance().keyPressed(Input::R))
-			m_gizmoType = ImGuizmo::OPERATION::SCALE;
+		if (!ImGuizmo::IsUsing())
+		{
+			if (Input::instance().keyPressed(Input::Q))
+				m_gizmoType = -1;
+			else if (Input::instance().keyPressed(Input::W))
+				m_gizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			else if (Input::instance().keyPressed(Input::E))
+				m_gizmoType = ImGuizmo::OPERATION::ROTATE;
+			else if (Input::instance().keyPressed(Input::R))
+				m_gizmoType = ImGuizmo::OPERATION::SCALE;
+		}
 	}
 
 	void EditorLayer::onUIRender()
