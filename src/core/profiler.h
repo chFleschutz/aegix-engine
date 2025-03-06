@@ -3,8 +3,6 @@
 #include "utils/rolling_average.h"
 #include "utils/timer.h"
 
-#include <chrono>
-#include <string_view>
 #include <unordered_map>
 
 #define AGX_PROFILE_SCOPE(name) Aegix::ScopeProfiler profiler##__LINE__(name)
@@ -12,20 +10,27 @@
 
 namespace Aegix
 {
+	/// @brief Utility class for profiling code execution
+	/// @note Uses a rolling average over 'AVERAGE_FRAME_COUNT' frames
 	class Profiler
 	{
 	public:
 		static constexpr int AVERAGE_FRAME_COUNT = 50;
 
-		Profiler() = default;
+		Profiler(const Profiler&) = delete;
+		Profiler(Profiler&&) = delete;
 		~Profiler() = default;
 
-		static Profiler& instance()
+		auto operator=(const Profiler&) -> Profiler& = delete;
+		auto operator=(Profiler&&) -> Profiler& = delete;
+
+		[[nodicard]] static auto instance() -> Profiler&
 		{
 			static Profiler instance;
 			return instance;
 		}
 
+		/// @brief Retrieve the average time for a given name or 0.0 if not found
 		[[nodicard]] auto time(const std::string& name) const -> double
 		{
 			auto it = m_times.find(name);
@@ -34,20 +39,24 @@ namespace Aegix
 			return it->second.average();
 		}
 
+		[[nodicard]] auto times() const -> const std::unordered_map<std::string, RollingAverage<AVERAGE_FRAME_COUNT>>&
+		{
+			return m_times;
+		}
+
 		void addTime(const std::string& name, double time)
 		{
 			m_times[name].add(time);
 		}
 
-		auto times() const -> const std::unordered_map<std::string, RollingAverage<AVERAGE_FRAME_COUNT>>&
-		{
-			return m_times;
-		}
-
 	private:
+		Profiler() = default;
+
 		std::unordered_map<std::string, RollingAverage<AVERAGE_FRAME_COUNT>> m_times;
 	};
 
+
+	/// @brief Times the current scope and adds the time to the profiler
 	class ScopeProfiler
 	{
 	public:
