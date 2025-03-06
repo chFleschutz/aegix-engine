@@ -3,10 +3,11 @@
 #include "core/engine.h"
 #include "ui/layer.h"
 #include "ui/layers/demo_layer.h"
+#include "ui/layers/profiler_layer.h"
 #include "ui/layers/renderer_layer.h"
 #include "ui/layers/scene_layer.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 namespace Aegix::UI
 {
@@ -28,6 +29,11 @@ namespace Aegix::UI
 					if (ImGui::MenuItem("Scene", nullptr, m_scenePropertiesShown))
 					{
 						toggleLayer<SceneLayer>(m_scenePropertiesShown);
+					}
+
+					if (ImGui::MenuItem("Profiler", nullptr, m_profilerShown))
+					{
+						toggleLayer<ProfilerLayer>(m_profilerShown);
 					}
 
 					if (ImGui::MenuItem("ImGui Demo", nullptr, m_demoShown))
@@ -60,6 +66,7 @@ namespace Aegix::UI
 
 		bool m_scenePropertiesShown = false;
 		bool m_rendererShown = false;
+		bool m_profilerShown = false;
 		bool m_demoShown = false;
 	};
 }
