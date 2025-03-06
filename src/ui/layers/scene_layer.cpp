@@ -4,8 +4,12 @@
 #include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 
-#include "imgui_internal.h"
-#include "imgui_stdlib.h"
+#include <glm/gtc/type_ptr.hpp>
+
+#include <imgui_internal.h>
+#include <imgui_stdlib.h>
+
+#include <ImGuizmo.h>
 
 namespace Aegix::UI
 {
@@ -17,6 +21,7 @@ namespace Aegix::UI
 		drawAllEntities();
 		drawSceneSettings();
 		drawEntityProperties();
+		drawGizmo();
 
 		ImGuiID dockSpaceID = ImGui::GetID("SceneLayer");
 		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
@@ -228,6 +233,42 @@ namespace Aegix::UI
 		drawAddComponent();
 
 		ImGui::End();
+	}
+
+	void SceneLayer::drawGizmo()
+	{
+		if (!m_selectedEntity)
+			return;
+
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+		auto& scene = Engine::instance().scene();
+		
+		auto& camera = scene.mainCamera().component<Camera>();
+		glm::mat4 projectionMatrix = camera.projectionMatrix;
+		projectionMatrix[1][1] *= -1.0f; // Flip y-axis 
+		
+		auto& transform = m_selectedEntity.component<Transform>();
+		glm::mat4 transformMatrix = transform.matrix();
+
+		ImGuizmo::Manipulate(
+			glm::value_ptr(camera.viewMatrix), 
+			glm::value_ptr(projectionMatrix),
+			ImGuizmo::OPERATION::TRANSLATE, 
+			ImGuizmo::MODE::LOCAL, 
+			glm::value_ptr(transformMatrix));
+		
+		if (ImGuizmo::IsUsing())
+		{
+			glm::vec3 translation, rotation, scale;
+			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transformMatrix), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
+			transform.location = translation;
+			transform.rotation += rotation - transform.rotation; // Prevent gimbal lock
+			transform.scale = scale;
+		}
 	}
 
 	void SceneLayer::drawSingleEntity(Scene::Entity entity)
