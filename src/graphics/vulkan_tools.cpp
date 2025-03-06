@@ -3,8 +3,8 @@
 #include "graphics/globals.h"
 #include "utils/file.h"
 
-PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT_ = nullptr;
-PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT_ = nullptr;
+PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT_ptr = nullptr;
+PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT_ptr = nullptr;
 
 namespace Aegix::Tools
 {
@@ -12,13 +12,13 @@ namespace Aegix::Tools
 	{
 		if constexpr (Graphics::ENABLE_VALIDATION)
 		{
-			vkCmdBeginDebugUtilsLabelEXT_ = (PFN_vkCmdBeginDebugUtilsLabelEXT)
+			vkCmdBeginDebugUtilsLabelEXT_ptr = (PFN_vkCmdBeginDebugUtilsLabelEXT)
 				vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT");
-			assert(vkCmdBeginDebugUtilsLabelEXT_ && "Failed to load vkCmdBeginDebugUtilsLabelEXT");
+			assert(vkCmdBeginDebugUtilsLabelEXT_ptr && "Failed to load vkCmdBeginDebugUtilsLabelEXT");
 
-			vkCmdEndDebugUtilsLabelEXT_ = reinterpret_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(
-				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT"));
-			assert(vkCmdEndDebugUtilsLabelEXT_ && "Failed to load vkCmdEndDebugUtilsLabelEXT");
+			vkCmdEndDebugUtilsLabelEXT_ptr = (PFN_vkCmdEndDebugUtilsLabelEXT)
+				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT");
+			assert(vkCmdEndDebugUtilsLabelEXT_ptr && "Failed to load vkCmdEndDebugUtilsLabelEXT");
 		}
 	}
 
@@ -396,7 +396,7 @@ namespace Aegix::Tools
 			labelInfo.color[1] = color.g;
 			labelInfo.color[2] = color.b;
 			labelInfo.color[3] = color.a;
-			vkCmdBeginDebugUtilsLabelEXT_(cmd, &labelInfo);
+			vkCmdBeginDebugUtilsLabelEXT_ptr(cmd, &labelInfo);
 		}
 	}
 
@@ -404,7 +404,7 @@ namespace Aegix::Tools
 	{
 		if constexpr (Graphics::ENABLE_VALIDATION)
 		{
-			vkCmdEndDebugUtilsLabelEXT_(cmd);
+			vkCmdEndDebugUtilsLabelEXT_ptr(cmd);
 		}
 	}
 }
