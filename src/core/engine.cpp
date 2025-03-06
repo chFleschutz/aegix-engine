@@ -1,6 +1,7 @@
 #include "engine.h"
 
 #include "ui/layers/main_menu_layer.h"
+#include "core/profiler.h"
 
 #include <chrono>
 
@@ -35,6 +36,8 @@ namespace Aegix
 		// Main Update loop
 		while (!m_window.shouldClose())
 		{
+			AGX_PROFILE_SCOPE("Frame Time");
+
 			// Calculate time
 			auto currentFrameBegin = std::chrono::high_resolution_clock::now();
 			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(currentFrameBegin - lastFrameBegin).count();
@@ -57,6 +60,8 @@ namespace Aegix
 
 	void Engine::applyFrameBrake(std::chrono::high_resolution_clock::time_point lastFrameBegin)
 	{
+		AGX_PROFILE_SCOPE("Wait for FPS limit");
+
 		if (MAX_FPS <= 0)
 			return;
 

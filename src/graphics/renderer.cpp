@@ -1,13 +1,14 @@
 #include "renderer.h"
 
+#include "core/profiler.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
-#include "graphics/render_passes/ui_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
+#include "graphics/render_passes/ui_pass.h"
 #include "scene/scene.h"
 
 #include <cassert>
@@ -48,6 +49,8 @@ namespace Aegix::Graphics
 
 	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
 	{
+		AGX_PROFILE_FUNCTION();
+
 		auto commandBuffer = beginFrame();
 
 		assert(commandBuffer && "Failed to begin frame");

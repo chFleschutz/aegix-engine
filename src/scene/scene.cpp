@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include "core/profiler.h"
 #include "graphics/static_mesh.h"
 #include "scene/components.h"
 #include "scene/entity.h"
@@ -56,6 +57,8 @@ namespace Aegix::Scene
 
 	void Scene::update(float deltaSeconds)
 	{
+		AGX_PROFILE_FUNCTION();
+
 		for (auto& system : m_systems)
 		{
 			system->onUpdate(deltaSeconds, *this);
