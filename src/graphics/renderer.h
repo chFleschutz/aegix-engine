@@ -41,6 +41,7 @@ namespace Aegix::Graphics
 		}
 
 		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
+		[[nodiscard]] auto window() -> Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
 		[[nodiscard]] auto globalPool() -> DescriptorPool& { return *m_globalPool; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }

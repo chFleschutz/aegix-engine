@@ -14,10 +14,9 @@
 
 namespace Aegix::UI
 {
-	UI::UI(const Graphics::Window& window, Graphics::Renderer& renderer)
+	UI::UI(Graphics::Renderer& renderer, Core::LayerStack& layerStack)
+		: m_layerStack{ layerStack }
 	{
-		auto& device = renderer.device();
-
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
@@ -32,8 +31,9 @@ namespace Aegix::UI
 		io.ConfigDebugIsDebuggerPresent = true;
 #endif // !NDEBUG
 
-		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
+		ImGui_ImplGlfw_InitForVulkan(renderer.window().glfwWindow(), true);
 
+		auto& device = renderer.device();
 		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = device.instance();
@@ -69,25 +69,9 @@ namespace Aegix::UI
 
 	UI::~UI()
 	{
-		for (auto& layer : m_layers)
-		{
-			layer->onDetach();
-		}
-
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-	}
-
-	void UI::update(float deltaTime)
-	{
-		AGX_PROFILE_FUNCTION();
-
-		// Cant use iterator because its possible to push/pop layers during update
-		for (int i = 0; i < m_layers.size(); i++)
-		{
-			m_layers[i]->onUpdate(deltaTime);
-		}
 	}
 
 	void UI::render(VkCommandBuffer commandBuffer)
@@ -113,10 +97,9 @@ namespace Aegix::UI
 		ImGui::Begin("Main Window", nullptr, windowFlags);
 		ImGui::PopStyleVar(3);
 
-		// Cant use iterator because its possible to push/pop layers during update
-		for (int i = 0; i < m_layers.size(); i++)
+		for (auto& layer : m_layerStack)
 		{
-			m_layers[i]->onGuiRender();
+			layer->onUIRender();
 		}
 
 		ImGui::End();

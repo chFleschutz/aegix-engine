@@ -1,7 +1,6 @@
 #pragma once
 
 #include "scene/entity.h"
-#include "ui/layer.h"
 
 #include "imgui.h"
 
@@ -9,10 +8,10 @@
 
 namespace Aegix::UI
 {
-	class SceneLayer : public Layer
+	class ScenePanel
 	{
 	public:
-		virtual void onGuiRender() override;
+		void draw();
 
 	private:
 		void drawHierachy();

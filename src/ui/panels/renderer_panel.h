@@ -4,9 +4,9 @@
 
 namespace Aegix::UI 
 {
-	class RendererLayer : public Layer
+	class RendererPanel
 	{
 	public:
-		virtual void onGuiRender() override;
+		void draw();
 	};
 }

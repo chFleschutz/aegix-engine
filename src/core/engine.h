@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/input.h"
+#include "core/layer_stack.h"
 #include "core/logging.h"
 #include "graphics/device.h"
 #include "graphics/globals.h"
@@ -51,10 +52,11 @@ namespace Aegix
 		inline static Engine* s_instance = nullptr;
 
 		Logging m_logging{};
+		Core::LayerStack m_layerStack{};
 		Graphics::Window m_window{ Graphics::DEFAULT_WIDTH, Graphics::DEFAULT_HEIGHT, "Aegix" };
 		Graphics::VulkanDevice m_device{ m_window };
 		Graphics::Renderer m_renderer{ m_window, m_device };
-		UI::UI m_ui{ m_window, m_renderer };
+		UI::UI m_ui{ m_renderer, m_layerStack };
 		Input m_input{ m_window };
 		Scene::Scene m_scene;
 	};

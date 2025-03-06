@@ -1,4 +1,4 @@
-#include "scene_layer.h"
+#include "scene_panel.h"
 
 #include "core/engine.h"
 #include "graphics/systems/default_render_system.h"
@@ -13,7 +13,7 @@
 
 namespace Aegix::UI
 {
-	void SceneLayer::onGuiRender()
+	void ScenePanel::draw()
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(400, 800));
 
@@ -42,7 +42,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawHierachy()
+	void ScenePanel::drawHierachy()
 	{
 		if (!ImGui::Begin("Hierachy"))
 		{
@@ -102,7 +102,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawAllEntities()
+	void ScenePanel::drawAllEntities()
 	{
 		if (!ImGui::Begin("All Entities"))
 		{
@@ -125,7 +125,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawSceneSettings()
+	void ScenePanel::drawSceneSettings()
 	{
 		if (!ImGui::Begin("Scene Settings"))
 		{
@@ -144,7 +144,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawEntityProperties()
+	void ScenePanel::drawEntityProperties()
 	{
 		if (!ImGui::Begin("Properties") || !m_selectedEntity)
 		{
@@ -235,7 +235,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawGizmo()
+	void ScenePanel::drawGizmo()
 	{
 		if (!m_selectedEntity)
 			return;
@@ -271,7 +271,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawSingleEntity(Scene::Entity entity)
+	void ScenePanel::drawSingleEntity(Scene::Entity entity)
 	{
 		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
 		auto flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
@@ -284,7 +284,7 @@ namespace Aegix::UI
 			m_selectedEntity = entity;
 	}
 
-	auto SceneLayer::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
+	auto ScenePanel::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
 	{
 		auto& children = entity.getOrAddComponent<Children>();
 
@@ -300,7 +300,7 @@ namespace Aegix::UI
 		return isOpen;
 	}
 
-	void SceneLayer::drawEntityActions()
+	void ScenePanel::drawEntityActions()
 	{
 		// Right click on window to create entity
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight))
@@ -318,7 +318,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawAddComponent()
+	void ScenePanel::drawAddComponent()
 	{
 		ImGui::Spacing();
 
@@ -342,7 +342,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
+	void ScenePanel::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 		if (!assetSet)

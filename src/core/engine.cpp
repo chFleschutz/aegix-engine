@@ -1,6 +1,6 @@
 #include "engine.h"
 
-#include "ui/layers/main_menu_layer.h"
+#include "core/editor_layer.h"
 #include "core/profiler.h"
 
 #include <chrono>
@@ -12,7 +12,7 @@ namespace Aegix
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
 		s_instance = this;
 
-		m_ui.pushLayer<UI::MainMenuLayer>();
+		m_layerStack.push<EditorLayer>();
 		
 		ALOG::info("Engine Initialized!");
 		Logging::logo();
@@ -47,7 +47,7 @@ namespace Aegix
 
 			// Update 
 			m_scene.update(frameTimeSec);
-			m_ui.update(frameTimeSec);
+			m_layerStack.update(frameTimeSec);
 
 			// Rendering
 			m_renderer.renderFrame(m_scene, m_ui);
