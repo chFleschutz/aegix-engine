@@ -4,12 +4,14 @@
 #define SHADER_DIR ENGINE_DIR "shaders/"
 #define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
 
-#include "window.h"
 #include "graphics/deletion_queue.h"
+#include "window.h"
 
+#include <array>
+#include <functional>
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 namespace Aegix::Graphics
 {
@@ -30,6 +32,9 @@ namespace Aegix::Graphics
 	class VulkanDevice
 	{
 	public:
+		static constexpr auto VALIDATION_LAYERS = std::array{ "VK_LAYER_KHRONOS_validation" };
+		static constexpr auto DEVICE_EXTENSIONS = std::array{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
 		VulkanDevice(Window& window);
 		VulkanDevice(const VulkanDevice&) = delete;
 		VulkanDevice(VulkanDevice&&) = delete;
@@ -83,18 +88,18 @@ namespace Aegix::Graphics
 
 	private:
 		void createInstance();
-		void setupDebugMessenger();
+		void setupDebugUtils();
 		void createSurface();
 		void pickPhysicalDevice();
 		void createLogicalDevice();
 		void createCommandPool();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
-		std::vector<const char*> requiredExtensions() const;
+		std::vector<const char*> queryRequiredInstanceExtensions() const;
 		bool checkValidationLayerSupport();
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
-		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-		void hasGflwRequiredInstanceExtensions();
+		auto debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT;
+		void checkGflwRequiredInstanceExtensions();
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
 
@@ -110,9 +115,6 @@ namespace Aegix::Graphics
 		VkSurfaceKHR m_surface;
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
-
-		const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-		const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 		DeletionQueue m_deletionQueue;
 	};
