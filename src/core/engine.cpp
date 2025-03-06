@@ -12,7 +12,7 @@ namespace Aegix
 		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
 		s_instance = this;
 
-		m_layerStack.push<EditorLayer>();
+		m_layerStack.push<Core::EditorLayer>();
 		
 		ALOG::info("Engine Initialized!");
 		Logging::logo();

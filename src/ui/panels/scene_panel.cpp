@@ -21,7 +21,6 @@ namespace Aegix::UI
 		drawAllEntities();
 		drawSceneSettings();
 		drawEntityProperties();
-		drawGizmo();
 
 		ImGuiID dockSpaceID = ImGui::GetID("SceneLayer");
 		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
@@ -233,42 +232,6 @@ namespace Aegix::UI
 		drawAddComponent();
 
 		ImGui::End();
-	}
-
-	void ScenePanel::drawGizmo()
-	{
-		if (!m_selectedEntity)
-			return;
-
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-		auto& scene = Engine::instance().scene();
-		
-		auto& camera = scene.mainCamera().component<Camera>();
-		glm::mat4 projectionMatrix = camera.projectionMatrix;
-		projectionMatrix[1][1] *= -1.0f; // Flip y-axis 
-		
-		auto& transform = m_selectedEntity.component<Transform>();
-		glm::mat4 transformMatrix = transform.matrix();
-
-		ImGuizmo::Manipulate(
-			glm::value_ptr(camera.viewMatrix), 
-			glm::value_ptr(projectionMatrix),
-			ImGuizmo::OPERATION::TRANSLATE, 
-			ImGuizmo::MODE::LOCAL, 
-			glm::value_ptr(transformMatrix));
-		
-		if (ImGuizmo::IsUsing())
-		{
-			glm::vec3 translation, rotation, scale;
-			MathLib::decomposeTRS(transformMatrix, translation, rotation, scale);
-			transform.location = translation;
-			transform.rotation += rotation - transform.rotation; // Prevent gimbal lock
-			transform.scale = scale;
-		}
 	}
 
 	void ScenePanel::drawSingleEntity(Scene::Entity entity)

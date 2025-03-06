@@ -1,4 +1,5 @@
 target_sources(aegix-engine PRIVATE
+	"editor_layer.cpp"
 	"editor_layer.h"
 	"engine.cpp"
 	"engine.h"
