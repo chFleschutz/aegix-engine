@@ -1,7 +1,7 @@
 #include "perlin_noise.h"
 
 #include "math/interpolation.h"
-#include "utils/random.h"
+#include "math/random.h"
 
 #include <cassert>
 
@@ -10,7 +10,6 @@ namespace Aegix
 	PerlinNoise1D::PerlinNoise1D(float bandwidth)
 		: m_bandwidth(bandwidth)
 	{
-		// Add the first interval
 		m_intervals.emplace_back(Interval(Random::uniformFloat()));
 	}
 
@@ -112,7 +111,6 @@ namespace Aegix
 	{
 		assert(x >= 0.0f and x < 1.0f and "x must be in the interval [0, 1)");
 
-		// Find the two signal values that are closest to x
 		int leftIndex = static_cast<int>((signalValues.size() - 1) * x);
 		int rightIndex = leftIndex + 1;
 
@@ -120,19 +118,16 @@ namespace Aegix
 		float chunkSize = 1.0f / (signalValues.size() - 1);
 		float percent = Math::percentage(x, leftIndex * chunkSize, rightIndex * chunkSize);
 
-		// Return the interpolated value
 		return std::lerp(signalValues[leftIndex], signalValues[rightIndex], Math::tanh01(percent));
 	}
 
 	PerlinNoise1D::Interval::Interval(float firstValue)
 	{
-		// Add the first octave
 		octaves.emplace_back(Octave(1, firstValue, Random::uniformFloat()));
 	}
 
 	void PerlinNoise1D::Interval::addOctave(float firstValue, float lastValue)
 	{
-		// Adds an octave with the rank of the last octave + 1
 		octaves.emplace_back(Octave(octaves.back().rank + 1, firstValue, lastValue));
 	}
 }

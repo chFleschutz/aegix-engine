@@ -3,6 +3,9 @@ target_sources(aegix-engine PRIVATE
 	interpolation.h
 	math.cpp
 	math.h
+	perlin_noise.cpp
+	perlin_noise.h
+	print.h
 	random.cpp
 	random.h
 )

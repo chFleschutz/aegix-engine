@@ -4,8 +4,6 @@ target_sources(aegix-engine PRIVATE
 	"factory.h"
 	"file.cpp"
 	"file.h"
-	"perlin_noise.cpp"
-	"perlin_noise.h"
 	"rolling_average.h"
 	"timer.h"
 	"utils.h"
