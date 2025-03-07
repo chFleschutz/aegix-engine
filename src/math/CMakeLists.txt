@@ -3,4 +3,6 @@ target_sources(aegix-engine PRIVATE
 	interpolation.h
 	math.cpp
 	math.h
+	random.cpp
+	random.h
 )
