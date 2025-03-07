@@ -1,9 +1,8 @@
 #pragma once
 
-#include "utils/math_utils.h"
+#include "math/math.h"
 
 #include <vector>
-
 
 namespace Aegix
 {

@@ -1,5 +1,6 @@
 #include "perlin_noise.h"
 
+#include "math/interpolation.h"
 #include "utils/random.h"
 
 #include <cassert>
@@ -117,10 +118,10 @@ namespace Aegix
 
 		// Calculate the percentage where x is between the two signal values
 		float chunkSize = 1.0f / (signalValues.size() - 1);
-		float percent = Aegix::MathLib::percentage(x, leftIndex * chunkSize, rightIndex * chunkSize);
+		float percent = Math::percentage(x, leftIndex * chunkSize, rightIndex * chunkSize);
 
 		// Return the interpolated value
-		return std::lerp(signalValues[leftIndex], signalValues[rightIndex], Aegix::MathLib::tanh01(percent));
+		return std::lerp(signalValues[leftIndex], signalValues[rightIndex], Math::tanh01(percent));
 	}
 
 	PerlinNoise1D::Interval::Interval(float firstValue)

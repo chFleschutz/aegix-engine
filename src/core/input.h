@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/window.h"
-#include "utils/math_utils.h"
+#include "math/math.h"
 
 #include <functional>
 #include <unordered_map>

@@ -1,7 +1,7 @@
 #include "kinematic_movement_controller.h"
 
 #include "core/input.h"
-
+#include "math/math.h"
 
 namespace Aegix::Scripting
 {
@@ -54,7 +54,7 @@ namespace Aegix::Scripting
 		auto& transform = component<Transform>();
 		auto forwardDir = transform.forward();
 		auto rightDir = transform.right();
-		auto upDir = MathLib::UP;
+		auto upDir = Math::World::UP;
 
 		// Key input movement
 		glm::vec3 moveDir{ 0.0f };
@@ -65,9 +65,9 @@ namespace Aegix::Scripting
 		if (Input::instance().keyPressed(m_keys.moveUp)) moveDir += upDir;
 		if (Input::instance().keyPressed(m_keys.moveDown)) moveDir -= upDir;
 
-		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
+		if (glm::length(moveDir) > std::numeric_limits<float>::epsilon())
 		{
-			transform.location += m_moveSpeed * Aegix::MathLib::normalize(moveDir) * deltaSeconds;
+			transform.location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/input.h"
+#include "math/math.h"
 #include "scripting/script_base.h"
-#include "utils/math_utils.h"
 
 namespace Aegix::Scripting
 {

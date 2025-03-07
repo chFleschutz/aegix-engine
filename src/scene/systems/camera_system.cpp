@@ -1,6 +1,6 @@
 #include "camera_system.h"
 
-#include "utils/math_utils.h"
+#include "math/math.h"
 
 namespace Aegix::Scene
 {
@@ -20,9 +20,9 @@ namespace Aegix::Scene
 		// see: https://www.3dgep.com/understanding-the-view-matrix/
 
 		// Vectors for the view coordinate system
-		const glm::vec3 f(glm::normalize(transform.forward()));			// Forward
-		const glm::vec3 s(glm::normalize(glm::cross(f, MathLib::UP)));	// Sideways
-		const glm::vec3 u(glm::cross(s, f));							// Up
+		const glm::vec3 f(glm::normalize(transform.forward()));				// Forward
+		const glm::vec3 s(glm::normalize(glm::cross(f, Math::World::UP)));	// Sideways
+		const glm::vec3 u(glm::cross(s, f));								// Up
 
 		glm::mat4 viewMatrix{ 1.0f };
 		viewMatrix[0][0] = s.x;

@@ -1,12 +1,9 @@
 #include "gltf_loader.h"
 
 #include "core/engine.h"
+#include "math/math.h"
 
 #include <gltf_utils.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 #include <cassert>
 #include <variant>
@@ -102,7 +99,7 @@ namespace Aegix::Scene
 				if constexpr (std::is_same_v<T, GLTF::Mat4>)
 				{
 					glm::mat4 matrix = glm::make_mat4(val.data());
-					MathLib::decomposeTRS(matrix, result.location, result.rotation, result.scale);
+					Math::decomposeTRS(matrix, result.location, result.rotation, result.scale);
 				}
 				else if constexpr (std::is_same_v<T, GLTF::Node::TRS>)
 				{
