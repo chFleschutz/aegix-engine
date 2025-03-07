@@ -44,7 +44,7 @@ namespace Aegix::Scene
 		auto& sceneNode = m_gltf->scenes[sceneIndex];
 
 		// Correct coordinate system (GLTF uses Y-up, Z-forward)
-		m_rootEntity.component<Transform>().rotation = { glm::radians(90.0f), 0.0f, 0.0f };
+		m_rootEntity.component<Transform>().rotation = glm::vec3{ glm::radians(90.0f), 0.0f, 0.0f };
 
 		struct Node
 		{

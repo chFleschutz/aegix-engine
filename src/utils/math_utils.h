@@ -45,14 +45,17 @@ namespace Aegix
 		/// @brief Composes a transformation matrix from location, rotation and scale
 		/// @return Composed transformation matrix
 		static glm::mat4 tranformationMatrix(const glm::vec3& location, const glm::vec3& rotation, const glm::vec3& scale);
+		static glm::mat4 tranformationMatrix(const glm::vec3& location, const glm::quat& rotation, const glm::vec3& scale);
 
 		/// @brief Compoeses a matrix to transform normals into world space
 		/// @return Composed normal matrix
 		static glm::mat3 normalMatrix(const glm::vec3& rotation, const glm::vec3& scale);
+		static glm::mat3 normalMatrix(const glm::quat& rotation, const glm::vec3& scale);
 
 		/// @brief Decomposes a transformation matrix into location, rotation and scale
 		/// @note The matrix has to consist of only translation, rotation and scale (M = T * R * S)
 		static void decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale);
+		static void decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale);
 
 		/// @brief Returns the global forward direction
 		static glm::vec3 forward() { return { 0.0f, 0.0f, 1.0f }; }
@@ -67,16 +70,19 @@ namespace Aegix
 		/// @param rotation Rotation in euler angles
 		/// @return Forward direction of the rotation
 		static glm::vec3 forward(const glm::vec3& rotation);
+		static glm::vec3 forward(const glm::quat& rotation);
 
 		/// @brief Returns the right direction of a rotation
 		/// @param rotation Rotation in euler angles
 		/// @return Right direction of the rotation
 		static glm::vec3 right(const glm::vec3& rotation);
+		static glm::vec3 right(const glm::quat& rotation);
 
 		/// @brief Returns the up direction of a rotation
 		/// @param rotation Rotation in euler angles
 		/// @return Up direction of the rotation
 		static glm::vec3 up(const glm::vec3& rotation);
+		static glm::vec3 up(const glm::quat& rotation);
 
 		/// @brief Normalizes a vector
 		/// @param vec Non zero vector to normalize (length > 0)

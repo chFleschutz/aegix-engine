@@ -1,7 +1,6 @@
 #pragma once
 
 #include "scene/entity.h"
-#include "ui/layer.h"
 
 #include "imgui.h"
 
@@ -9,17 +8,18 @@
 
 namespace Aegix::UI
 {
-	class SceneLayer : public Layer
+	class ScenePanel
 	{
 	public:
-		virtual void onGuiRender() override;
+		[[nodiscard]] auto selectedEntity() const -> Scene::Entity { return m_selectedEntity; }
+		
+		void draw();
 
 	private:
 		void drawHierachy();
 		void drawAllEntities();
 		void drawSceneSettings();
 		void drawEntityProperties();
-		void drawGizmo();
 
 		void drawSingleEntity(Scene::Entity entity);
 		auto drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool;

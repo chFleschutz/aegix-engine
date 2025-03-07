@@ -1,16 +1,15 @@
 #pragma once
 
-#include "ui/layer.h"
 #include "core/profiler.h"
 
 #include <imgui.h>
 
 namespace Aegix::UI
 {
-	class ProfilerLayer : public Layer
+	class ProfilerPanel
 	{
 	public:
-		virtual void onGuiRender() override
+		void draw()
 		{
 			ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - 10), ImGuiCond_FirstUseEver, ImVec2(0, 1));
 			if (!ImGui::Begin("Profiler"))

@@ -1,4 +1,4 @@
-#include "scene_layer.h"
+#include "scene_panel.h"
 
 #include "core/engine.h"
 #include "graphics/systems/default_render_system.h"
@@ -13,7 +13,7 @@
 
 namespace Aegix::UI
 {
-	void SceneLayer::onGuiRender()
+	void ScenePanel::draw()
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(400, 800));
 
@@ -21,7 +21,6 @@ namespace Aegix::UI
 		drawAllEntities();
 		drawSceneSettings();
 		drawEntityProperties();
-		drawGizmo();
 
 		ImGuiID dockSpaceID = ImGui::GetID("SceneLayer");
 		if (ImGui::DockBuilderGetNode(dockSpaceID) == NULL)
@@ -42,7 +41,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawHierachy()
+	void ScenePanel::drawHierachy()
 	{
 		if (!ImGui::Begin("Hierachy"))
 		{
@@ -102,7 +101,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawAllEntities()
+	void ScenePanel::drawAllEntities()
 	{
 		if (!ImGui::Begin("All Entities"))
 		{
@@ -125,7 +124,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawSceneSettings()
+	void ScenePanel::drawSceneSettings()
 	{
 		if (!ImGui::Begin("Scene Settings"))
 		{
@@ -144,7 +143,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawEntityProperties()
+	void ScenePanel::drawEntityProperties()
 	{
 		if (!ImGui::Begin("Properties") || !m_selectedEntity)
 		{
@@ -163,9 +162,9 @@ namespace Aegix::UI
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
 
-				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
-				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, -360.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
-				transform.rotation = glm::radians(rotationDeg);
+				glm::vec3 eulerDeg = glm::degrees(glm::eulerAngles(transform.rotation));
+				if (ImGui::DragFloat3("Rotation", &eulerDeg.x, 0.5f))
+					transform.rotation = glm::quat(glm::radians(eulerDeg));
 
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 			});
@@ -235,43 +234,7 @@ namespace Aegix::UI
 		ImGui::End();
 	}
 
-	void SceneLayer::drawGizmo()
-	{
-		if (!m_selectedEntity)
-			return;
-
-		ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetDrawlist();
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-		auto& scene = Engine::instance().scene();
-		
-		auto& camera = scene.mainCamera().component<Camera>();
-		glm::mat4 projectionMatrix = camera.projectionMatrix;
-		projectionMatrix[1][1] *= -1.0f; // Flip y-axis 
-		
-		auto& transform = m_selectedEntity.component<Transform>();
-		glm::mat4 transformMatrix = transform.matrix();
-
-		ImGuizmo::Manipulate(
-			glm::value_ptr(camera.viewMatrix), 
-			glm::value_ptr(projectionMatrix),
-			ImGuizmo::OPERATION::TRANSLATE, 
-			ImGuizmo::MODE::LOCAL, 
-			glm::value_ptr(transformMatrix));
-		
-		if (ImGuizmo::IsUsing())
-		{
-			glm::vec3 translation, rotation, scale;
-			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transformMatrix), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
-			transform.location = translation;
-			transform.rotation += rotation - transform.rotation; // Prevent gimbal lock
-			transform.scale = scale;
-		}
-	}
-
-	void SceneLayer::drawSingleEntity(Scene::Entity entity)
+	void ScenePanel::drawSingleEntity(Scene::Entity entity)
 	{
 		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
 		auto flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
@@ -284,7 +247,7 @@ namespace Aegix::UI
 			m_selectedEntity = entity;
 	}
 
-	auto SceneLayer::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
+	auto ScenePanel::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
 	{
 		auto& children = entity.getOrAddComponent<Children>();
 
@@ -300,7 +263,7 @@ namespace Aegix::UI
 		return isOpen;
 	}
 
-	void SceneLayer::drawEntityActions()
+	void ScenePanel::drawEntityActions()
 	{
 		// Right click on window to create entity
 		if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight))
@@ -318,7 +281,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawAddComponent()
+	void ScenePanel::drawAddComponent()
 	{
 		ImGui::Spacing();
 
@@ -342,7 +305,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void SceneLayer::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
+	void ScenePanel::drawAssetSlot(const char* buttonLabel, const char* description, bool assetSet)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 		if (!assetSet)

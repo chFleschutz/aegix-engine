@@ -1,4 +1,4 @@
-#include "renderer_layer.h"
+#include "renderer_panel.h"
 
 #include "core/engine.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
@@ -51,7 +51,7 @@ namespace Aegix::UI
 		}
 	}
 
-	void RendererLayer::onGuiRender()
+	void RendererPanel::draw()
 	{
 		ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 10, 30), ImGuiCond_FirstUseEver, ImVec2(1.0f, 0.0f));
 		if (!ImGui::Begin("Renderer"))

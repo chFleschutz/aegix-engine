@@ -21,34 +21,32 @@ namespace Aegix::Scripting
 		auto& transform = component<Transform>();
 
 		// Key input rotation
-		glm::vec3 rotate{0.0f};
-		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.z -= 1.0f;
-		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.z += 1.0f;
-		if (Input::instance().keyPressed(m_keys.lookUp)) rotate.x += 1.0f;
-		if (Input::instance().keyPressed(m_keys.lookDown)) rotate.x -= 1.0f;
-
-		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-		{
-			transform.rotation += m_lookSpeed * Aegix::MathLib::normalize(rotate) * deltaSeconds;
-		}
+		glm::vec3 rotate{ 0.0f };
+		if (Input::instance().keyPressed(m_keys.lookRight)) rotate.z -= m_lookSpeed;
+		if (Input::instance().keyPressed(m_keys.lookLeft)) rotate.z += m_lookSpeed;
+		if (Input::instance().keyPressed(m_keys.lookUp)) rotate.x += m_lookSpeed;
+		if (Input::instance().keyPressed(m_keys.lookDown)) rotate.x -= m_lookSpeed;
 
 		// Mouse input rotation
 		toggleMouseRotate(Input::instance().mouseButtonPressed(m_keys.mouseRotate));
 		if (m_mouseRotateEnabled)
 		{
 			auto cursorPos = Input::instance().cursorPosition();
-			rotate.x -= cursorPos.y - m_previousCursorPos.y;
-			rotate.z -= cursorPos.x - m_previousCursorPos.x;
+			rotate.x -= (cursorPos.y - m_previousCursorPos.y) * m_mouseSensitivity;
+			rotate.z -= (cursorPos.x - m_previousCursorPos.x) * m_mouseSensitivity;
 			m_previousCursorPos = cursorPos;
-
-			if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-			{
-				transform.rotation += m_mouseSensitivity * rotate * deltaSeconds;
-			}
 		}
 
-		transform.rotation.x = glm::clamp(transform.rotation.x, -1.5f, 1.5f);
-		transform.rotation.z = glm::mod(transform.rotation.z, glm::two_pi<float>());
+		if (glm::length(rotate) > std::numeric_limits<float>::epsilon())
+		{
+			rotate *= deltaSeconds;
+
+			glm::vec3 rotation = glm::eulerAngles(transform.rotation);
+			rotation.x += glm::clamp(rotate.x, -1.5f, 1.5f);
+			rotation.z += glm::mod(rotate.z, glm::two_pi<float>());
+			rotation.y = 0.0f; // Lock rotation around y-axis
+			transform.rotation = glm::quat(rotation);
+		}
 	}
 
 	void KinematcMovementController::applyMovement(float deltaSeconds)
@@ -59,7 +57,7 @@ namespace Aegix::Scripting
 		auto upDir = MathLib::UP;
 
 		// Key input movement
-		glm::vec3 moveDir{0.0f};
+		glm::vec3 moveDir{ 0.0f };
 		if (Input::instance().keyPressed(m_keys.moveForward)) moveDir += forwardDir;
 		if (Input::instance().keyPressed(m_keys.moveBackward)) moveDir -= forwardDir;
 		if (Input::instance().keyPressed(m_keys.moveRight)) moveDir += rightDir;
@@ -68,7 +66,7 @@ namespace Aegix::Scripting
 		if (Input::instance().keyPressed(m_keys.moveDown)) moveDir -= upDir;
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
-		{ 
+		{
 			transform.location += m_moveSpeed * Aegix::MathLib::normalize(moveDir) * deltaSeconds;
 		}
 
@@ -81,9 +79,9 @@ namespace Aegix::Scripting
 			moveDir += upDir * (cursorPos.y - m_previousCursorPos.y);
 			m_previousCursorPos = cursorPos;
 
-			if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
+			if (glm::length(moveDir) > std::numeric_limits<float>::epsilon())
 			{
-				transform.location += m_mouseSensitivity * Aegix::MathLib::normalize(moveDir) * deltaSeconds;
+				transform.location += moveDir * deltaSeconds;
 			}
 		}
 	}

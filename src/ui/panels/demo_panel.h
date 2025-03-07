@@ -1,16 +1,14 @@
 #pragma once
 
-#include "ui/layer.h"
-
 #include "imgui.h"
 
 namespace Aegix::UI
 {
 	/// @brief A demo layer that shows the ImGui demo window
-	class DemoLayer : public Layer
+	class DemoPanel
 	{
 	public:
-		virtual void onGuiRender() override
+		void draw()
 		{
 			ImGui::ShowDemoWindow();
 		}

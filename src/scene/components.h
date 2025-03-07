@@ -5,6 +5,7 @@
 #include "utils/math_utils.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include <memory>
 #include <string>
@@ -25,9 +26,9 @@ namespace Aegix
 	/// @brief Stores the local transformation of the entity
 	struct Transform
 	{
-		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 location{ 0.0f };
+		glm::quat rotation{};
+		glm::vec3 scale{ 1.0f };
 
 		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
 		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
@@ -38,9 +39,9 @@ namespace Aegix
 	/// @brief Transformation of the entity in world space (including parent transforms)
 	struct GlobalTransform
 	{
-		glm::vec3 location = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 location{ 0.0f };
+		glm::quat rotation{};
+		glm::vec3 scale{ 1.0f };
 
 		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
 		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
