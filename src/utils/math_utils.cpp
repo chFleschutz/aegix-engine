@@ -76,6 +76,21 @@ namespace Aegix
 			} };
 	}
 
+	glm::mat4 MathLib::tranformationMatrix(const glm::vec3& location, const glm::quat& rotation, const glm::vec3& scale)
+	{
+		glm::mat3 rotMat = glm::mat3_cast(rotation);
+		rotMat[0] *= scale.x;
+		rotMat[1] *= scale.y;
+		rotMat[2] *= scale.z;
+
+		return glm::mat4{
+			glm::vec4{ rotMat[0], 0.0f },
+			glm::vec4{ rotMat[1], 0.0f },
+			glm::vec4{ rotMat[2], 0.0f },
+			glm::vec4{ location, 1.0f }
+		};
+	}
+
 	glm::mat3 MathLib::normalMatrix(const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		const float c3 = glm::cos(rotation.z);
@@ -104,6 +119,15 @@ namespace Aegix
 			} };
 	}
 
+	glm::mat3 MathLib::normalMatrix(const glm::quat& rotation, const glm::vec3& scale)
+	{
+		glm::mat3 rotMat = glm::mat3_cast(rotation);
+		rotMat[0] *= 1.0f / scale.x;
+		rotMat[1] *= 1.0f / scale.y;
+		rotMat[2] *= 1.0f / scale.z;
+		return rotMat;
+	}
+
 	void MathLib::decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 	{
 		translation = glm::vec3(matrix[3]);
@@ -115,6 +139,19 @@ namespace Aegix
 		rotationMat[1] /= scale.y;
 		rotationMat[2] /= scale.z;
 		rotation = glm::eulerAngles(glm::quat_cast(rotationMat));
+	}
+
+	void MathLib::decomposeTRS(const glm::mat4& matrix, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
+	{
+		translation = glm::vec3(matrix[3]);
+		scale.x = glm::length(glm::vec3(matrix[0]));
+		scale.y = glm::length(glm::vec3(matrix[1]));
+		scale.z = glm::length(glm::vec3(matrix[2]));
+		glm::mat3 rotationMat = glm::mat3(matrix);
+		rotationMat[0] /= scale.x;
+		rotationMat[1] /= scale.y;
+		rotationMat[2] /= scale.z;
+		rotation = glm::quat_cast(rotationMat);
 	}
 
 	glm::vec3 MathLib::forward(const glm::vec3& rotation)
@@ -129,6 +166,11 @@ namespace Aegix
 		return { sx * sy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy };
 	}
 
+	glm::vec3 MathLib::forward(const glm::quat& rotation)
+	{
+		return rotation * FORWARD;
+	}
+
 	glm::vec3 MathLib::right(const glm::vec3& rotation)
 	{
 		const float sy = glm::sin(rotation.y);
@@ -137,6 +179,11 @@ namespace Aegix
 		const float sz = glm::sin(rotation.z);
 
 		return { cy * cz, cy * sz, -sy };
+	}
+
+	glm::vec3 MathLib::right(const glm::quat& rotation)
+	{
+		return rotation * RIGHT;
 	}
 
 	glm::vec3 MathLib::up(const glm::vec3& rotation)
@@ -149,6 +196,11 @@ namespace Aegix
 		const float sz = glm::sin(rotation.z);
 
 		return { cx * sy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy };
+	}
+
+	glm::vec3 MathLib::up(const glm::quat& rotation)
+	{
+		return rotation * UP;
 	}
 
 	glm::vec3 MathLib::normalize(const glm::vec3& vec)

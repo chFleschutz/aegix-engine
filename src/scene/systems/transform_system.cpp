@@ -22,7 +22,7 @@ namespace Aegix::Scene
 
 			auto& parentGlobal = parent.entity.component<GlobalTransform>();
 			globalTransform.location = parentGlobal.location + transform.location;
-			globalTransform.rotation = parentGlobal.rotation + transform.rotation;
+			globalTransform.rotation = parentGlobal.rotation * transform.rotation;
 			globalTransform.scale = parentGlobal.scale * transform.scale;
 		}
 	}

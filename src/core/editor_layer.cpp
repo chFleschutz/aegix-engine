@@ -72,11 +72,7 @@ namespace Aegix::Core
 
 		if (ImGuizmo::IsUsing())
 		{
-			glm::vec3 translation, rotation, scale;
-			MathLib::decomposeTRS(transformMatrix, translation, rotation, scale);
-			transform.location = translation;
-			transform.rotation += rotation - transform.rotation; // Prevent gimbal lock
-			transform.scale = scale;
+			MathLib::decomposeTRS(transformMatrix, transform.location, transform.rotation, transform.scale);
 		}
 	}
 }

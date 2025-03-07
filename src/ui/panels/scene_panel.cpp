@@ -162,9 +162,9 @@ namespace Aegix::UI
 			{
 				ImGui::DragFloat3("Location", &transform.location.x, 0.1f);
 
-				glm::vec3 rotationDeg = glm::degrees(transform.rotation);
-				ImGui::DragFloat3("Rotation", &rotationDeg.x, 0.5f, -360.0f, 360.0f, "%.3f", ImGuiSliderFlags_WrapAround);
-				transform.rotation = glm::radians(rotationDeg);
+				glm::vec3 eulerDeg = glm::degrees(glm::eulerAngles(transform.rotation));
+				if (ImGui::DragFloat3("Rotation", &eulerDeg.x, 0.5f))
+					transform.rotation = glm::quat(glm::radians(eulerDeg));
 
 				ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 			});

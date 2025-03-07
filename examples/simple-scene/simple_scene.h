@@ -3,6 +3,7 @@
 #include "graphics/systems/default_render_system.h"
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
+#include "scene/description.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
 #include "scripting/script_base.h"
@@ -15,7 +16,8 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		component<Aegix::Transform>().rotation += glm::vec3{ 0.0f, 0.0f, 1.0f } *deltaSeconds;
+		auto& transform = component<Aegix::Transform>();
+		transform.rotation *= glm::angleAxis(deltaSeconds, glm::vec3{ 0.0f, 0.0f, 1.0f });
 	}
 };
 
