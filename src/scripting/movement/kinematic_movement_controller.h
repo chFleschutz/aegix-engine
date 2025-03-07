@@ -21,7 +21,7 @@ namespace Aegix::Scripting
 
 			Input::MouseButton mouseRotate = Input::MouseRight;
 			Input::MouseButton mousePan = Input::MouseMiddle;
-			
+
 			// Disabled by default
 			Input::Key lookLeft = Input::Unknown;
 			Input::Key lookRight = Input::Unknown;
@@ -49,10 +49,10 @@ namespace Aegix::Scripting
 		KeyMappings m_keys{};
 		float m_moveSpeed{ 5.0f };
 		float m_lookSpeed{ 1.5f };
-		float m_mouseSensitivity{ 0.4f };
-		glm::vec2 m_previousCursorPos{0.0f};
-
+		float m_mouseSensitivity{ 0.25f };
 		bool m_mouseRotateEnabled{ false };
 		bool m_mousePanEnabled{ false };
+
+		glm::vec2 m_previousCursorPos{ 0.0f };
 	};
 }
