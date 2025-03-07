@@ -11,6 +11,8 @@ namespace Aegix::Core
 {
 	void EditorLayer::onUpdate(float deltaSeconds)
 	{
+		m_snapping = Input::instance().keyPressed(Input::LeftControl);
+
 		if (!ImGuizmo::IsUsing())
 		{
 			if (Input::instance().keyPressed(Input::Q))
@@ -63,12 +65,17 @@ namespace Aegix::Core
 		auto& transform = selected.component<Transform>();
 		glm::mat4 transformMatrix = transform.matrix();
 
-		ImGuizmo::Manipulate(
-			glm::value_ptr(camera.viewMatrix),
-			glm::value_ptr(projectionMatrix),
-			static_cast<ImGuizmo::OPERATION>(m_gizmoType),
-			ImGuizmo::MODE::LOCAL,
-			glm::value_ptr(transformMatrix));
+		float snapValue = 0.5f;
+		if (m_gizmoType == ImGuizmo::OPERATION::SCALE)
+			snapValue = 0.1f;
+		if (m_gizmoType == ImGuizmo::OPERATION::ROTATE)
+			snapValue = 15.0f;
+
+		float snapValues[3] = { snapValue, snapValue, snapValue };
+
+		ImGuizmo::Manipulate(glm::value_ptr(camera.viewMatrix), glm::value_ptr(projectionMatrix),
+			static_cast<ImGuizmo::OPERATION>(m_gizmoType), ImGuizmo::MODE::LOCAL, glm::value_ptr(transformMatrix),
+			nullptr, m_snapping ? snapValues : nullptr);
 
 		if (ImGuizmo::IsUsing())
 		{

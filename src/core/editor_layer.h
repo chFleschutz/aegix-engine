@@ -26,5 +26,6 @@ namespace Aegix::Core
 		UI::ProfilerPanel m_profilerPanel{};
 		UI::DemoPanel m_demoPanel{};
 		int m_gizmoType = -1;
+		bool m_snapping = false;
 	};
 }
