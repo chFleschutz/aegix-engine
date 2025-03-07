@@ -8,5 +8,5 @@ target_sources(aegix-engine PRIVATE
 	"panels/scene_panel.h"
 	"ui.cpp"
 	"ui.h"
-	"layer.h"
+	
 )
