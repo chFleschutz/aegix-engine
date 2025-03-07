@@ -1,6 +1,7 @@
 #include "default_render_system.h"
 
 #include "graphics/vulkan_tools.h"
+#include "math/math.h"
 
 namespace Aegix::Graphics
 {
@@ -81,7 +82,7 @@ namespace Aegix::Graphics
 			// Push Constants
 			PushConstantData push{};
 			push.modelMatrix = globalTransform.matrix();
-			push.normalMatrix = MathLib::normalMatrix(globalTransform.rotation, globalTransform.scale);
+			push.normalMatrix = Math::normalMatrix(globalTransform.rotation, globalTransform.scale);
 
 			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);

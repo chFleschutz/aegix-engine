@@ -1,6 +1,6 @@
 #include "color.h"
 
-#include "utils/random.h"
+#include "math/random.h"
 
 #include <cassert>
 #include <sstream>

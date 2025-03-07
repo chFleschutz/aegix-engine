@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scripting/script_base.h"
-#include "utils/math_utils.h"
+#include "math/math.h"
 
 namespace Aegix::Physics
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "graphics/static_mesh.h"
+#include "math/math.h"
 #include "scene/entity.h"
-#include "utils/math_utils.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -30,10 +30,10 @@ namespace Aegix
 		glm::quat rotation{};
 		glm::vec3 scale{ 1.0f };
 
-		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
-		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
-		auto up() const -> glm::vec3 { return MathLib::up(rotation); }
-		auto matrix() const -> glm::mat4 { return MathLib::tranformationMatrix(location, rotation, scale); }
+		auto forward() const -> glm::vec3 { return Math::forward(rotation); }
+		auto right() const -> glm::vec3 { return Math::right(rotation); }
+		auto up() const -> glm::vec3 { return Math::up(rotation); }
+		auto matrix() const -> glm::mat4 { return Math::tranformationMatrix(location, rotation, scale); }
 	};
 
 	/// @brief Transformation of the entity in world space (including parent transforms)
@@ -43,10 +43,10 @@ namespace Aegix
 		glm::quat rotation{};
 		glm::vec3 scale{ 1.0f };
 
-		auto forward() const -> glm::vec3 { return MathLib::forward(rotation); }
-		auto right() const -> glm::vec3 { return MathLib::right(rotation); }
-		auto up() const -> glm::vec3 { return MathLib::up(rotation); }
-		auto matrix() const -> glm::mat4 { return MathLib::tranformationMatrix(location, rotation, scale); }
+		auto forward() const -> glm::vec3 { return Math::forward(rotation); }
+		auto right() const -> glm::vec3 { return Math::right(rotation); }
+		auto up() const -> glm::vec3 { return Math::up(rotation); }
+		auto matrix() const -> glm::mat4 { return Math::tranformationMatrix(location, rotation, scale); }
 	};
 
 	/// @brief Stores the parent entity

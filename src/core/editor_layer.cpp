@@ -1,9 +1,7 @@
 #include "editor_layer.h"
 
 #include "core/engine.h"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "math/math.h"
 
 #include <ImGuizmo.h>
 
@@ -79,7 +77,7 @@ namespace Aegix::Core
 
 		if (ImGuizmo::IsUsing())
 		{
-			MathLib::decomposeTRS(transformMatrix, transform.location, transform.rotation, transform.scale);
+			Math::decomposeTRS(transformMatrix, transform.location, transform.rotation, transform.scale);
 		}
 	}
 }
