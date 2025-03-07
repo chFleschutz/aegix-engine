@@ -10,8 +10,8 @@ public:
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
-			.location = glm::vec3{ -9.75f, 1.2f, 5.25f},
-			.rotation = glm::vec3{ glm::radians(-12.0f), 0.0f, glm::radians(263.0f) }
+			.location = { -9.75f, 1.2f, 5.25f},
+			.rotation = glm::radians(glm::vec3{ -12.0f, 0.0f, 263.0f })
 		};
 
 		// MODELS

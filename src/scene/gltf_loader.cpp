@@ -44,7 +44,7 @@ namespace Aegix::Scene
 		auto& sceneNode = m_gltf->scenes[sceneIndex];
 
 		// Correct coordinate system (GLTF uses Y-up, Z-forward)
-		m_rootEntity.component<Transform>().rotation = glm::vec3{ glm::radians(90.0f), 0.0f, 0.0f };
+		m_rootEntity.component<Transform>().rotation = glm::radians(glm::vec3{ 90.0f, 0.0f, 0.0f });
 
 		struct Node
 		{
@@ -107,7 +107,7 @@ namespace Aegix::Scene
 				else if constexpr (std::is_same_v<T, GLTF::Node::TRS>)
 				{
 					result.location = { val.translation[0], val.translation[1], val.translation[2] };
-					result.rotation = glm::eulerAngles(glm::quat{ val.rotation[3], val.rotation[0], val.rotation[1], val.rotation[2] });
+					result.rotation = { val.rotation[3], val.rotation[0], val.rotation[1], val.rotation[2] };
 					result.scale = { val.scale[0], val.scale[1], val.scale[2] };
 				}
 			}, nodeTransform);

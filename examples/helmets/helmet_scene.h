@@ -19,8 +19,8 @@ public:
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
-			.location = glm::vec3{ 0.0f, -6.0f, 3.0f},
-			.rotation = glm::vec3{ glm::radians(0.0f), 0.0f, glm::radians(0.0f) }
+			.location = { -3.0f, -6.0f, 3.0f},
+			.rotation = glm::radians(glm::vec3{ -8.0f, 0.0f, 335.0f })
 		};
 
 		// ENTITIES
