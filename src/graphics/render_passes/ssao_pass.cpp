@@ -1,6 +1,7 @@
 #include "ssao_pass.h"
 
 #include "graphics/vulkan_tools.h"
+#include "math/interpolation.h"
 #include "math/random.h"
 
 #include <imgui.h>
@@ -35,15 +36,22 @@ namespace Aegix::Graphics
 		// Generate random samples
 		auto& gen = Random::generator();
 		std::uniform_real_distribution dis(0.0f, 1.0f);
-		std::vector<glm::vec4> samples(SAMPLE_COUNT);
-		for (auto& sample : samples)
+		std::vector<glm::vec4> samples;
+		samples.reserve(SAMPLE_COUNT);
+		for (uint32_t i = 0; i < SAMPLE_COUNT; i++)
 		{
-			sample.x = dis(gen) * 2.0f - 1.0f;
-			sample.y = dis(gen) * 2.0f - 1.0f;
-			sample.z = dis(gen);
-			sample.w = 0.0f;
+			glm::vec4 sample{
+				dis(gen) * 2.0f - 1.0f,
+				dis(gen) * 2.0f - 1.0f,
+				dis(gen),
+				0.0f
+			};
 			sample = glm::normalize(sample);
 			sample *= dis(gen);
+
+			float scale = static_cast<float>(i) / static_cast<float>(SAMPLE_COUNT);
+			sample *= Math::lerp(0.1f, 1.0f, scale * scale);
+			samples.emplace_back(sample);
 		}
 
 		m_ssaoSamples = std::make_unique<Buffer>(device, sizeof(glm::vec4), static_cast<uint32_t>(samples.size()),
