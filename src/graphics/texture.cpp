@@ -301,6 +301,17 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
+	void Texture::fill(const void* data, VkDeviceSize size)
+	{
+		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(data);
+		stagingBuffer.unmap();
+
+		fill(stagingBuffer);
+	}
+
 	void Texture::fill(const Buffer& buffer)
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
@@ -319,6 +330,19 @@ namespace Aegix::Graphics
 
 		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, newLayout, m_mipLevels);
 		m_layout = newLayout;
+	}
+
+	void Texture::transitionLayout(VkImageLayout newLayout)
+	{
+		if (m_layout == newLayout)
+			return;
+
+		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, newLayout, m_mipLevels);
+		m_layout = newLayout;
+
+		m_device.endSingleTimeCommands(cmd);
 	}
 
 	void Texture::resize(uint32_t width, uint32_t height, VkImageUsageFlags usage)

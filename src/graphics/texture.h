@@ -124,9 +124,11 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier;
 
 		void fill(const glm::vec4& color);
+		void fill(const void* data, VkDeviceSize size);
 		void fill(const Buffer& buffer);
 
 		void transitionLayout(VkCommandBuffer commandBuffer, VkImageLayout newLayout);
+		void transitionLayout(VkImageLayout newLayout);
 
 		void resize(uint32_t width, uint32_t height, VkImageUsageFlags usage);
 
