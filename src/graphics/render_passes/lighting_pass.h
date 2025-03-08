@@ -49,6 +49,7 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_albedo;
 		FrameGraphResourceHandle m_arm;
 		FrameGraphResourceHandle m_emissive;
+		FrameGraphResourceHandle m_ssao;
 
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;

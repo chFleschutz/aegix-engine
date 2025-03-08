@@ -15,7 +15,8 @@ namespace Aegix::Graphics
 			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(6, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
@@ -53,6 +54,11 @@ namespace Aegix::Graphics
 			FrameGraphResourceType::Reference,
 			FrameGraphResourceUsage::Compute
 			});
+		m_ssao = builder.add({ "SSAO",
+			FrameGraphResourceType::Reference,
+			FrameGraphResourceUsage::Compute
+			});
+
 		m_sceneColor = builder.add({ "SceneColor",
 			FrameGraphResourceType::Texture,
 			FrameGraphResourceUsage::Compute,
@@ -65,7 +71,7 @@ namespace Aegix::Graphics
 
 		return FrameGraphNodeCreateInfo{
 			.name = "Lighting",
-			.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive },
+			.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_ssao },
 			.outputs = { m_sceneColor }
 		};
 	}
@@ -83,7 +89,8 @@ namespace Aegix::Graphics
 			.writeImage(3, resources.texture(m_albedo))
 			.writeImage(4, resources.texture(m_arm))
 			.writeImage(5, resources.texture(m_emissive))
-			.writeBuffer(6, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
+			.writeImage(6, resources.texture(m_ssao))
+			.writeBuffer(7, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);

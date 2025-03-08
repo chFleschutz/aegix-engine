@@ -8,6 +8,7 @@ layout(set = 0, binding = 2, rgba16f) uniform image2D normalMap;
 layout(set = 0, binding = 3, rgba8) uniform image2D albedoMap;
 layout(set = 0, binding = 4, rgba8) uniform image2D armMap;
 layout(set = 0, binding = 5, rgba8) uniform image2D emissiveMap;
+layout(set = 0, binding = 6, r8) uniform image2D ssaoMap;
 
 struct AmbientLight
 {
@@ -26,7 +27,7 @@ struct PointLight
 	vec4 color;
 };
 
-layout(set = 0, binding = 6) uniform Lighting
+layout(set = 0, binding = 7) uniform Lighting
 {
 	vec4 cameraPosition;
 	AmbientLight ambientLight;
@@ -57,8 +58,9 @@ void main()
 	vec3 albedo = imageLoad(albedoMap, pixelCoords).rgb;
 	vec3 arm = imageLoad(armMap, pixelCoords).rgb;
 	vec3 emissive = imageLoad(emissiveMap, pixelCoords).rgb;
+    float ssao = imageLoad(ssaoMap, pixelCoords).r;
 
-    float ambientOcclusion = arm.r;
+    float ambientOcclusion = arm.r * ssao;
     float roughness = arm.g;
     float metallic = arm.b;
 
