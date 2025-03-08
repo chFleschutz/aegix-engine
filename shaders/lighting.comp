@@ -34,6 +34,7 @@ layout(set = 0, binding = 7) uniform Lighting
 	DirectionalLight directionalLight;
 	PointLight pointLights[128];
 	int numPointLights;
+    int debugViewMode;
 } lighting;
 
 const float PI = 3.14159265359;
@@ -100,6 +101,30 @@ void main()
 
     Lo = max(Lo, 0.0); 
     imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
+
+    // Debug view modes
+    if (lighting.debugViewMode > 0)
+    {
+        switch (lighting.debugViewMode)
+        {
+        case 1:
+            imageStore(sceneColorMap, pixelCoords, vec4(albedo, 1.0));
+            break;
+        case 2:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(ambientOcclusion), 1.0));
+            break;
+        case 3:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(roughness), 1.0));
+            break;
+        case 4:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(metallic), 1.0));
+            break;
+        case 5:
+            imageStore(sceneColorMap, pixelCoords, vec4(emissive, 1.0));
+            break;
+
+        }
+    }
 }
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos)

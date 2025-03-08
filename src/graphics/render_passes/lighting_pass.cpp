@@ -99,6 +99,18 @@ namespace Aegix::Graphics
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
+	void LightingPass::drawUI()
+	{
+		static constexpr auto viewModeNames = std::array{ "Scene Color", "Albedo", "Ambient Occlusion" , "Roughness", 
+			"Metallic",	"Emissive" };
+
+		int currentMode = static_cast<int>(m_viewMode);
+		if (ImGui::Combo("View Mode", &currentMode, viewModeNames.data(), viewModeNames.size()))
+		{
+			m_viewMode = static_cast<LightingViewMode>(currentMode);
+		}
+	}
+
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
 	{
 		LightingUniforms lighting;
@@ -138,6 +150,8 @@ namespace Aegix::Graphics
 			lighIndex++;
 		}
 		lighting.pointLightCount = lighIndex;
+
+		lighting.viewMode = m_viewMode;
 
 		m_ubo->setData(frameInfo.frameIndex, lighting);
 	}
