@@ -19,13 +19,13 @@ namespace Aegix::Graphics
 	{
 		struct AmbientLight
 		{
-			glm::vec4 color{ 0.0 };
+			glm::vec4 color{ 0.0f };
 		};
 
 		struct DirectionalLight
 		{
-			glm::vec4 direction{ 0.0, 0.0, 1.0, 0.0 };
-			glm::vec4 color{ 0.0 };
+			glm::vec4 direction{ 0.0f, 0.0f, 1.0f, 0.0f };
+			glm::vec4 color{ 0.0f };
 		};
 
 		struct PointLight
@@ -39,6 +39,7 @@ namespace Aegix::Graphics
 		DirectionalLight directional{};
 		std::array<PointLight, MAX_POINT_LIGHTS> pointLights{};
 		int32_t pointLightCount{ 0 };
+		float ambientOcclusionFactor{ 0.5f };
 		LightingViewMode viewMode{ LightingViewMode::SceneColor };
 	};
 
@@ -64,6 +65,7 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_ssao;
 
 		LightingViewMode m_viewMode{ LightingViewMode::SceneColor };
+		float m_ambientOcclusionFactor{ 1.0f };
 
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;

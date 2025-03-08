@@ -34,6 +34,7 @@ layout(set = 0, binding = 7) uniform Lighting
 	DirectionalLight directionalLight;
 	PointLight pointLights[128];
 	int numPointLights;
+    float ambientOcclusionFactor;
     int debugViewMode;
 } lighting;
 
@@ -79,7 +80,7 @@ void main()
     // Ambient light
     {
         vec3 ambientLight = lighting.ambientLight.color.rgb * lighting.ambientLight.color.w;
-        Lo += albedo * ambientLight * ambientOcclusion;
+        Lo += albedo * ambientLight * ambientOcclusion * lighting.ambientOcclusionFactor;
     }
 
     // Directional light

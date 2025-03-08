@@ -101,9 +101,10 @@ namespace Aegix::Graphics
 
 	void LightingPass::drawUI()
 	{
+		ImGui::DragFloat("AO Factor", &m_ambientOcclusionFactor, 0.01f, 0.0f, 1.0f);
+
 		static constexpr auto viewModeNames = std::array{ "Scene Color", "Albedo", "Ambient Occlusion" , "Roughness", 
 			"Metallic",	"Emissive" };
-
 		int currentMode = static_cast<int>(m_viewMode);
 		if (ImGui::Combo("View Mode", &currentMode, viewModeNames.data(), viewModeNames.size()))
 		{
@@ -151,6 +152,7 @@ namespace Aegix::Graphics
 		}
 		lighting.pointLightCount = lighIndex;
 
+		lighting.ambientOcclusionFactor = m_ambientOcclusionFactor;
 		lighting.viewMode = m_viewMode;
 
 		m_ubo->setData(frameInfo.frameIndex, lighting);
