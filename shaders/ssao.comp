@@ -7,21 +7,21 @@ layout(set = 0, binding = 1) uniform sampler2D positionMap;
 layout(set = 0, binding = 2) uniform sampler2D normalMap;
 layout(set = 0, binding = 3) uniform sampler2D noiseMap;
 
-layout(set = 0, binding = 4) uniform SSAO
+layout(set = 0, binding = 4) uniform SSAOSamples
 {
 	vec4 samples[64];
 } ssao;
 
-layout(push_constant, std140) uniform Push
+layout(set = 0, binding = 5) uniform UBO
 {
 	mat4 view;
 	mat4 projection;
-} push;
+	vec2 noiseScale;
+	float radius;
+	float bias;
+} ubo;
 
 const int sampleCount = 64;
-const vec2 noiseScale = vec2(4.0);
-const float radius = 0.5;
-const float bias = 0.025;
 
 void main()
 {
@@ -29,12 +29,12 @@ void main()
 	vec2 uv = vec2(pixelCoords) / imageSize(ssaoMap);
 
 	vec3 worldPosition = texture(positionMap, uv).rgb;
-	vec3 viewPosition = (push.view * vec4(worldPosition, 1.0)).xyz;
+	vec3 viewPosition = (ubo.view * vec4(worldPosition, 1.0)).xyz;
 
 	vec3 worldNormal = texture(normalMap, uv).rgb;
-	vec3 viewNormal = mat3(push.view) * worldNormal;
+	vec3 viewNormal = mat3(ubo.view) * worldNormal;
 
-	vec3 noise = vec3(texture(noiseMap, uv * noiseScale).xy, 0.0);
+	vec3 noise = vec3(texture(noiseMap, uv * ubo.noiseScale).xy, 0.0);
 
 	vec3 tangent = normalize(noise - viewNormal * dot(noise, viewNormal));
 	vec3 bitangent = cross(viewNormal, tangent);
@@ -44,16 +44,16 @@ void main()
 	for (int i = 0; i < sampleCount; i++)
 	{
 		vec3 samplePos = TBN * ssao.samples[i].xyz;
-		samplePos = viewPosition + samplePos * radius;
+		samplePos = viewPosition + samplePos * ubo.radius;
 
-		vec4 offset = push.projection * vec4(samplePos, 1.0);
+		vec4 offset = ubo.projection * vec4(samplePos, 1.0);
 		offset.xyz /= offset.w;					// Perspective division
 		offset.xyz = offset.xyz * 0.5 + 0.5;	// Transform to range [0, 1] 
 
-		float sampleDepth = (push.view * texture(positionMap, offset.xy)).z;
+		float sampleDepth = (ubo.view * texture(positionMap, offset.xy)).z;
 
-		float rangeCheck = smoothstep(0.0, 1.0, radius / abs(viewPosition.z - sampleDepth));
-		occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;  
+		float rangeCheck = smoothstep(0.0, 1.0, ubo.radius / abs(viewPosition.z - sampleDepth));
+		occlusion += (sampleDepth >= samplePos.z + ubo.bias ? 1.0 : 0.0) * rangeCheck;  
 	}
 
 	occlusion = 1.0 - (occlusion / float(sampleCount));

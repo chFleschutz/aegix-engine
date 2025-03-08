@@ -3,6 +3,8 @@
 #include "graphics/vulkan_tools.h"
 #include "math/random.h"
 
+#include <imgui.h>
+
 namespace Aegix::Graphics
 {
 	SSAOPass::SSAOPass(VulkanDevice& device, DescriptorPool& pool)
@@ -13,18 +15,22 @@ namespace Aegix::Graphics
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(4, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
-			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(SSAOPushConstants))
 			.build();
 
 		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
 			.build();
+
+		m_uniforms = std::make_unique<Buffer>(device, sizeof(SSAOUniforms), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+		m_uniforms->map();
 
 		// Generate random samples
 		auto& gen = Random::generator();
@@ -96,13 +102,10 @@ namespace Aegix::Graphics
 	{
 		// Update push constants
 		auto& camera = frameInfo.scene.mainCamera().component<Camera>();
-		
-		SSAOPushConstants pushConstants{
-			.view = camera.viewMatrix,
-			.projection = camera.projectionMatrix
-		};
-
-		Tools::vk::cmdPushConstants(frameInfo.commandBuffer, *m_pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, pushConstants);
+		m_uniformData.view = camera.viewMatrix;
+		m_uniformData.projection = camera.projectionMatrix;
+		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
+		m_uniforms->writeToBuffer(&m_uniformData);
 
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
@@ -112,11 +115,19 @@ namespace Aegix::Graphics
 			.writeImage(2, resources.texture(m_normal))
 			.writeImage(3, *m_ssaoNoise)
 			.writeBuffer(4, *m_ssaoSamples)
+			.writeBuffer(5, *m_uniforms)
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
 		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
+	}
+
+	void SSAOPass::drawUI()
+	{
+		ImGui::DragFloat("Noise Scale", &m_uniformData.noiseScale.y, 0.01f, 0.0f, 100.0f);
+		ImGui::DragFloat("Radius", &m_uniformData.radius, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Bias", &m_uniformData.bias, 0.001f, 0.0f, 1.0f);
 	}
 }

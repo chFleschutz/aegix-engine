@@ -8,10 +8,13 @@
 
 namespace Aegix::Graphics
 {
-	struct SSAOPushConstants
+	struct SSAOUniforms
 	{
-		glm::mat4 view;
-		glm::mat4 projection;
+		glm::mat4 view{ 1.0f };
+		glm::mat4 projection{ 1.0f };
+		glm::vec2 noiseScale{ 4.0f };
+		float radius{ 0.5f };
+		float bias{ 0.025 };
 	};
 
 	class SSAOPass : public FrameGraphRenderPass
@@ -24,6 +27,7 @@ namespace Aegix::Graphics
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual void drawUI() override;
 
 	private:
 		FrameGraphResourceHandle m_position;
@@ -35,7 +39,10 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
-		std::unique_ptr<Buffer> m_ssaoSamples;
 		std::unique_ptr<Texture> m_ssaoNoise;
+		std::unique_ptr<Buffer> m_ssaoSamples;
+		std::unique_ptr<Buffer> m_uniforms;
+
+		SSAOUniforms m_uniformData;
 	};
 }
