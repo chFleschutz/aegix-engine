@@ -19,6 +19,7 @@ layout(set = 0, binding = 5) uniform UBO
 	vec2 noiseScale;
 	float radius;
 	float bias;
+	float power;
 } ubo;
 
 const int sampleCount = 64;
@@ -57,5 +58,6 @@ void main()
 	}
 
 	occlusion = 1.0 - (occlusion / float(sampleCount));
+	occlusion = pow(occlusion, ubo.power);
 	imageStore(ssaoMap, pixelCoords, vec4(occlusion, 0.0, 0.0, 1.0));
 }

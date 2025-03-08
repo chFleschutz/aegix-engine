@@ -137,5 +137,6 @@ namespace Aegix::Graphics
 		ImGui::DragFloat("Noise Scale", &m_uniformData.noiseScale.y, 0.01f, 0.0f, 100.0f);
 		ImGui::DragFloat("Radius", &m_uniformData.radius, 0.01f, 0.0f, 1.0f);
 		ImGui::DragFloat("Bias", &m_uniformData.bias, 0.001f, 0.0f, 1.0f);
+		ImGui::DragFloat("Power", &m_uniformData.power, 0.01f, 0.0f, 10.0f);
 	}
 }

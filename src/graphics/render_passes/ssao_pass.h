@@ -15,6 +15,7 @@ namespace Aegix::Graphics
 		glm::vec2 noiseScale{ 4.0f };
 		float radius{ 0.5f };
 		float bias{ 0.025 };
+		float power{ 2.0f };
 	};
 
 	class SSAOPass : public FrameGraphRenderPass
