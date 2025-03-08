@@ -8,6 +8,7 @@ layout(set = 0, binding = 2, rgba16f) uniform image2D normalMap;
 layout(set = 0, binding = 3, rgba8) uniform image2D albedoMap;
 layout(set = 0, binding = 4, rgba8) uniform image2D armMap;
 layout(set = 0, binding = 5, rgba8) uniform image2D emissiveMap;
+layout(set = 0, binding = 6) uniform sampler2D ssaoMap;
 
 struct AmbientLight
 {
@@ -26,13 +27,15 @@ struct PointLight
 	vec4 color;
 };
 
-layout(set = 0, binding = 6) uniform Lighting
+layout(set = 0, binding = 7) uniform Lighting
 {
 	vec4 cameraPosition;
 	AmbientLight ambientLight;
 	DirectionalLight directionalLight;
 	PointLight pointLights[128];
 	int numPointLights;
+    float ambientOcclusionFactor;
+    int debugViewMode;
 } lighting;
 
 const float PI = 3.14159265359;
@@ -41,6 +44,7 @@ const float F_DIELECTRIC = 0.04;
 
 const float EMISSIVE_FACTOR = 2.0;
 
+float sampleSSAO(vec2 uv);
 float lightAttenuation(vec3 lightPos, vec3 fragPos);
 float normalDistribution(float NdotH, float alpha);
 float SchlickGGX(float NdotX, float alpha);
@@ -51,14 +55,16 @@ vec3 PBRLighting(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float met
 void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    vec2 uv = vec2(pixelCoords) / imageSize(sceneColorMap);
 
 	vec3 position = imageLoad(positionMap, pixelCoords).rgb;
     vec3 normal = imageLoad(normalMap, pixelCoords).rgb;
 	vec3 albedo = imageLoad(albedoMap, pixelCoords).rgb;
 	vec3 arm = imageLoad(armMap, pixelCoords).rgb;
 	vec3 emissive = imageLoad(emissiveMap, pixelCoords).rgb;
+    float ssao = sampleSSAO(uv).r;
 
-    float ambientOcclusion = arm.r;
+    float ambientOcclusion = arm.r * ssao;
     float roughness = arm.g;
     float metallic = arm.b;
 
@@ -74,7 +80,7 @@ void main()
     // Ambient light
     {
         vec3 ambientLight = lighting.ambientLight.color.rgb * lighting.ambientLight.color.w;
-        Lo += albedo * ambientLight * ambientOcclusion;
+        Lo += albedo * ambientLight * ambientOcclusion * lighting.ambientOcclusionFactor;
     }
 
     // Directional light
@@ -98,6 +104,45 @@ void main()
 
     Lo = max(Lo, 0.0); 
     imageStore(sceneColorMap, pixelCoords, vec4(Lo, 1.0));
+
+    // Debug view modes
+    if (lighting.debugViewMode > 0)
+    {
+        switch (lighting.debugViewMode)
+        {
+        case 1:
+            imageStore(sceneColorMap, pixelCoords, vec4(albedo, 1.0));
+            break;
+        case 2:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(ambientOcclusion), 1.0));
+            break;
+        case 3:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(roughness), 1.0));
+            break;
+        case 4:
+            imageStore(sceneColorMap, pixelCoords, vec4(vec3(metallic), 1.0));
+            break;
+        case 5:
+            imageStore(sceneColorMap, pixelCoords, vec4(emissive, 1.0));
+            break;
+
+        }
+    }
+}
+
+float sampleSSAO(vec2 uv)
+{
+    vec2 texelSize = 1.0 / vec2(textureSize(ssaoMap, 0));
+    float result = 0.0;
+    for (int x = -2; x < 2; ++x) 
+    {
+        for (int y = -2; y < 2; ++y) 
+        {
+            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            result += texture(ssaoMap, uv + offset).r;
+        }
+    }
+    return result / (4.0 * 4.0);
 }
 
 float lightAttenuation(vec3 lightPos, vec3 fragPos)

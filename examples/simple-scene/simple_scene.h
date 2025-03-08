@@ -3,12 +3,12 @@
 #include "graphics/systems/default_render_system.h"
 #include "graphics/systems/point_light_system.h"
 #include "math/math.h"
+#include "math/random.h"
 #include "scene/components.h"
 #include "scene/description.h"
 #include "scene/entity.h"
 #include "scene/scene.h"
 #include "scripting/script_base.h"
-#include "utils/random.h"
 
 /// @brief Rotates the entity around the vertical axis
 /// @note Example of a custom Component
