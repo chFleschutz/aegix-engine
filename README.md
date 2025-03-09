@@ -12,12 +12,13 @@ A small Vulkan game engine written in modern C++.
 
 - **Physically Based Rendering (PBR)** - Realistic lighting and materials 
 - **GLTF & OBJ Loading** - Loading of custom 3D models 
-- **Immediate Mode Editor UI** - Editor tools using Dear ImGui
+- **Immediate Mode Editor UI** - Editor tools using Dear ImGui and ImGuizmo
 - **Entity Component System (ECS)** - Efficient object management using EnTT
 - **Framegraph** - Multipass rendering with automatic renderpass sorting
 - **Deferred Rendering** - Improved lighting performance
 - **HDR Rendering and Tone Mapping** - Enables wider color range for more visible details
 - **Physically Based Bloom** - Realistic glow effect around bright areas created using convolution
+- **Screen Space Ambient Occlusion (SSAO)** - Enhanced depth perception
 
 ## Prerequisites <a name="prerequisites"></a>
 
@@ -42,15 +43,16 @@ Follow these steps to get started:
 ## Modules and External Libraries <a name="external-libraries"></a>
 
 This project is structured into several independent modules:
-- [aegix-assets](https://github.com/chFleschutz/aegix-assets): A collection of sample assest
-- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf): GLTF 3D model loader
-- [aegix-log](https://github.com/chFleschutz/aegix-log): Logging library
+- [aegix-assets](https://github.com/chFleschutz/aegix-assets) - Collection of sample assest
+- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf) - GLTF 3D model loader
+- [aegix-log](https://github.com/chFleschutz/aegix-log) - Logging library
 
 The engine relies on the following external libraries:
-- [entt](https://github.com/skypjack/entt): Entity component system (ECS)
-- [glfw](https://github.com/glfw/glfw): Window management
-- [glm](https://github.com/g-truc/glm): Math library
-- [imgui](https://github.com/ocornut/imgui): Immediate mode UI 
-- [stb](https://github.com/nothings/stb): Image loading
-- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader): OBJ 3D model loader
-- [Vulkan](https://www.vulkan.org/): Graphics API
+- [entt](https://github.com/skypjack/entt) - Entity component system (ECS)
+- [glfw](https://github.com/glfw/glfw) - Window management
+- [glm](https://github.com/g-truc/glm) - Math library
+- [imgui](https://github.com/ocornut/imgui) - Immediate mode UI
+- [imguizmo](https://github.com/CedricGuillemet/ImGuizmo) - Gizmos
+- [stb](https://github.com/nothings/stb) - Image loading
+- [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader) - OBJ 3D model loader
+- [Vulkan](https://www.vulkan.org/) - Graphics API
