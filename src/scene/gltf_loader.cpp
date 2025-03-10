@@ -18,9 +18,9 @@ namespace Aegix::Scene
 		if (m_gltf->scenes.empty())
 			return;
 
-		m_defaultBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultBlack = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultWhite = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultNormal = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		m_defaultMaterial = Engine::instance().renderer().createMaterialInstance<Graphics::DefaultMaterial>(
 			m_defaultWhite, m_defaultNormal, m_defaultWhite, m_defaultBlack, m_defaultBlack);
 
@@ -153,11 +153,11 @@ namespace Aegix::Scene
 			return m_materials[materialIndex];
 
 		auto& material = m_gltf->materials[materialIndex];
-		std::shared_ptr<Graphics::Texture> baseColorTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> normalTexture = m_defaultNormal;
-		std::shared_ptr<Graphics::Texture> metallicRoughnessTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> occlusionTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> emissiveTexture = m_defaultBlack;
+		std::shared_ptr<Graphics::SampledTexture> baseColorTexture = m_defaultWhite;
+		std::shared_ptr<Graphics::SampledTexture> normalTexture = m_defaultNormal;
+		std::shared_ptr<Graphics::SampledTexture> metallicRoughnessTexture = m_defaultWhite;
+		std::shared_ptr<Graphics::SampledTexture> occlusionTexture = m_defaultWhite;
+		std::shared_ptr<Graphics::SampledTexture> emissiveTexture = m_defaultBlack;
 
 		if (auto& pbr = material.pbrMetallicRoughness)
 		{
@@ -184,7 +184,7 @@ namespace Aegix::Scene
 		return materialInstance;
 	}
 
-	auto GLTFLoader::loadTexture(size_t textureIndex, VkFormat format) -> std::shared_ptr<Graphics::Texture>
+	auto GLTFLoader::loadTexture(size_t textureIndex, VkFormat format) -> std::shared_ptr<Graphics::SampledTexture>
 	{
 		assert(textureIndex < m_gltf->textures.size() && "Texture index is out of range");
 
@@ -197,13 +197,13 @@ namespace Aegix::Scene
 		assert(source.has_value() && "Texture source is required");
 
 		auto& image = m_gltf->images[source.value()];
-		std::shared_ptr<Graphics::Texture> texture;
+		std::shared_ptr<Graphics::SampledTexture> texture;
 		std::visit([&](auto&& val)
 			{
 				using T = std::decay_t<decltype(val)>;
 				if constexpr (std::is_same_v<T, GLTF::Image::UriData>)
 				{
-					texture = Graphics::Texture::create(m_gltf->basePath / val.uri, format);
+					texture = Graphics::SampledTexture::create(m_gltf->basePath / val.uri, format);
 				}
 				else if constexpr (std::is_same_v<T, GLTF::Image::BufferViewData>)
 				{

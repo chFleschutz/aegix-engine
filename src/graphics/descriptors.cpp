@@ -139,13 +139,13 @@ namespace Aegix::Graphics
 	{
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const SampledTexture& texture)
 	{
 		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), texture.layout() });
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const SampledTexture& texture, VkImageLayout layoutOverride)
 	{
 		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), layoutOverride });
 		return *this;
@@ -230,7 +230,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const SampledTexture& texture)
 	{
 		for (size_t i = 0; i < m_writer.size(); i++)
 		{
@@ -239,7 +239,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture)
+	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<SampledTexture> texture)
 	{
 		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
 		return addTexture(binding, *texture);

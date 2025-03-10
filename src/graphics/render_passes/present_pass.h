@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			Texture& srcTexture = resources.texture(m_final);
+			SampledTexture& srcTexture = resources.texture(m_final);
 			assert(m_swapChain.width() == srcTexture.width() && "Swapchain extent does not match source texture extent");
 			assert(m_swapChain.height() == srcTexture.height() && "Swapchain extent does not match source texture extent");
 			

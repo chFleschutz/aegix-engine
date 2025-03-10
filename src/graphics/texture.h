@@ -10,13 +10,13 @@
 
 namespace Aegix::Graphics
 {
-	class Texture;
+	class SampledTexture;
 
 	class ImageView
 	{
 	public:
 		explicit ImageView(VulkanDevice& device);
-		ImageView(const Texture& texture, uint32_t baseMipLevel, uint32_t levelCount);
+		ImageView(const SampledTexture& texture, uint32_t baseMipLevel, uint32_t levelCount);
 		ImageView(const ImageView&) = delete;
 		ImageView(ImageView&& other) noexcept;
 		~ImageView();
@@ -58,7 +58,7 @@ namespace Aegix::Graphics
 
 
 	/// @brief Represents a Texture on the gpu and wraps a VkImage, VkDeviceMemory and VkImageView
-	class Texture
+	class SampledTexture
 	{
 		friend class ImageView;
 
@@ -80,32 +80,32 @@ namespace Aegix::Graphics
 			bool anisotropy = true;
 		};
 
-		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
-		static auto create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
+		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<SampledTexture>;
+		static auto create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<SampledTexture>;
 
-		Texture(VulkanDevice& device, const Config& config);
+		SampledTexture(VulkanDevice& device, const Config& config);
 
 		/// @brief Creates a texture from a file, supports: jpeg, png, tga, bmp, psd, gif, hdr, pic, pnm (see: https://github.com/nothings/stb/blob/master/stb_image.h)
 		/// @note The texture will be in VK_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout
-		Texture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format);
+		SampledTexture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format);
 
 		/// @brief Creates a texture with a single color
 		/// @note The texture will be in VK_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout
-		Texture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format);
+		SampledTexture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format);
 
 		/// @brief Creates an empty texture (primarily for render targets)
 		/// @note The texture will be in VK_LAYOUT_UNDEFINED layout
-		Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
+		SampledTexture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage);
 
 		/// @brief Wraps an existing image and view 
-		Texture(VulkanDevice& device, const SwapChain& swapChain);
+		SampledTexture(VulkanDevice& device, const SwapChain& swapChain);
 
-		Texture(const Texture&) = delete;
-		Texture(Texture&& other) noexcept;
-		~Texture();
+		SampledTexture(const SampledTexture&) = delete;
+		SampledTexture(SampledTexture&& other) noexcept;
+		~SampledTexture();
 
-		Texture& operator=(const Texture&) = delete;
-		Texture& operator=(Texture&& other) noexcept;
+		SampledTexture& operator=(const SampledTexture&) = delete;
+		SampledTexture& operator=(SampledTexture&& other) noexcept;
 
 		[[nodiscard]] auto extent() const -> VkExtent2D{ return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }

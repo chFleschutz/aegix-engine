@@ -29,16 +29,16 @@ namespace Aegix::Graphics
 	{
 	public:
 		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
-			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data = {});
+			std::shared_ptr<SampledTexture> albedo, std::shared_ptr<SampledTexture> normal, std::shared_ptr<SampledTexture> metalRoughness,
+			std::shared_ptr<SampledTexture> ao, std::shared_ptr<SampledTexture> emissive, DefaultMaterial::Data data = {});
 
 	private:
 		UniformBuffer m_uniformBuffer;
-		std::shared_ptr<Texture> m_albedoTexture;
-		std::shared_ptr<Texture> m_normalTexture;
-		std::shared_ptr<Texture> m_metalRoughnessTexture;
-		std::shared_ptr<Texture> m_aoTexture;
-		std::shared_ptr<Texture> m_emissiveTexture;
+		std::shared_ptr<SampledTexture> m_albedoTexture;
+		std::shared_ptr<SampledTexture> m_normalTexture;
+		std::shared_ptr<SampledTexture> m_metalRoughnessTexture;
+		std::shared_ptr<SampledTexture> m_aoTexture;
+		std::shared_ptr<SampledTexture> m_emissiveTexture;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
 		friend DefaultRenderSystem;

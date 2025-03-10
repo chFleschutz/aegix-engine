@@ -43,8 +43,8 @@ namespace Aegix::Graphics
 
 	private:
 		void extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo);
-		void downSample(VkCommandBuffer cmd, const Texture& bloom);
-		void upSample(VkCommandBuffer cmd, const Texture& bloom);
+		void downSample(VkCommandBuffer cmd, const SampledTexture& bloom);
+		void upSample(VkCommandBuffer cmd, const SampledTexture& bloom);
 
 
 		FrameGraphResourceHandle m_sceneColor;

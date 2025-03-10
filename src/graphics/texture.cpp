@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 	{
 	}
 
-	ImageView::ImageView(const Texture& texture, uint32_t baseMipLevel, uint32_t levelCount)
+	ImageView::ImageView(const SampledTexture& texture, uint32_t baseMipLevel, uint32_t levelCount)
 		: m_device{ texture.m_device }
 	{
 		assert(baseMipLevel + levelCount <= texture.m_mipLevels && "Invalid mip level range");
@@ -123,17 +123,17 @@ namespace Aegix::Graphics
 
 	// Texture -------------------------------------------------------------------
 
-	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
+	auto SampledTexture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<SampledTexture>
 	{
-		return std::make_shared<Texture>(Engine::instance().device(), texturePath, format);
+		return std::make_shared<SampledTexture>(Engine::instance().device(), texturePath, format);
 	}
 
-	auto Texture::create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
+	auto SampledTexture::create(VkExtent2D extent, glm::vec4 color, VkFormat format) -> std::shared_ptr<SampledTexture>
 	{
-		return std::make_shared<Texture>(Engine::instance().device(), extent.width, extent.height, color, format);
+		return std::make_shared<SampledTexture>(Engine::instance().device(), extent.width, extent.height, color, format);
 	}
 
-	Texture::Texture(VulkanDevice& device, const Config& config)
+	SampledTexture::SampledTexture(VulkanDevice& device, const Config& config)
 		: m_device{ device }
 	{
 		createImage(config);
@@ -141,7 +141,7 @@ namespace Aegix::Graphics
 		createSampler(config);
 	}
 
-	Texture::Texture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format)
+	SampledTexture::SampledTexture(VulkanDevice& device, const std::filesystem::path& texturePath, VkFormat format)
 		: m_device{ device }
 	{
 		int texWidth, texHeight, texChannels;
@@ -172,7 +172,7 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
-	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format)
+	SampledTexture::SampledTexture(VulkanDevice& device, uint32_t width, uint32_t height, const glm::vec4& color, VkFormat format)
 		: m_device{ device }
 	{
 		Config config{};
@@ -187,7 +187,7 @@ namespace Aegix::Graphics
 		fill(color);
 	}
 
-	Texture::Texture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
+	SampledTexture::SampledTexture(VulkanDevice& device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage)
 		: m_device{ device }
 	{
 		Config config{};
@@ -201,7 +201,7 @@ namespace Aegix::Graphics
 	}
 
 
-	Texture::Texture(VulkanDevice& device, const SwapChain& swapChain)
+	SampledTexture::SampledTexture(VulkanDevice& device, const SwapChain& swapChain)
 		: m_device{ device }, m_format{ swapChain.format() }, m_extent{ swapChain.extent() },
 		m_layout{ VK_IMAGE_LAYOUT_PRESENT_SRC_KHR }, m_image{ swapChain.image(0) }, m_imageView{ swapChain.imageView(0) }
 	{
@@ -209,7 +209,7 @@ namespace Aegix::Graphics
 		createSampler(config);
 	}
 
-	Texture::Texture(Texture&& other) noexcept
+	SampledTexture::SampledTexture(SampledTexture&& other) noexcept
 		: m_device{ other.m_device }, m_format{ other.m_format }, m_extent{ other.m_extent }, m_mipLevels{ other.m_mipLevels },
 		m_layout{ other.m_layout }, m_image{ other.m_image }, m_imageMemory{ other.m_imageMemory }, 
 		m_imageView{ other.m_imageView }, m_sampler{ other.m_sampler }
@@ -220,12 +220,12 @@ namespace Aegix::Graphics
 		other.m_sampler = VK_NULL_HANDLE;
 	}
 
-	Texture::~Texture()
+	SampledTexture::~SampledTexture()
 	{
 		destroy();
 	}
 
-	Texture& Texture::operator=(Texture&& other) noexcept
+	SampledTexture& SampledTexture::operator=(SampledTexture&& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -248,7 +248,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto Texture::descriptorImageInfo() const -> VkDescriptorImageInfo
+	auto SampledTexture::descriptorImageInfo() const -> VkDescriptorImageInfo
 	{
 		VkDescriptorImageInfo info{};
 		info.sampler = m_sampler;
@@ -258,7 +258,7 @@ namespace Aegix::Graphics
 		return info;
 	}
 
-	auto Texture::transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier
+	auto SampledTexture::transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier
 	{
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -280,7 +280,7 @@ namespace Aegix::Graphics
 		return barrier;
 	}
 
-	void Texture::fill(const glm::vec4& color)
+	void SampledTexture::fill(const glm::vec4& color)
 	{
 		auto pixelCount = m_extent.width * m_extent.height;
 
@@ -301,7 +301,7 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
-	void Texture::fill(const void* data, VkDeviceSize size)
+	void SampledTexture::fill(const void* data, VkDeviceSize size)
 	{
 		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
@@ -312,7 +312,7 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
-	void Texture::fill(const Buffer& buffer)
+	void SampledTexture::fill(const Buffer& buffer)
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
 
@@ -323,7 +323,7 @@ namespace Aegix::Graphics
 		m_device.endSingleTimeCommands(cmd);
 	}
 
-	void Texture::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)
+	void SampledTexture::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)
 	{
 		if (m_layout == newLayout)
 			return;
@@ -332,7 +332,7 @@ namespace Aegix::Graphics
 		m_layout = newLayout;
 	}
 
-	void Texture::transitionLayout(VkImageLayout newLayout)
+	void SampledTexture::transitionLayout(VkImageLayout newLayout)
 	{
 		if (m_layout == newLayout)
 			return;
@@ -345,7 +345,7 @@ namespace Aegix::Graphics
 		m_device.endSingleTimeCommands(cmd);
 	}
 
-	void Texture::resize(uint32_t width, uint32_t height, VkImageUsageFlags usage)
+	void SampledTexture::resize(uint32_t width, uint32_t height, VkImageUsageFlags usage)
 	{
 		m_device.scheduleDeletion(m_imageView);
 		m_device.scheduleDeletion(m_image);
@@ -361,20 +361,20 @@ namespace Aegix::Graphics
 		createImageView(config);
 	}
 
-	void Texture::update(const SwapChain& swapChain)
+	void SampledTexture::update(const SwapChain& swapChain)
 	{
 		uint32_t index = swapChain.currentImageIndex();
 		update(swapChain.image(index), swapChain.imageView(index), VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
 
-	void Texture::update(VkImage image, VkImageView imageView, VkImageLayout layout)
+	void SampledTexture::update(VkImage image, VkImageView imageView, VkImageLayout layout)
 	{
 		m_layout = layout;
 		m_image = image;
 		m_imageView = imageView;
 	}
 
-	void Texture::generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout)
+	void SampledTexture::generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout)
 	{
 		transitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
@@ -454,7 +454,7 @@ namespace Aegix::Graphics
 		m_layout = finalLayout;
 	}
 
-	void Texture::createImage(const Config& config)
+	void SampledTexture::createImage(const Config& config)
 	{
 		m_format = config.format;
 		m_extent = config.extent;
@@ -489,7 +489,7 @@ namespace Aegix::Graphics
 		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_imageMemory);
 	}
 
-	void Texture::createImageView(const Config& config)
+	void SampledTexture::createImageView(const Config& config)
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -505,7 +505,7 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageView))
 	}
 
-	void Texture::createSampler(const Config& config)
+	void SampledTexture::createSampler(const Config& config)
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -528,7 +528,7 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler));
 	}
 
-	void Texture::destroy()
+	void SampledTexture::destroy()
 	{
 		if (m_imageView)
 			m_device.scheduleDeletion(m_imageView);

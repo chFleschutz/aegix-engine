@@ -36,9 +36,9 @@ public:
 		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
 		plane.addComponent<Mesh>(planeMesh);
 
-		auto textureBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto textureWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureBlack = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureWhite = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultNormal = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
 			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);

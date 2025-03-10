@@ -216,7 +216,7 @@ namespace Aegix::Tools
 		return attachment;
 	}
 
-	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
+	auto renderingAttachmentInfo(const Graphics::SampledTexture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
 	{
 		return renderingAttachmentInfo(texture.imageView(), texture.layout(), loadOp, clearValue);
 	}

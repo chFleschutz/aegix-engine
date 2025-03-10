@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 		return refRes;
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> Texture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> SampledTexture&
 	{
 		auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
@@ -92,7 +92,7 @@ namespace Aegix::Graphics
 		return m_textures[res.handle.id];
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const SampledTexture&
 	{
 		const auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
@@ -117,7 +117,7 @@ namespace Aegix::Graphics
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
-	auto FrameGraphResourcePool::addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, 
+	auto FrameGraphResourcePool::addResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo, 
 		FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
 	{
 		auto ResourceHandle = addResource(createInfo, producer);
@@ -126,7 +126,7 @@ namespace Aegix::Graphics
 		return ResourceHandle;
 	}
 
-	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+	auto FrameGraphResourcePool::addExternalResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 	{
 		auto ResourceHandle = addResource(createInfo, FrameGraphNode::INVALID_HANDLE);
 		m_textures.emplace_back(std::move(texture));
@@ -225,7 +225,7 @@ namespace Aegix::Graphics
 			info.extent = { DEFAULT_WIDTH, DEFAULT_HEIGHT };
 		}
 
-		m_textures.emplace_back(device, Texture::Config{
+		m_textures.emplace_back(device, SampledTexture::Config{
 			.extent = info.extent,
 			.format = info.format,
 			.usage = info.usage,

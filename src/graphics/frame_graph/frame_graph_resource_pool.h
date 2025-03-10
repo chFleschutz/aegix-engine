@@ -144,18 +144,18 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
 
 		/// @brief Returns the texture for the given handle (must be a texture resource)
-		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> Texture&;
-		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&;
+		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> SampledTexture&;
+		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const SampledTexture&;
 
 		[[nodiscard]] auto resources() -> std::vector<FrameGraphResource>& { return m_resources; }
 		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNode>& { return m_nodes; }
 
 		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
 		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
-		auto addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
+		auto addResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
 
 		/// @brief Adds an existing texture as a resource
-		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
+		auto addExternalResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
 
 		template<typename T>
 			requires std::is_base_of_v<RenderSystem, T>
@@ -189,7 +189,7 @@ namespace Aegix::Graphics
 
 		std::vector<FrameGraphNode> m_nodes;
 		std::vector<FrameGraphResource> m_resources;
-		std::vector<Texture> m_textures;
+		std::vector<SampledTexture> m_textures;
 		std::vector<Buffer> m_buffers;
 
 		std::array<RenderStage, static_cast<size_t>(RenderStage::Type::Count)> m_renderStages;
@@ -210,7 +210,7 @@ namespace Aegix::Graphics
 			return m_pool.addResource(createInfo, m_node);
 		}
 
-		auto add(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+		auto add(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 		{
 			return m_pool.addResource(std::move(texture), createInfo, m_node);
 		}

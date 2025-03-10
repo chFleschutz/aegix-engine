@@ -6,8 +6,8 @@
 namespace Aegix::Graphics
 {
 	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
-		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
-		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data)
+		std::shared_ptr<SampledTexture> albedo, std::shared_ptr<SampledTexture> normal, std::shared_ptr<SampledTexture> metalRoughness,
+		std::shared_ptr<SampledTexture> ao, std::shared_ptr<SampledTexture> emissive, DefaultMaterial::Data data)
 		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
 		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, m_uniformBuffer{ device, data }
 	{

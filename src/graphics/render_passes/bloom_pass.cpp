@@ -155,7 +155,7 @@ namespace Aegix::Graphics
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
-	void BloomPass::downSample(VkCommandBuffer cmd, const Texture& bloom)
+	void BloomPass::downSample(VkCommandBuffer cmd, const SampledTexture& bloom)
 	{
 		assert(bloom.layout() == VK_IMAGE_LAYOUT_GENERAL);
 
@@ -212,7 +212,7 @@ namespace Aegix::Graphics
 		);
 	}
 
-	void BloomPass::upSample(VkCommandBuffer cmd, const Texture& bloom)
+	void BloomPass::upSample(VkCommandBuffer cmd, const SampledTexture& bloom)
 	{
 		m_upsamplePipeline->bind(cmd);
 
