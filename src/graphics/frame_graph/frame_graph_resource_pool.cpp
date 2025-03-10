@@ -1,9 +1,9 @@
 #include "frame_graph_resource_pool.h"
 
+#include "core/logging.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
 #include <cassert>
-
 
 namespace Aegix::Graphics
 {
@@ -151,6 +151,9 @@ namespace Aegix::Graphics
 					break;
 				}
 			}
+
+			if (resource.handle == FrameGraphResource::INVALID_HANDLE)
+				ALOG::fatal("Failed to resolve reference '{}'", resource.name);
 
 			assert(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
 		}
