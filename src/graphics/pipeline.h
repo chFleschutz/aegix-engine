@@ -88,6 +88,8 @@ namespace Aegix::Graphics
 			GraphicsBuilder& addColorAttachment(VkFormat colorFormat, bool alphaBlending = false);
 			GraphicsBuilder& setDepthAttachment(VkFormat depthFormat);
 			GraphicsBuilder& setStencilFormat(VkFormat stencilFormat);
+			GraphicsBuilder& setDepthTest(bool enableDepthTest, bool writeDepth, VkCompareOp compareOp = VK_COMPARE_OP_LESS);
+			GraphicsBuilder& setCullMode(VkCullModeFlags cullMode);
 			GraphicsBuilder& setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions);
 			GraphicsBuilder& setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions);
 

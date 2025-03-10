@@ -135,6 +135,20 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setDepthTest(bool enableDepthTest, bool writeDepth, VkCompareOp compareOp)
+	{
+		m_config.depthStencilInfo.depthTestEnable = enableDepthTest;
+		m_config.depthStencilInfo.depthWriteEnable = writeDepth;
+		m_config.depthStencilInfo.depthCompareOp = compareOp;
+		return *this;
+	}
+
+	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setCullMode(VkCullModeFlags cullMode)
+	{
+		m_config.rasterizationInfo.cullMode = cullMode;
+		return *this;
+	}
+
 	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
 	{
 		m_config.bindingDescriptions = bindingDescriptions;

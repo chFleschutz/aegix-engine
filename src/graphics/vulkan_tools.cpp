@@ -1,5 +1,6 @@
 #include "vulkan_tools.h"
 
+#include "core/logging.h"
 #include "graphics/globals.h"
 #include "utils/file.h"
 
@@ -236,6 +237,8 @@ namespace Aegix::Tools
 	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule
 	{
 		auto code = File::readBinary(path);
+		if (code.empty())
+			ALOG::fatal("Failed to read shader file: {}", path.string());
 		assert(!code.empty() && "Shader code is empty");
 
 		return createShaderModule(device, code);

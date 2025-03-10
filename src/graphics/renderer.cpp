@@ -134,7 +134,7 @@ namespace Aegix::Graphics
 		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
 		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
 		m_frameGraph.add<SSAOPass>(m_device, *m_globalPool);
-		m_frameGraph.add<SkyBoxPass>();
+		m_frameGraph.add<SkyBoxPass>(m_device, *m_globalPool);
 
 		m_frameGraph.compile(m_device);
 	}
