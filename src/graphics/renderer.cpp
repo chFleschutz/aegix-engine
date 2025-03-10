@@ -7,6 +7,7 @@
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
+#include "graphics/render_passes/sky_box_pass.h"
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
@@ -133,6 +134,7 @@ namespace Aegix::Graphics
 		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
 		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
 		m_frameGraph.add<SSAOPass>(m_device, *m_globalPool);
+		m_frameGraph.add<SkyBoxPass>();
 
 		m_frameGraph.compile(m_device);
 	}
