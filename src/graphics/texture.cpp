@@ -66,61 +66,6 @@ namespace Aegix::Graphics
 	}
 
 
-	Sampler::Sampler(VulkanDevice& device, VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy)
-		: m_device{ device }
-	{
-		VkSamplerCreateInfo samplerInfo{};
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = magFilter;
-		samplerInfo.minFilter = minFilter;
-		samplerInfo.addressModeU = addressMode;
-		samplerInfo.addressModeV = addressMode;
-		samplerInfo.addressModeW = addressMode;
-		samplerInfo.anisotropyEnable = anisotropy;
-		samplerInfo.maxAnisotropy = m_device.properties().limits.maxSamplerAnisotropy;
-		samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.mipLodBias = 0.0f;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
-
-		VK_CHECK(vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler))
-	}
-
-	Sampler::Sampler(Sampler&& other) noexcept
-		: m_device{ other.m_device }, m_sampler{ other.m_sampler }
-	{
-		other.m_sampler = VK_NULL_HANDLE;
-	}
-
-	Sampler::~Sampler()
-	{
-		destroy();
-	}
-
-	auto Sampler::operator=(Sampler&& other) noexcept -> Sampler&
-	{
-		if (this != &other)
-		{
-			destroy();
-			m_sampler = other.m_sampler;
-			other.m_sampler = VK_NULL_HANDLE;
-		}
-		return *this;
-	}
-
-	void Sampler::destroy()
-	{
-		if (m_sampler)
-		{
-			m_device.scheduleDeletion(m_sampler);
-		}
-	}
-
-
 	// Texture -------------------------------------------------------------------
 
 	auto SampledTexture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<SampledTexture>

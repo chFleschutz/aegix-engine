@@ -107,7 +107,7 @@ namespace Aegix::Graphics
 		auto pixels = stbi_load(path.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		if (!pixels)
 		{
-			ALOG::fatal("Failed to load image: '{}'", path);
+			ALOG::fatal("Failed to load image: '{}'", path.string());
 			assert(false && "Failed to load image");
 		}
 

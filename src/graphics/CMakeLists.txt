@@ -21,6 +21,8 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/transparent_pass.h"
 	"resources/image.cpp"
 	"resources/image.h"
+	"resources/sampler.cpp"
+	"resources/sampler.h"
 	"systems/default_render_system.cpp"
 	"systems/default_render_system.h"
 	"systems/point_light_system.cpp"
