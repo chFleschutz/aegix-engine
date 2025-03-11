@@ -20,7 +20,8 @@ public:
 
 		// SKYBOX
 		auto& skyBox = scene.skybox().addComponent<Skybox>(Graphics::Texture{ renderer.device() });
-		skyBox.cubemap.createCube(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+		skyBox.cubemap.createCube(ASSETS_DIR "Environments/KloppenheimSky.hdr");
+
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
