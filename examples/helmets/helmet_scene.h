@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/engine.h"
 #include "graphics/systems/default_render_system.h"
 #include "graphics/systems/point_light_system.h"
 #include "scene/components.h"
@@ -17,6 +18,10 @@ public:
 		auto& renderer = Engine::instance().renderer();
 		renderer.addRenderSystem<Graphics::PointLightSystem>();
 
+		// SKYBOX
+		auto& skyBox = scene.skybox().addComponent<Skybox>(Graphics::Texture{ renderer.device() });
+		skyBox.cubemap.createCube(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
 			.location = { -3.0f, -6.0f, 3.0f},
@@ -31,7 +36,7 @@ public:
 		scifiHelmet.component<Transform>().location = { 2.0f, 0.0f, 2.0f };
 
 		auto plane = scene.createEntity("Plane");
-		plane.component<Transform>().scale = { 20.0f, 20.0f, 20.0f };
+		plane.component<Transform>().scale = { 2.0f, 2.0f, 2.0f };
 
 		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
 		plane.addComponent<Mesh>(planeMesh);
@@ -40,12 +45,12 @@ public:
 		auto textureWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			textureWhite, defaultNormal, textureWhite, textureBlack, textureBlack);
+			textureWhite, defaultNormal, textureWhite, textureWhite, textureBlack);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
 
 		// LIGHTS
-		scene.ambientLight().component<AmbientLight>().intensity = 0.1f;
-		scene.directionalLight().component<DirectionalLight>().intensity = 0.0f;
+		scene.ambientLight().component<AmbientLight>().intensity = 0.2f;
+		scene.directionalLight().component<DirectionalLight>().intensity = 5.0f;
 
 		auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
 		light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
