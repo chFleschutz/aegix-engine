@@ -68,7 +68,8 @@ namespace Aegix::Graphics
 
 	void Texture::createCube(const std::filesystem::path& path)
 	{
-		auto& device = m_image.device();
+		// HDR environment maps are stored as equirectangular images (longitude/latitude 2D image)
+		// To convert it to a cubemap, the image is sampled in a compute shader and written to the cubemap 
 
 		int width = 0;
 		int height = 0;
@@ -81,7 +82,8 @@ namespace Aegix::Graphics
 		}
 
 		// Upload data to staging buffer
-		VkDeviceSize imageSize = static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height) * 4 * sizeof(float);
+		auto& device = m_image.device();
+		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
 		Buffer stagingBuffer{ device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		stagingBuffer.map();
@@ -96,7 +98,8 @@ namespace Aegix::Graphics
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		
 		// Create cubemap image
-		createCube(1024, 1024, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+		uint32_t cubeSize = width / 4; // Cubemap needs 4 horizontal faces
+		createCube(cubeSize, cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
@@ -134,7 +137,7 @@ namespace Aegix::Graphics
 			uint32_t groupCountY = (height + height - 1) / 16;
 			vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
 
-			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
 		device.endSingleTimeCommands(cmd);
