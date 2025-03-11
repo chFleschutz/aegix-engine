@@ -52,7 +52,8 @@ namespace Aegix::Graphics
 		void create2D(const std::filesystem::path& path, VkFormat format);
 
 		void createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::Config::CALCULATE_MIP_LEVELS);
-		
+		void createCube(const std::filesystem::path& path);
+
 		void resize(VkExtent3D newSize, VkImageUsageFlags usage);
 		
 	private:

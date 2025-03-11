@@ -368,6 +368,9 @@ namespace Aegix::Tools
 	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
 		VkImageLayout newLayout, uint32_t miplevels, uint32_t layoutCount)
 	{
+		if (oldLayout == newLayout)
+			return;
+
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		barrier.oldLayout = oldLayout;

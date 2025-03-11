@@ -1,0 +1,41 @@
+#version 450
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(set = 0, binding = 0) uniform sampler2D equirectanglarMap;
+layout(set = 0, binding = 1, rgba16f) uniform writeonly imageCube cubeMap;
+
+const float PI = 3.14159265359;
+const vec2 invAtan = vec2(0.1591, 0.3183);
+
+vec3 sampleVector(vec2 uv)
+{
+    vec3 dir;
+    if (gl_GlobalInvocationID.z == 0)      dir = vec3(1.0,  uv.y, -uv.x);
+    else if (gl_GlobalInvocationID.z == 1) dir = vec3(-1.0, uv.y,  uv.x);
+    else if (gl_GlobalInvocationID.z == 2) dir = vec3(uv.x, 1.0, -uv.y);
+    else if (gl_GlobalInvocationID.z == 3) dir = vec3(uv.x, -1.0, uv.y);
+    else if (gl_GlobalInvocationID.z == 4) dir = vec3(uv.x, uv.y, 1.0);
+    else if (gl_GlobalInvocationID.z == 5) dir = vec3(-uv.x, uv.y, -1.0);
+    return normalize(dir);
+}
+
+vec2 sampleEquirectangular(vec3 dir)
+{
+    vec2 uv = vec2(atan(dir.z, dir.x), asin(dir.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
+
+void main()
+{
+	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    vec2 st = vec2(pixelCoords) / vec2(imageSize(cubeMap));
+    vec2 uv = 2.0 * vec2(st.x, 1.0 - st.y) - 1.0;
+
+    vec3 dir = sampleVector(uv);
+    vec2 equirectUV = sampleEquirectangular(dir);
+    vec4 color = texture(equirectanglarMap, equirectUV);
+    imageStore(cubeMap, ivec3(gl_GlobalInvocationID), color);
+}

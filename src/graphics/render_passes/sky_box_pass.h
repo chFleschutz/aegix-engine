@@ -16,15 +16,24 @@ namespace Aegix::Graphics
 	{
 	public:
 		SkyBoxPass(VulkanDevice& device, DescriptorPool& pool)
+			: m_skyBoxTexture{ device }
 		{
+			// TODO: Remove hard-coded path
+			//m_skyBoxTexture.createCube("C:/Users/chfle/Downloads/autumn_field_puresky_2k.hdr");
+
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
 				//.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
-			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
+
+			m_descriptorSet = DescriptorSet::Builder(device, pool, *m_descriptorSetLayout)
+				//.addTexture(0, m_skyBoxTexture)
+				.build();
+
 			m_pipelineLayout = PipelineLayout::Builder(device)
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
 				.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
 				.build();
+
 			m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 				.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
 				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.frag.spv")
@@ -64,7 +73,7 @@ namespace Aegix::Graphics
 				std::vector<uint32_t> indices{
 					0, 3, 2, 2, 1, 0,
 					1, 2, 5, 5, 2, 6,
-					4, 5, 6, 6, 7, 4,					
+					4, 5, 6, 6, 7, 4,
 					0, 4, 7, 7, 3, 0,
 					2, 3, 7, 7, 6, 2,
 					5, 4, 0, 0, 1, 5,
@@ -79,83 +88,85 @@ namespace Aegix::Graphics
 					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 				device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), indices.size() * sizeof(uint32_t));
 			}
-			}
+		}
 
-				virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
-			{
-				m_sceneColor = builder.add(FrameGraphResourceCreateInfo{
-					.name = "SceneColor",
-					.type = FrameGraphResourceType::Reference,
-					.usage = FrameGraphResourceUsage::ColorAttachment,
-					});
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+		{
+			m_sceneColor = builder.add(FrameGraphResourceCreateInfo{
+				.name = "SceneColor",
+				.type = FrameGraphResourceType::Reference,
+				.usage = FrameGraphResourceUsage::ColorAttachment,
+				});
 
-				m_depth = builder.add(FrameGraphResourceCreateInfo{
-					.name = "Depth",
-					.type = FrameGraphResourceType::Reference,
-					.usage = FrameGraphResourceUsage::DepthStencilAttachment,
-					});
+			m_depth = builder.add(FrameGraphResourceCreateInfo{
+				.name = "Depth",
+				.type = FrameGraphResourceType::Reference,
+				.usage = FrameGraphResourceUsage::DepthStencilAttachment,
+				});
 
-				return FrameGraphNodeCreateInfo{
-					.name = "Sky Box",
-					.inputs = { m_sceneColor, m_depth },
-					.outputs = { m_sceneColor },
-				};
-			}
+			return FrameGraphNodeCreateInfo{
+				.name = "Sky Box",
+				.inputs = { m_sceneColor, m_depth },
+				.outputs = { m_sceneColor },
+			};
+		}
 
-			virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
-			{
-				VkCommandBuffer cmd = frameInfo.commandBuffer;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		{
+			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
-				auto& sceneColorTexture = resources.texture(m_sceneColor);
-				auto& depthTexture = resources.texture(m_depth);
-				auto colorAttachment = Tools::renderingAttachmentInfo(sceneColorTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
-				auto depthAttachment = Tools::renderingAttachmentInfo(depthTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
+			auto& sceneColorTexture = resources.texture(m_sceneColor);
+			auto& depthTexture = resources.texture(m_depth);
+			auto colorAttachment = Tools::renderingAttachmentInfo(sceneColorTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
+			auto depthAttachment = Tools::renderingAttachmentInfo(depthTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
 
-				VkRenderingInfo renderInfo{};
-				renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-				renderInfo.renderArea.offset = { 0, 0 };
-				renderInfo.renderArea.extent = frameInfo.swapChainExtent;
-				renderInfo.layerCount = 1;
-				renderInfo.pColorAttachments = &colorAttachment;
-				renderInfo.colorAttachmentCount = 1;
-				renderInfo.pDepthAttachment = &depthAttachment;
+			VkRenderingInfo renderInfo{};
+			renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+			renderInfo.renderArea.offset = { 0, 0 };
+			renderInfo.renderArea.extent = frameInfo.swapChainExtent;
+			renderInfo.layerCount = 1;
+			renderInfo.pColorAttachments = &colorAttachment;
+			renderInfo.colorAttachmentCount = 1;
+			renderInfo.pDepthAttachment = &depthAttachment;
 
-				vkCmdBeginRendering(cmd, &renderInfo);
-				Tools::vk::cmdViewport(cmd, frameInfo.swapChainExtent);
-				Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
+			vkCmdBeginRendering(cmd, &renderInfo);
+			Tools::vk::cmdViewport(cmd, frameInfo.swapChainExtent);
+			Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
 
-				m_pipeline->bind(cmd);
+			m_pipeline->bind(cmd);
 
-				auto& camera = frameInfo.scene.mainCamera().component<Camera>();
-				SkyBoxUniforms uniforms{
-					.view = camera.viewMatrix,
-					.projection = camera.projectionMatrix
-				};
-				Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
+			auto& camera = frameInfo.scene.mainCamera().component<Camera>();
+			SkyBoxUniforms uniforms{
+				.view = camera.viewMatrix,
+				.projection = camera.projectionMatrix
+			};
+			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
 
-				Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout,
-					m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+			Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout,
+				m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
-				VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
-				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-				vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+			VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
 
-				vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
+			vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
-				vkCmdEndRendering(cmd);
-			}
+			vkCmdEndRendering(cmd);
+		}
 
-		private:
-			FrameGraphResourceHandle m_sceneColor;
-			FrameGraphResourceHandle m_depth;
+	private:
+		FrameGraphResourceHandle m_sceneColor;
+		FrameGraphResourceHandle m_depth;
 
-			std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
-			std::unique_ptr<DescriptorSet> m_descriptorSet;
-			std::unique_ptr<PipelineLayout> m_pipelineLayout;
-			std::unique_ptr<Pipeline> m_pipeline;
+		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
+		std::unique_ptr<DescriptorSet> m_descriptorSet;
+		std::unique_ptr<PipelineLayout> m_pipelineLayout;
+		std::unique_ptr<Pipeline> m_pipeline;
 
-			std::unique_ptr<Buffer> m_vertexBuffer;
-			std::unique_ptr<Buffer> m_indexBuffer;
-		};
-	}
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		std::unique_ptr<Buffer> m_indexBuffer;
+
+		Texture m_skyBoxTexture;
+	};
+}

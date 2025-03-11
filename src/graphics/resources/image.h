@@ -24,6 +24,7 @@ namespace Aegix::Graphics
 			uint32_t layerCount = 1;
 			VkImageUsageFlags usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 			VkImageType imageType = VK_IMAGE_TYPE_2D;
+			VkImageCreateFlags flags = 0;
 		};
 
 		Image(VulkanDevice& device);
@@ -36,6 +37,7 @@ namespace Aegix::Graphics
 
 		operator VkImage() const { return m_image; }
 
+		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
 		[[nodiscard]] auto image() const -> VkImage { return m_image; }
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto extent() const -> VkExtent3D { return m_extent; }
@@ -49,10 +51,13 @@ namespace Aegix::Graphics
 		void create(const Config& config);
 		void create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = 1, uint32_t layerCount = 1);
 		void create(const std::filesystem::path& path, VkFormat format);
+		void createCube(const std::filesystem::path& path, VkFormat format);
 
 		void fill(const Buffer& buffer);
 		void fill(const void* data, VkDeviceSize size);
 		void fillRGBA8(const glm::vec4& color);
+
+		void copyFrom(VkCommandBuffer cmd, const Buffer& src);
 
 		void resize(VkExtent3D extent, VkImageUsageFlags usage);
 

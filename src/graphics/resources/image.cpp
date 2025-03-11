@@ -1,5 +1,8 @@
 #include "image.h"
 
+#include "core/engine.h"
+#include "graphics/descriptors.h"
+#include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -76,7 +79,7 @@ namespace Aegix::Graphics
 		imageInfo.usage = config.usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = 0;
+		imageInfo.flags = config.flags;
 
 		if (m_mipLevels > 1)
 		{
@@ -95,14 +98,14 @@ namespace Aegix::Graphics
 			.layerCount = layerCount,
 			.usage = usage,
 		};
-		
+
 		create(config);
 	}
 
 	void Image::create(const std::filesystem::path& path, VkFormat format)
 	{
 		int texWidth = 0;
-		int texHeight = 0; 
+		int texHeight = 0;
 		int texChannels = 0;
 		auto pixels = stbi_load(path.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		if (!pixels)
@@ -113,7 +116,7 @@ namespace Aegix::Graphics
 
 		m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };
 		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
-		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer(pixels);
@@ -133,6 +136,11 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
+	void Image::createCube(const std::filesystem::path& path, VkFormat format)
+	{
+
+	}
+
 	void Image::fill(const Buffer& buffer)
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
@@ -146,7 +154,7 @@ namespace Aegix::Graphics
 
 	void Image::fill(const void* data, VkDeviceSize size)
 	{
-		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		stagingBuffer.map();
 		stagingBuffer.writeToBuffer(data);
@@ -165,6 +173,13 @@ namespace Aegix::Graphics
 		uint32_t rgba = (a << 24) | (b << 16) | (g << 8) | r;
 		std::vector<uint32_t> pixels(pixelCount, rgba);
 		fill(pixels.data(), sizeof(uint32_t) * pixelCount);
+	}
+
+	void Image::copyFrom(VkCommandBuffer cmd, const Buffer& src)
+	{
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
+		Tools::vk::cmdCopyBufferToImage(cmd, src.buffer(), m_image, m_extent, m_layerCount);
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_mipLevels, m_layerCount);
 	}
 
 	void Image::resize(VkExtent3D extent, VkImageUsageFlags usage)
