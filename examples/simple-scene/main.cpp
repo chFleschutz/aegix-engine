@@ -4,7 +4,7 @@
 
 auto main() -> int
 {
-	Aegix::Engine engine{};
+	auto& engine = Aegix::Engine::instance();
 	engine.loadScene<SimpleScene>();
 	engine.run();
 }

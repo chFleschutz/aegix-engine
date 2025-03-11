@@ -9,24 +9,16 @@ namespace Aegix
 {
 	Engine::Engine()
 	{
-		assert(s_instance == nullptr && "Only one instance of Engine is allowed");
-		s_instance = this;
-
 		m_layerStack.push<Core::EditorLayer>();
 		
 		ALOG::info("Engine Initialized!");
 		Logging::logo();
 	}
 
-	Engine::~Engine()
-	{
-		s_instance = nullptr;
-	}
-
 	Engine& Engine::instance()
 	{
-		assert(s_instance != nullptr && "Engine instance is not created");
-		return *s_instance;
+		static Engine instance;
+		return instance;
 	}
 
 	void Engine::run()

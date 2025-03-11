@@ -21,7 +21,7 @@ namespace Aegix
 		Engine();
 		Engine(const Engine&) = delete;
 		Engine(Engine&&) = delete;
-		~Engine();
+		~Engine() = default;
 
 		Engine& operator=(const Engine&) = delete;
 		Engine& operator=(Engine&&) = delete;
@@ -48,8 +48,6 @@ namespace Aegix
 
 	private:
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
-
-		inline static Engine* s_instance = nullptr;
 
 		Logging m_logging{};
 		Core::LayerStack m_layerStack{};

@@ -31,7 +31,7 @@ public:
 
 auto main() -> int
 {
-	Aegix::Engine engine;
+	auto& engine = Aegix::Engine::instance();
 	engine.loadScene<Sponza>();
 	engine.run();
 }
