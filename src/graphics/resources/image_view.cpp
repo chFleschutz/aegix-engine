@@ -93,6 +93,7 @@ namespace Aegix::Graphics
 		if (m_imageView)
 		{
 			m_device.scheduleDeletion(m_imageView);
+			m_imageView = VK_NULL_HANDLE;
 		}
 	}
 }

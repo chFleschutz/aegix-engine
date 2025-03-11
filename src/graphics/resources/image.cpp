@@ -138,11 +138,6 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
-	void Image::createCube(const std::filesystem::path& path, VkFormat format)
-	{
-
-	}
-
 	void Image::fill(const Buffer& buffer)
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
@@ -322,10 +317,12 @@ namespace Aegix::Graphics
 		if (m_image)
 		{
 			m_device.scheduleDeletion(m_image);
+			m_image = VK_NULL_HANDLE;
 		}
 		if (m_memory)
 		{
 			m_device.scheduleDeletion(m_memory);
+			m_memory = VK_NULL_HANDLE;
 		}
 	}
 }

@@ -51,7 +51,6 @@ namespace Aegix::Graphics
 		void create(const Config& config);
 		void create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = 1, uint32_t layerCount = 1);
 		void create(const std::filesystem::path& path, VkFormat format);
-		void createCube(const std::filesystem::path& path, VkFormat format);
 
 		void fill(const Buffer& buffer);
 		void fill(const void* data, VkDeviceSize size);

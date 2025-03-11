@@ -72,6 +72,7 @@ namespace Aegix::Graphics
 		if (m_sampler)
 		{
 			m_device.scheduleDeletion(m_sampler);
+			m_sampler = VK_NULL_HANDLE;
 		}
 	}
 }
