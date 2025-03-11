@@ -248,7 +248,7 @@ namespace Aegix::Graphics
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = m_layerCount;
 		barrier.subresourceRange.levelCount = 1;
 
 		for (uint32_t i = 1; i < m_mipLevels; i++)
@@ -270,7 +270,7 @@ namespace Aegix::Graphics
 			blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.srcSubresource.mipLevel = i - 1;
 			blit.srcSubresource.baseArrayLayer = 0;
-			blit.srcSubresource.layerCount = 1;
+			blit.srcSubresource.layerCount = m_layerCount;
 			blit.srcOffsets[0] = { 0, 0, 0 };
 			blit.srcOffsets[1].x = static_cast<int32_t>(m_extent.width >> (i - 1));
 			blit.srcOffsets[1].y = static_cast<int32_t>(m_extent.height >> (i - 1));
@@ -278,7 +278,7 @@ namespace Aegix::Graphics
 			blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.dstSubresource.mipLevel = i;
 			blit.srcSubresource.baseArrayLayer = 0;
-			blit.dstSubresource.layerCount = 1;
+			blit.dstSubresource.layerCount = m_layerCount;
 			blit.dstOffsets[0] = { 0, 0, 0 };
 			blit.dstOffsets[1].x = static_cast<int32_t>(m_extent.width >> i);
 			blit.dstOffsets[1].y = static_cast<int32_t>(m_extent.height >> i);
