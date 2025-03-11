@@ -33,6 +33,8 @@ namespace Aegix::Graphics
 
 	void Sampler::create(const Config& config)
 	{
+		destroy();
+
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		samplerInfo.magFilter = config.magFilter;

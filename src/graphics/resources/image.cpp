@@ -55,6 +55,8 @@ namespace Aegix::Graphics
 
 	void Image::create(const Config& config)
 	{
+		destroy();
+
 		m_format = config.format;
 		m_extent = config.extent;
 		m_mipLevels = config.mipLevels;
