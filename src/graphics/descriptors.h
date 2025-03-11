@@ -2,7 +2,7 @@
 
 #include "graphics/device.h"
 #include "graphics/globals.h"
-#include "graphics/texture.h"
+#include "graphics/resources/texture.h"
 #include "graphics/uniform_buffer.h"
 
 #include <memory>
@@ -101,8 +101,8 @@ namespace Aegix::Graphics
 		DescriptorWriter& operator=(const DescriptorWriter&) = delete;
 		DescriptorWriter& operator=(DescriptorWriter&&) = default;
 
-		DescriptorWriter& writeImage(uint32_t binding, const SampledTexture& texture);
-		DescriptorWriter& writeImage(uint32_t binding, const SampledTexture& texture, VkImageLayout layoutOverride);
+		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture);
+		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride);
 		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo);
 
 		DescriptorWriter& writeBuffer(uint32_t binding, const Buffer& buffer);
@@ -140,8 +140,8 @@ namespace Aegix::Graphics
 			}
 
 			Builder& addBuffer(uint32_t binding, const UniformBuffer& buffer);
-			Builder& addTexture(uint32_t binding, const SampledTexture& texture);
-			Builder& addTexture(uint32_t binding, std::shared_ptr<SampledTexture> texture);
+			Builder& addTexture(uint32_t binding, const Texture& texture);
+			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture);
 
 			std::unique_ptr<DescriptorSet> build();
 

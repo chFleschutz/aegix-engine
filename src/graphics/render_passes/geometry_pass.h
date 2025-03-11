@@ -123,7 +123,7 @@ namespace Aegix::Graphics
 			auto& emissive = resources.texture(m_emissive);
 			auto& depth = resources.texture(m_depth);
 
-			VkExtent2D extent = albedo.extent();
+			VkExtent2D extent = albedo.extent2D();
 
 			auto colorAttachments = std::array{
 				Tools::renderingAttachmentInfo(position, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),

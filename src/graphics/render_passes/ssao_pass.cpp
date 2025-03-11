@@ -68,10 +68,10 @@ namespace Aegix::Graphics
 			n.y = dis(gen) * 2.0f - 1.0f;
 		}
 
-		m_ssaoNoise = std::make_unique<SampledTexture>(device, NOISE_SIZE, NOISE_SIZE, VK_FORMAT_R16G16_UNORM,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL | VK_IMAGE_USAGE_SAMPLED_BIT);
-		m_ssaoNoise->fill(noise.data(), sizeof(glm::vec2) * noise.size());
-		m_ssaoNoise->transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		m_ssaoNoise = std::make_unique<Texture>(device);
+		m_ssaoNoise->create2D(NOISE_SIZE, NOISE_SIZE, VK_FORMAT_R16G16_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL | VK_IMAGE_USAGE_SAMPLED_BIT);
+		m_ssaoNoise->image().fill(noise.data(), sizeof(glm::vec2) * noise.size());
+		m_ssaoNoise->image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	auto SSAOPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo

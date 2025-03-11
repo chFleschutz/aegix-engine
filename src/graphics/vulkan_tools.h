@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/texture.h"
 #include "core/logging.h"
+#include "graphics/resources/texture.h"
 
 #include <vulkan/vulkan.h>
 
@@ -40,7 +40,7 @@ namespace Aegix::Tools
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
 
 	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
-	auto renderingAttachmentInfo(const Graphics::SampledTexture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f }) -> VkRenderingAttachmentInfo;
+	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f }) -> VkRenderingAttachmentInfo;
 
 	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule;
 	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule;

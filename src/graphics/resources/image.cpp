@@ -128,18 +128,9 @@ namespace Aegix::Graphics
 			.layerCount = 1,
 			.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		};
-	
 		create(config);
 
 		fill(stagingBuffer);
-	}
-
-	void Image::fill(const glm::vec4& color)
-	{
-	}
-
-	void Image::fill(const void* data, VkDeviceSize size)
-	{
 	}
 
 	void Image::fill(const Buffer& buffer)
@@ -151,6 +142,29 @@ namespace Aegix::Graphics
 		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		m_device.endSingleTimeCommands(cmd);
+	}
+
+	void Image::fill(const void* data, VkDeviceSize size)
+	{
+		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(data);
+		stagingBuffer.unmap();
+
+		fill(stagingBuffer);
+	}
+
+	void Image::fillRGBA8(const glm::vec4& color)
+	{
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;
+		uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
+		uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
+		uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
+		uint8_t a = static_cast<uint8_t>(color.a * 255.0f);
+		uint32_t rgba = (a << 24) | (b << 16) | (g << 8) | r;
+		std::vector<uint32_t> pixels(pixelCount, rgba);
+		fill(pixels.data(), sizeof(uint32_t) * pixelCount);
 	}
 
 	void Image::resize(VkExtent3D extent, VkImageUsageFlags usage)
@@ -167,6 +181,15 @@ namespace Aegix::Graphics
 		create(config);
 	}
 
+	void Image::transitionLayout(VkImageLayout newLayout)
+	{
+		if (m_layout == newLayout)
+			return;
+		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+		transitionLayout(cmd, newLayout);
+		m_device.endSingleTimeCommands(cmd);
+	}
+
 	void Image::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)
 	{
 		if (m_layout == newLayout)
@@ -174,6 +197,27 @@ namespace Aegix::Graphics
 
 		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, newLayout, m_mipLevels, m_layerCount);
 		m_layout = newLayout;
+	}
+
+	auto Image::transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = m_layout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = m_image;
+		barrier.subresourceRange.aspectMask = Tools::aspectFlags(m_format);
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = m_mipLevels;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = m_layerCount;
+		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
+		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
+
+		m_layout = newLayout;
+		return barrier;
 	}
 
 	void Image::generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout)

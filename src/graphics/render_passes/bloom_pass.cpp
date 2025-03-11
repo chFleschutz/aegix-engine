@@ -107,11 +107,11 @@ namespace Aegix::Graphics
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 		{
-			//m_mipViews[i].create2D(bloom, i, 1); // TODO
+			m_mipViews[i].create2D(bloom.image(), i, 1);
 		}
 
 		DescriptorWriter{ *m_thresholdSetLayout }
-			.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, sceneColor.imageView(), VK_IMAGE_LAYOUT_GENERAL })
+			.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, sceneColor.view(), VK_IMAGE_LAYOUT_GENERAL })
 			.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], VK_IMAGE_LAYOUT_GENERAL })
 			.build(m_thresholdSet->descriptorSet(0));
 
@@ -157,9 +157,9 @@ namespace Aegix::Graphics
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
-	void BloomPass::downSample(VkCommandBuffer cmd, const SampledTexture& bloom)
+	void BloomPass::downSample(VkCommandBuffer cmd, Texture& bloom)
 	{
-		assert(bloom.layout() == VK_IMAGE_LAYOUT_GENERAL);
+		assert(bloom.image().layout() == VK_IMAGE_LAYOUT_GENERAL);
 
 		m_downsamplePipeline->bind(cmd);
 
@@ -196,7 +196,7 @@ namespace Aegix::Graphics
 			m_downsample.mipLevel = srcMip;
 			Tools::vk::cmdPushConstants(cmd, *m_downsamplePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, m_downsample);
 
-			VkExtent2D mipExtent = { bloom.width() >> dstMip, bloom.height() >> dstMip };
+			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip};
 			Tools::vk::cmdDispatch(cmd, mipExtent, { 16, 16 });
 		}
 
@@ -214,7 +214,7 @@ namespace Aegix::Graphics
 		);
 	}
 
-	void BloomPass::upSample(VkCommandBuffer cmd, const SampledTexture& bloom)
+	void BloomPass::upSample(VkCommandBuffer cmd, Texture& bloom)
 	{
 		m_upsamplePipeline->bind(cmd);
 
@@ -252,7 +252,7 @@ namespace Aegix::Graphics
 
 			Tools::vk::cmdPushConstants(cmd, *m_upsamplePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, m_upsample);
 
-			VkExtent2D mipExtent = { bloom.width() >> dstMip, bloom.height() >> dstMip };
+			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip };
 			Tools::vk::cmdDispatch(cmd, mipExtent, { 16, 16 });
 
 			// Transition the dst mip level back to shader read 

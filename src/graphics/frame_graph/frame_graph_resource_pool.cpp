@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 		return refRes;
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> SampledTexture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> Texture&
 	{
 		auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
@@ -92,7 +92,7 @@ namespace Aegix::Graphics
 		return m_textures[res.handle.id];
 	}
 	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const SampledTexture&
+	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&
 	{
 		const auto& res = finalResource(resourceHandle);
 		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
@@ -117,7 +117,7 @@ namespace Aegix::Graphics
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
-	auto FrameGraphResourcePool::addResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo, 
+	auto FrameGraphResourcePool::addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, 
 		FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
 	{
 		auto ResourceHandle = addResource(createInfo, producer);
@@ -126,7 +126,7 @@ namespace Aegix::Graphics
 		return ResourceHandle;
 	}
 
-	auto FrameGraphResourcePool::addExternalResource(SampledTexture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 	{
 		auto ResourceHandle = addResource(createInfo, FrameGraphNode::INVALID_HANDLE);
 		m_textures.emplace_back(std::move(texture));
@@ -211,7 +211,7 @@ namespace Aegix::Graphics
 			auto& info = std::get<FrameGraphResourceTextureInfo>(res.info);
 			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
 			{
-				m_textures[res.handle.id].resize(width, height, info.usage);
+				m_textures[res.handle.id].resize({ width, height, 1 }, info.usage);
 				info.extent = { width, height };
 			}
 		}
@@ -225,12 +225,9 @@ namespace Aegix::Graphics
 			info.extent = { DEFAULT_WIDTH, DEFAULT_HEIGHT };
 		}
 
-		m_textures.emplace_back(device, SampledTexture::Config{
-			.extent = info.extent,
-			.format = info.format,
-			.usage = info.usage,
-			.mipLevels = info.mipLevels
-			});
+		auto& texture = m_textures.emplace_back(device);
+		texture.create2D(info.extent.width, info.extent.height, info.format, info.usage, info.mipLevels);
+
 		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}
 

@@ -4,7 +4,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
-#include "graphics/texture.h"
+#include "graphics/resources/texture.h"
 
 namespace Aegix::Graphics
 {
@@ -40,7 +40,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
-		std::unique_ptr<SampledTexture> m_ssaoNoise;
+		std::unique_ptr<Texture> m_ssaoNoise;
 		std::unique_ptr<Buffer> m_ssaoSamples;
 		std::unique_ptr<Buffer> m_uniforms;
 

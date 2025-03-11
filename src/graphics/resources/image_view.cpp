@@ -38,6 +38,8 @@ namespace Aegix::Graphics
 	{
 		assert(config.baseMipLevel + config.levelCount <= image.mipLevels() && "Invalid mip level range");
 		assert(config.baseLayer + config.layerCount <= image.layerCount() && "Invalid layer range");
+		
+		destroy();
 
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
