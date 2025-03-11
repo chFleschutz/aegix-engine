@@ -70,9 +70,6 @@ namespace Aegix::Graphics
 	{
 		auto& device = m_image.device();
 
-		// TODO
-		VkFormat format = VK_FORMAT_R16G16B16A16_SFLOAT;
-
 		int width = 0;
 		int height = 0;
 		int channels = 0;
@@ -95,11 +92,11 @@ namespace Aegix::Graphics
 
 		// Create spherical image
 		Texture spherialImage{ device };
-		spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), format,
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+		spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
 		// Create cubemap image
-		createCube(512, 512, format, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+		createCube(512, 512, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
@@ -125,6 +122,7 @@ namespace Aegix::Graphics
 
 		// Convert spherical image to cubemap
 		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
 		{
 			spherialImage.image().copyFrom(cmd, stagingBuffer);
 			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
@@ -132,10 +130,13 @@ namespace Aegix::Graphics
 			pipeline->bind(cmd);
 			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			Tools::vk::cmdDispatch(cmd, m_image.extent(), { 16, 16, 6 });
+			uint32_t groupCountX = (width + width - 1) / 16;
+			uint32_t groupCountY = (height + height - 1) / 16;
+			vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
 
 			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
+		Tools::vk::cmdEndDebugUtilsLabel(cmd);
 		device.endSingleTimeCommands(cmd);
 	}
 

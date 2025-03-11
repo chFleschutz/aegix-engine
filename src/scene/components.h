@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/resources/texture.h"
 #include "graphics/static_mesh.h"
 #include "math/math.h"
 #include "scene/entity.h"
@@ -134,6 +135,10 @@ namespace Aegix
 		glm::mat4 projectionMatrix = glm::mat4{ 1.0f };
 	};
 
+	struct Skybox
+	{
+		Graphics::Texture cubemap;
+	};
 
 
 	template<typename T, typename... Ts>

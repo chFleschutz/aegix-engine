@@ -3,6 +3,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
+#include "scene/components.h"
 
 namespace Aegix::Graphics
 {
@@ -16,18 +17,12 @@ namespace Aegix::Graphics
 	{
 	public:
 		SkyBoxPass(VulkanDevice& device, DescriptorPool& pool)
-			: m_skyBoxTexture{ device }
 		{
-			// TODO: Remove hard-coded path
-			//m_skyBoxTexture.createCube("C:/Users/chfle/Downloads/autumn_field_puresky_2k.hdr");
-
 			m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
-				//.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
 
-			m_descriptorSet = DescriptorSet::Builder(device, pool, *m_descriptorSetLayout)
-				//.addTexture(0, m_skyBoxTexture)
-				.build();
+			m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
 			m_pipelineLayout = PipelineLayout::Builder(device)
 				.addDescriptorSetLayout(*m_descriptorSetLayout)
@@ -113,6 +108,15 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
+			auto skyBoxEntity = frameInfo.scene.skybox();
+			if (!skyBoxEntity || !skyBoxEntity.hasComponent<Skybox>())
+				return;
+			
+			auto& skyboxTexture = skyBoxEntity.component<Skybox>().cubemap;
+			DescriptorWriter{ *m_descriptorSetLayout }
+				.writeImage(0, skyboxTexture.descriptorImageInfo())
+				.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 			auto& sceneColorTexture = resources.texture(m_sceneColor);
@@ -166,7 +170,5 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<Buffer> m_vertexBuffer;
 		std::unique_ptr<Buffer> m_indexBuffer;
-
-		Texture m_skyBoxTexture;
 	};
 }

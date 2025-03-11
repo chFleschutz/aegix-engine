@@ -30,6 +30,8 @@ namespace Aegix::Scene
 		m_directionalLight = createEntity("Directional Light");
 		m_directionalLight.addComponent<DirectionalLight>();
 		m_directionalLight.component<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 45.0f });
+
+		m_skybox = createEntity("Skybox");
 	}
 
 	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation,
