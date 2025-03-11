@@ -15,6 +15,7 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/post_processing_pass.cpp"
 	"render_passes/post_processing_pass.h"
 	"render_passes/present_pass.h"
+	"render_passes/sky_box_pass.cpp"
 	"render_passes/sky_box_pass.h"
 	"render_passes/ssao_pass.cpp"
 	"render_passes/ssao_pass.h"
