@@ -107,7 +107,7 @@ namespace Aegix::Graphics
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 		{
-			m_mipViews[i] = ImageView{ bloom, i, 1 };
+			//m_mipViews[i].create2D(bloom, i, 1); // TODO
 		}
 
 		DescriptorWriter{ *m_thresholdSetLayout }

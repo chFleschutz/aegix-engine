@@ -10,31 +10,6 @@
 
 namespace Aegix::Graphics
 {
-	class SampledTexture;
-
-	class ImageView
-	{
-	public:
-		explicit ImageView(VulkanDevice& device);
-		ImageView(const SampledTexture& texture, uint32_t baseMipLevel, uint32_t levelCount);
-		ImageView(const ImageView&) = delete;
-		ImageView(ImageView&& other) noexcept;
-		~ImageView();
-
-		auto operator=(const ImageView&) -> ImageView& = delete;
-		auto operator=(ImageView&& other) noexcept -> ImageView&;
-
-		operator VkImageView() const { return m_imageView; }
-		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
-
-	private:
-		void destroy();
-
-		VulkanDevice& m_device;
-		VkImageView m_imageView = VK_NULL_HANDLE;
-	};
-
-	
 	/// @brief Represents a Texture on the gpu and wraps a VkImage, VkDeviceMemory and VkImageView
 	class SampledTexture
 	{
