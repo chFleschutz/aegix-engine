@@ -284,6 +284,23 @@ namespace Aegix::Tools
 			&region);
 	}
 
+	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount)
+	{
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = layerCount;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = extent;
+
+		vkCmdCopyBufferToImage(cmd, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &region);
+	}
+
 	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
 	{
 		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
@@ -349,7 +366,7 @@ namespace Aegix::Tools
 	}
 
 	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
-		VkImageLayout newLayout, uint32_t miplevels)
+		VkImageLayout newLayout, uint32_t miplevels, uint32_t layoutCount)
 	{
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -362,7 +379,7 @@ namespace Aegix::Tools
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = miplevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = layoutCount;
 		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
 		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
 

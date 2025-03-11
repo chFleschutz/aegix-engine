@@ -19,6 +19,8 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/ssao_pass.cpp"
 	"render_passes/ssao_pass.h"
 	"render_passes/transparent_pass.h"
+	"resources/image.cpp"
+	"resources/image.h"
 	"systems/default_render_system.cpp"
 	"systems/default_render_system.h"
 	"systems/point_light_system.cpp"

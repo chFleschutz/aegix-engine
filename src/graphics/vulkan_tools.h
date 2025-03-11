@@ -52,6 +52,7 @@ namespace Aegix::Tools
 		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet, uint32_t firstSet = 0);
 
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
+		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount);
 
 		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
 		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
@@ -71,7 +72,7 @@ namespace Aegix::Tools
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
-			VkImageLayout newLayout, uint32_t miplevels = 1);
+			VkImageLayout newLayout, uint32_t miplevels = 1, uint32_t layoutCount = 1);
 
 		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
