@@ -142,7 +142,7 @@ namespace Aegix::Graphics
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
 
-		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels);
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
 		Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
 		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
