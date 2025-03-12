@@ -10,6 +10,7 @@ const float EPSILON = 0.0001;
 
 const uint SAMPLE_COUNT = 16 * 1024;
 const float INV_SAMPLE_COUNT = 1.0 / float(SAMPLE_COUNT);
+const vec3 MAX_BRIGHTNESS = vec3(1000.0); 
 
 vec3 sampleVector(const vec2 uv)
 {
@@ -80,9 +81,10 @@ void main()
         vec3 L = hemisphereToWorld(sampleHemisphere(pos), N, S, T);
         float NdotL = max(dot(N, L), 0.0);
         
-        irradiance += 2.0 * texture(environmentMap, L).rgb * NdotL;
+        // Clamp color to reduces noise from overly bright pixels
+        vec3 sampleColor = min(texture(environmentMap, L).rgb, MAX_BRIGHTNESS);
+        irradiance += 2.0 * sampleColor * NdotL;
     }
-
     irradiance /= vec3(SAMPLE_COUNT);
     imageStore(irradianceMap, ivec3(gl_GlobalInvocationID), vec4(irradiance, 1.0));
 }
