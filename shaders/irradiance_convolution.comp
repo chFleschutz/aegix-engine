@@ -1,0 +1,50 @@
+#version 450
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+layout(set = 0, binding = 0) uniform samplerCube environmentMap;
+layout(set = 0, binding = 1, rgba16f) uniform writeonly imageCube irradianceMap;
+
+const float PI = 3.14159265359;
+
+vec3 sampleVector(vec2 uv)
+{
+    vec3 dir;
+    if (gl_GlobalInvocationID.z == 0)      dir = vec3(1.0,  uv.y, -uv.x); 
+    else if (gl_GlobalInvocationID.z == 1) dir = vec3(-1.0, uv.y,  uv.x);
+    else if (gl_GlobalInvocationID.z == 2) dir = vec3(uv.x, 1.0, -uv.y);
+    else if (gl_GlobalInvocationID.z == 3) dir = vec3(uv.x, -1.0, uv.y);
+    else if (gl_GlobalInvocationID.z == 4) dir = vec3(uv.x, uv.y, 1.0);
+    else if (gl_GlobalInvocationID.z == 5) dir = vec3(-uv.x, uv.y, -1.0);
+    return normalize(dir); 
+}
+
+void main()
+{
+	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+	vec2 st = vec2(pixelCoords) / vec2(imageSize(irradianceMap));
+    vec2 uv = vec2(st.x, 1.0 - st.y) * 2.0 - 1.0;
+
+    vec3 dir = sampleVector(uv);
+
+    vec3 irradiance = vec3(0.0);
+    vec3 up = vec3(0.0, 1.0, 0.0);
+    vec3 right = cross(up, dir);
+    up = cross(dir, right);
+
+    float sampleDelta = 0.025;
+    float nrSamples = 0.0;
+    for (float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta)
+    {
+        for (float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
+        {
+            vec3 tangentSample = vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * dir;
+            irradiance += texture(environmentMap, sampleVec).rgb * cos(theta) * sin(theta);
+            nrSamples += 1.0;
+        }
+    }
+
+    irradiance = PI * irradiance * (1.0 / nrSamples);
+    imageStore(irradianceMap, ivec3(gl_GlobalInvocationID), vec4(irradiance, 1.0));
+}
