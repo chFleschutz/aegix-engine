@@ -129,7 +129,7 @@ namespace Aegix::Graphics
 		Config config{
 			.format = format,
 			.extent = m_extent,
-			.mipLevels = 1,
+			.mipLevels = Config::CALCULATE_MIP_LEVELS,
 			.layerCount = 1,
 			.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		};

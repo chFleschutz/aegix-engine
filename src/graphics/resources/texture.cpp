@@ -105,14 +105,26 @@ namespace Aegix::Graphics
 	{
 		m_image.create({ width, height, 1 }, format, usage, mipLevels);
 		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-		m_sampler.create({});
+		m_sampler.create(Sampler::Config{
+			.magFilter = VK_FILTER_LINEAR,
+			.minFilter = VK_FILTER_LINEAR,
+			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+			.maxLod = static_cast<float>(m_image.mipLevels())
+			});
 	}
 
 	void Texture::create2D(const std::filesystem::path& path, VkFormat format)
 	{
 		m_image.create(path, format);
 		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-		m_sampler.create({});
+		m_sampler.create(Sampler::Config{
+			.magFilter = VK_FILTER_LINEAR,
+			.minFilter = VK_FILTER_LINEAR,
+			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+			.maxLod = static_cast<float>(m_image.mipLevels())
+			});
 	}
 
 	void Texture::createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
@@ -137,7 +149,13 @@ namespace Aegix::Graphics
 		};
 		m_view.create(m_image, viewConfig);
 
-		m_sampler.create({});
+		m_sampler.create(Sampler::Config{
+			.magFilter = VK_FILTER_LINEAR,
+			.minFilter = VK_FILTER_LINEAR,
+			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+			.maxLod = static_cast<float>(m_image.mipLevels())
+			});
 	}
 
 	void Texture::createCube(const std::filesystem::path& path)

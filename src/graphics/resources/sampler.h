@@ -12,6 +12,8 @@ namespace Aegix::Graphics
 			VkFilter magFilter = VK_FILTER_LINEAR;
 			VkFilter minFilter = VK_FILTER_LINEAR;
 			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			float maxLod = 0.0f;
 			bool anisotropy = true;
 		};
 
