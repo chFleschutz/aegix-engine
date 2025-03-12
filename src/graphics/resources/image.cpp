@@ -160,6 +160,13 @@ namespace Aegix::Graphics
 		fill(stagingBuffer);
 	}
 
+	void Image::fillSFLOAT(const glm::vec4& color)
+	{
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;
+		std::vector<glm::vec4> pixels(pixelCount, color);
+		fill(pixels.data(), sizeof(glm::vec4) * pixelCount);
+	}
+
 	void Image::fillRGBA8(const glm::vec4& color)
 	{
 		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;

@@ -54,6 +54,7 @@ namespace Aegix::Graphics
 
 		void fill(const Buffer& buffer);
 		void fill(const void* data, VkDeviceSize size);
+		void fillSFLOAT(const glm::vec4& color);
 		void fillRGBA8(const glm::vec4& color);
 
 		void copyFrom(VkCommandBuffer cmd, const Buffer& src);
