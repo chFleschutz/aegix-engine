@@ -20,7 +20,6 @@ public:
 
 		// SKYBOX
 		auto& environment = scene.environment().component<Environment>();
-		//environment.irradiance = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
 		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
 		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
 

@@ -14,6 +14,11 @@ public:
 			.rotation = glm::radians(glm::vec3{ -12.0f, 0.0f, 263.0f })
 		};
 
+		// SKYBOX
+		auto& environment = scene.environment().component<Environment>();
+		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
+
 		// MODELS
 		scene.load(ASSETS_DIR "Sponza/Sponza.gltf");
 
