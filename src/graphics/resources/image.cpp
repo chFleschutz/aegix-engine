@@ -154,7 +154,7 @@ namespace Aegix::Graphics
 		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		stagingBuffer.map();
-		stagingBuffer.writeToBuffer(data);
+		stagingBuffer.writeToBuffer(data, size);
 		stagingBuffer.unmap();
 
 		fill(stagingBuffer);
@@ -162,14 +162,14 @@ namespace Aegix::Graphics
 
 	void Image::fillSFLOAT(const glm::vec4& color)
 	{
-		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
 		std::vector<glm::vec4> pixels(pixelCount, color);
 		fill(pixels.data(), sizeof(glm::vec4) * pixelCount);
 	}
 
 	void Image::fillRGBA8(const glm::vec4& color)
 	{
-		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
 		uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
 		uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
 		uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
