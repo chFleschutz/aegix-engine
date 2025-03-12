@@ -7,6 +7,24 @@
 
 namespace Aegix::Graphics
 {
+	auto Texture::create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>
+	{
+		if (!std::filesystem::exists(texturePath))
+		{
+			ALOG::fatal("Texture file does not exist: '{}'", texturePath.string());
+			assert(false && "Texture file does not exist");
+		}
+
+		if (texturePath.extension() == ".hdr")
+		{
+			auto texture = std::make_shared<Texture>(Engine::instance().device());
+			texture->createCube(texturePath);
+			return texture;
+		}
+
+		return create(texturePath, VK_FORMAT_R8G8B8A8_UNORM);
+	}
+
 	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
 	{
 		auto texture = std::make_shared<Texture>(Engine::instance().device());

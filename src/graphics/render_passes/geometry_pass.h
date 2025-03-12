@@ -15,11 +15,9 @@ namespace Aegix::Graphics
 		glm::mat4 inverseView{ 1.0f };
 	};
 
-
 	class GeometryPass : public FrameGraphRenderPass
 	{
 	public:
-
 		GeometryPass(FrameGraph& framegraph, VulkanDevice& device, DescriptorPool& pool)
 		{
 			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Geometry);

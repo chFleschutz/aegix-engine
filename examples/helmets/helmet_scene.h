@@ -19,9 +19,8 @@ public:
 		renderer.addRenderSystem<Graphics::PointLightSystem>();
 
 		// SKYBOX
-		auto& skyBox = scene.skybox().addComponent<Skybox>(Graphics::Texture{ renderer.device() });
-		skyBox.cubemap.createCube(ASSETS_DIR "Environments/KloppenheimSky.hdr");
-
+		auto& environment = scene.environment().component<Environment>();
+		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{

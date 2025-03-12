@@ -135,9 +135,10 @@ namespace Aegix
 		glm::mat4 projectionMatrix = glm::mat4{ 1.0f };
 	};
 
-	struct Skybox
+	struct Environment
 	{
-		Graphics::Texture cubemap;
+		std::shared_ptr<Graphics::Texture> skybox;
+		std::shared_ptr<Graphics::Texture> irradiance;
 	};
 
 

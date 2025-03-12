@@ -13,6 +13,7 @@ namespace Aegix::Graphics
 	class Texture
 	{
 	public:
+		static auto create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>;
 		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
 
