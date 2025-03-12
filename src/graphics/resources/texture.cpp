@@ -45,8 +45,9 @@ namespace Aegix::Graphics
 		auto& device = Engine::instance().device();
 
 		// Create irradiance map
+		constexpr uint32_t irradianceSize = 32;
 		auto irradiance = std::make_shared<Texture>(device);
-		irradiance->createCube(64, 64, VK_FORMAT_R16G16B16A16_SFLOAT,
+		irradiance->createCube(irradianceSize, irradianceSize, VK_FORMAT_R16G16B16A16_SFLOAT,
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
 		// Create pipeline resources
