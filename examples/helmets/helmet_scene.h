@@ -21,8 +21,8 @@ public:
 		// SKYBOX
 		auto& environment = scene.environment().component<Environment>();
 		//environment.irradiance = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
-		environment.irradiance = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
-		environment.skybox = Graphics::Texture::createIrradiance(environment.irradiance);
+		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
@@ -46,8 +46,9 @@ public:
 		auto textureBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto textureWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultMetalRoughness = Graphics::Texture::create(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			textureWhite, defaultNormal, textureWhite, textureWhite, textureBlack);
+			textureWhite, defaultNormal, defaultMetalRoughness, textureWhite, textureBlack);
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
 
 		// LIGHTS

@@ -16,7 +16,8 @@ namespace Aegix::Graphics
 			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(7, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(8, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
@@ -81,6 +82,8 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		updateLightingUBO(frameInfo);
+		auto& environment = frameInfo.scene.environment().component<Environment>();
+		assert(environment.irradiance && "Environment irradiance map is not set");
 
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_sceneColor))
@@ -90,7 +93,8 @@ namespace Aegix::Graphics
 			.writeImage(4, resources.texture(m_arm))
 			.writeImage(5, resources.texture(m_emissive))
 			.writeImage(6, resources.texture(m_ssao))
-			.writeBuffer(7, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
+			.writeImage(7, *environment.irradiance)
+			.writeBuffer(8, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
