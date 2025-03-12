@@ -1,5 +1,6 @@
 #include "vulkan_tools.h"
 
+#include "core/logging.h"
 #include "graphics/globals.h"
 #include "utils/file.h"
 
@@ -217,7 +218,7 @@ namespace Aegix::Tools
 
 	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo
 	{
-		return renderingAttachmentInfo(texture.imageView(), texture.layout(), loadOp, clearValue);
+		return renderingAttachmentInfo(texture.view(), texture.image().layout(), loadOp, clearValue);
 	}
 
 	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule
@@ -236,6 +237,8 @@ namespace Aegix::Tools
 	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule
 	{
 		auto code = File::readBinary(path);
+		if (code.empty())
+			ALOG::fatal("Failed to read shader file: {}", path.string());
 		assert(!code.empty() && "Shader code is empty");
 
 		return createShaderModule(device, code);
@@ -279,6 +282,23 @@ namespace Aegix::Tools
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&region);
+	}
+
+	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount)
+	{
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = layerCount;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = extent;
+
+		vkCmdCopyBufferToImage(cmd, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &region);
 	}
 
 	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
@@ -346,8 +366,11 @@ namespace Aegix::Tools
 	}
 
 	void vk::cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
-		VkImageLayout newLayout, uint32_t miplevels)
+		VkImageLayout newLayout, uint32_t miplevels, uint32_t layoutCount)
 	{
+		if (oldLayout == newLayout)
+			return;
+
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		barrier.oldLayout = oldLayout;
@@ -359,7 +382,7 @@ namespace Aegix::Tools
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = miplevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = layoutCount;
 		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
 		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
 

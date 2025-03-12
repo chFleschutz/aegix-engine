@@ -553,9 +553,9 @@ namespace Aegix::Graphics
 	void VulkanDevice::createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties,
 		VkImage& image, VkDeviceMemory& imageMemory) const
 	{
-		VK_CHECK(vkCreateImage(m_device, &imageInfo, nullptr, &image))
+		VK_CHECK(vkCreateImage(m_device, &imageInfo, nullptr, &image));
 
-			VkMemoryRequirements memRequirements;
+		VkMemoryRequirements memRequirements;
 		vkGetImageMemoryRequirements(m_device, image, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
@@ -563,8 +563,8 @@ namespace Aegix::Graphics
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
-		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory))
-			VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0))
+		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory));
+		VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0));
 	}
 
 	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,

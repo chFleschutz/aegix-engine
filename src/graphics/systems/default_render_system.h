@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/systems/render_system.h"
+#include "graphics/resources/texture.h"
 #include "graphics/uniform_buffer.h"
 
 namespace Aegix::Graphics

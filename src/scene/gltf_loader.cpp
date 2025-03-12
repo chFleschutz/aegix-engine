@@ -18,9 +18,9 @@ namespace Aegix::Scene
 		if (m_gltf->scenes.empty())
 			return;
 
-		m_defaultBlack = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultWhite = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultNormal = Graphics::Texture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		m_defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		m_defaultMaterial = Engine::instance().renderer().createMaterialInstance<Graphics::DefaultMaterial>(
 			m_defaultWhite, m_defaultNormal, m_defaultWhite, m_defaultBlack, m_defaultBlack);
 

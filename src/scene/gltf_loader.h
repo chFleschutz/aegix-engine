@@ -1,8 +1,8 @@
 #pragma once
 
+#include "graphics/resources/texture.h"
 #include "graphics/static_mesh.h"
 #include "graphics/systems/default_render_system.h"
-#include "graphics/texture.h"
 #include "scene/entity.h"
 
 #include <gltf.h>

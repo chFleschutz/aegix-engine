@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/texture.h"
 #include "core/logging.h"
+#include "graphics/resources/texture.h"
 
 #include <vulkan/vulkan.h>
 
@@ -40,7 +40,7 @@ namespace Aegix::Tools
 	auto aspectFlags(VkFormat format) -> VkImageAspectFlags;
 
 	auto renderingAttachmentInfo(VkImageView imageView, VkImageLayout layout, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
-	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue) -> VkRenderingAttachmentInfo;
+	auto renderingAttachmentInfo(const Graphics::Texture& texture, VkAttachmentLoadOp loadOp, VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f }) -> VkRenderingAttachmentInfo;
 
 	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule;
 	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule;
@@ -52,6 +52,7 @@ namespace Aegix::Tools
 		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet, uint32_t firstSet = 0);
 
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
+		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount);
 
 		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
 		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
@@ -71,7 +72,7 @@ namespace Aegix::Tools
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,
-			VkImageLayout newLayout, uint32_t miplevels = 1);
+			VkImageLayout newLayout, uint32_t miplevels = 1, uint32_t layoutCount = 1);
 
 		void cmdViewport(VkCommandBuffer commandBuffer, VkExtent2D extent);
 

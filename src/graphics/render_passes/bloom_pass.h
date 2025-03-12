@@ -3,7 +3,8 @@
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
-#include "graphics/texture.h"
+#include "graphics/resources/image_view.h"
+#include "graphics/resources/sampler.h"
 #include "graphics/vulkan_tools.h"
 
 #include <memory>
@@ -43,8 +44,8 @@ namespace Aegix::Graphics
 
 	private:
 		void extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo);
-		void downSample(VkCommandBuffer cmd, const Texture& bloom);
-		void upSample(VkCommandBuffer cmd, const Texture& bloom);
+		void downSample(VkCommandBuffer cmd, Texture& bloom);
+		void upSample(VkCommandBuffer cmd, Texture& bloom);
 
 
 		FrameGraphResourceHandle m_sceneColor;

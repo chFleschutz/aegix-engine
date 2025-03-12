@@ -2,7 +2,7 @@
 
 #include "graphics/device.h"
 #include "graphics/globals.h"
-#include "graphics/texture.h"
+#include "graphics/resources/texture.h"
 #include "graphics/uniform_buffer.h"
 
 #include <memory>

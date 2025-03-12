@@ -141,13 +141,13 @@ namespace Aegix::Graphics
 
 	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture)
 	{
-		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), texture.layout() });
+		m_imageInfos.emplace_back(binding, texture.descriptorImageInfo());
 		return *this;
 	}
 
 	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride)
 	{
-		m_imageInfos.emplace_back(binding, VkDescriptorImageInfo{ texture.sampler(), texture.imageView(), layoutOverride });
+		m_imageInfos.emplace_back(binding, texture.descriptorImageInfo(layoutOverride));
 		return *this;
 	}
 

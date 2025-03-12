@@ -19,6 +19,7 @@ namespace Aegix::Graphics
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, true)
 			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
+			.setDepthTest(true, false)
 			.setVertexBindingDescriptions({}) // Clear default vertex binding
 			.setVertexAttributeDescriptions({}) // Clear default vertex attributes
 			.build();

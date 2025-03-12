@@ -1,9 +1,9 @@
 #include "frame_graph_resource_pool.h"
 
+#include "core/logging.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
 #include <cassert>
-
 
 namespace Aegix::Graphics
 {
@@ -152,6 +152,9 @@ namespace Aegix::Graphics
 				}
 			}
 
+			if (resource.handle == FrameGraphResource::INVALID_HANDLE)
+				ALOG::fatal("Failed to resolve reference '{}'", resource.name);
+
 			assert(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
 		}
 	}
@@ -208,7 +211,7 @@ namespace Aegix::Graphics
 			auto& info = std::get<FrameGraphResourceTextureInfo>(res.info);
 			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
 			{
-				m_textures[res.handle.id].resize(width, height, info.usage);
+				m_textures[res.handle.id].resize({ width, height, 1 }, info.usage);
 				info.extent = { width, height };
 			}
 		}
@@ -222,12 +225,9 @@ namespace Aegix::Graphics
 			info.extent = { DEFAULT_WIDTH, DEFAULT_HEIGHT };
 		}
 
-		m_textures.emplace_back(device, Texture::Config{
-			.extent = info.extent,
-			.format = info.format,
-			.usage = info.usage,
-			.mipLevels = info.mipLevels
-			});
+		auto& texture = m_textures.emplace_back(device);
+		texture.create2D(info.extent.width, info.extent.height, info.format, info.usage, info.mipLevels);
+
 		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}
 

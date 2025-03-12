@@ -42,8 +42,8 @@ namespace Aegix::Scripting
 			rotate *= deltaSeconds;
 
 			glm::vec3 rotation = glm::eulerAngles(transform.rotation);
-			rotation.x += glm::clamp(rotate.x, -1.5f, 1.5f);
-			rotation.z += glm::mod(rotate.z, glm::two_pi<float>());
+			rotation.x = glm::clamp(rotation.x + rotate.x, -1.5f, 1.5f);
+			rotation.z = glm::mod(rotation.z + rotate.z, glm::two_pi<float>());
 			rotation.y = 0.0f; // Lock rotation around y-axis
 			transform.rotation = glm::quat(rotation);
 		}

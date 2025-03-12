@@ -3,7 +3,7 @@
 
 auto main() -> int
 {
-	Aegix::Engine engine;
+	auto& engine = Aegix::Engine::instance();
 	engine.loadScene<HelmetScene>();
 	engine.run();
 }

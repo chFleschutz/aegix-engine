@@ -2,7 +2,7 @@
 
 #include "graphics/buffer.h"
 #include "graphics/frame_graph/render_stage.h"
-#include "graphics/texture.h"
+#include "graphics/resources/texture.h"
 
 #include <array>
 #include <limits>

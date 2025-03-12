@@ -205,12 +205,12 @@ namespace Aegix::Graphics
 			if (resource.usage == FrameGraphResourceUsage::None)
 				continue;
 
-			VkImageLayout oldLayout = texture.layout();
+			VkImageLayout oldLayout = texture.image().layout();
 			VkImageLayout newLayout = imageLayoutForUsage(resource.usage);
 			if (oldLayout == newLayout)
 				continue;
 
-			VkImageMemoryBarrier barrier = texture.transitionLayoutDeferred(newLayout);
+			VkImageMemoryBarrier barrier = texture.image().transitionLayoutDeferred(newLayout);
 			srcStage |= Tools::srcStage(barrier.srcAccessMask);
 			dstStage |= Tools::dstStage(barrier.dstAccessMask);
 			barriers.emplace_back(barrier);
