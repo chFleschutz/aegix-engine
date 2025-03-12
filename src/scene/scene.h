@@ -62,9 +62,9 @@ namespace Aegix::Scene
 		/// @brief Loads a scene from a file and returns the root entity
 		auto load(const std::filesystem::path& path) -> Entity;
 
-	private:
-		auto loadGLTF(const std::filesystem::path& path) -> Entity;
+		void reset();
 
+	private:
 		entt::registry m_registry;
 		std::vector<std::unique_ptr<System>> m_systems;
 		Scripting::ScriptManager m_scriptManager;

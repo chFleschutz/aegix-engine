@@ -42,6 +42,7 @@ namespace Aegix
 		template<Scene::DescriptionDerived T>
 		void loadScene()
 		{
+			m_scene.reset();
 			T description{};
 			description.initialize(m_scene);
 		}
