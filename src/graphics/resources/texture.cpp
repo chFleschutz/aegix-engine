@@ -39,6 +39,61 @@ namespace Aegix::Graphics
 		texture->m_image.fillRGBA8(color);
 		return texture;
 	}
+	
+	auto Texture::createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
+	{
+		auto& device = Engine::instance().device();
+
+		// Create irradiance map
+		auto irradiance = std::make_shared<Texture>(device);
+		irradiance->createCube(64, 64, VK_FORMAT_R16G16B16A16_SFLOAT,
+			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+
+		// Create pipeline resources
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+
+		auto& pool = Engine::instance().renderer().globalPool();
+		auto descriptorSet = std::make_shared<DescriptorSet>(pool, *descriptorSetLayout);
+		DescriptorWriter{ *descriptorSetLayout }
+			.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
+			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.build(descriptorSet->descriptorSet(0));
+
+		auto pipelineLayout = PipelineLayout::Builder{ device }
+			.addDescriptorSetLayout(*descriptorSetLayout)
+			.build();
+
+		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
+			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
+			.build();
+
+		// Convert skybox to irradiance map
+		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Irradiance Convolution");
+		{
+			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+			pipeline->bind(cmd);
+			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+
+			constexpr uint32_t groupSize = 16;
+			uint32_t width = irradiance->image().width();
+			uint32_t height = irradiance->image().height();
+			vkCmdDispatch(cmd, (width + groupSize - 1) / groupSize, (height + groupSize) / groupSize, 6);
+
+			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+		Tools::vk::cmdEndDebugUtilsLabel(cmd);
+		device.endSingleTimeCommands(cmd);
+
+		return irradiance;
+	}
+
+
 
 	Texture::Texture(VulkanDevice& device)
 		: m_image{ device }, m_view{ device }, m_sampler{ device }
@@ -151,8 +206,9 @@ namespace Aegix::Graphics
 			pipeline->bind(cmd);
 			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-			uint32_t groupCountX = (width + width - 1) / 16;
-			uint32_t groupCountY = (height + height - 1) / 16;
+			constexpr uint32_t groupSize = 16;
+			uint32_t groupCountX = (width + groupSize - 1) / groupSize;
+			uint32_t groupCountY = (height + groupSize - 1) / groupSize;
 			vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
 
 			m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
