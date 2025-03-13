@@ -140,6 +140,7 @@ namespace Aegix
 		std::shared_ptr<Graphics::Texture> skybox;
 		std::shared_ptr<Graphics::Texture> irradiance;
 		std::shared_ptr<Graphics::Texture> prefiltered;
+		std::shared_ptr<Graphics::Texture> brdfLUT;
 	};
 
 

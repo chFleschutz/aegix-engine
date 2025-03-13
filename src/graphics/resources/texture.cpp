@@ -180,6 +180,66 @@ namespace Aegix::Graphics
 		return prefiltered;
 	}
 
+	auto Texture::createBRDFLUT() -> std::shared_ptr<Texture>
+	{
+		auto& device = Engine::instance().device();
+
+		// Create BRDF LUT
+		constexpr uint32_t lutSize = 512;
+		Image::Config imgageConfig{
+			.format = VK_FORMAT_R16G16_SFLOAT,
+			.extent = { lutSize, lutSize, 1 },
+			.mipLevels = 1,
+			.layerCount = 1,
+			.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+		};
+		Sampler::Config samplerConfig{
+			.magFilter = VK_FILTER_LINEAR,
+			.minFilter = VK_FILTER_LINEAR,
+			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
+		};
+		auto lut = std::make_shared<Texture>(device);
+		lut->create2D(imgageConfig, samplerConfig);
+
+		// Create pipeline resources
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+		auto& pool = Engine::instance().renderer().globalPool();
+		auto descriptorSet = std::make_shared<DescriptorSet>(pool, *descriptorSetLayout);
+		DescriptorWriter{ *descriptorSetLayout }
+			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.build(descriptorSet->descriptorSet(0));
+		auto pipelineLayout = PipelineLayout::Builder{ device }
+			.addDescriptorSetLayout(*descriptorSetLayout)
+			.build();
+		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
+			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
+			.build();
+
+		// Convert skybox to irradiance map
+		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "BRDF LUT Generation");
+		{
+			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+			pipeline->bind(cmd);
+			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+
+			constexpr uint32_t groupSize = 16;
+			vkCmdDispatch(cmd, (lutSize + groupSize - 1) / groupSize, (lutSize + groupSize - 1) / groupSize, 1);
+
+			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+		Tools::vk::cmdEndDebugUtilsLabel(cmd);
+		device.endSingleTimeCommands(cmd);
+
+		return lut;
+	}
+
+
+
 	Texture::Texture(VulkanDevice& device)
 		: m_image{ device }, m_view{ device }, m_sampler{ device }
 	{
@@ -196,6 +256,13 @@ namespace Aegix::Graphics
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 			.maxLod = static_cast<float>(m_image.mipLevels())
 			});
+	}
+
+	void Texture::create2D(const Image::Config& config, const Sampler::Config& samplerConfig)
+	{
+		m_image.create(config);
+		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
+		m_sampler.create(samplerConfig);
 	}
 
 	void Texture::create2D(const std::filesystem::path& path, VkFormat format)

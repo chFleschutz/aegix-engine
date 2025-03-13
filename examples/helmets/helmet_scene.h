@@ -24,6 +24,7 @@ public:
 		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
 		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
 		environment.prefiltered = Graphics::Texture::createPrefiltered(environment.skybox);
+		environment.brdfLUT = Graphics::Texture::createBRDFLUT();
 		environment.skybox = environment.prefiltered;
 
 		// CAMERA

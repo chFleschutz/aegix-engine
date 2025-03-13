@@ -18,6 +18,7 @@ namespace Aegix::Graphics
 		static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
 		static auto createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
+		static auto createBRDFLUT() -> std::shared_ptr<Texture>;
 
 		explicit Texture(VulkanDevice& device);
 		Texture(const Texture&) = delete;
@@ -52,6 +53,7 @@ namespace Aegix::Graphics
 		}
 
 		void create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::Config::CALCULATE_MIP_LEVELS);
+		void create2D(const Image::Config& config, const Sampler::Config& samplerConfig);
 		void create2D(const std::filesystem::path& path, VkFormat format);
 
 		void createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::Config::CALCULATE_MIP_LEVELS);
