@@ -114,7 +114,9 @@ namespace Aegix::Graphics
 		struct PushConstants
 		{
 			float roughness = 0.0f;
+			float envResolution = 512.0f;
 		} pushConstants;
+		pushConstants.envResolution = static_cast<float>(skybox->image().width());
 
 		auto pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
