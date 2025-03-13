@@ -20,7 +20,8 @@ public:
 
 		// SKYBOX
 		auto& environment = scene.environment().component<Environment>();
-		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+		//environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
+		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
 		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
 
 		// CAMERA
@@ -30,6 +31,9 @@ public:
 		};
 
 		// ENTITIES
+		auto spheres = scene.load(ASSETS_DIR "MetalRoughSpheres/MetalRoughSpheres.gltf");
+		spheres.component<Transform>().location = { 0.0f, 5.0f, 5.0f };
+
 		auto damagedHelmet = scene.load(ASSETS_DIR "DamagedHelmet/DamagedHelmet.gltf");
 		damagedHelmet.component<Transform>().location = { -2.0f, 0.0f, 2.0f };
 
@@ -51,16 +55,17 @@ public:
 		plane.addComponent<Graphics::DefaultMaterial>(planeMat);
 
 		// LIGHTS
-		scene.ambientLight().component<AmbientLight>().intensity = 0.2f;
-		scene.directionalLight().component<DirectionalLight>().intensity = 5.0f;
+		scene.ambientLight().component<AmbientLight>().intensity = 1.0f;
+		scene.directionalLight().component<DirectionalLight>().intensity = 1.0f;
+		scene.directionalLight().component<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 135.0f });
 
-		auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
-		light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
+		//auto light1 = scene.createEntity("Light 1", { 0.0f, 6.0f, 5.0f });
+		//light1.addComponent<PointLight>(glm::vec4{ 0.7f, 0.0f, 1.0f, 1.0f }, 200.0f);
 
-		auto light2 = scene.createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
-		light2.addComponent<PointLight>(Color::blue(), 200.0f);
+		//auto light2 = scene.createEntity("Light 2", { 7.0f, -5.0f, 5.0f });
+		//light2.addComponent<PointLight>(Color::blue(), 200.0f);
 
-		auto light3 = scene.createEntity("Light 3", { -8.0f, -5.0f, 5.0f });
-		light3.addComponent<PointLight>(Color::white(), 200.0f);
+		//auto light3 = scene.createEntity("Light 3", { -8.0f, -5.0f, 5.0f });
+		//light3.addComponent<PointLight>(Color::white(), 200.0f);
 	}
 };
