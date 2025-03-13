@@ -25,7 +25,6 @@ public:
 		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
 		environment.prefiltered = Graphics::Texture::createPrefiltered(environment.skybox);
 		environment.brdfLUT = Graphics::Texture::createBRDFLUT();
-		environment.skybox = environment.prefiltered;
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
