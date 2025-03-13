@@ -23,6 +23,8 @@ public:
 		//environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
 		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
 		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
+		environment.prefiltered = Graphics::Texture::createPrefiltered(environment.skybox);
+		environment.skybox = environment.prefiltered;
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{

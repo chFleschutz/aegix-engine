@@ -17,6 +17,7 @@ namespace Aegix::Graphics
 		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
+		static auto createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
 
 		explicit Texture(VulkanDevice& device);
 		Texture(const Texture&) = delete;
