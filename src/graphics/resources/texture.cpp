@@ -254,7 +254,7 @@ namespace Aegix::Graphics
 			.minFilter = VK_FILTER_LINEAR,
 			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels())
+			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
 			});
 	}
 
@@ -274,7 +274,7 @@ namespace Aegix::Graphics
 			.minFilter = VK_FILTER_LINEAR,
 			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels())
+			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
 			});
 	}
 
@@ -305,7 +305,7 @@ namespace Aegix::Graphics
 			.minFilter = VK_FILTER_LINEAR,
 			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels())
+			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
 			});
 	}
 
