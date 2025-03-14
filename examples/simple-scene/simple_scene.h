@@ -40,15 +40,15 @@ public:
 		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
 
 		// MATERIALS
-		auto textureBlack = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto textureWhite = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto defaultNormal = Graphics::SampledTexture::create({ 1, 1 }, glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto textureWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
+		auto defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 
-		auto paintingTexture = Graphics::SampledTexture::create(ASSETS_DIR "Misc/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto paintingTexture = Graphics::Texture::create(ASSETS_DIR "Misc/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
 		auto paintingMat = renderer.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
 			paintingTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
-		auto metalTexture = Graphics::SampledTexture::create(ASSETS_DIR "Misc/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto metalTexture = Graphics::Texture::create(ASSETS_DIR "Misc/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
 		auto metalMat = renderer.createMaterialInstance<Aegix::Graphics::DefaultMaterial>(
 			metalTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
 
@@ -65,7 +65,7 @@ public:
 		teapot.component<Aegix::Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
 		// LIGHTS
-		constexpr int lightCount = 32;
+		constexpr int lightCount = 64;
 		constexpr float lightRadius = 10.0f;
 
 		// Ring of lights
