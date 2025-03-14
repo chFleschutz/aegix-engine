@@ -15,22 +15,17 @@ public:
 		};
 
 		// SKYBOX
-		auto& environment = scene.environment().component<Environment>();
-		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/AutumnFieldSky.hdr");
-		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
+		auto& env = scene.environment().component<Environment>();
+		env.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
+		env.irradiance = Graphics::Texture::createIrradiance(env.skybox);
+		env.prefiltered = Graphics::Texture::createPrefiltered(env.skybox);
 
 		// MODELS
 		scene.load(ASSETS_DIR "Sponza/Sponza.gltf");
 
 		// LIGHTS
-		auto light = scene.createEntity("Point Light 1", { -5.0f, 0.3f, 7.0f });
-		light.addComponent<PointLight>(glm::vec3{ 1.0f, 1.0f, 1.0f }, 50.0f);
-
-		auto light2 = scene.createEntity("Point Light 2", { 4.0f, 0.3f, 7.0f });
-		light2.addComponent<PointLight>(glm::vec3{ 1.0f, 1.0f, 1.0f }, 50.0f);
-
-		auto light3 = scene.createEntity("Point Light 3", { -0.5f, 0.3f, 7.0f });
-		light3.addComponent<PointLight>(glm::vec3{ 1.0f, 1.0f, 1.0f }, 50.0f);
+		scene.ambientLight().component<AmbientLight>().intensity = 0.5f;
+		scene.directionalLight().component<DirectionalLight>().intensity = 1.0f;
 	}
 };
 

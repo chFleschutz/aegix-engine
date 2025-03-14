@@ -19,11 +19,10 @@ public:
 		renderer.addRenderSystem<Graphics::PointLightSystem>();
 
 		// SKYBOX
-		auto& environment = scene.environment().component<Environment>();
-		environment.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
-		environment.irradiance = Graphics::Texture::createIrradiance(environment.skybox);
-		environment.prefiltered = Graphics::Texture::createPrefiltered(environment.skybox);
-		environment.brdfLUT = Graphics::Texture::createBRDFLUT();
+		auto& env = scene.environment().component<Environment>();
+		env.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
+		env.irradiance = Graphics::Texture::createIrradiance(env.skybox);
+		env.prefiltered = Graphics::Texture::createPrefiltered(env.skybox);
 
 		// CAMERA
 		scene.mainCamera().component<Transform>() = Transform{
