@@ -1,5 +1,6 @@
 #include "Scene.h"
 
+#include "core/engine.h"
 #include "core/profiler.h"
 #include "graphics/static_mesh.h"
 #include "scene/components.h"
@@ -13,25 +14,6 @@ namespace Aegix::Scene
 {
 	Scene::Scene()
 	{
-		addSystem<CameraSystem>();
-		addSystem<TransformSystem>();
-
-		m_mainCamera = createEntity("Main Camera");
-		m_mainCamera.addComponent<Camera>();
-		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
-		m_mainCamera.component<Transform>() = Transform{
-			.location = { 0.0f, -15.0f, 10.0f },
-			.rotation = glm::radians(glm::vec3{ -30.0f, 0.0f, 0.0f })
-		};
-
-		m_ambientLight = createEntity("Ambient Light");
-		m_ambientLight.addComponent<AmbientLight>();
-
-		m_directionalLight = createEntity("Directional Light");
-		m_directionalLight.addComponent<DirectionalLight>();
-		m_directionalLight.component<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 45.0f });
-
-		m_skybox = createEntity("Skybox");
 	}
 
 	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation,
@@ -89,5 +71,41 @@ namespace Aegix::Scene
 		}
 
 		return Entity{};
+	}
+
+	void Scene::reset()
+	{
+		// TODO: Clear old scene
+
+		addSystem<CameraSystem>();
+		addSystem<TransformSystem>();
+
+		m_mainCamera = createEntity("Main Camera");
+		m_mainCamera.addComponent<Camera>();
+		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
+		m_mainCamera.component<Transform>() = Transform{
+			.location = { 0.0f, -15.0f, 10.0f },
+			.rotation = glm::radians(glm::vec3{ -30.0f, 0.0f, 0.0f })
+		};
+
+		m_ambientLight = createEntity("Ambient Light");
+		m_ambientLight.addComponent<AmbientLight>();
+
+		m_directionalLight = createEntity("Directional Light");
+		m_directionalLight.addComponent<DirectionalLight>();
+		m_directionalLight.component<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 45.0f });
+
+		m_skybox = createEntity("Skybox");
+		auto& env = m_skybox.addComponent<Environment>();
+		env.skybox = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.skybox->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+		env.skybox->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		env.irradiance = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.irradiance->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+		env.irradiance->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		env.prefiltered = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.prefiltered->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+		env.prefiltered->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		env.brdfLUT = Graphics::Texture::createBRDFLUT();
 	}
 }

@@ -69,8 +69,13 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<PipelineLayout> m_pipelineLayout;
-		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
-		std::unique_ptr<DescriptorSet> m_descriptorSet;
+
+		std::unique_ptr<DescriptorSetLayout> m_gbufferSetLayout;
+		std::unique_ptr<DescriptorSet> m_gbufferSet;
 		std::unique_ptr<UniformBuffer> m_ubo;
+
+		// IBL
+		std::unique_ptr<DescriptorSetLayout> m_iblSetLayout;
+		std::unique_ptr<DescriptorSet> m_iblSet;
 	};
 }

@@ -8,7 +8,7 @@ namespace Aegix::Graphics
 {
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
+		m_gbufferSetLayout = DescriptorSetLayout::Builder(device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -18,13 +18,20 @@ namespace Aegix::Graphics
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
+		m_gbufferSet = std::make_unique<DescriptorSet>(pool, *m_gbufferSetLayout);
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
+		m_iblSetLayout = DescriptorSetLayout::Builder(device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+		m_iblSet = std::make_unique<DescriptorSet>(pool, *m_iblSetLayout);
 
 		m_ubo = std::make_unique<UniformBuffer>(device, LightingUniforms{});
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
-			.addDescriptorSetLayout(*m_descriptorSetLayout)
+			.addDescriptorSetLayout(*m_gbufferSetLayout)
+			.addDescriptorSetLayout(*m_iblSetLayout)
 			.build();
 
 		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
@@ -81,8 +88,10 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		updateLightingUBO(frameInfo);
+		auto& environment = frameInfo.scene.environment().component<Environment>();
+		assert(environment.irradiance && "Environment irradiance map is not set");
 
-		DescriptorWriter{ *m_descriptorSetLayout }
+		DescriptorWriter{ *m_gbufferSetLayout }
 			.writeImage(0, resources.texture(m_sceneColor))
 			.writeImage(1, resources.texture(m_position))
 			.writeImage(2, resources.texture(m_normal))
@@ -91,10 +100,19 @@ namespace Aegix::Graphics
 			.writeImage(5, resources.texture(m_emissive))
 			.writeImage(6, resources.texture(m_ssao))
 			.writeBuffer(7, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
-			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+			.build(m_gbufferSet->descriptorSet(frameInfo.frameIndex));
+
+		DescriptorWriter{ *m_iblSetLayout }
+			.writeImage(0, *environment.irradiance)
+			.writeImage(1, *environment.prefiltered)
+			.writeImage(2, *environment.brdfLUT)
+			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout, 
+			m_gbufferSet->descriptorSet(frameInfo.frameIndex), 0);
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout,
+			m_iblSet->descriptorSet(frameInfo.frameIndex), 1);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}

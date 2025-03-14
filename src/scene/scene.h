@@ -36,7 +36,7 @@ namespace Aegix::Scene
 		[[nodiscard]] auto mainCamera() const -> Entity { return m_mainCamera; }
 		[[nodiscard]] auto ambientLight() const -> Entity { return m_ambientLight; }
 		[[nodiscard]] auto directionalLight() const -> Entity { return m_directionalLight; }
-		[[nodiscard]] auto skybox() const -> Entity { return m_skybox; }
+		[[nodiscard]] auto environment() const -> Entity { return m_skybox; }
 
 		void setMainCamera(Entity camera) { m_mainCamera = camera; }
 
@@ -62,9 +62,9 @@ namespace Aegix::Scene
 		/// @brief Loads a scene from a file and returns the root entity
 		auto load(const std::filesystem::path& path) -> Entity;
 
-	private:
-		auto loadGLTF(const std::filesystem::path& path) -> Entity;
+		void reset();
 
+	private:
 		entt::registry m_registry;
 		std::vector<std::unique_ptr<System>> m_systems;
 		Scripting::ScriptManager m_scriptManager;

@@ -96,13 +96,16 @@ namespace Aegix::Graphics
 
 	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		auto skyBoxEntity = frameInfo.scene.skybox();
-		if (!skyBoxEntity || !skyBoxEntity.hasComponent<Skybox>())
+		auto skyBoxEntity = frameInfo.scene.environment();
+		if (!skyBoxEntity || !skyBoxEntity.hasComponent<Environment>())
 			return;
 
-		auto& skyboxTexture = skyBoxEntity.component<Skybox>().cubemap;
+		auto& environment = skyBoxEntity.component<Environment>();
+		if (!environment.skybox)
+			return;
+
 		DescriptorWriter{ *m_descriptorSetLayout }
-			.writeImage(0, skyboxTexture.descriptorImageInfo())
+			.writeImage(0, environment.skybox->descriptorImageInfo())
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		VkCommandBuffer cmd = frameInfo.commandBuffer;

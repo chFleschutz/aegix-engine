@@ -129,7 +129,7 @@ namespace Aegix::Graphics
 		Config config{
 			.format = format,
 			.extent = m_extent,
-			.mipLevels = 1,
+			.mipLevels = Config::CALCULATE_MIP_LEVELS,
 			.layerCount = 1,
 			.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		};
@@ -142,7 +142,7 @@ namespace Aegix::Graphics
 	{
 		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
 
-		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels);
+		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
 		Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
 		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
@@ -154,15 +154,22 @@ namespace Aegix::Graphics
 		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 		stagingBuffer.map();
-		stagingBuffer.writeToBuffer(data);
+		stagingBuffer.writeToBuffer(data, size);
 		stagingBuffer.unmap();
 
 		fill(stagingBuffer);
 	}
 
+	void Image::fillSFLOAT(const glm::vec4& color)
+	{
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
+		std::vector<glm::vec4> pixels(pixelCount, color);
+		fill(pixels.data(), sizeof(glm::vec4) * pixelCount);
+	}
+
 	void Image::fillRGBA8(const glm::vec4& color)
 	{
-		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth;
+		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
 		uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
 		uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
 		uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
