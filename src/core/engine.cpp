@@ -2,6 +2,7 @@
 
 #include "core/editor_layer.h"
 #include "core/profiler.h"
+#include "core/globals.h"
 
 #include <chrono>
 
@@ -54,16 +55,15 @@ namespace Aegix
 	{
 		AGX_PROFILE_SCOPE("Wait for FPS limit");
 
-		if (MAX_FPS <= 0)
+		if constexpr (!Core::ENABLE_FPS_LIMIT)
 			return;
 
 		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
 		std::chrono::milliseconds frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameBegin);
 
-		static constexpr auto targetFrameTime = std::chrono::milliseconds(1000 / MAX_FPS);
-		if (frameTime < targetFrameTime)
+		if (frameTime < Core::TARGET_FRAME_TIME)
 		{
-			std::this_thread::sleep_for(targetFrameTime - frameTime);
+			std::this_thread::sleep_for(Core::TARGET_FRAME_TIME - frameTime);
 		}
 	}
 }

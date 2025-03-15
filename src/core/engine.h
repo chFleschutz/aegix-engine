@@ -14,8 +14,6 @@ namespace Aegix
 	class Engine
 	{
 	public:
-		static constexpr int MAX_FPS = 144; // Max frames per second, set 0 to disable
-
 		Engine();
 		Engine(const Engine&) = delete;
 		Engine(Engine&&) = delete;
