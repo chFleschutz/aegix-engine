@@ -42,12 +42,12 @@ namespace Aegix
 			m_layerStack.update(frameTimeSec);
 
 			// Rendering
-			m_renderer.renderFrame(m_scene, m_ui);
+			m_graphics.renderer().renderFrame(m_scene, m_ui);
 
 			applyFrameBrake(currentFrameBegin);
 		}
 
-		m_renderer.waitIdle();
+		m_graphics.renderer().waitIdle();
 	}
 
 	void Engine::applyFrameBrake(std::chrono::high_resolution_clock::time_point lastFrameBegin)

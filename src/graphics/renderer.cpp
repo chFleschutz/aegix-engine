@@ -17,7 +17,7 @@
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Window& window, VulkanDevice& device)
+	Renderer::Renderer(Core::Window& window, VulkanDevice& device)
 		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extend() }
 	{
 		createCommandBuffers();
@@ -35,7 +35,7 @@ namespace Aegix::Graphics
 		);
 	}
 
-	auto Graphics::Renderer::currentCommandBuffer() const -> VkCommandBuffer
+	auto Renderer::currentCommandBuffer() const -> VkCommandBuffer
 	{
 		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
 		assert(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE && "Command buffer not initialized");
@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 		return m_commandBuffers[m_currentFrameIndex];
 	}
 
-	auto Graphics::Renderer::frameIndex() const -> uint32_t
+	auto Renderer::frameIndex() const -> uint32_t
 	{
 		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
 		return m_currentFrameIndex;
@@ -72,7 +72,7 @@ namespace Aegix::Graphics
 		endFrame(commandBuffer);
 	}
 
-	void Graphics::Renderer::waitIdle()
+	void Renderer::waitIdle()
 	{
 		vkDeviceWaitIdle(m_device.device());
 	}

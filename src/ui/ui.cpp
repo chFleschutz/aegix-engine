@@ -1,8 +1,7 @@
 #include "ui.h"
 
 #include "core/profiler.h"
-#include "graphics/renderer.h"
-#include "graphics/window.h"
+#include "graphics/graphics.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -14,9 +13,13 @@
 
 namespace Aegix::UI
 {
-	UI::UI(Graphics::Renderer& renderer, Core::LayerStack& layerStack)
+	UI::UI(Graphics::Graphics& graphics, Core::LayerStack& layerStack)
 		: m_layerStack{ layerStack }
 	{
+		auto& renderer = graphics.renderer();
+		auto& device = renderer.device();
+		auto& window = renderer.window();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
@@ -31,9 +34,8 @@ namespace Aegix::UI
 		io.ConfigDebugIsDebuggerPresent = true;
 #endif // !NDEBUG
 
-		ImGui_ImplGlfw_InitForVulkan(renderer.window().glfwWindow(), true);
+		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
-		auto& device = renderer.device();
 		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = device.instance();

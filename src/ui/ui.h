@@ -6,7 +6,7 @@
 
 namespace Aegix::Graphics
 {
-	class Renderer;
+	class Graphics;
 }
 
 namespace Aegix::UI
@@ -16,7 +16,7 @@ namespace Aegix::UI
 	class UI
 	{
 	public:
-		UI(Graphics::Renderer& renderer, Core::LayerStack& layerStack);
+		UI(Graphics::Graphics& graphics, Core::LayerStack& layerStack);
 		UI(const UI&) = delete;
 		UI(UI&&) = delete;
 		~UI();

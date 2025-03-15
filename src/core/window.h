@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace Aegix::Graphics
+namespace Aegix::Core
 {
 	class Window
 	{

@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 	}
 
 	// class member functions
-	VulkanDevice::VulkanDevice(Window& window) : m_window{ window }
+	VulkanDevice::VulkanDevice(Core::Window& window) : m_window{ window }
 	{
 		createInstance();
 		setupDebugUtils();

@@ -1,15 +1,12 @@
 #include "input.h"
 
-#include "graphics/window.h"
-
-
 #include <cassert>
 
 namespace Aegix
 {
 	Input* Input::s_instance = nullptr;
 
-	Input::Input(const Graphics::Window& window)
+	Input::Input(const Core::Window& window)
 		: m_window{ window.glfwWindow() }
 	{
 		assert(s_instance == nullptr && "Cannot create Input: Only one instance of Input is allowed");

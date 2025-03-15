@@ -5,7 +5,7 @@
 #define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
 
 #include "graphics/deletion_queue.h"
-#include "window.h"
+#include "core/window.h"
 
 #include <array>
 #include <functional>
@@ -35,7 +35,7 @@ namespace Aegix::Graphics
 		static constexpr auto VALIDATION_LAYERS = std::array{ "VK_LAYER_KHRONOS_validation" };
 		static constexpr auto DEVICE_EXTENSIONS = std::array{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-		VulkanDevice(Window& window);
+		VulkanDevice(Core::Window& window);
 		VulkanDevice(const VulkanDevice&) = delete;
 		VulkanDevice(VulkanDevice&&) = delete;
 		~VulkanDevice();
@@ -108,7 +108,7 @@ namespace Aegix::Graphics
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties m_properties;
 
-		Window& m_window;
+		Core::Window& m_window;
 		VkCommandPool m_commandPool;
 
 		VkDevice m_device;

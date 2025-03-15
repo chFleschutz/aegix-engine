@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/globals.h"
 #include "graphics/buffer.h"
 #include "graphics/frame_graph/render_stage.h"
 #include "graphics/resources/texture.h"
@@ -17,14 +18,14 @@ namespace Aegix::Graphics
 
 	struct FrameGraphResourceHandle
 	{
-		uint32_t id{ INVALID_HANDLE };
+		uint32_t id{ Core::INVALID_HANDLE };
 
 		constexpr auto operator<=>(const FrameGraphResourceHandle&) const = default;
 	};
 
 	struct FrameGraphNodeHandle
 	{
-		uint32_t id{ INVALID_HANDLE };
+		uint32_t id{ Core::INVALID_HANDLE };
 
 		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
 	};

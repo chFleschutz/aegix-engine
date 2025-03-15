@@ -55,6 +55,6 @@ target_sources(aegix-engine PRIVATE
 	"uniform_buffer.h"
 	"vulkan_tools.cpp"
 	"vulkan_tools.h"
-	"window.cpp"
-	"window.h"
+	"../core/window.cpp"
+	"../core/window.h"
 )

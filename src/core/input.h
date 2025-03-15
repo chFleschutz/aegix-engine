@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/window.h"
+#include "core/window.h"
 #include "math/math.h"
 
 #include <functional>
@@ -16,7 +16,7 @@ namespace Aegix
 		enum Key;
 		enum MouseButton;
 
-		Input(const Graphics::Window& window);
+		Input(const Core::Window& window);
 		Input(const Input&) = delete;
 		Input(Input&&) = delete;
 		~Input();
