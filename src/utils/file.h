@@ -1,7 +1,5 @@
 #pragma once
 
-#include <filesystem>
-
 namespace Aegix::File
 {
 	/// @brief Reads a binary file and returns the contents as a vector of chars

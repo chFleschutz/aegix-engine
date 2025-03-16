@@ -3,8 +3,6 @@
 #include "core/window.h"
 #include "math/math.h"
 
-#include <functional>
-#include <unordered_map>
 
 namespace Aegix 
 {

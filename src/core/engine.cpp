@@ -6,8 +6,6 @@
 #include "core/profiler.h"
 #include "core/globals.h"
 
-#include <chrono>
-
 namespace Aegix
 {
 	Engine::Engine()

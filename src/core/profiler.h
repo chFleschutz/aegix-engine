@@ -3,8 +3,6 @@
 #include "utils/rolling_average.h"
 #include "utils/timer.h"
 
-#include <unordered_map>
-
 #define AGX_PROFILE_SCOPE(name) Aegix::ScopeProfiler profiler##__LINE__(name)
 #define AGX_PROFILE_FUNCTION() AGX_PROFILE_SCOPE(__FUNCTION__)
 

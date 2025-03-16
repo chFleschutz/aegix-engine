@@ -2,9 +2,6 @@
 
 #include "buffer.h"
 
-#include <cassert>
-#include <cstring>
-
 namespace Aegix::Graphics
 {
 	VkDeviceSize Buffer::getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment)

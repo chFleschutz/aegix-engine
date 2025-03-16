@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 namespace Aegix
 {
 	/// @brief Rolling average over N values

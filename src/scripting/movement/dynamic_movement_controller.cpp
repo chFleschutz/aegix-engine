@@ -5,8 +5,6 @@
 #include "core/input.h"
 #include "physics/motion_dynamics.h"
 
-#include <iostream>
-
 namespace Aegix::Scripting
 {
 	void DynamicMovementController::update(float deltaSeconds)

@@ -7,9 +7,6 @@
 
 #include <gltf.h>
 
-#include <memory>
-#include <vector>
-
 namespace Aegix::Scene
 {
 	class GLTFLoader

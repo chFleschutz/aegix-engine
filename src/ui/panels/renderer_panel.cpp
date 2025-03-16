@@ -7,7 +7,7 @@
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/renderer.h"
 
-#include "imgui.h"
+#include <imgui.h>
 
 namespace Aegix::UI
 {

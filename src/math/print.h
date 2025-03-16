@@ -3,11 +3,9 @@
 #include <glm/glm.hpp>	
 #include <glm/gtc/quaternion.hpp>
 
-#include <iostream>
-
 // Overloads to print glm types
 
-auto operator<<(std::ostream& os, const glm::vec2& vec) -> std::ostream&;
+auto operator<<(std::ostream& os, const glm::vec2& vec) -> std::ostream&
 {
 	return os << "{ " << vec.x << ", " << vec.y << " }";
 }

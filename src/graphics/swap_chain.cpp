@@ -5,10 +5,6 @@
 #include "core/logging.h"
 #include "graphics/vulkan_tools.h"
 
-#include <array>
-#include <cassert>
-#include <limits>
-
 namespace Aegix::Graphics
 {
 	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent)

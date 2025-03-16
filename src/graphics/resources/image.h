@@ -7,8 +7,6 @@
 
 #include <glm/glm.hpp>
 
-#include <filesystem>
-
 namespace Aegix::Graphics
 {
 	class Image

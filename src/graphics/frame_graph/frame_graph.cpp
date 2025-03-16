@@ -6,8 +6,6 @@
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan_tools.h"
 
-#include <cassert>
-
 namespace std
 {
 	template <>

@@ -11,8 +11,6 @@
 
 #include <ImGuizmo.h>
 
-#include <cassert>
-
 namespace Aegix::UI
 {
 	UI::UI(Graphics::Graphics& graphics, Core::LayerStack& layerStack)

@@ -7,9 +7,6 @@
 #include "graphics/resources/sampler.h"
 #include "graphics/vulkan_tools.h"
 
-#include <memory>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	struct BloomThreshold

@@ -5,8 +5,6 @@
 #include "math/interpolation.h"
 #include "math/random.h"
 
-#include <cassert>
-
 namespace Aegix
 {
 	PerlinNoise1D::PerlinNoise1D(float bandwidth)

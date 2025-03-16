@@ -5,11 +5,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include <cassert>
-#include <filesystem>
-#include <iostream>
-#include <vector>
-
 #define VK_CHECK(f)																						\
 {																										\
 	VkResult result = (f);																				\

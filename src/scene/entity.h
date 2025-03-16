@@ -2,8 +2,6 @@
 
 #include <entt/entt.hpp>
 
-#include <cassert>
-
 namespace Aegix::Scripting
 {
 	class ScriptBase;

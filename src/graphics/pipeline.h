@@ -2,9 +2,6 @@
 
 #include "graphics/device.h"
 
-#include <filesystem>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	class PipelineLayout

@@ -7,12 +7,6 @@
 #include "graphics/deletion_queue.h"
 #include "core/window.h"
 
-#include <array>
-#include <functional>
-#include <optional>
-#include <string>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	struct SwapChainSupportDetails

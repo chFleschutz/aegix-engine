@@ -1,9 +1,7 @@
 #pragma once
 
 #include <any>
-#include <cassert>
 #include <typeindex>
-#include <unordered_map>
 
 namespace Aegix::Graphics
 {

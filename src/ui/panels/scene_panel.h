@@ -2,9 +2,7 @@
 
 #include "scene/entity.h"
 
-#include "imgui.h"
-
-#include <functional>
+#include <imgui.h>
 
 namespace Aegix::UI
 {

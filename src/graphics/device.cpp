@@ -5,10 +5,6 @@
 #include "graphics/vulkan_tools.h"
 #include "core/logging.h"
 
-#include <set>
-#include <unordered_set>
-#include <cassert>
-
 namespace Aegix::Graphics
 {
 	// local callback functions

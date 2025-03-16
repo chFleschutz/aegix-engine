@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 namespace Aegix
 {
 	/// @brief 1D Perlin noise generator.

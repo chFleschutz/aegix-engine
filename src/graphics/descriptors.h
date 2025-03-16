@@ -5,10 +5,6 @@
 #include "graphics/resources/texture.h"
 #include "graphics/uniform_buffer.h"
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	class DescriptorSetLayout

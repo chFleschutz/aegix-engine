@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 namespace Aegix::Utils 
 {
 	// from: https://stackoverflow.com/a/57595105

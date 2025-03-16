@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cstdint>
-#include <limits>
-
 namespace Aegix::Graphics
 {
 #ifdef NDEBUG

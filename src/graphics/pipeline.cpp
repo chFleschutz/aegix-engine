@@ -6,8 +6,6 @@
 #include "graphics/vulkan_tools.h"
 #include "utils/file.h"
 
-#include <cassert>
-
 namespace Aegix::Graphics
 {
 	// PipelineLayout::Builder ---------------------------------------------------

@@ -5,8 +5,6 @@
 #include "graphics/resources/image.h"
 #include "graphics/vulkan_tools.h"
 
-#include <cassert>
-
 namespace Aegix::Graphics
 {
 	ImageView::ImageView(VulkanDevice& device)

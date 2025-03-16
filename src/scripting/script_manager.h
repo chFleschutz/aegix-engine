@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 namespace Aegix::Scripting
 {
 	class ScriptBase;

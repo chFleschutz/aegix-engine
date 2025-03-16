@@ -4,8 +4,6 @@
 #include "graphics/systems/render_system.h"
 #include "graphics/vulkan_tools.h"
 
-#include <array>
-
 namespace Aegix::Graphics
 {
 	struct GBufferUbo

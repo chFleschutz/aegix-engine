@@ -2,9 +2,6 @@
 
 #include "graphics/descriptors.h"
 
-#include <memory>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	class RenderSystem;

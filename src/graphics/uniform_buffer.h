@@ -4,8 +4,6 @@
 #include "graphics/descriptors.h"
 #include "graphics/globals.h"
 
-#include <array>
-
 namespace Aegix::Graphics
 {
 	/// @brief Manages uniform buffers of the gpu

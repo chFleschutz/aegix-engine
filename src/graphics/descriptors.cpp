@@ -4,8 +4,6 @@
 
 #include "graphics/vulkan_tools.h"
 
-#include <cassert>
-
 namespace Aegix::Graphics
 {
 	// DescriptorSetLayout Builder -----------------------------------------------------

@@ -3,8 +3,6 @@
 #include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
-#include <algorithm>
-
 namespace Aegix::Scripting
 {
 	/// @brief Limits the locaton of the entity to the given limits.

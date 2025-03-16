@@ -2,9 +2,6 @@
 
 #include "core/layer.h"
 
-#include <vector>
-#include <memory>
-
 namespace Aegix::Core
 {
 	class LayerStack

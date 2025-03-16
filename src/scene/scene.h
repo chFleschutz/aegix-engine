@@ -7,10 +7,6 @@
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
 
-#include <filesystem>
-#include <memory>
-#include <vector>
-
 namespace Aegix::Scripting
 {
 	class ScriptBase;

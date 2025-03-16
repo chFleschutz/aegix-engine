@@ -2,10 +2,6 @@
 
 #include "graphics/globals.h"
 
-#include <array>
-#include <vector>
-#include <functional>
-
 namespace Aegix::Graphics
 {
 	/// @brief Manages the deletion of vulkan objects to ensure they are not deleted while in use

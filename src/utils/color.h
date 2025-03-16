@@ -2,8 +2,6 @@
 
 #include <glm/glm.hpp>
 
-#include <string>
-
 namespace Aegix
 {
 	class Color

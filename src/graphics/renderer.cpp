@@ -15,8 +15,6 @@
 #include "graphics/render_passes/ui_pass.h"
 #include "scene/scene.h"
 
-#include <cassert>
-
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Core::Window& window, VulkanDevice& device)

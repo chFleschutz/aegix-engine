@@ -4,7 +4,6 @@
 
 #include "math/random.h"
 
-#include <cassert>
 #include <sstream>
 
 namespace Aegix

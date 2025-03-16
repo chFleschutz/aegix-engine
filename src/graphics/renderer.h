@@ -9,9 +9,6 @@
 #include "graphics/systems/render_system.h"
 #include "scene/scene.h"
 
-#include <array>
-#include <memory>
-
 namespace Aegix::Graphics
 {
 	class Renderer

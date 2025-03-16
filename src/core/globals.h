@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-#include <limits>
 #include <chrono>
 
 namespace Aegix::Core

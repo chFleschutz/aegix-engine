@@ -2,9 +2,6 @@
 
 #include "graphics/device.h"
 
-#include <memory>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	class SwapChain

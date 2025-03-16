@@ -5,10 +5,6 @@
 
 #include "glm/glm.hpp"
 
-#include <filesystem>
-#include <memory>
-#include <vector>
-
 namespace Aegix::Graphics
 {
 	class StaticMesh

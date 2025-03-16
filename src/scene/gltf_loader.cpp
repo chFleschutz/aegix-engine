@@ -7,7 +7,6 @@
 
 #include <gltf_utils.h>
 
-#include <cassert>
 #include <variant>
 
 namespace Aegix::Scene
