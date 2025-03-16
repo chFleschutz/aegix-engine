@@ -2,7 +2,7 @@
 
 #include "image.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"

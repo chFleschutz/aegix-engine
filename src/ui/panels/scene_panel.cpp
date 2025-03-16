@@ -2,7 +2,7 @@
 
 #include "scene_panel.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 

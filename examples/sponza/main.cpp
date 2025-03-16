@@ -1,5 +1,5 @@
-#include "core/engine.h"
-#include "scene/description.h"
+#include <engine.h>
+#include <scene/description.h>
 
 class Sponza : public Aegix::Scene::Description
 {

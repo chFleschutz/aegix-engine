@@ -2,7 +2,7 @@
 
 #include "static_mesh.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "utils/file.h"
 
 #include "gltf.h"

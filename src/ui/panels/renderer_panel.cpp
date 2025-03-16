@@ -2,7 +2,7 @@
 
 #include "renderer_panel.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/renderer.h"

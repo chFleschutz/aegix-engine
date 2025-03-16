@@ -2,7 +2,7 @@
 
 #include "texture.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "graphics/vulkan_tools.h"
 
 #include <stb_image.h>

@@ -2,7 +2,7 @@
 
 #include "gltf_loader.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "math/math.h"
 
 #include <gltf_utils.h>

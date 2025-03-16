@@ -2,7 +2,7 @@
 
 #include "Scene.h"
 
-#include "core/engine.h"
+#include "engine.h"
 #include "core/profiler.h"
 #include "graphics/static_mesh.h"
 #include "scene/components.h"
