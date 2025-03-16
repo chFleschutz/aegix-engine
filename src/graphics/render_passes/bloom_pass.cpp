@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "bloom_pass.h"
 
 #include <imgui.h>

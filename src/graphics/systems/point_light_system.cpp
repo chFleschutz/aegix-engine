@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "point_light_system.h"
 
 #include "graphics/vulkan_tools.h"

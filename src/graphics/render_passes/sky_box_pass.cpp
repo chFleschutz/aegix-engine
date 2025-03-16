@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "sky_box_pass.h"
 
 #include "graphics/vulkan_tools.h"

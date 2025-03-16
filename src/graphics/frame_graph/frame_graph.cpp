@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "frame_graph.h"
 
 #include "core/logging.h"

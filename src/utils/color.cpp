@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "color.h"
 
 #include "math/random.h"

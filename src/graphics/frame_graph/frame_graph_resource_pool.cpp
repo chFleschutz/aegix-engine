@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "frame_graph_resource_pool.h"
 
 #include "core/globals.h"

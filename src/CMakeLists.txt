@@ -1,6 +1,8 @@
 add_library(aegix-engine STATIC)
 add_library(Aegix::Engine ALIAS aegix-engine)
 
+target_precompile_headers(aegix-engine PUBLIC pch.h)
+
 target_include_directories(aegix-engine 
 	PUBLIC 
 		${CMAKE_CURRENT_SOURCE_DIR}

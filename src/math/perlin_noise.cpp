@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "perlin_noise.h"
 
 #include "math/interpolation.h"

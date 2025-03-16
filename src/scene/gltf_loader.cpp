@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "gltf_loader.h"
 
 #include "core/engine.h"

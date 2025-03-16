@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "vulkan_tools.h"
 
 #include "core/logging.h"

@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "entity.h"
 
 #include "scene/scene.h"

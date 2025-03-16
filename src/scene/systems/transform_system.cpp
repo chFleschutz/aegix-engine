@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "transform_system.h"
 
 #include "scene/components.h"

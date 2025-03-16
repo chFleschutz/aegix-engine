@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "lighting_pass.h"
 
 #include "graphics/vulkan_tools.h"

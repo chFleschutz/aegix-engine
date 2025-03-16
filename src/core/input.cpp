@@ -1,6 +1,6 @@
-#include "input.h"
+#include "pch.h"
 
-#include <cassert>
+#include "input.h"
 
 namespace Aegix
 {
