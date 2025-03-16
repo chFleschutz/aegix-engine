@@ -1,9 +1,9 @@
-#include <engine.h>
-#include <graphics/systems/default_render_system.h>
-#include <graphics/systems/point_light_system.h>
-#include <math/random.h>
-#include <scene/description.h>
-#include <scripting/script_base.h>
+#include <aegix/engine.h>
+#include <aegix/graphics/systems/default_render_system.h>
+#include <aegix/graphics/systems/point_light_system.h>
+#include <aegix/math/random.h>
+#include <aegix/scene/description.h>
+#include <aegix/scripting/script_base.h>
 
 /// @brief Example script to rotate the entity around the up axis
 class Rotator : public Aegix::Scripting::ScriptBase

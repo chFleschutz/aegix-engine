@@ -1,5 +1,5 @@
-#include "core/engine.h"
-#include "scene/description.h"
+#include "aegix/engine.h"
+#include "aegix/scene/description.h"
 
 class TemplateScene : public Aegix::Scene::Description
 {

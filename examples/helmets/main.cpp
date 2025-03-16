@@ -1,7 +1,7 @@
-#include <engine.h>
-#include <scene/description.h>
-#include <graphics/systems/default_render_system.h>
-#include <graphics/systems/point_light_system.h>
+#include <aegix/engine.h>
+#include <aegix/scene/description.h>
+#include <aegix/graphics/systems/default_render_system.h>
+#include <aegix/graphics/systems/point_light_system.h>
 
 /// @brief Scene with two helmets
 class HelmetScene : public Aegix::Scene::Description
