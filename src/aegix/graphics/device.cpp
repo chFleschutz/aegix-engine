@@ -44,12 +44,12 @@ namespace Aegix::Graphics
 	}
 
 	// class member functions
-	VulkanDevice::VulkanDevice(Core::Window& window) : m_window{ window }
+	VulkanDevice::VulkanDevice(Core::Window& window) 
 	{
 		createInstance();
 		setupDebugUtils();
-		createSurface();
-		pickPhysicalDevice();
+		createSurface(window);
+		createPhysicalDevice();
 		createLogicalDevice();
 		createCommandPool();
 	}
@@ -108,7 +108,7 @@ namespace Aegix::Graphics
 		Tools::loadFunctionPointers(m_instance);
 	}
 
-	void VulkanDevice::pickPhysicalDevice()
+	void VulkanDevice::createPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
@@ -213,12 +213,12 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool))
 	}
 
-	void VulkanDevice::createSurface()
+	void VulkanDevice::createSurface(Core::Window& window)
 	{
-		m_window.createWindowSurface(m_instance, &m_surface);
+		window.createWindowSurface(m_instance, &m_surface);
 	}
 
-	bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device)
+	auto VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) -> bool
 	{
 		QueueFamilyIndices indices = findQueueFamilies(device);
 
@@ -260,7 +260,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	bool VulkanDevice::checkValidationLayerSupport()
+	auto VulkanDevice::checkValidationLayerSupport() -> bool
 	{
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -287,7 +287,7 @@ namespace Aegix::Graphics
 		return true;
 	}
 
-	std::vector<const char*> VulkanDevice::queryRequiredInstanceExtensions() const
+	auto VulkanDevice::queryRequiredInstanceExtensions() const -> std::vector<const char*>
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -323,7 +323,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
+	auto VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) -> bool
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -340,7 +340,7 @@ namespace Aegix::Graphics
 		return requiredExtensions.empty();
 	}
 
-	QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const
+	auto VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const -> QueueFamilyIndices
 	{
 		QueueFamilyIndices indices;
 
@@ -370,7 +370,7 @@ namespace Aegix::Graphics
 		return indices;
 	}
 
-	SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const
+	auto VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const -> SwapChainSupportDetails
 	{
 		SwapChainSupportDetails details;
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
@@ -399,12 +399,12 @@ namespace Aegix::Graphics
 		return details;
 	}
 
-	SwapChainSupportDetails VulkanDevice::querySwapChainSupport() const
+	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails
 	{
 		return querySwapChainSupport(m_physicalDevice);
 	}
 
-	uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const
+	auto VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const -> uint32_t
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
@@ -418,13 +418,13 @@ namespace Aegix::Graphics
 		return 0;
 	}
 
-	QueueFamilyIndices VulkanDevice::findPhysicalQueueFamilies() const
+	auto VulkanDevice::findPhysicalQueueFamilies() const -> QueueFamilyIndices
 	{
 		return findQueueFamilies(m_physicalDevice);
 	}
 
-	VkFormat VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
-		VkFormatFeatureFlags features) const
+	auto VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+		VkFormatFeatureFlags features) const -> VkFormat
 	{
 		for (VkFormat format : candidates)
 		{
@@ -445,7 +445,7 @@ namespace Aegix::Graphics
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkImageAspectFlags VulkanDevice::findAspectFlags(VkFormat format) const
+	auto VulkanDevice::findAspectFlags(VkFormat format) const -> VkImageAspectFlags
 	{
 		switch (format)
 		{
@@ -467,7 +467,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	VkCommandBuffer VulkanDevice::beginSingleTimeCommands() const
+	auto VulkanDevice::beginSingleTimeCommands() const -> VkCommandBuffer
 	{
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

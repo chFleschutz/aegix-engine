@@ -53,14 +53,14 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto presentQueue() const -> VkQueue { return m_presentQueue; }
 		[[nodiscard]] auto properties() const -> const VkPhysicalDeviceProperties& { return m_properties; }
 
-		SwapChainSupportDetails querySwapChainSupport() const;
-		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const;
-		QueueFamilyIndices findPhysicalQueueFamilies() const;
-		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, 
-			VkFormatFeatureFlags features) const;
-		VkImageAspectFlags findAspectFlags(VkFormat format) const;
+		auto querySwapChainSupport() const -> SwapChainSupportDetails;
+		auto findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const -> uint32_t;
+		auto findPhysicalQueueFamilies() const -> QueueFamilyIndices;
+		auto findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, 
+			VkFormatFeatureFlags features) const -> VkFormat;
+		auto findAspectFlags(VkFormat format) const -> VkImageAspectFlags;
 
-		VkCommandBuffer beginSingleTimeCommands() const;
+		auto beginSingleTimeCommands() const -> VkCommandBuffer;
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
 
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags m_properties, VkBuffer& buffer, 
@@ -88,22 +88,20 @@ namespace Aegix::Graphics
 	private:
 		void createInstance();
 		void setupDebugUtils();
-		void createSurface();
-		void pickPhysicalDevice();
+		void createSurface(Core::Window& window);
+		void createPhysicalDevice();
 		void createLogicalDevice();
 		void createAllocator();
 		void createCommandPool();
 
-		bool isDeviceSuitable(VkPhysicalDevice device);
-		std::vector<const char*> queryRequiredInstanceExtensions() const;
-		bool checkValidationLayerSupport();
-		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
+		auto isDeviceSuitable(VkPhysicalDevice device) -> bool;
+		auto queryRequiredInstanceExtensions() const -> std::vector<const char*>;
+		auto checkValidationLayerSupport() -> bool;
+		auto findQueueFamilies(VkPhysicalDevice device) const -> QueueFamilyIndices;
 		auto debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT;
 		void checkGflwRequiredInstanceExtensions();
-		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
-
-		Core::Window& m_window;
+		auto checkDeviceExtensionSupport(VkPhysicalDevice device) -> bool;
+		auto querySwapChainSupport(VkPhysicalDevice device) const -> SwapChainSupportDetails;
 
 		VkInstance m_instance = VK_NULL_HANDLE;
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
