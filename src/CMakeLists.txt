@@ -20,6 +20,7 @@ target_link_libraries(aegix-engine
 		imgui
 		imguizmo
 		tinyobjloader
+		GPUOpen::VulkanMemoryAllocator
 		Aegix::GLTF
 		Aegix::Log
 )
