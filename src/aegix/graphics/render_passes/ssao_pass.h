@@ -1,9 +1,9 @@
 #pragma once
 
-#include "graphics/buffer.h"
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
 
 namespace Aegix::Graphics

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/globals.h"
-#include "graphics/buffer.h"
 #include "graphics/frame_graph/render_stage.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
 
 #include <variant>

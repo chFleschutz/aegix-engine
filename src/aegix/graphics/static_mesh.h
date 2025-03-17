@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/buffer.h"
 #include "graphics/device.h"
+#include "graphics/resources/buffer.h"
 
 #include "glm/glm.hpp"
 
