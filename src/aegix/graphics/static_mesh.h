@@ -42,13 +42,9 @@ namespace Aegix::Graphics
 			assert(attribute.size() >= 3 && "Vertex attribute must have at least 3 elements");
 
 			size_t bufferSize = sizeof(T) * attribute.size();
-			Buffer stagingBuffer{ m_device, bufferSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-			stagingBuffer.singleWrite(attribute.data());
-
 			auto attributeBuffer = std::make_unique<Buffer>(m_device, bufferSize, 1,
 				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-			m_device.copyBuffer(stagingBuffer.buffer(), attributeBuffer->buffer(), bufferSize);
+			attributeBuffer->upload(attribute.data(), bufferSize);
 
 			m_vkBuffers.emplace_back(attributeBuffer->buffer());
 			m_bufferOffsets.emplace_back(0);

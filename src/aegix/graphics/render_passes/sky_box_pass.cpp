@@ -44,13 +44,9 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize vertexBufferSize = sizeof(glm::vec3) * vertices.size();
-			Buffer stagingBuffer{ device, vertexBufferSize, 1,
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-			stagingBuffer.singleWrite(vertices.data());
-
 			m_vertexBuffer = std::make_unique<Buffer>(device, vertexBufferSize, 1,
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), vertexBufferSize);
+			m_vertexBuffer->upload(vertices.data(), vertexBufferSize);
 		}
 
 		// Create index buffer
@@ -65,17 +61,13 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize indexBufferSize = sizeof(uint32_t) * indices.size();
-			Buffer stagingBuffer{ device, indexBufferSize, 1,
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-			stagingBuffer.singleWrite(indices.data());
-
 			m_indexBuffer = std::make_unique<Buffer>(device, indexBufferSize, 1,
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), indexBufferSize);
+			m_indexBuffer->upload(indices.data(), indexBufferSize);
 		}
 	}
 
-	auto SkyBoxPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo 
+	auto SkyBoxPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
 	{
 		m_sceneColor = builder.add(FrameGraphResourceCreateInfo{
 			.name = "SceneColor",

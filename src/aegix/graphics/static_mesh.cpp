@@ -115,13 +115,9 @@ namespace Aegix::Graphics
 			return;
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
-		Buffer stagingBuffer{ m_device, bufferSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT};
-		stagingBuffer.singleWrite((void*)indices.data());
-
 		m_indexBuffer = std::make_unique<Buffer>(m_device, bufferSize, 1,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-		m_device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
+		m_indexBuffer->upload(indices.data(), bufferSize);
 	}
 
 	void StaticMesh::MeshInfo::loadOBJ(const std::filesystem::path& filepath)

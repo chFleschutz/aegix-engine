@@ -57,6 +57,12 @@ namespace Aegix::Graphics
 		/// @brief Flush the memory range at 'index * alignmentSize'
 		void flushIndex(int index);
 
+		/// @brief Uploads data to the buffer using a staging buffer (Used for device local memory)
+		void upload(const void* data, VkDeviceSize size);
+
+		/// @brief Copy the buffer to another buffer
+		void copyTo(Buffer& dest, VkDeviceSize size);
+
 	private:
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 

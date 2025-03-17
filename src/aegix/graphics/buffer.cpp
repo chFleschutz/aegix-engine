@@ -117,6 +117,18 @@ namespace Aegix::Graphics
 		flush(m_alignmentSize, index * m_alignmentSize);
 	}
 
+	void Buffer::upload(const void* data, VkDeviceSize size)
+	{
+		Buffer stagingBuffer = Buffer::createStagingBuffer(m_device, size);
+		stagingBuffer.singleWrite(data, size, 0);
+		stagingBuffer.copyTo(*this, size);
+	}
+
+	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
+	{
+		m_device.copyBuffer(m_buffer, dest.m_buffer, size);
+	}
+
 	auto Buffer::computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize
 	{
 		if (minOffsetAlignment > 0)
