@@ -121,7 +121,7 @@ namespace Aegix::Graphics
 		m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };
 		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
 		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-		stagingBuffer.write(pixels);
+		stagingBuffer.singleWrite(pixels);
 
 		stbi_image_free(pixels);
 
@@ -151,7 +151,7 @@ namespace Aegix::Graphics
 	void Image::fill(const void* data, VkDeviceSize size)
 	{
 		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-		stagingBuffer.write(data);
+		stagingBuffer.singleWrite(data);
 
 		fill(stagingBuffer);
 	}

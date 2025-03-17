@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 
 			Buffer stagingBuffer{ m_device, sizeof(T), instanceCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
 				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-			stagingBuffer.write(attribute.data());
+			stagingBuffer.singleWrite(attribute.data());
 
 			auto attributeBuffer = std::make_unique<Buffer>(m_device, sizeof(T), instanceCount,
 				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);

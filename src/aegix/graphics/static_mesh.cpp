@@ -118,7 +118,7 @@ namespace Aegix::Graphics
 		uint32_t indexSize = sizeof(indices[0]);
 		Buffer stagingBuffer{ m_device, indexSize, m_indexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT};
-		stagingBuffer.write((void*)indices.data());
+		stagingBuffer.singleWrite((void*)indices.data());
 
 		m_indexBuffer = std::make_unique<Buffer>(m_device, indexSize, m_indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);

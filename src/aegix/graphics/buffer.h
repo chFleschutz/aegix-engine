@@ -8,8 +8,11 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
+		static auto createUniformBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer;
+		static auto createStagingBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer;
+
 		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
-			VmaAllocationCreateFlags allocFlags = 0, VkDeviceSize minOffsetAlignment = 1);
+			VmaAllocationCreateFlags allocFlags = 0, VkDeviceSize minOffsetAlignment = 0);
 		Buffer(const Buffer&) = delete;
 		~Buffer();
 
@@ -17,69 +20,54 @@ namespace Aegix::Graphics
 		
 		operator VkBuffer() const { return m_buffer; }
 
-		/// @brief Map a memory range of this buffer. If successful, mapped points to the specified buffer range.
-		void map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+		[[nodiscard]] auto buffer() const -> VkBuffer { return m_buffer; }
+		[[nodiscard]] auto bufferSize() const -> VkDeviceSize { return m_bufferSize; }
+		[[nodiscard]] auto instanceSize() const -> VkDeviceSize { return m_instanceSize; }
+		[[nodiscard]] auto alignmentSize() const -> VkDeviceSize { return m_instanceSize; }
+		[[nodiscard]] auto instanceCount() const -> uint32_t { return m_instanceCount; }
+		[[nodiscard]] auto usage() const -> VkBufferUsageFlags { return m_usage; }
 
-		/// @brief Unmap a mapped memory range
+		[[nodiscard]] auto descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
+		[[nodiscard]] auto descriptorInfoForIndex(int index) const -> VkDescriptorBufferInfo;
+
+		/// @brief Map the buffer memory to allow writing to it
+		void map();
+
+		/// @brief Unmap the buffer memory
 		void unmap();
 
+		/// @brief Only writes data to the buffer
+		/// @note Buffer MUST be mapped before calling
 		void write(const void* data);
-
-		/// @brief Copies the specified data to the mapped buffer. Default value writes whole buffer range
 		void write(const void* data, VkDeviceSize size, VkDeviceSize offset);
 
-		/// @brief Flush a memory range of the buffer to make it visible to the device
-		/// @note Only required for non-coherent memory. Also 'write' automatically flushes if needed
-		void flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-
-		/// @brief Create a buffer info descriptor
-		/// @param size (Optional) Size of the memory range of the descriptor
-		/// @param offset (Optional) Byte offset from beginning
-		/// @return VkDescriptorBufferInfo of specified offset and range
-		VkDescriptorBufferInfo descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
-
-		/// @brief Copies "instanceSize" bytes of data to the mapped buffer at an offset of index alignmentSize
-		/// @param data Pointer to the data to copy
-		/// @param index Used in offset calculation
+		/// @brief Writes data of 'instanceSize' to the buffer at an offset of 'index * alignmentSize'
+		/// @note Buffer MUST be mapped before calling
 		void writeToIndex(const void* data, int index);
 
-		/// @brief Flush the memory range at index * alignmentSize of the buffer to make it visible to the device
-		/// @param index index Used in offset calculation
-		/// @return VkResult of the flush call
+		/// @brief Maps, writes data, then unmaps the buffer
+		void singleWrite(const void* data);
+		void singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset);
+
+		/// @brief Flushes the buffer memory to make it visible to the device 
+		/// @note Only required for non-coherent memory, 'write' functions already flush
+		void flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+
+		/// @brief Flush the memory range at 'index * alignmentSize'
 		void flushIndex(int index);
 
-		/// @brief Create a buffer info descriptor
-		/// @param index Specifies the region given by index * alignmentSize
-		/// @return VkDescriptorBufferInfo for instance at index
-		VkDescriptorBufferInfo descriptorInfoForIndex(int index);
-
-		VkBuffer buffer() const { return m_buffer; }
-		void* mappedMemory() const { return m_mapped; }
-		uint32_t instanceCount() const { return m_instanceCount; }
-		VkDeviceSize instanceSize() const { return m_instanceSize; }
-		VkDeviceSize alignmentSize() const { return m_instanceSize; }
-		VkBufferUsageFlags usage() const { return m_usage; }
-		VkMemoryPropertyFlags memoryProperties() const { return m_memoryProperties; }
-		VkDeviceSize bufferSize() const { return m_bufferSize; }
-
 	private:
-		/// @brief Returns the minimum instance size required to be compatible with devices minOffsetAlignment
-		/// @param instanceSize The size of an instance
-		/// @param minOffsetAlignment The minimum required alignment, in bytes, for the offset member (eg minUniformBufferOffsetAlignment)
-		/// @return VkResult of the buffer mapping call
-		static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
+		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 
 		VulkanDevice& m_device;
 
 		VkBuffer m_buffer = VK_NULL_HANDLE;
 		VmaAllocation m_allocation = VK_NULL_HANDLE;
-		void* m_mapped = nullptr;
-
 		VkDeviceSize m_bufferSize;
-		uint32_t m_instanceCount;
 		VkDeviceSize m_instanceSize;
 		VkDeviceSize m_alignmentSize;
+		uint32_t m_instanceCount;
 		VkBufferUsageFlags m_usage;
-		VkMemoryPropertyFlags m_memoryProperties;
+		void* m_mapped = nullptr;
 	};
 }

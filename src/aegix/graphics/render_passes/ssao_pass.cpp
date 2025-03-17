@@ -11,6 +11,8 @@
 namespace Aegix::Graphics
 {
 	SSAOPass::SSAOPass(VulkanDevice& device, DescriptorPool& pool)
+		: m_uniforms{ Buffer::createUniformBuffer(device, sizeof(SSAOUniforms)) },
+		m_ssaoSamples{ Buffer::createUniformBuffer(device, sizeof(glm::vec4) * SAMPLE_COUNT) }
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -30,10 +32,6 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
 			.build();
-
-		m_uniforms = std::make_unique<Buffer>(device, sizeof(SSAOUniforms), 1, 
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		m_uniforms->map();
 
 		// Generate random samples
 		auto& gen = Random::generator();
@@ -56,9 +54,7 @@ namespace Aegix::Graphics
 			samples.emplace_back(sample);
 		}
 
-		m_ssaoSamples = std::make_unique<Buffer>(device, sizeof(glm::vec4), static_cast<uint32_t>(samples.size()),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-		m_ssaoSamples->write(samples.data());
+		m_ssaoSamples.singleWrite(samples.data());
 
 		// Generate noise texture
 		std::vector<glm::vec2> noise(NOISE_SIZE * NOISE_SIZE);
@@ -113,7 +109,7 @@ namespace Aegix::Graphics
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
-		m_uniforms->write(&m_uniformData);
+		m_uniforms.writeToIndex(&m_uniformData, frameInfo.frameIndex);
 
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
@@ -122,8 +118,8 @@ namespace Aegix::Graphics
 			.writeImage(1, resources.texture(m_position))
 			.writeImage(2, resources.texture(m_normal))
 			.writeImage(3, *m_ssaoNoise)
-			.writeBuffer(4, *m_ssaoSamples)
-			.writeBuffer(5, *m_uniforms)
+			.writeBuffer(4, m_ssaoSamples)
+			.writeBuffer(5, m_uniforms.descriptorInfoForIndex(frameInfo.frameIndex))
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);

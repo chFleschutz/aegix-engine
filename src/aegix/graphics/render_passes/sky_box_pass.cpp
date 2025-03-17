@@ -43,9 +43,9 @@ namespace Aegix::Graphics
 				{-1.0f,  1.0f,  1.0f}
 			};
 
-			auto stagingBuffer = Buffer(device, sizeof(glm::vec3), (uint32_t)vertices.size(), 
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-			stagingBuffer.write(vertices.data());
+			Buffer stagingBuffer{ device, sizeof(glm::vec3), (uint32_t)vertices.size(),
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+			stagingBuffer.singleWrite(vertices.data());
 
 			m_vertexBuffer = std::make_unique<Buffer>(device, sizeof(glm::vec3), (uint32_t)vertices.size(), 
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
@@ -63,9 +63,9 @@ namespace Aegix::Graphics
 				5, 4, 0, 0, 1, 5,
 			};
 
-			auto stagingBuffer = Buffer(device, sizeof(uint32_t), (uint32_t)indices.size(), 
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
-			stagingBuffer.write(indices.data());
+			Buffer stagingBuffer{ device, sizeof(uint32_t), (uint32_t)indices.size(),
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+			stagingBuffer.singleWrite(indices.data());
 
 			m_indexBuffer = std::make_unique<Buffer>(device, sizeof(uint32_t), (uint32_t)indices.size(), 
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);

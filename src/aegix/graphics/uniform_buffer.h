@@ -13,20 +13,22 @@ namespace Aegix::Graphics
 		template<typename T>
 		UniformBuffer(VulkanDevice& device, const T& data)
 		{
+			auto minAlignment = device.properties().limits.minUniformBufferOffsetAlignment;
 			for (auto& buffer : m_buffers)
 			{
 				buffer = std::make_unique<Buffer>(device, sizeof(T), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, minAlignment);
 				buffer->write(&data);
 			}
 		}
 
 		UniformBuffer(VulkanDevice& device, const void* data, size_t size)
 		{
+			auto minAlignment = device.properties().limits.minUniformBufferOffsetAlignment;
 			for (auto& buffer : m_buffers)
 			{
 				buffer = std::make_unique<Buffer>(device, size, 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, minAlignment);
 				buffer->write(data);
 			}
 		}
