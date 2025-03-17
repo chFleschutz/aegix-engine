@@ -72,7 +72,7 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<DescriptorSetLayout> m_gbufferSetLayout;
 		std::unique_ptr<DescriptorSet> m_gbufferSet;
-		std::unique_ptr<UniformBuffer> m_ubo;
+		Buffer m_ubo;
 
 		// IBL
 		std::unique_ptr<DescriptorSetLayout> m_iblSetLayout;

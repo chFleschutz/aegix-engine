@@ -2,7 +2,6 @@
 
 #include "graphics/systems/render_system.h"
 #include "graphics/resources/texture.h"
-#include "graphics/uniform_buffer.h"
 
 namespace Aegix::Graphics
 {
@@ -34,7 +33,7 @@ namespace Aegix::Graphics
 			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data = {});
 
 	private:
-		UniformBuffer m_uniformBuffer;
+		Buffer m_uniformBuffer;
 		std::shared_ptr<Texture> m_albedoTexture;
 		std::shared_ptr<Texture> m_normalTexture;
 		std::shared_ptr<Texture> m_metalRoughnessTexture;

@@ -6,10 +6,10 @@
 
 namespace Aegix::Graphics
 {
-	auto Buffer::createUniformBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer
+	auto Buffer::createUniformBuffer(VulkanDevice& device, VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
 		auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
-		return Buffer{ device, size, MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		return Buffer{ device, size, instanceCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
 	}
 
@@ -86,7 +86,20 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data)
 	{
-		singleWrite(data, m_bufferSize, 0);
+		if (m_instanceCount == 1)
+		{
+			singleWrite(data, m_instanceSize, 0);
+		}
+		else // Copy data to all instances
+		{
+			map();
+			for (uint32_t i = 0; i < m_instanceCount; i++)
+			{
+				memcpy(static_cast<uint8_t*>(m_mapped) + (i * m_alignmentSize), data, m_instanceSize);
+			}
+			flush(m_bufferSize, 0);
+			unmap();
+		}
 	}
 
 	void Buffer::singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset)

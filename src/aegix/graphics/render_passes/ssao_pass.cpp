@@ -12,7 +12,7 @@ namespace Aegix::Graphics
 {
 	SSAOPass::SSAOPass(VulkanDevice& device, DescriptorPool& pool)
 		: m_uniforms{ Buffer::createUniformBuffer(device, sizeof(SSAOUniforms)) },
-		m_ssaoSamples{ Buffer::createUniformBuffer(device, sizeof(glm::vec4) * SAMPLE_COUNT) }
+		m_ssaoSamples{ Buffer::createUniformBuffer(device, sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -119,7 +119,7 @@ namespace Aegix::Graphics
 			.writeImage(2, resources.texture(m_normal))
 			.writeImage(3, *m_ssaoNoise)
 			.writeBuffer(4, m_ssaoSamples)
-			.writeBuffer(5, m_uniforms.descriptorInfoForIndex(frameInfo.frameIndex))
+			.writeBuffer(5, m_uniforms, frameInfo.frameIndex)
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);

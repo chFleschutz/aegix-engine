@@ -3,7 +3,6 @@
 #include "graphics/device.h"
 #include "graphics/globals.h"
 #include "graphics/resources/texture.h"
-#include "graphics/uniform_buffer.h"
 
 namespace Aegix::Graphics
 {
@@ -94,15 +93,16 @@ namespace Aegix::Graphics
 		DescriptorWriter(DescriptorWriter&&) = default;
 		~DescriptorWriter() = default;
 
-		DescriptorWriter& operator=(const DescriptorWriter&) = delete;
-		DescriptorWriter& operator=(DescriptorWriter&&) = default;
+		auto operator=(const DescriptorWriter&) -> DescriptorWriter& = delete;
+		auto operator=(DescriptorWriter&&) -> DescriptorWriter& = default;
 
-		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture);
-		DescriptorWriter& writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride);
-		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo);
+		auto writeImage(uint32_t binding, const Texture& texture) -> DescriptorWriter&;
+		auto writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride) -> DescriptorWriter&;
+		auto writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo) -> DescriptorWriter&;
 
-		DescriptorWriter& writeBuffer(uint32_t binding, const Buffer& buffer);
-		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo);
+		auto writeBuffer(uint32_t binding, const Buffer& buffer) -> DescriptorWriter&;
+		auto writeBuffer(uint32_t binding, const Buffer& buffer, uint32_t index) -> DescriptorWriter&;
+		auto writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo) -> DescriptorWriter&;
 
 		void build(VkDescriptorSet set);
 
@@ -123,23 +123,13 @@ namespace Aegix::Graphics
 			Builder(const Builder&) = delete;
 			~Builder() = default;
 
-			Builder& operator=(const Builder&) = delete;
+			auto operator=(const Builder&) -> Builder& = delete;
 
-			template<typename T>
-			Builder& addBuffer(uint32_t binding, const UniformBufferData<T>& buffer)
-			{
-				for (size_t i = 0; i < m_writer.size(); i++)
-				{
-					m_writer[i].writeBuffer(binding, buffer.descriptorBufferInfo(i));
-				}
-				return *this;
-			}
+			auto addBuffer(uint32_t binding, const Buffer& buffer) -> Builder&;
+			auto addTexture(uint32_t binding, const Texture& texture) -> Builder&;
+			auto addTexture(uint32_t binding, std::shared_ptr<Texture> texture) -> Builder&;
 
-			Builder& addBuffer(uint32_t binding, const UniformBuffer& buffer);
-			Builder& addTexture(uint32_t binding, const Texture& texture);
-			Builder& addTexture(uint32_t binding, std::shared_ptr<Texture> texture);
-
-			std::unique_ptr<DescriptorSet> build();
+			auto build() -> std::unique_ptr<DescriptorSet>;
 
 		private:
 			VulkanDevice& m_device;

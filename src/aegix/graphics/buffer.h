@@ -8,7 +8,7 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
-		static auto createUniformBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer;
+		static auto createUniformBuffer(VulkanDevice& device, VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
 		static auto createStagingBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer;
 
 		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
@@ -44,6 +44,7 @@ namespace Aegix::Graphics
 		/// @brief Writes data of 'instanceSize' to the buffer at an offset of 'index * alignmentSize'
 		/// @note Buffer MUST be mapped before calling
 		void writeToIndex(const void* data, int index);
+		void writeToAll(const void* data);
 
 		/// @brief Maps, writes data, then unmaps the buffer
 		void singleWrite(const void* data);

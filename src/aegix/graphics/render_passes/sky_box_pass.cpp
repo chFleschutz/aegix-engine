@@ -43,13 +43,14 @@ namespace Aegix::Graphics
 				{-1.0f,  1.0f,  1.0f}
 			};
 
-			Buffer stagingBuffer{ device, sizeof(glm::vec3), (uint32_t)vertices.size(),
+			VkDeviceSize vertexBufferSize = sizeof(glm::vec3) * vertices.size();
+			Buffer stagingBuffer{ device, vertexBufferSize, 1,
 				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 			stagingBuffer.singleWrite(vertices.data());
 
-			m_vertexBuffer = std::make_unique<Buffer>(device, sizeof(glm::vec3), (uint32_t)vertices.size(), 
+			m_vertexBuffer = std::make_unique<Buffer>(device, vertexBufferSize, 1,
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), vertices.size() * sizeof(glm::vec3));
+			device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), vertexBufferSize);
 		}
 
 		// Create index buffer
@@ -63,13 +64,14 @@ namespace Aegix::Graphics
 				5, 4, 0, 0, 1, 5,
 			};
 
-			Buffer stagingBuffer{ device, sizeof(uint32_t), (uint32_t)indices.size(),
+			VkDeviceSize indexBufferSize = sizeof(uint32_t) * indices.size();
+			Buffer stagingBuffer{ device, indexBufferSize, 1,
 				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 			stagingBuffer.singleWrite(indices.data());
 
-			m_indexBuffer = std::make_unique<Buffer>(device, sizeof(uint32_t), (uint32_t)indices.size(), 
+			m_indexBuffer = std::make_unique<Buffer>(device, indexBufferSize, 1,
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), indices.size() * sizeof(uint32_t));
+			device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), indexBufferSize);
 		}
 	}
 

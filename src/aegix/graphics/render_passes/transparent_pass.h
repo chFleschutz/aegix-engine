@@ -21,7 +21,9 @@ namespace Aegix::Graphics
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 				.build();
 
-			stage.ubo = std::make_unique<UniformBuffer>(device, TransparentUbo{});
+			auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
+			stage.ubo = std::make_unique<Buffer>(device, sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
 
 			stage.descriptorSet = DescriptorSet::Builder(device, pool, *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
@@ -93,7 +95,7 @@ namespace Aegix::Graphics
 				.projection = camera.projectionMatrix
 			};
 
-			stage.ubo->setData(ubo);
+			stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
 		}
 
 		FrameGraphResourceHandle m_sceneColor;

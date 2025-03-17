@@ -18,6 +18,6 @@ namespace Aegix::Graphics
 		std::vector<std::unique_ptr<RenderSystem>> renderSystems;
 		std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> descriptorSet;
-		std::unique_ptr<UniformBuffer> ubo;
+		std::unique_ptr<Buffer> ubo;
 	};
 }

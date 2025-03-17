@@ -9,6 +9,7 @@
 namespace Aegix::Graphics
 {
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
+		: m_ubo{ Buffer::createUniformBuffer(device, sizeof(LightingUniforms)) }
 	{
 		m_gbufferSetLayout = DescriptorSetLayout::Builder(device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -28,8 +29,6 @@ namespace Aegix::Graphics
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 		m_iblSet = std::make_unique<DescriptorSet>(pool, *m_iblSetLayout);
-
-		m_ubo = std::make_unique<UniformBuffer>(device, LightingUniforms{});
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
@@ -101,7 +100,7 @@ namespace Aegix::Graphics
 			.writeImage(4, resources.texture(m_arm))
 			.writeImage(5, resources.texture(m_emissive))
 			.writeImage(6, resources.texture(m_ssao))
-			.writeBuffer(7, m_ubo->descriptorBufferInfo(frameInfo.frameIndex))
+			.writeBuffer(7, m_ubo, frameInfo.frameIndex)
 			.build(m_gbufferSet->descriptorSet(frameInfo.frameIndex));
 
 		DescriptorWriter{ *m_iblSetLayout }
@@ -175,6 +174,6 @@ namespace Aegix::Graphics
 		lighting.ambientOcclusionFactor = m_ambientOcclusionFactor;
 		lighting.viewMode = m_viewMode;
 
-		m_ubo->setData(frameInfo.frameIndex, lighting);
+		m_ubo.writeToIndex(&lighting, frameInfo.frameIndex);
 	}
 }

@@ -139,31 +139,37 @@ namespace Aegix::Graphics
 	{
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture)
+	auto DescriptorWriter::writeImage(uint32_t binding, const Texture& texture) -> DescriptorWriter&
 	{
 		m_imageInfos.emplace_back(binding, texture.descriptorImageInfo());
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride)
+	auto DescriptorWriter::writeImage(uint32_t binding, const Texture& texture, VkImageLayout layoutOverride) -> DescriptorWriter&
 	{
 		m_imageInfos.emplace_back(binding, texture.descriptorImageInfo(layoutOverride));
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo)
+	auto DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo imageInfo) -> DescriptorWriter&
 	{
 		m_imageInfos.emplace_back(binding, std::move(imageInfo));
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer)
+	auto DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer) -> DescriptorWriter&
 	{
-		m_bufferInfos.emplace_back(binding, VkDescriptorBufferInfo{ buffer.buffer(), 0, VK_WHOLE_SIZE });
+		m_bufferInfos.emplace_back(binding, buffer.descriptorInfo());
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo)
+	auto DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer, uint32_t index) -> DescriptorWriter&
+	{
+		m_bufferInfos.emplace_back(binding, buffer.descriptorInfoForIndex(index));
+		return *this;
+	}
+
+	auto DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo) -> DescriptorWriter&
 	{
 		m_bufferInfos.emplace_back(binding, std::move(bufferInfo));
 		return *this;
@@ -221,16 +227,16 @@ namespace Aegix::Graphics
 		}
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addBuffer(uint32_t binding, const UniformBuffer& buffer)
+	auto DescriptorSet::Builder::addBuffer(uint32_t binding, const Buffer& buffer) -> DescriptorSet::Builder&
 	{
 		for (size_t i = 0; i < m_writer.size(); i++)
 		{
-			m_writer[i].writeBuffer(binding, buffer.descriptorBufferInfo(i));
+			m_writer[i].writeBuffer(binding, buffer.descriptorInfoForIndex(i));
 		}
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture)
+	auto DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture) -> DescriptorSet::Builder&
 	{
 		for (size_t i = 0; i < m_writer.size(); i++)
 		{
@@ -239,21 +245,19 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorSet::Builder& DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture)
+	auto DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture) -> DescriptorSet::Builder&
 	{
 		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
 		return addTexture(binding, *texture);
 	}
 
-	std::unique_ptr<DescriptorSet> DescriptorSet::Builder::build()
+	auto DescriptorSet::Builder::build() -> std::unique_ptr<DescriptorSet>
 	{
 		auto set = std::make_unique<DescriptorSet>(m_pool, m_setLayout);
-
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			m_writer[i].build(set->m_descriptorSets[i]);
 		}
-
 		return set;
 	}
 
