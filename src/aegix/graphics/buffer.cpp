@@ -32,11 +32,52 @@ namespace Aegix::Graphics
 		m_mapped = allocInfo.pMappedData;
 	}
 
+	Buffer::Buffer(Buffer&& other) noexcept
+		: m_device{ other.m_device }, m_buffer{ other.m_buffer }, m_allocation{ other.m_allocation },
+		m_bufferSize{ other.m_bufferSize }, m_instanceSize{ other.m_instanceSize }, m_alignmentSize{ other.m_alignmentSize },
+		m_instanceCount{ other.m_instanceCount }, m_usage{ other.m_usage }, m_mapped{ other.m_mapped }
+	{
+		other.m_buffer = VK_NULL_HANDLE;
+		other.m_allocation = VK_NULL_HANDLE;
+		other.m_bufferSize = 0;
+		other.m_instanceSize = 0;
+		other.m_alignmentSize = 0;
+		other.m_instanceCount = 0;
+		other.m_usage = 0;
+		other.m_mapped = nullptr;
+	}
+
 	Buffer::~Buffer()
 	{
-		m_device.destroyBuffer(m_buffer, m_allocation);
-		m_buffer = VK_NULL_HANDLE;
-		m_allocation = VK_NULL_HANDLE;
+		destroy();
+	}
+
+	auto Buffer::operator=(Buffer&& other) noexcept -> Buffer&
+	{
+		if (this != &other)
+			return *this;
+
+		destroy();
+
+		m_buffer = other.m_buffer;
+		m_allocation = other.m_allocation;
+		m_bufferSize = other.m_bufferSize;
+		m_instanceSize = other.m_instanceSize;
+		m_alignmentSize = other.m_alignmentSize;
+		m_instanceCount = other.m_instanceCount;
+		m_usage = other.m_usage;
+		m_mapped = other.m_mapped;
+
+		other.m_buffer = VK_NULL_HANDLE;
+		other.m_allocation = VK_NULL_HANDLE;
+		other.m_bufferSize = 0;
+		other.m_instanceSize = 0;
+		other.m_alignmentSize = 0;
+		other.m_instanceCount = 0;
+		other.m_usage = 0;
+		other.m_mapped = nullptr;
+
+		return *this;
 	}
 
 	auto Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
@@ -137,5 +178,12 @@ namespace Aegix::Graphics
 		}
 
 		return instanceSize;
+	}
+
+	void Buffer::destroy()
+	{
+		m_device.destroyBuffer(m_buffer, m_allocation);
+		m_buffer = VK_NULL_HANDLE;
+		m_allocation = VK_NULL_HANDLE;
 	}
 }

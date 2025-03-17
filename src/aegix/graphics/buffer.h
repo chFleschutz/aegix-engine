@@ -14,10 +14,12 @@ namespace Aegix::Graphics
 		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
 			VmaAllocationCreateFlags allocFlags = 0, VkDeviceSize minOffsetAlignment = 0);
 		Buffer(const Buffer&) = delete;
+		Buffer(Buffer&& other) noexcept;
 		~Buffer();
 
-		Buffer& operator=(const Buffer&) = delete;
-		
+		auto operator=(const Buffer&) -> Buffer& = delete;
+		auto operator=(Buffer&& other) noexcept -> Buffer&;
+
 		operator VkBuffer() const { return m_buffer; }
 
 		[[nodiscard]] auto buffer() const -> VkBuffer { return m_buffer; }
@@ -65,6 +67,8 @@ namespace Aegix::Graphics
 
 	private:
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
+
+		void destroy();
 
 		VulkanDevice& m_device;
 
