@@ -1,16 +1,15 @@
 #include "pch.h"
 
-#define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
-
 #include "device.h"
 
 #include "graphics/vulkan_tools.h"
 #include "core/logging.h"
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 namespace Aegix::Graphics
 {
-	// local callback functions
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData)
@@ -19,31 +18,29 @@ namespace Aegix::Graphics
 		return VK_FALSE;
 	}
 
-	VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
+	static auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult
 	{
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func)
+		if (func != nullptr)
+		{
 			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+		}
 
 		return VK_ERROR_EXTENSION_NOT_PRESENT;
 	}
 
-	void DestroyDebugUtilsMessengerEXT(
-		VkInstance instance,
-		VkDebugUtilsMessengerEXT debugMessenger,
-		const VkAllocationCallbacks* pAllocator)
+	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
 	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
-			instance,
-			"vkDestroyDebugUtilsMessengerEXT");
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
 		if (func != nullptr)
 		{
 			func(instance, debugMessenger, pAllocator);
 		}
 	}
 
-	// class member functions
+	// VulkanDevice --------------------------------------------------------------
+
 	VulkanDevice::VulkanDevice(Core::Window& window) 
 	{
 		createInstance();
@@ -72,6 +69,62 @@ namespace Aegix::Graphics
 		vkDestroyInstance(m_instance, nullptr);
 	}
 
+	auto VulkanDevice::beginSingleTimeCommands() const -> VkCommandBuffer
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_commandPool;
+		allocInfo.commandBufferCount = 1;
+
+		VkCommandBuffer commandBuffer;
+		vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		return commandBuffer;
+	}
+
+	void VulkanDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer) const
+	{
+		vkEndCommandBuffer(commandBuffer);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(m_graphicsQueue);
+
+		vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
+	}
+
+	void VulkanDevice::createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size,
+		VkBufferUsageFlags bufferUsage, VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const
+	{
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = size;
+		bufferInfo.usage = bufferUsage;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		VmaAllocationCreateInfo allocInfo{};
+		allocInfo.usage = memoryUsage;
+		allocInfo.flags = allocFlags;
+
+		VK_CHECK(vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr));
+	}
+
+	void VulkanDevice::createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo,
+		const VmaAllocationCreateInfo& allocInfo) const
+	{
+		VK_CHECK(vmaCreateImage(m_allocator, &imageInfo, &allocInfo, &image, &allocation, nullptr));
+	}
+
 	void VulkanDevice::destroyBuffer(VkBuffer buffer, VmaAllocation allocation)
 	{
 		if (buffer)
@@ -88,6 +141,142 @@ namespace Aegix::Graphics
 			assert(allocation && "Image and allocation must be valid");
 			m_deletionQueue.schedule([=]() { vmaDestroyImage(m_allocator, image, allocation); });
 		}
+	}
+
+	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails
+	{
+		return querySwapChainSupport(m_physicalDevice);
+	}
+
+	auto VulkanDevice::findPhysicalQueueFamilies() const -> QueueFamilyIndices
+	{
+		return findQueueFamilies(m_physicalDevice);
+	}
+
+	auto VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+		VkFormatFeatureFlags features) const -> VkFormat
+	{
+		for (VkFormat format : candidates)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+			{
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+			{
+				return format;
+			}
+		}
+
+		assert(false && "failed to find supported format!");
+		return VK_FORMAT_UNDEFINED;
+	}
+
+	auto VulkanDevice::findAspectFlags(VkFormat format) const -> VkImageAspectFlags
+	{
+		switch (format)
+		{
+		case VK_FORMAT_D16_UNORM:
+		case VK_FORMAT_X8_D24_UNORM_PACK32:
+		case VK_FORMAT_D32_SFLOAT:
+			return VK_IMAGE_ASPECT_DEPTH_BIT;
+
+		case VK_FORMAT_S8_UINT:
+			return VK_IMAGE_ASPECT_STENCIL_BIT;
+
+		case VK_FORMAT_D16_UNORM_S8_UINT:
+		case VK_FORMAT_D24_UNORM_S8_UINT:
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:
+			return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+
+		default:
+			return VK_IMAGE_ASPECT_COLOR_BIT;  // For color formats
+		}
+	}
+
+	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
+	{
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+		VkBufferCopy copyRegion{};
+		copyRegion.srcOffset = 0;
+		copyRegion.dstOffset = 0;
+		copyRegion.size = size;
+		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) const
+	{
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = layerCount;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { width, height, 1 };
+
+		vkCmdCopyBufferToImage(commandBuffer,
+			buffer,
+			image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&region);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,
+		VkImageLayout newLayout, uint32_t mipLevels, VkImageAspectFlags aspectFlags) const
+	{
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = aspectFlags;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = mipLevels;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
+		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
+
+		VkPipelineStageFlags srcStage = Tools::srcStage(barrier.srcAccessMask);
+		VkPipelineStageFlags dstStage = Tools::dstStage(barrier.dstAccessMask);
+
+		vkCmdPipelineBarrier(commandBuffer,
+			srcStage, dstStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+	}
+
+	void VulkanDevice::transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
+		uint32_t mipLevels, VkImageAspectFlags aspectFlags) const
+	{
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+		transitionImageLayout(commandBuffer, image, oldLayout, newLayout, mipLevels, aspectFlags);
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
+		uint32_t mipLevels) const
+	{
+		transitionImageLayout(image, oldLayout, newLayout, mipLevels, findAspectFlags(format));
 	}
 
 	void VulkanDevice::createInstance()
@@ -128,24 +317,52 @@ namespace Aegix::Graphics
 		Tools::loadFunctionPointers(m_instance);
 	}
 
+	void VulkanDevice::setupDebugUtils()
+	{
+		if constexpr (ENABLE_VALIDATION)
+		{
+			VkDebugUtilsMessengerCreateInfoEXT createInfo = debugMessengerCreateInfo();
+			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
+		}
+	}
+
+	void VulkanDevice::createSurface(Core::Window& window)
+	{
+		window.createSurface(m_instance, m_surface);
+	}
+
 	void VulkanDevice::createPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
 		assert(deviceCount > 0 && "Failed to find GPUs with Vulkan support");
-
 		ALOG::info("Available GPUs: {}", deviceCount);
+
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
 
+		// Search for a suitable device
 		for (const auto& device : devices)
 		{
-			if (isDeviceSuitable(device))
-			{
-				m_physicalDevice = device;
-				break;
-			}
+			QueueFamilyIndices indices = findQueueFamilies(device);
+			if (!indices.isComplete())
+				continue;
+			
+			if (!checkDeviceExtensionSupport(device))
+				continue;
+
+			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+			if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
+				continue;
+
+			vkGetPhysicalDeviceFeatures(device, &m_features);
+			if (!m_features.samplerAnisotropy)
+				continue;
+
+			// Found a suitable device
+			m_physicalDevice = device;
+			break;
 		}
 
 		assert(m_physicalDevice != VK_NULL_HANDLE && "Failed to find a suitable GPU");
@@ -233,30 +450,6 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool))
 	}
 
-	void VulkanDevice::createSurface(Core::Window& window)
-	{
-		window.createSurface(m_instance, m_surface);
-	}
-
-	auto VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) -> bool
-	{
-		QueueFamilyIndices indices = findQueueFamilies(device);
-
-		bool extensionsSupported = checkDeviceExtensionSupport(device);
-
-		bool swapChainAdequate = false;
-		if (extensionsSupported)
-		{
-			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
-			swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-		}
-
-		VkPhysicalDeviceFeatures supportedFeatures;
-		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-
-		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
-	}
-
 	auto VulkanDevice::debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT
 	{
 		VkDebugUtilsMessengerCreateInfoEXT info{};
@@ -269,15 +462,6 @@ namespace Aegix::Graphics
 		info.pfnUserCallback = debugCallback;
 
 		return info;
-	}
-
-	void VulkanDevice::setupDebugUtils()
-	{
-		if constexpr (ENABLE_VALIDATION)
-		{
-			VkDebugUtilsMessengerCreateInfoEXT createInfo = debugMessengerCreateInfo();
-			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
-		}
 	}
 
 	auto VulkanDevice::checkValidationLayerSupport() -> bool
@@ -419,209 +603,4 @@ namespace Aegix::Graphics
 		return details;
 	}
 
-	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails
-	{
-		return querySwapChainSupport(m_physicalDevice);
-	}
-
-	auto VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const -> uint32_t
-	{
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-		{
-			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & m_properties) == m_properties)
-				return i;
-		}
-
-		assert(false && "Failed to find suitable memory type!");
-		return 0;
-	}
-
-	auto VulkanDevice::findPhysicalQueueFamilies() const -> QueueFamilyIndices
-	{
-		return findQueueFamilies(m_physicalDevice);
-	}
-
-	auto VulkanDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
-		VkFormatFeatureFlags features) const -> VkFormat
-	{
-		for (VkFormat format : candidates)
-		{
-			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, format, &props);
-
-			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
-			{
-				return format;
-			}
-			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
-			{
-				return format;
-			}
-		}
-
-		assert(false && "failed to find supported format!");
-		return VK_FORMAT_UNDEFINED;
-	}
-
-	auto VulkanDevice::findAspectFlags(VkFormat format) const -> VkImageAspectFlags
-	{
-		switch (format)
-		{
-		case VK_FORMAT_D16_UNORM:
-		case VK_FORMAT_X8_D24_UNORM_PACK32:
-		case VK_FORMAT_D32_SFLOAT:
-			return VK_IMAGE_ASPECT_DEPTH_BIT;
-
-		case VK_FORMAT_S8_UINT:
-			return VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		case VK_FORMAT_D16_UNORM_S8_UINT:
-		case VK_FORMAT_D24_UNORM_S8_UINT:
-		case VK_FORMAT_D32_SFLOAT_S8_UINT:
-			return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-
-		default:
-			return VK_IMAGE_ASPECT_COLOR_BIT;  // For color formats
-		}
-	}
-
-	auto VulkanDevice::beginSingleTimeCommands() const -> VkCommandBuffer
-	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_commandPool;
-		allocInfo.commandBufferCount = 1;
-
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
-		return commandBuffer;
-	}
-
-	void VulkanDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer) const
-	{
-		vkEndCommandBuffer(commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-
-		vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(m_graphicsQueue);
-
-		vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
-	}
-
-	void VulkanDevice::createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, 
-		VkBufferUsageFlags bufferUsage,	VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const
-	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = bufferUsage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		VmaAllocationCreateInfo allocInfo{};
-		allocInfo.usage = memoryUsage;
-		allocInfo.flags = allocFlags;
-
-		VK_CHECK(vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr));
-	}
-
-	void VulkanDevice::createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo,
-		const VmaAllocationCreateInfo& allocInfo) const
-	{
-		VK_CHECK(vmaCreateImage(m_allocator, &imageInfo, &allocInfo, &image, &allocation, nullptr));
-	}
-
-	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
-	{
-		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
-
-		VkBufferCopy copyRegion{};
-		copyRegion.srcOffset = 0;
-		copyRegion.dstOffset = 0;
-		copyRegion.size = size;
-		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-		endSingleTimeCommands(commandBuffer);
-	}
-
-	void VulkanDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) const
-	{
-		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
-
-		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = layerCount;
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = { width, height, 1 };
-
-		vkCmdCopyBufferToImage(commandBuffer,
-			buffer,
-			image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1,
-			&region);
-
-		endSingleTimeCommands(commandBuffer);
-	}
-
-	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,
-		VkImageLayout newLayout, uint32_t mipLevels, VkImageAspectFlags aspectFlags) const
-	{
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = oldLayout;
-		barrier.newLayout = newLayout;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = image;
-		barrier.subresourceRange.aspectMask = aspectFlags;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = mipLevels;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-		barrier.srcAccessMask = Tools::srcAccessMask(barrier.oldLayout);
-		barrier.dstAccessMask = Tools::dstAccessMask(barrier.newLayout);
-
-		VkPipelineStageFlags srcStage = Tools::srcStage(barrier.srcAccessMask);
-		VkPipelineStageFlags dstStage = Tools::dstStage(barrier.dstAccessMask);
-
-		vkCmdPipelineBarrier(commandBuffer,
-			srcStage, dstStage,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-	}
-
-	void VulkanDevice::transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
-		uint32_t mipLevels, VkImageAspectFlags aspectFlags) const
-	{
-		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
-		transitionImageLayout(commandBuffer, image, oldLayout, newLayout, mipLevels, aspectFlags);
-		endSingleTimeCommands(commandBuffer);
-	}
-
-	void VulkanDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
-		uint32_t mipLevels) const
-	{
-		transitionImageLayout(image, oldLayout, newLayout, mipLevels, findAspectFlags(format));
-	}
 }
