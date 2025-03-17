@@ -7,4 +7,6 @@ target_sources(aegix-engine PRIVATE
 	"layer_stack.h"
 	"logging.h"
 	"profiler.h"
+	"window.cpp"
+	"window.h"
 )
