@@ -1,5 +1,8 @@
 #include "pch.h"
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 #include "device.h"
 
 #include "graphics/vulkan_tools.h"
@@ -77,7 +80,7 @@ namespace Aegix::Graphics
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "Aegix Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_3;
+		appInfo.apiVersion = API_VERSION;
 
 		auto extensions = queryRequiredInstanceExtensions();
 
@@ -183,6 +186,18 @@ namespace Aegix::Graphics
 			assert(indices.isComplete() && "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
 		vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
+	}
+
+	void VulkanDevice::createAllocator()
+	{
+		VmaAllocatorCreateInfo allocatorInfo{
+			.physicalDevice = m_physicalDevice,
+			.device = m_device,
+			.instance = m_instance,
+			.vulkanApiVersion = API_VERSION
+		};
+
+		VK_CHECK(vmaCreateAllocator(&allocatorInfo, &m_allocator));
 	}
 
 	void VulkanDevice::createCommandPool()
@@ -505,9 +520,9 @@ namespace Aegix::Graphics
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
 
-		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory))
+		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory));
 
-			vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
 	}
 
 	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const

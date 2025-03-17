@@ -7,6 +7,9 @@
 #include "graphics/deletion_queue.h"
 #include "core/window.h"
 
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
 namespace Aegix::Graphics
 {
 	struct SwapChainSupportDetails
@@ -26,6 +29,7 @@ namespace Aegix::Graphics
 	class VulkanDevice
 	{
 	public:
+		static constexpr uint32_t API_VERSION = VK_API_VERSION_1_3;
 		static constexpr auto VALIDATION_LAYERS = std::array{ "VK_LAYER_KHRONOS_validation" };
 		static constexpr auto DEVICE_EXTENSIONS = std::array{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -34,19 +38,20 @@ namespace Aegix::Graphics
 		VulkanDevice(VulkanDevice&&) = delete;
 		~VulkanDevice();
 
-		VulkanDevice& operator=(const VulkanDevice&) = delete;
-		VulkanDevice& operator=(VulkanDevice&&) = delete;
+		auto operator=(const VulkanDevice&) -> VulkanDevice& = delete;
+		auto operator=(VulkanDevice&&) -> VulkanDevice& = delete;
 
 		operator VkDevice() { return m_device; }
 
-		VkInstance instance() const { return m_instance; }
-		VkCommandPool commandPool() const { return m_commandPool; }
-		VkDevice device() const { return m_device; }
-		VkSurfaceKHR surface() const { return m_surface; }
-		VkQueue graphicsQueue() const { return m_graphicsQueue; }
-		VkQueue presentQueue() const { return m_presentQueue; }
-		VkPhysicalDevice physicalDevice() const { return m_physicalDevice; }
-		VkPhysicalDeviceProperties properties() const { return m_properties; }
+		[[nodiscard]] auto instance() const -> VkInstance { return m_instance; }
+		[[nodiscard]] auto physicalDevice() const -> VkPhysicalDevice { return m_physicalDevice; }
+		[[nodiscard]] auto device() const -> VkDevice { return m_device; }
+		[[nodiscard]] auto allocator() const -> VmaAllocator { return m_allocator; }
+		[[nodiscard]] auto commandPool() const -> VkCommandPool { return m_commandPool; }
+		[[nodiscard]] auto surface() const -> VkSurfaceKHR { return m_surface; }
+		[[nodiscard]] auto graphicsQueue() const -> VkQueue { return m_graphicsQueue; }
+		[[nodiscard]] auto presentQueue() const -> VkQueue { return m_presentQueue; }
+		[[nodiscard]] auto properties() const -> const VkPhysicalDeviceProperties& { return m_properties; }
 
 		SwapChainSupportDetails querySwapChainSupport() const;
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags m_properties) const;
@@ -86,6 +91,7 @@ namespace Aegix::Graphics
 		void createSurface();
 		void pickPhysicalDevice();
 		void createLogicalDevice();
+		void createAllocator();
 		void createCommandPool();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
@@ -97,15 +103,17 @@ namespace Aegix::Graphics
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
 
-		VkInstance m_instance;
-		VkDebugUtilsMessengerEXT m_debugMessenger;
+		Core::Window& m_window;
+
+		VkInstance m_instance = VK_NULL_HANDLE;
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+		VkDevice m_device = VK_NULL_HANDLE;
+		VmaAllocator m_allocator = VK_NULL_HANDLE;
+		VkCommandPool m_commandPool = VK_NULL_HANDLE;
+
+		VkDebugUtilsMessengerEXT m_debugMessenger;
 		VkPhysicalDeviceProperties m_properties;
 
-		Core::Window& m_window;
-		VkCommandPool m_commandPool;
-
-		VkDevice m_device;
 		VkSurfaceKHR m_surface;
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
