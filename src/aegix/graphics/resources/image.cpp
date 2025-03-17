@@ -21,14 +21,15 @@ namespace Aegix::Graphics
 		: m_device{ other.m_device }
 	{
 		m_image = other.m_image;
-		m_memory = other.m_memory;
+		m_allocation = other.m_allocation;
 		m_format = other.m_format;
 		m_extent = other.m_extent;
 		m_mipLevels = other.m_mipLevels;
 		m_layerCount = other.m_layerCount;
 		m_layout = other.m_layout;
+
 		other.m_image = VK_NULL_HANDLE;
-		other.m_memory = VK_NULL_HANDLE;
+		other.m_allocation = VK_NULL_HANDLE;
 	}
 
 	Image::~Image()
@@ -43,14 +44,14 @@ namespace Aegix::Graphics
 			destroy();
 
 			m_image = other.m_image;
-			m_memory = other.m_memory;
+			m_allocation = other.m_allocation;
 			m_format = other.m_format;
 			m_extent = other.m_extent;
 			m_mipLevels = other.m_mipLevels;
 			m_layerCount = other.m_layerCount;
 			m_layout = other.m_layout;
 			other.m_image = VK_NULL_HANDLE;
-			other.m_memory = VK_NULL_HANDLE;
+			other.m_allocation = VK_NULL_HANDLE;
 		}
 		return *this;
 	}
@@ -90,7 +91,10 @@ namespace Aegix::Graphics
 			imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		}
 
-		m_device.createImage(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_image, m_memory);
+		VmaAllocationCreateInfo allocInfo{};
+		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+		m_device.createImage(m_image, m_allocation, imageInfo, allocInfo);
 	}
 
 	void Image::create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels, uint32_t layerCount)
@@ -317,15 +321,8 @@ namespace Aegix::Graphics
 
 	void Image::destroy()
 	{
-		if (m_image)
-		{
-			m_device.scheduleDeletion(m_image);
-			m_image = VK_NULL_HANDLE;
-		}
-		if (m_memory)
-		{
-			m_device.scheduleDeletion(m_memory);
-			m_memory = VK_NULL_HANDLE;
-		}
+		m_device.destroyImage(m_image, m_allocation);
+		m_image = VK_NULL_HANDLE;
+		m_allocation = VK_NULL_HANDLE;
 	}
 }

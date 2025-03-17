@@ -81,6 +81,15 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void VulkanDevice::destroyImage(VkImage image, VmaAllocation allocation)
+	{
+		if (image)
+		{
+			assert(allocation && "Image and allocation must be valid");
+			m_deletionQueue.schedule([=]() { vmaDestroyImage(m_allocator, image, allocation); });
+		}
+	}
+
 	void VulkanDevice::createInstance()
 	{
 		assert(!ENABLE_VALIDATION || checkValidationLayerSupport() && "Validation layers requested, but not available!");
@@ -528,6 +537,12 @@ namespace Aegix::Graphics
 		VK_CHECK(vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr));
 	}
 
+	void VulkanDevice::createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo,
+		const VmaAllocationCreateInfo& allocInfo) const
+	{
+		VK_CHECK(vmaCreateImage(m_allocator, &imageInfo, &allocInfo, &image, &allocation, nullptr));
+	}
+
 	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const
 	{
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
@@ -564,23 +579,6 @@ namespace Aegix::Graphics
 			&region);
 
 		endSingleTimeCommands(commandBuffer);
-	}
-
-	void VulkanDevice::createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties,
-		VkImage& image, VkDeviceMemory& imageMemory) const
-	{
-		VK_CHECK(vkCreateImage(m_device, &imageInfo, nullptr, &image));
-
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(m_device, image, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
-
-		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &imageMemory));
-		VK_CHECK(vkBindImageMemory(m_device, image, imageMemory, 0));
 	}
 
 	void VulkanDevice::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout,

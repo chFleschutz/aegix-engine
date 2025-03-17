@@ -65,11 +65,12 @@ namespace Aegix::Graphics
 
 		void createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage,
 			VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const;
+		void createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo, 
+			const VmaAllocationCreateInfo& allocInfo) const;
+
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) const;
 
-		void createImage(const VkImageCreateInfo& imageInfo, VkMemoryPropertyFlags m_properties, VkImage& image, 
-			VkDeviceMemory& imageMemory) const;
 		void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, 
 			uint32_t mipLevels = 1, VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT) const; 
 		void transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels = 1, 
@@ -86,6 +87,7 @@ namespace Aegix::Graphics
 		void scheduleDeletion(VkSampler sampler) { m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); }); }
 
 		void destroyBuffer(VkBuffer buffer, VmaAllocation allocation);
+		void destroyImage(VkImage image, VmaAllocation allocation);
 
 	private:
 		void createInstance();

@@ -69,10 +69,8 @@ namespace Aegix::Graphics
 		void destroy();
 
 		VulkanDevice& m_device;
-
 		VkImage m_image = VK_NULL_HANDLE;
-		VkDeviceMemory m_memory = VK_NULL_HANDLE;
-
+		VmaAllocation m_allocation = VK_NULL_HANDLE;
 		VkFormat m_format = VK_FORMAT_UNDEFINED;
 		VkExtent3D m_extent = { 1, 1, 1 };
 		uint32_t m_mipLevels = 1;
