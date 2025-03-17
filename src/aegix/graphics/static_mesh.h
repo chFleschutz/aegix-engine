@@ -44,25 +44,12 @@ namespace Aegix::Graphics
 			size_t bufferSize = sizeof(T) * attribute.size();
 			uint32_t instanceCount = static_cast<uint32_t>(attribute.size());
 
-			Buffer stagingBuffer{ 
-				m_device, 
-				sizeof(T), 
-				instanceCount,
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
-			};
+			Buffer stagingBuffer{ m_device, sizeof(T), instanceCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+			stagingBuffer.write(attribute.data());
 
-			stagingBuffer.map();
-			stagingBuffer.writeToBuffer(attribute.data(), bufferSize);
-
-			auto attributeBuffer = std::make_unique<Buffer>(
-				m_device,
-				sizeof(T),
-				instanceCount,
-				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-			);
-			
+			auto attributeBuffer = std::make_unique<Buffer>(m_device, sizeof(T), instanceCount,
+				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 			m_device.copyBuffer(stagingBuffer.buffer(), attributeBuffer->buffer(), bufferSize);
 
 			m_vkBuffers.emplace_back(attributeBuffer->buffer());

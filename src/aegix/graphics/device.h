@@ -63,8 +63,8 @@ namespace Aegix::Graphics
 		auto beginSingleTimeCommands() const -> VkCommandBuffer;
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
 
-		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags m_properties, VkBuffer& buffer, 
-			VkDeviceMemory& bufferMemory) const;
+		void createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage,
+			VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const;
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) const;
 
@@ -84,6 +84,8 @@ namespace Aegix::Graphics
 		void scheduleDeletion(VkBuffer buffer) { m_deletionQueue.schedule([=]() { vkDestroyBuffer(m_device, buffer, nullptr); }); }
 		void scheduleDeletion(VkDeviceMemory memory) { m_deletionQueue.schedule([=]() { vkFreeMemory(m_device, memory, nullptr); }); }
 		void scheduleDeletion(VkSampler sampler) { m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); }); }
+
+		void destroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 
 	private:
 		void createInstance();

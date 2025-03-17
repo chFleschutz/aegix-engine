@@ -116,26 +116,12 @@ namespace Aegix::Graphics
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
 		uint32_t indexSize = sizeof(indices[0]);
+		Buffer stagingBuffer{ m_device, indexSize, m_indexCount, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT};
+		stagingBuffer.write((void*)indices.data());
 
-		Buffer stagingBuffer{
-			m_device,
-			indexSize,
-			m_indexCount,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer((void*)indices.data());
-
-		m_indexBuffer = std::make_unique<Buffer>(
-			m_device,
-			indexSize,
-			m_indexCount,
-			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		);
-
+		m_indexBuffer = std::make_unique<Buffer>(m_device, indexSize, m_indexCount,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 		m_device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), bufferSize);
 	}
 

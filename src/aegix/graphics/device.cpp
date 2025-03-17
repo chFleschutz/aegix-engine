@@ -51,6 +51,7 @@ namespace Aegix::Graphics
 		createSurface(window);
 		createPhysicalDevice();
 		createLogicalDevice();
+		createAllocator();
 		createCommandPool();
 	}
 
@@ -59,6 +60,7 @@ namespace Aegix::Graphics
 		m_deletionQueue.flushAll();
 
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
+		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
 
 		if (ENABLE_VALIDATION)
@@ -68,6 +70,15 @@ namespace Aegix::Graphics
 
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
+	}
+
+	void VulkanDevice::destroyBuffer(VkBuffer buffer, VmaAllocation allocation)
+	{
+		if (buffer)
+		{
+			assert(allocation && "Buffer and allocation must be valid");
+			m_deletionQueue.schedule([=]() { vmaDestroyBuffer(m_allocator, buffer, allocation); });
+		}
 	}
 
 	void VulkanDevice::createInstance()
@@ -501,28 +512,20 @@ namespace Aegix::Graphics
 		vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
 	}
 
-	void VulkanDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags m_properties,
-		VkBuffer& buffer, VkDeviceMemory& bufferMemory) const
+	void VulkanDevice::createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, 
+		VkBufferUsageFlags bufferUsage,	VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const
 	{
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = size;
-		bufferInfo.usage = usage;
+		bufferInfo.usage = bufferUsage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		VK_CHECK(vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer))
+		VmaAllocationCreateInfo allocInfo{};
+		allocInfo.usage = memoryUsage;
+		allocInfo.flags = allocFlags;
 
-			VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, m_properties);
-
-		VK_CHECK(vkAllocateMemory(m_device, &allocInfo, nullptr, &bufferMemory));
-
-		vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
+		VK_CHECK(vmaCreateBuffer(m_allocator, &bufferInfo, &allocInfo, &buffer, &allocation, nullptr));
 	}
 
 	void VulkanDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const

@@ -15,11 +15,9 @@ namespace Aegix::Graphics
 		{
 			for (auto& buffer : m_buffers)
 			{
-				buffer = std::make_unique<Buffer>(device, sizeof(T), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-				buffer->map();
-				buffer->writeToBuffer(&data, sizeof(T));
-				buffer->flush();
+				buffer = std::make_unique<Buffer>(device, sizeof(T), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+				buffer->write(&data);
 			}
 		}
 
@@ -28,10 +26,8 @@ namespace Aegix::Graphics
 			for (auto& buffer : m_buffers)
 			{
 				buffer = std::make_unique<Buffer>(device, size, 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-				buffer->map();
-				buffer->writeToBuffer(data);
-				buffer->flush();
+					VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+				buffer->write(data);
 			}
 		}
 
@@ -46,7 +42,7 @@ namespace Aegix::Graphics
 		{
 			for (auto& buffer : m_buffers)
 			{
-				buffer->writeToBuffer(&data, sizeof(T), offset);
+				buffer->write(&data, sizeof(T), offset);
 			}
 		}
 
@@ -57,8 +53,7 @@ namespace Aegix::Graphics
 		template<typename T>
 		void setData(int index, const T& data, VkDeviceSize offset = 0)
 		{
-			m_buffers[index]->writeToBuffer(&data, sizeof(T), offset);
-			m_buffers[index]->flush();
+			m_buffers[index]->write(&data, sizeof(T), offset);
 		}
 
 	private:

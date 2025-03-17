@@ -43,13 +43,12 @@ namespace Aegix::Graphics
 				{-1.0f,  1.0f,  1.0f}
 			};
 
-			auto stagingBuffer = Buffer(device, sizeof(glm::vec3), (uint32_t)vertices.size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			stagingBuffer.map();
-			stagingBuffer.writeToBuffer(vertices.data());
+			auto stagingBuffer = Buffer(device, sizeof(glm::vec3), (uint32_t)vertices.size(), 
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+			stagingBuffer.write(vertices.data());
 
-			m_vertexBuffer = std::make_unique<Buffer>(device, sizeof(glm::vec3), (uint32_t)vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			m_vertexBuffer = std::make_unique<Buffer>(device, sizeof(glm::vec3), (uint32_t)vertices.size(), 
+				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			device.copyBuffer(stagingBuffer.buffer(), m_vertexBuffer->buffer(), vertices.size() * sizeof(glm::vec3));
 		}
 
@@ -64,13 +63,12 @@ namespace Aegix::Graphics
 				5, 4, 0, 0, 1, 5,
 			};
 
-			auto stagingBuffer = Buffer(device, sizeof(uint32_t), (uint32_t)indices.size(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			stagingBuffer.map();
-			stagingBuffer.writeToBuffer(indices.data());
+			auto stagingBuffer = Buffer(device, sizeof(uint32_t), (uint32_t)indices.size(), 
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+			stagingBuffer.write(indices.data());
 
-			m_indexBuffer = std::make_unique<Buffer>(device, sizeof(uint32_t), (uint32_t)indices.size(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			m_indexBuffer = std::make_unique<Buffer>(device, sizeof(uint32_t), (uint32_t)indices.size(), 
+				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			device.copyBuffer(stagingBuffer.buffer(), m_indexBuffer->buffer(), indices.size() * sizeof(uint32_t));
 		}
 	}

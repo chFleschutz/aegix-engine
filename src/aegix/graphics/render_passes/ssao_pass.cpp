@@ -31,8 +31,8 @@ namespace Aegix::Graphics
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
 			.build();
 
-		m_uniforms = std::make_unique<Buffer>(device, sizeof(SSAOUniforms), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+		m_uniforms = std::make_unique<Buffer>(device, sizeof(SSAOUniforms), 1, 
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
 		m_uniforms->map();
 
 		// Generate random samples
@@ -57,10 +57,8 @@ namespace Aegix::Graphics
 		}
 
 		m_ssaoSamples = std::make_unique<Buffer>(device, sizeof(glm::vec4), static_cast<uint32_t>(samples.size()),
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-		m_ssaoSamples->map();
-		m_ssaoSamples->writeToBuffer(samples.data());
-		m_ssaoSamples->unmap();
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+		m_ssaoSamples->write(samples.data());
 
 		// Generate noise texture
 		std::vector<glm::vec2> noise(NOISE_SIZE * NOISE_SIZE);
@@ -115,7 +113,7 @@ namespace Aegix::Graphics
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
-		m_uniforms->writeToBuffer(&m_uniformData);
+		m_uniforms->write(&m_uniformData);
 
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
