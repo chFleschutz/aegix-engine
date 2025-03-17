@@ -215,7 +215,7 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createSurface(Core::Window& window)
 	{
-		window.createWindowSurface(m_instance, &m_surface);
+		window.createSurface(m_instance, m_surface);
 	}
 
 	auto VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) -> bool

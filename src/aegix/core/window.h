@@ -9,29 +9,28 @@ namespace Aegix::Core
 	{
 	public:
 		Window(int width, int height, std::string title);
+		Window(const Window&) = delete;
+		Window(Window&&) = delete;
 		~Window();
 
-		Window(const Window&) = delete;
-		Window operator=(const Window&) = delete;
+		auto operator=(const Window&) -> Window& = delete;
+		auto operator=(Window&&) -> Window& = delete;
 
-		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
-		VkExtent2D extend() const { return { static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height) }; }
-		bool wasWindowResized() const { return m_frameBufferResized; }
-		void resetWindowResizedFlag() { m_frameBufferResized = false; }
-		GLFWwindow* glfwWindow() const { return m_window; }
+		[[nodiscard]] auto glfwWindow() const -> GLFWwindow* { return m_window; }
+		[[nodiscard]] auto shouldClose() const -> bool { return glfwWindowShouldClose(m_window); }
+		[[nodiscard]] auto extent() const -> VkExtent2D { return { m_width, m_height }; }
+		[[nodiscard]] auto wasResized() const -> bool { return m_windowResized; }
 
-		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+		void resetResizedFlag() { m_windowResized = false; }
+		void createSurface(VkInstance instance, VkSurfaceKHR& surface) const;
 
 	private:
-		static void framebufferResizeCallback(GLFWwindow* glfwWindow, int width, int height);
+		static void onWindowResize(GLFWwindow* glfwWindow, int newWidth, int newHeight);
 
-		void initWindow();
-
-		int m_width;
-		int m_height;
-		bool m_frameBufferResized = false;
-
-		std::string m_windowTitle;
 		GLFWwindow* m_window = nullptr;
+		std::string m_windowTitle;
+		uint32_t m_width;
+		uint32_t m_height;
+		bool m_windowResized = false;
 	};
 }

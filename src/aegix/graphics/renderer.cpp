@@ -18,7 +18,7 @@
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Core::Window& window, VulkanDevice& device)
-		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extend() }
+		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extent() }
 	{
 		createCommandBuffers();
 		createDescriptorPool();
@@ -90,17 +90,16 @@ namespace Aegix::Graphics
 
 	void Renderer::recreateSwapChain()
 	{
-		VkExtent2D extend = m_window.extend();
-		while (extend.width == 0 || extend.height == 0) // minimized
+		VkExtent2D extent = m_window.extent();
+		while (extent.width == 0 || extent.height == 0) // minimized
 		{
 			glfwWaitEvents();
-			extend = m_window.extend();
+			extent = m_window.extent();
 		}
 		
 		waitIdle();
-		m_swapChain.resize(extend);
-
-		m_frameGraph.swapChainResized(extend.width, extend.height);
+		m_swapChain.resize(extent);
+		m_frameGraph.swapChainResized(extent.width, extent.height);
 	}
 
 	void Renderer::createDescriptorPool()
@@ -171,9 +170,9 @@ namespace Aegix::Graphics
 		VK_CHECK(vkEndCommandBuffer(commandBuffer))
 
 		auto result = m_swapChain.submitCommandBuffers(&commandBuffer);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized())
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasResized())
 		{
-			m_window.resetWindowResizedFlag();
+			m_window.resetResizedFlag();
 			recreateSwapChain();
 		}
 		else if (result != VK_SUCCESS)
