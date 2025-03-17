@@ -62,6 +62,8 @@ namespace Aegix::Graphics
 
 		void destroyBuffer(VkBuffer buffer, VmaAllocation allocation);
 		void destroyImage(VkImage image, VmaAllocation allocation);
+		void destroyImageView(VkImageView view);
+		void destroySampler(VkSampler sampler);
 		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
 
 		auto querySwapChainSupport() const -> SwapChainSupportDetails;
@@ -77,10 +79,6 @@ namespace Aegix::Graphics
 			VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT) const;
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
 			uint32_t mipLevels = 1) const;
-
-		void scheduleDeletion(std::function<void()>&& func) { m_deletionQueue.schedule(std::move(func)); }
-		void scheduleDeletion(VkImageView view) { m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); }); }
-		void scheduleDeletion(VkSampler sampler) { m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); }); }
 
 	private:
 		void createInstance();

@@ -90,10 +90,7 @@ namespace Aegix::Graphics
 
 	void ImageView::destroy()
 	{
-		if (m_imageView)
-		{
-			m_device.scheduleDeletion(m_imageView);
-			m_imageView = VK_NULL_HANDLE;
-		}
+		m_device.destroyImageView(m_imageView);
+		m_imageView = VK_NULL_HANDLE;
 	}
 }

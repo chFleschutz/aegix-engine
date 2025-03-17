@@ -71,10 +71,7 @@ namespace Aegix::Graphics
 
 	void Sampler::destroy()
 	{
-		if (m_sampler)
-		{
-			m_device.scheduleDeletion(m_sampler);
-			m_sampler = VK_NULL_HANDLE;
-		}
+		m_device.destroySampler(m_sampler);
+		m_sampler = VK_NULL_HANDLE;
 	}
 }

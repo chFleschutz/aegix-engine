@@ -143,6 +143,22 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void VulkanDevice::destroyImageView(VkImageView view)
+	{
+		if (view)
+		{
+			m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); });
+		}
+	}
+
+	void VulkanDevice::destroySampler(VkSampler sampler)
+	{
+		if (sampler)
+		{
+			m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); });
+		}
+	}
+
 	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails
 	{
 		return querySwapChainSupport(m_physicalDevice);
