@@ -11,3 +11,5 @@ add_subdirectory(imgui)
 add_subdirectory(imguizmo)
 
 add_subdirectory(tinyobjloader)
+
+add_subdirectory(vma)
