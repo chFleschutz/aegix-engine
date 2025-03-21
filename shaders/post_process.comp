@@ -10,7 +10,8 @@ layout(push_constant) uniform PostProcess
 {
 	int toneMappingMode;
 	float bloomIntensity;
-	float gamma;
+	float exposure;
+	float gamma; 
 } push;
 
 vec3 ToneMapReinhard(vec3 color);
@@ -26,7 +27,7 @@ void main()
 	vec3 bloomColor = imageLoad(bloomMap, pixelCoords).rgb;
 
 	vec3 color = sceneColor + (push.bloomIntensity * bloomColor);
-	color = applyToneMapping(color);
+	color = applyToneMapping(color * push.exposure);
 	color = applyGammaCorrection(color);
 	imageStore(outFinalMap, pixelCoords, vec4(color, 1.0));
 }

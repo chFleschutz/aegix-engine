@@ -87,6 +87,7 @@ namespace Aegix::Graphics
 		}
 
 		ImGui::SliderFloat("Bloom Intensity", &m_settings.bloomIntensity, 0.0f, 2.0f);
+		ImGui::SliderFloat("Exposure", &m_settings.exposure, 0.1f, 10.0f);
 		ImGui::SliderFloat("Gamma", &m_settings.gamma, 1.0f, 5.0f);
 	}
 }
