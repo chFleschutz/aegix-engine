@@ -5,6 +5,7 @@
 #define AEGIX_LOG_DISABLE_TRACE
 #endif // NDEBUG
 
+#define AEGIX_LOG_FATAL_NO_ASYNC
 #include <aegix-log/log.h>
 #include <aegix-log/sinks/console_sink.h>
 
