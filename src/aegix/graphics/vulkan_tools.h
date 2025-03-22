@@ -1,19 +1,14 @@
 #pragma once
 
 #include "core/logging.h"
+#include "core/assert.h"
 #include "graphics/resources/texture.h"
 
 #include <vulkan/vulkan.h>
 
-#define VK_CHECK(f)																						\
-{																										\
-	VkResult result = (f);																				\
-	if (result != VK_SUCCESS)																			\
-	{																									\
-		ALOG::fatal("Vulkan Error: {} in function '{}' at {}, line {}\nExpression: {}",					\
-			Aegix::Tools::resultString(result), __FUNCTION__, __FILE__, __LINE__, #f);					\
-		std::terminate();																				\
-	}																									\
+#define VK_CHECK(f)									\
+{													\
+	AGX_ASSERT((f) == VK_SUCCESS, "Vulkan Error");	\
 }
 
 namespace Aegix::Tools
