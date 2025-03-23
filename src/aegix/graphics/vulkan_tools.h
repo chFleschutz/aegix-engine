@@ -6,9 +6,10 @@
 
 #include <vulkan/vulkan.h>
 
-#define VK_CHECK(f)									\
-{													\
-	AGX_ASSERT((f) == VK_SUCCESS, "Vulkan Error");	\
+#define VK_CHECK(f)				\
+{								\
+	VkResult result = (f);		\
+	AGX_ASSERT(result == VK_SUCCESS, "Vulkan Error"); \
 }
 
 namespace Aegix::Tools
