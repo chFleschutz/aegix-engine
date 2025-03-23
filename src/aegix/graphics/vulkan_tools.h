@@ -8,8 +8,8 @@
 
 #define VK_CHECK(f)				\
 {								\
-	VkResult result = (f);		\
-	AGX_ASSERT(result == VK_SUCCESS, "Vulkan Error"); \
+	VkResult vkResult = (f);		\
+	AGX_ASSERT_X(vkResult == VK_SUCCESS, "Vulkan Error: '" #f "'"); \
 }
 
 namespace Aegix::Tools
