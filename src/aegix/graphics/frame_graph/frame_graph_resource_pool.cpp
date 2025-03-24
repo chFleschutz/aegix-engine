@@ -3,7 +3,6 @@
 #include "frame_graph_resource_pool.h"
 
 #include "core/globals.h"
-#include "core/logging.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
 namespace Aegix::Graphics

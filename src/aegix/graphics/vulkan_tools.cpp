@@ -2,7 +2,6 @@
 
 #include "vulkan_tools.h"
 
-#include "core/logging.h"
 #include "graphics/globals.h"
 #include "utils/file.h"
 

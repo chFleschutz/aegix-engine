@@ -1,7 +1,6 @@
 #pragma once
 
 #include "scripting/script_base.h"
-#include "core/logging.h"
 
 namespace Aegix::Scripting
 {

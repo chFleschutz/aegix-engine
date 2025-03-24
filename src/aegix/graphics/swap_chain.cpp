@@ -2,7 +2,6 @@
 
 #include "swap_chain.h"
 
-#include "core/logging.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
