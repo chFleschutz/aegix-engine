@@ -2,7 +2,6 @@
 
 #include "core/logging.h"
 
-#include <cassert>
 #include <cstdlib>
 
 #ifdef _MSC_VER
