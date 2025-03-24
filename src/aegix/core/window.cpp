@@ -14,7 +14,7 @@ namespace Aegix::Core
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		m_window = glfwCreateWindow(m_width, m_height, m_windowTitle.c_str(), nullptr, nullptr);
-		assert(m_window && "Failed to create GLFW window");
+		AGX_ASSERT_X(m_window, "Failed to create GLFW window");
 
 		glfwSetWindowUserPointer(m_window, this);
 		glfwSetWindowSizeCallback(m_window, onWindowResize);

@@ -29,36 +29,36 @@ namespace Aegix::Graphics
 		case FrameGraphResourceUsage::Present:
 			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 		default:
-			assert(false && "Undefined FrameGraphResourceUsage");
+			AGX_ASSERT_X(false, "Undefined FrameGraphResourceUsage");
 			return 0;
 		}
 	}
 
 	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) -> FrameGraphNode&
 	{
-		assert(handle != FrameGraphNode::INVALID_HANDLE && "Invalid node handle");
-		assert(handle.id < m_nodes.size() && "Node handle out of range");
+		AGX_ASSERT_X(handle != FrameGraphNode::INVALID_HANDLE, "Invalid node handle");
+		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
 		return m_nodes[handle.id];
 	}
 	
 	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&
 	{
-		assert(handle != FrameGraphNode::INVALID_HANDLE && "Invalid node handle");
-		assert(handle.id < m_nodes.size() && "Node handle out of range");
+		AGX_ASSERT_X(handle != FrameGraphNode::INVALID_HANDLE, "Invalid node handle");
+		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
 		return m_nodes[handle.id];
 	}
 
 	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) -> FrameGraphResource&
 	{
-		assert(handle != FrameGraphResource::INVALID_HANDLE && "Invalid resource handle");
-		assert(handle.id < m_resources.size() && "Resource handle out of range");
+		AGX_ASSERT_X(handle != FrameGraphResource::INVALID_HANDLE, "Invalid resource handle");
+		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
 		return m_resources[handle.id];
 	}
 	
 	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&
 	{
-		assert(handle != FrameGraphResource::INVALID_HANDLE && "Invalid resource handle");
-		assert(handle.id < m_resources.size() && "Resource handle out of range");
+		AGX_ASSERT_X(handle != FrameGraphResource::INVALID_HANDLE, "Invalid resource handle");
+		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
 		return m_resources[handle.id];
 	}
 	
@@ -69,7 +69,7 @@ namespace Aegix::Graphics
 			return res;
 
 		auto& refRes = resource(res.handle);
-		assert(refRes.type != FrameGraphResourceType::Reference && "Reference to another reference is not allowed");
+		AGX_ASSERT_X(refRes.type != FrameGraphResourceType::Reference, "Reference to another reference is not allowed");
 		return refRes;
 	}
 	
@@ -80,25 +80,25 @@ namespace Aegix::Graphics
 			return res;
 
 		const auto& refRes = resource(res.handle);
-		assert(refRes.type != FrameGraphResourceType::Reference && "Reference to another reference is not allowed");
+		AGX_ASSERT_X(refRes.type != FrameGraphResourceType::Reference, "Reference to another reference is not allowed");
 		return refRes;
 	}
 	
 	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> Texture&
 	{
 		auto& res = finalResource(resourceHandle);
-		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
-		assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle is invalid");
-		assert(res.handle.id < m_textures.size() && "Texture handle out of range");
+		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
+		AGX_ASSERT_X(res.handle != FrameGraphResource::INVALID_HANDLE, "Texture handle is invalid");
+		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
 		return m_textures[res.handle.id];
 	}
 	
 	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&
 	{
 		const auto& res = finalResource(resourceHandle);
-		assert(res.type == FrameGraphResourceType::Texture && "Resource is not a texture");
-		assert(res.handle != FrameGraphResource::INVALID_HANDLE && "Texture handle is invalid");
-		assert(res.handle.id < m_textures.size() && "Texture handle out of range");
+		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
+		AGX_ASSERT_X(res.handle != FrameGraphResource::INVALID_HANDLE, "Texture handle is invalid");
+		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
 		return m_textures[res.handle.id];
 	}
 
@@ -156,7 +156,7 @@ namespace Aegix::Graphics
 			if (resource.handle == FrameGraphResource::INVALID_HANDLE)
 				ALOG::fatal("Failed to resolve reference '{}'", resource.name);
 
-			assert(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
+			AGX_ASSERT(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
 		}
 	}
 

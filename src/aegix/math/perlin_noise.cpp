@@ -15,7 +15,7 @@ namespace Aegix
 
 	float PerlinNoise1D::noise(float x, int rank, float persistence)
 	{
-		assert(x >= 0.0f && "Perlin noise only works for positive values");
+		AGX_ASSERT_X(x >= 0.0f, "Perlin noise only works for positive values");
 
 		int xIntervalIndex = static_cast<int>(x / m_bandwidth); // Get the interval of x
 		float xRelative = x / m_bandwidth - xIntervalIndex;		// Transform x to the interval [0, 1)
@@ -59,7 +59,7 @@ namespace Aegix
 
 	void PerlinNoise1D::addOctave(int intervalIndex)
 	{
-		assert(intervalIndex >= 0 and intervalIndex < m_intervals.size() and "Can't add octave, because of invalid interval index");
+		AGX_ASSERT_X(intervalIndex >= 0 && intervalIndex < m_intervals.size(), "Can't add octave, because of invalid interval index");
 
 		float firstValue = 0.0f;
 		float lastValue = 0.0f;
@@ -109,7 +109,7 @@ namespace Aegix
 
 	float PerlinNoise1D::Octave::value(float x) const
 	{
-		assert(x >= 0.0f and x < 1.0f and "x must be in the interval [0, 1)");
+		AGX_ASSERT_X(x >= 0.0f && x < 1.0f, "x must be in the interval [0, 1)");
 
 		int leftIndex = static_cast<int>((signalValues.size() - 1) * x);
 		int rightIndex = leftIndex + 1;

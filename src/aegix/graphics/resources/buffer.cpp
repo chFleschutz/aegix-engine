@@ -111,7 +111,7 @@ namespace Aegix::Graphics
 
 	void Buffer::write(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
-		assert(m_mapped && "Called write on buffer before map");
+		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + offset, data, size);
 		flush(size, offset);
@@ -119,7 +119,7 @@ namespace Aegix::Graphics
 
 	void Buffer::writeToIndex(const void* data, int index)
 	{
-		assert(m_mapped && "Called write on buffer before map");
+		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + (index * m_alignmentSize), data, m_instanceSize);
 		flushIndex(index);

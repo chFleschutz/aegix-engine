@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 		template <typename T, typename... Args>
 		T& add(Args&&... args)
 		{
-			assert(!has<T>() && "Blackboard already contains type T");
+			AGX_ASSERT_X(!has<T>(), "Blackboard already contains type T");
 			return m_storage[typeid(T)].emplace<T>(std::forward<Args>(args)...);
 		}
 
@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 		[[nodiscard]]
 		T& get()
 		{
-			assert(has<T>() && "Blackboard does not contain type T");
+			AGX_ASSERT_X(has<T>(), "Blackboard does not contain type T");
 			return std::any_cast<T&>(m_storage.at(typeid(T)));
 		}
 
@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		[[nodiscard]]
 		const T& get() const
 		{
-			assert(has<T>() && "Blackboard does not contain type T");
+			AGX_ASSERT_X(has<T>(), "Blackboard does not contain type T");
 			return std::any_cast<const T&>(m_storage.at(typeid(T)));
 		}
 

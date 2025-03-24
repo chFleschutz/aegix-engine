@@ -90,7 +90,7 @@ namespace Aegix::Graphics
 
 		updateLightingUBO(frameInfo);
 		auto& environment = frameInfo.scene.environment().component<Environment>();
-		assert(environment.irradiance && "Environment irradiance map is not set");
+		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
 		DescriptorWriter{ *m_gbufferSetLayout }
 			.writeImage(0, resources.texture(m_sceneColor))
@@ -162,7 +162,7 @@ namespace Aegix::Graphics
 		auto view = frameInfo.scene.registry().view<Transform, PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
-			assert(lighIndex < MAX_POINT_LIGHTS && "Point lights exceed maximum number of point lights");
+			AGX_ASSERT_X(lighIndex < MAX_POINT_LIGHTS, "Point lights exceed maximum number of point lights");
 			lighting.pointLights[lighIndex] = LightingUniforms::PointLight{
 				.position = glm::vec4(transform.location, 1.0f),
 				.color = glm::vec4(pointLight.color, pointLight.intensity)

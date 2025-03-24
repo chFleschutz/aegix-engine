@@ -36,8 +36,8 @@ namespace Aegix::Graphics
 
 	void ImageView::create(const Image& image, const Config& config)
 	{
-		assert(config.baseMipLevel + config.levelCount <= image.mipLevels() && "Invalid mip level range");
-		assert(config.baseLayer + config.layerCount <= image.layerCount() && "Invalid layer range");
+		AGX_ASSERT_X(config.baseMipLevel + config.levelCount <= image.mipLevels(), "Invalid mip level range");
+		AGX_ASSERT_X(config.baseLayer + config.layerCount <= image.layerCount(), "Invalid layer range");
 		
 		destroy();
 

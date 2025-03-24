@@ -14,7 +14,7 @@ namespace Aegix::Scene
 	GLTFLoader::GLTFLoader(Scene& scene, const std::filesystem::path& path)
 	{
 		m_gltf = GLTF::load(path);
-		assert(m_gltf.has_value() && "Failed to load GLTF file");
+		AGX_ASSERT_X(m_gltf.has_value(), "Failed to load GLTF file");
 
 		if (m_gltf->scenes.empty())
 			return;
@@ -114,8 +114,8 @@ namespace Aegix::Scene
 
 	auto GLTFLoader::loadMesh(size_t meshIndex, size_t primitiveIndex) -> std::shared_ptr<Graphics::StaticMesh>
 	{
-		assert(meshIndex < m_meshes.size() && "Mesh index is out of range");
-		assert(primitiveIndex < m_gltf->meshes[meshIndex].primitives.size() && "Primitive index is out of range");
+		AGX_ASSERT_X(meshIndex < m_meshes.size(), "Mesh index is out of range");
+		AGX_ASSERT_X(primitiveIndex < m_gltf->meshes[meshIndex].primitives.size(), "Primitive index is out of range");
 
 		// Return cached mesh
 		if (m_meshes[meshIndex][primitiveIndex])
@@ -147,7 +147,7 @@ namespace Aegix::Scene
 
 	auto GLTFLoader::loadMaterial(size_t materialIndex) -> std::shared_ptr<Graphics::DefaultMaterialInstance>
 	{
-		assert(materialIndex < m_gltf->materials.size() && "Material index is out of range");
+		AGX_ASSERT_X(materialIndex < m_gltf->materials.size(), "Material index is out of range");
 
 		// Return cached material
 		if (m_materials[materialIndex])
@@ -187,7 +187,7 @@ namespace Aegix::Scene
 
 	auto GLTFLoader::loadTexture(size_t textureIndex, VkFormat format) -> std::shared_ptr<Graphics::Texture>
 	{
-		assert(textureIndex < m_gltf->textures.size() && "Texture index is out of range");
+		AGX_ASSERT_X(textureIndex < m_gltf->textures.size(), "Texture index is out of range");
 
 		// Return cached texture
 		if (m_textures[textureIndex])
@@ -195,7 +195,7 @@ namespace Aegix::Scene
 
 		// Load texture
 		auto& source = m_gltf->textures[textureIndex].source;
-		assert(source.has_value() && "Texture source is required");
+		AGX_ASSERT_X(source.has_value(), "Texture source is required");
 
 		auto& image = m_gltf->images[source.value()];
 		std::shared_ptr<Graphics::Texture> texture;
@@ -208,7 +208,7 @@ namespace Aegix::Scene
 				}
 				else if constexpr (std::is_same_v<T, GLTF::Image::BufferViewData>)
 				{
-					assert(false && "BufferView image data not supported yet");
+					AGX_ASSERT_X(false, "BufferView image data not supported yet");
 				}
 			}, image.data);
 

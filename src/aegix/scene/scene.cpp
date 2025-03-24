@@ -69,7 +69,7 @@ namespace Aegix::Scene
 		}
 		else
 		{
-			assert(false && "Unsupported file format");
+			AGX_ASSERT_X(false, "Unsupported file format");
 		}
 
 		return Entity{};

@@ -47,7 +47,7 @@ namespace Aegix::Scene
 		template<typename T>
 		auto component() const -> T&
 		{
-			assert(hasComponent<T>() && "Cannot get Component: Entity does not have the component");
+			AGX_ASSERT_X(hasComponent<T>(), "Cannot get Component: Entity does not have the component");
 			return registry().get<T>(m_id);
 		}
 
@@ -56,7 +56,7 @@ namespace Aegix::Scene
 		template<typename T, typename... Args>
 		auto addComponent(Args&&... args) -> T&
 		{
-			assert(!hasComponent<T>() && "Cannot add Component: Entity already has the component");
+			AGX_ASSERT_X(!hasComponent<T>(), "Cannot add Component: Entity already has the component");
 			return registry().emplace<T>(m_id, std::forward<Args>(args)...);
 		}
 
@@ -65,7 +65,7 @@ namespace Aegix::Scene
 		template<Scripting::Script T, typename... Args>
 		auto addComponent(Args&&... args) -> T&
 		{
-			assert(!hasComponent<T>() && "Cannot add Component: Entity already has the component");
+			AGX_ASSERT_X(!hasComponent<T>(), "Cannot add Component: Entity already has the component");
 			auto& script = registry().emplace<T>(m_id, std::forward<Args>(args)...);
 			addScript(&script);
 			return script;
@@ -82,7 +82,7 @@ namespace Aegix::Scene
 			requires OptionalComponent<T>
 		void removeComponent()
 		{
-			assert(hasComponent<T>() && "Cannot remove Component: Entity does not have the component");
+			AGX_ASSERT_X(hasComponent<T>(), "Cannot remove Component: Entity does not have the component");
 			registry().remove<T>(m_id);
 		}
 

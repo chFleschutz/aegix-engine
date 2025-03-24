@@ -207,8 +207,8 @@ namespace Aegix::Graphics
 	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::ComputeConfig& config)
 		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_COMPUTE }
 	{
-		assert(config.pipelineLayout != VK_NULL_HANDLE && "Cannot create pipeline: no pipelineLayout provided");
-		assert(config.shaderStage.module != VK_NULL_HANDLE && "Cannot create pipeline: no shader provided");
+		AGX_ASSERT_X(config.pipelineLayout != VK_NULL_HANDLE, "Cannot create pipeline: no pipelineLayout provided");
+		AGX_ASSERT_X(config.shaderStage.module != VK_NULL_HANDLE, "Cannot create pipeline: no shader provided");
 
 		VkComputePipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -297,7 +297,7 @@ namespace Aegix::Graphics
 
 	void Pipeline::createGraphicsPipeline(const Pipeline::GraphicsConfig& configInfo)
 	{
-		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
+		AGX_ASSERT_X(configInfo.pipelineLayout != VK_NULL_HANDLE, "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 
 		auto& bindingDescriptions = configInfo.bindingDescriptions;
 		auto& attributeDescriptions = configInfo.attributeDescriptions;

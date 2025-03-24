@@ -17,8 +17,8 @@ namespace Aegix::Graphics
 	{
 		// Create vertex buffers (Order: Position, Color, Normal, UV)
 		m_vertexCount = static_cast<uint32_t>(info.positions.size());
-		assert(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount
-			&& "Vertex attribute count has to match");
+		AGX_ASSERT_X(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount, 
+			"Vertex attribute count has to match");
 
 		createVertexAttributeBuffer(info.positions);
 		createVertexAttributeBuffer(info.colors);
@@ -82,7 +82,7 @@ namespace Aegix::Graphics
 		}
 		else
 		{
-			assert(false && "Unsupported file format");
+			AGX_ASSERT_X(false, "Unsupported file format");
 		}
 
 		return std::make_shared<StaticMesh>(Engine::instance().device(), info);
@@ -128,7 +128,7 @@ namespace Aegix::Graphics
 		std::string warn, err;
 
 		bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str());
-		assert(result && "Failed to load OBJ file");
+		AGX_ASSERT_X(result, "Failed to load OBJ file");
 
 		positions.clear();
 		colors.clear();
@@ -180,7 +180,7 @@ namespace Aegix::Graphics
 	void StaticMesh::MeshInfo::loadGLTF(const std::filesystem::path& filepath)
 	{
 		auto gltf = GLTF::load(filepath);
-		assert(gltf.has_value() && "Failed to load GLTF file");
+		AGX_ASSERT_X(gltf.has_value(), "Failed to load GLTF file");
 
 		// TODO: Support multiple meshes and primitives
 		auto& primitive = gltf->meshes[0].primitives[0];
@@ -192,7 +192,7 @@ namespace Aegix::Graphics
 		GLTF::copyAttribute("TEXCOORD_0", uvs, primitive, *gltf);
 
 		// Ensure all attributes have the same size
-		assert(!positions.empty() && "Failed to load positions");
+		AGX_ASSERT_X(!positions.empty(), "Failed to load positions");
 		auto vertexCount = positions.size();
 		if (colors.size() != vertexCount)
 			colors.resize(vertexCount);

@@ -119,7 +119,7 @@ namespace Aegix::Graphics
 		if (!pixels)
 		{
 			ALOG::fatal("Failed to load image: '{}'", path.string());
-			assert(false && "Failed to load image");
+			AGX_ASSERT_X(false, "Failed to load image");
 		}
 
 		m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };

@@ -37,15 +37,15 @@ namespace Aegix::Graphics
 
 	auto Renderer::currentCommandBuffer() const -> VkCommandBuffer
 	{
-		assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
-		assert(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE && "Command buffer not initialized");
+		AGX_ASSERT_X(m_isFrameStarted, "Cannot get command buffer when frame not in progress");
+		AGX_ASSERT_X(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE, "Command buffer not initialized");
 
 		return m_commandBuffers[m_currentFrameIndex];
 	}
 
 	auto Renderer::frameIndex() const -> uint32_t
 	{
-		assert(m_isFrameStarted && "Cannot get frame index when frame not in progress");
+		AGX_ASSERT_X(m_isFrameStarted, "Cannot get frame index when frame not in progress");
 		return m_currentFrameIndex;
 	}
 
@@ -55,8 +55,8 @@ namespace Aegix::Graphics
 
 		auto commandBuffer = beginFrame();
 
-		assert(commandBuffer && "Failed to begin frame");
-		assert(m_isFrameStarted && "Frame not started");
+		AGX_ASSERT_X(commandBuffer, "Failed to begin frame");
+		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
 		FrameInfo frameInfo{
 			scene,
@@ -140,7 +140,7 @@ namespace Aegix::Graphics
 
 	auto Renderer::beginFrame() -> VkCommandBuffer
 	{
-		assert(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
+		AGX_ASSERT(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
 		auto result = m_swapChain.acquireNextImage();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -149,7 +149,7 @@ namespace Aegix::Graphics
 			return nullptr;
 		}
 
-		assert(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR && "Failed to aquire swap chain image");
+		AGX_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR && "Failed to aquire swap chain image");
 
 		m_isFrameStarted = true;
 
@@ -165,7 +165,7 @@ namespace Aegix::Graphics
 
 	void Renderer::endFrame(VkCommandBuffer commandBuffer)
 	{
-		assert(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
+		AGX_ASSERT(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
 		VK_CHECK(vkEndCommandBuffer(commandBuffer))
 
@@ -177,7 +177,7 @@ namespace Aegix::Graphics
 		}
 		else if (result != VK_SUCCESS)
 		{
-			assert(false && "Failed to present swap chain image");
+			AGX_ASSERT(false && "Failed to present swap chain image");
 		}
 
 		waitIdle();

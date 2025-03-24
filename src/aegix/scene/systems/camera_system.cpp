@@ -59,7 +59,7 @@ namespace Aegix::Scene
 
 	void CameraSystem::calcPerspectiveProjection(Camera& camera)
 	{
-		assert(abs(camera.aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
+		AGX_ASSERT(abs(camera.aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
 
 		// Projection matrix for right handed system with depth range [0, 1]
 		// Note: Value [1][1] is negated because Vulkan uses a flipped y-axis

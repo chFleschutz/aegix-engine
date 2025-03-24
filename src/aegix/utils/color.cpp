@@ -15,7 +15,7 @@ namespace Aegix
 
 	glm::vec4 Color::fromHex(const std::string& hex)
 	{
-		assert(hex.length() == 7 and hex[0] == '#' and "Invalid hex color format");
+		AGX_ASSERT_X(hex.length() == 7 && hex[0] == '#', "Invalid hex color format");
 
 		if (hex.size() != 7 or hex[0] != '#')
 			return glm::vec4{ 1.0f };

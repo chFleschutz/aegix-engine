@@ -39,7 +39,7 @@ namespace Aegix::Graphics
 		template<typename T>
 		void createVertexAttributeBuffer(const std::vector<T>& attribute)
 		{
-			assert(attribute.size() >= 3 && "Vertex attribute must have at least 3 elements");
+			AGX_ASSERT_X(attribute.size() >= 3, "Vertex attribute must have at least 3 elements");
 
 			size_t bufferSize = sizeof(T) * attribute.size();
 			auto attributeBuffer = std::make_unique<Buffer>(m_device, bufferSize, 1,

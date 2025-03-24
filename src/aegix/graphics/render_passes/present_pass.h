@@ -30,8 +30,8 @@ namespace Aegix::Graphics
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
 			auto& srcTexture = resources.texture(m_final);
-			assert(m_swapChain.width() == srcTexture.image().width() && "Swapchain extent does not match source texture extent");
-			assert(m_swapChain.height() == srcTexture.image().height() && "Swapchain extent does not match source texture extent");
+			AGX_ASSERT_X(m_swapChain.width() == srcTexture.image().width(), "Swapchain extent does not match source texture extent");
+			AGX_ASSERT_X(m_swapChain.height() == srcTexture.image().height(), "Swapchain extent does not match source texture extent");
 			
 			VkCommandBuffer cmd = frameInfo.commandBuffer;
 			VkImage srcImage = srcTexture.image();

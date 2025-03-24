@@ -50,7 +50,7 @@ namespace Aegix::UI
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags,
 			std::function<void(T&)> drawFunc)
 		{
-			assert(entity.hasComponent<T>() && "Entity does not have the required component");
+			AGX_ASSERT_X(entity.hasComponent<T>(), "Entity does not have the required component");
 
 			if (ImGui::CollapsingHeader(componentName, nullptr, flags))
 				drawFunc(entity.component<T>());

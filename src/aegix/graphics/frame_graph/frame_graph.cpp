@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		case FrameGraphResourceUsage::Present:
 			return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		default:
-			assert(false && "Undefined FrameGraphResourceUsage");
+			AGX_ASSERT_X(false, "Undefined FrameGraphResourceUsage");
 			return VK_IMAGE_LAYOUT_UNDEFINED;
 		}
 	}
@@ -182,7 +182,7 @@ namespace Aegix::Graphics
 			}
 		}
 
-		assert(sortedNodes.size() == m_nodeHandles.size() && "Failed to sort nodes");
+		AGX_ASSERT_X(sortedNodes.size() == m_nodeHandles.size(), "Failed to sort nodes");
 		m_nodeHandles.assign(sortedNodes.rbegin(), sortedNodes.rend());
 	}
 

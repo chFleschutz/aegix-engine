@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/logging.h"
-#include "core/assert.h"
 #include "graphics/resources/texture.h"
 
 #include <vulkan/vulkan.h>

@@ -17,11 +17,11 @@ namespace Aegix::Tools
 		{
 			vkCmdBeginDebugUtilsLabelEXT_ptr = (PFN_vkCmdBeginDebugUtilsLabelEXT)
 				vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT");
-			assert(vkCmdBeginDebugUtilsLabelEXT_ptr && "Failed to load vkCmdBeginDebugUtilsLabelEXT");
+			AGX_ASSERT_X(vkCmdBeginDebugUtilsLabelEXT_ptr, "Failed to load vkCmdBeginDebugUtilsLabelEXT");
 
 			vkCmdEndDebugUtilsLabelEXT_ptr = (PFN_vkCmdEndDebugUtilsLabelEXT)
 				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT");
-			assert(vkCmdEndDebugUtilsLabelEXT_ptr && "Failed to load vkCmdEndDebugUtilsLabelEXT");
+			AGX_ASSERT_X(vkCmdEndDebugUtilsLabelEXT_ptr, "Failed to load vkCmdEndDebugUtilsLabelEXT");
 		}
 	}
 
@@ -120,7 +120,7 @@ namespace Aegix::Tools
 		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
 			return VK_ACCESS_TRANSFER_WRITE_BIT;
 		default:
-			assert(false && "Unsupported layout transition");
+			AGX_ASSERT_X(false, "Unsupported layout transition");
 			return 0;
 		}
 	}
@@ -146,7 +146,7 @@ namespace Aegix::Tools
 		case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
 			return VK_ACCESS_TRANSFER_WRITE_BIT;
 		default:
-			assert(false && "Unsupported layout transition");
+			AGX_ASSERT_X(false, "Unsupported layout transition");
 			return 0;
 		}
 	}
@@ -241,7 +241,7 @@ namespace Aegix::Tools
 		auto code = File::readBinary(path);
 		if (code.empty())
 			ALOG::fatal("Failed to read shader file: {}", path.string());
-		assert(!code.empty() && "Shader code is empty");
+		AGX_ASSERT_X(!code.empty(), "Shader code is empty");
 
 		return createShaderModule(device, code);
 	}

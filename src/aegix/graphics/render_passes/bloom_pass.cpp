@@ -161,7 +161,7 @@ namespace Aegix::Graphics
 
 	void BloomPass::downSample(VkCommandBuffer cmd, Texture& bloom)
 	{
-		assert(bloom.image().layout() == VK_IMAGE_LAYOUT_GENERAL);
+		AGX_ASSERT(bloom.image().layout() == VK_IMAGE_LAYOUT_GENERAL);
 
 		m_downsamplePipeline->bind(cmd);
 

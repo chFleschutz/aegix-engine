@@ -125,7 +125,7 @@ namespace Aegix::Graphics
 		createInfo.oldSwapchain = m_swapChain;
 
 		QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
-		assert(indices.isComplete() && "Queue family indices are not complete");
+		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 		
 		std::array<uint32_t, 2> queueFamilyIndices{ indices.graphicsFamily.value(), indices.presentFamily.value() };
 		if (indices.graphicsFamily != indices.presentFamily)
@@ -231,7 +231,7 @@ namespace Aegix::Graphics
 			}
 		}
 
-		assert(false && "No suitable surface format found");
+		AGX_ASSERT_X(false, "No suitable surface format found");
 		return availableFormats[0];
 	}
 

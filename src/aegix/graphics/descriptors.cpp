@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType descriptorType,
 		VkShaderStageFlags stageFlags, uint32_t count)
 	{
-		assert(m_bindings.count(binding) == 0 && "Binding already in use");
+		AGX_ASSERT_X(m_bindings.count(binding) == 0, "Binding already in use");
 
 		VkDescriptorSetLayoutBinding layoutBinding{};
 		layoutBinding.binding = binding;
@@ -183,7 +183,7 @@ namespace Aegix::Graphics
 		for (const auto& [binding, info] : m_imageInfos)
 		{
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
-			assert(bindingDesc.descriptorCount == 1 && "Cannot write multiple images to a single descriptor");
+			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple images to a single descriptor");
 
 			VkWriteDescriptorSet write{};
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -198,7 +198,7 @@ namespace Aegix::Graphics
 		for (const auto& [binding, info] : m_bufferInfos)
 		{
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
-			assert(bindingDesc.descriptorCount == 1 && "Cannot write multiple images to a single descriptor");
+			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple images to a single descriptor");
 
 			VkWriteDescriptorSet write{};
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -247,7 +247,7 @@ namespace Aegix::Graphics
 
 	auto DescriptorSet::Builder::addTexture(uint32_t binding, std::shared_ptr<Texture> texture) -> DescriptorSet::Builder&
 	{
-		assert(texture != nullptr && "Cannot add Texture if it is nullptr");
+		AGX_ASSERT_X(texture != nullptr, "Cannot add Texture if it is nullptr");
 		return addTexture(binding, *texture);
 	}
 
@@ -266,7 +266,7 @@ namespace Aegix::Graphics
 		for (auto& set : m_descriptorSets)
 		{
 			auto result = pool.allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
-			assert(result && "Failed to allocate descriptor set");
+			AGX_ASSERT_X(result, "Failed to allocate descriptor set");
 		}
 	}
 

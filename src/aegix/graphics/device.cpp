@@ -129,7 +129,7 @@ namespace Aegix::Graphics
 	{
 		if (buffer)
 		{
-			assert(allocation && "Buffer and allocation must be valid");
+			AGX_ASSERT_X(allocation, "Buffer and allocation must be valid");
 			m_deletionQueue.schedule([=]() { vmaDestroyBuffer(m_allocator, buffer, allocation); });
 		}
 	}
@@ -138,7 +138,7 @@ namespace Aegix::Graphics
 	{
 		if (image)
 		{
-			assert(allocation && "Image and allocation must be valid");
+			AGX_ASSERT_X(allocation, "Image and allocation must be valid");
 			m_deletionQueue.schedule([=]() { vmaDestroyImage(m_allocator, image, allocation); });
 		}
 	}
@@ -187,7 +187,7 @@ namespace Aegix::Graphics
 			}
 		}
 
-		assert(false && "failed to find supported format!");
+		AGX_ASSERT_X(false, "failed to find supported format!");
 		return VK_FORMAT_UNDEFINED;
 	}
 
@@ -297,7 +297,7 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createInstance()
 	{
-		assert(!ENABLE_VALIDATION || checkValidationLayerSupport() && "Validation layers requested, but not available!");
+		AGX_ASSERT_X(!ENABLE_VALIDATION || checkValidationLayerSupport(), "Validation layers requested, but not available!");
 
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -352,7 +352,7 @@ namespace Aegix::Graphics
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
-		assert(deviceCount > 0 && "Failed to find GPUs with Vulkan support");
+		AGX_ASSERT_X(deviceCount > 0, "Failed to find GPUs with Vulkan support");
 		ALOG::info("Available GPUs: {}", deviceCount);
 
 		std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -381,7 +381,7 @@ namespace Aegix::Graphics
 			break;
 		}
 
-		assert(m_physicalDevice != VK_NULL_HANDLE && "Failed to find a suitable GPU");
+		AGX_ASSERT_X(m_physicalDevice != VK_NULL_HANDLE, "Failed to find a suitable GPU");
 
 		vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
 		uint32_t major = VK_VERSION_MAJOR(m_properties.apiVersion);
@@ -393,7 +393,7 @@ namespace Aegix::Graphics
 	void VulkanDevice::createLogicalDevice()
 	{
 		QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
-		assert(indices.isComplete() && "Queue family indices are not complete");
+		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -434,9 +434,9 @@ namespace Aegix::Graphics
 			createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 		}
 
-		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device))
+		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device));
 
-			assert(indices.isComplete() && "Queue family indices are not complete");
+		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
 		vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 	}
@@ -456,7 +456,7 @@ namespace Aegix::Graphics
 	void VulkanDevice::createCommandPool()
 	{
 		QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
-		assert(queueFamilyIndices.graphicsFamily.has_value() && "Graphics queue family not found");
+		AGX_ASSERT_X(queueFamilyIndices.graphicsFamily.has_value(), "Graphics queue family not found");
 
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -539,7 +539,7 @@ namespace Aegix::Graphics
 
 		for (const auto& required : queryRequiredInstanceExtensions())
 		{
-			assert(available.find(required) != available.end() && "Missing required glfw extension");
+			AGX_ASSERT_X(available.find(required) != available.end(), "Missing required glfw extension");
 		}
 	}
 

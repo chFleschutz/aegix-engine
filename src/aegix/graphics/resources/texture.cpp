@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 		if (!std::filesystem::exists(texturePath))
 		{
 			ALOG::fatal("Texture file does not exist: '{}'", texturePath.string());
-			assert(false && "Texture file does not exist");
+			AGX_ASSERT_X(false, "Texture file does not exist");
 		}
 
 		if (texturePath.extension() == ".hdr")
@@ -323,7 +323,7 @@ namespace Aegix::Graphics
 		if (!pixels)
 		{
 			ALOG::fatal("Failed to load image: '{}'", path.string());
-			assert(false && "Failed to load image");
+			AGX_ASSERT_X(false, "Failed to load image");
 		}
 
 		// Upload data to staging buffer

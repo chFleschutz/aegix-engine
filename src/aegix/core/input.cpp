@@ -9,7 +9,7 @@ namespace Aegix
 	Input::Input(const Core::Window& window)
 		: m_window{ window.glfwWindow() }
 	{
-		assert(s_instance == nullptr && "Cannot create Input: Only one instance of Input is allowed");
+		AGX_ASSERT_X(s_instance == nullptr, "Cannot create Input: Only one instance of Input is allowed");
 		s_instance = this;
 
 		if (glfwRawMouseMotionSupported())
@@ -29,7 +29,7 @@ namespace Aegix
 
 	Input& Input::instance()
 	{
-		assert(s_instance != nullptr && "Input instance is not created");
+		AGX_ASSERT_X(s_instance != nullptr, "Input instance is not created");
 		return *s_instance;
 	}
 

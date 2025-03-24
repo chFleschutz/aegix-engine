@@ -83,7 +83,7 @@ namespace Aegix::Graphics
 			{
 				lastMaterial = material.instance.get();
 				auto& descriptorSet = material.instance->m_descriptorSet;
-				assert(descriptorSet != nullptr && "Material descriptor set is null");
+				AGX_ASSERT_X(descriptorSet != nullptr, "Material descriptor set is null");
 
 				Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
 					*m_pipelineLayout, descriptorSet->descriptorSet(frameInfo.frameIndex), 1);

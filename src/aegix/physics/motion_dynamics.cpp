@@ -74,13 +74,13 @@ namespace Aegix::Physics
 
 	glm::vec3 MotionDynamics::moveDirection() const
 	{
-		assert(linearSpeed() > 0.0f && "Direction of zero-vector is undefined");
+		AGX_ASSERT_X(linearSpeed() > 0.0f, "Direction of zero-vector is undefined");
 		return glm::normalize(m_linearVelocity);
 	}
 
 	glm::vec3 MotionDynamics::angularDirection() const
 	{
-		assert(angularSpeed() > 0.0f && "Direction of zero-vector is undefined");
+		AGX_ASSERT_X(angularSpeed() > 0.0f, "Direction of zero-vector is undefined");
 		return glm::normalize(m_angularVelocity);
 	}
 
