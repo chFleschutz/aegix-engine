@@ -14,7 +14,7 @@ namespace Aegix::Scene
 		auto view = scene.registry().view<Transform, GlobalTransform, Parent>();
 		for (auto&& [entity, transform, globalTransform, parent] : view.each())
 		{
-			if (!parent.entity || !parent.entity.hasComponent<GlobalTransform>())
+			if (!parent.entity || !parent.entity.has<GlobalTransform>())
 			{
 				globalTransform.location = transform.location;
 				globalTransform.rotation = transform.rotation;
@@ -22,7 +22,7 @@ namespace Aegix::Scene
 				continue;
 			}
 
-			auto& parentGlobal = parent.entity.component<GlobalTransform>();
+			auto& parentGlobal = parent.entity.get<GlobalTransform>();
 			globalTransform.location = parentGlobal.location + transform.location;
 			globalTransform.rotation = parentGlobal.rotation * transform.rotation;
 			globalTransform.scale = parentGlobal.scale * transform.scale;

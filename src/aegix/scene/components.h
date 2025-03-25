@@ -69,7 +69,7 @@ namespace Aegix
 			Scene::Entity current{};
 
 			auto operator*() const -> Scene::Entity { return current; }
-			auto operator++() -> Iterator& { current = current.component<Siblings>().next; return *this; }
+			auto operator++() -> Iterator& { current = current.get<Siblings>().next; return *this; }
 			auto operator==(const Iterator& other) const -> bool { return current == other.current; }
 		};
 
@@ -78,7 +78,7 @@ namespace Aegix
 			Scene::Entity current{};
 
 			auto operator*() const -> Scene::Entity { return current; }
-			auto operator++() -> ReverseIterator& { current = current.component<Siblings>().prev; return *this; }
+			auto operator++() -> ReverseIterator& { current = current.get<Siblings>().prev; return *this; }
 			auto operator==(const ReverseIterator& other) const -> bool { return current == other.current; };
 		};
 

@@ -89,7 +89,7 @@ namespace Aegix::Graphics
 			if (!mainCamera)
 				return;
 
-			auto& camera = mainCamera.component<Camera>();
+			auto& camera = mainCamera.get<Camera>();
 			TransparentUbo ubo{
 				.view = camera.viewMatrix,
 				.projection = camera.projectionMatrix

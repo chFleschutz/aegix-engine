@@ -10,6 +10,7 @@ namespace Aegix::Scene
 	Entity::Entity(entt::entity entityHandle, Scene* scene)
 		: m_id(entityHandle), m_scene(scene)
 	{
+		AGX_ASSERT_X(m_scene, "Entity must have a scene");
 	}
 
 	bool Entity::operator==(const Entity& other) const
@@ -42,22 +43,35 @@ namespace Aegix::Scene
 		parent.addChild(*this);
 	}
 
+	void Entity::removeParent()
+	{
+		AGX_ASSERT_X(*this, "Cannot remove parent: Entity is null");
+		AGX_ASSERT_X(has<Parent>(), "Cannot remove parent: Entity does not have a parent");
+
+		auto& parent = get<Parent>();
+		if (!parent.entity)
+			return;
+
+		parent.entity.removeChild(Entity{ *this });
+		parent.entity = Entity{};
+	}
+
 	void Entity::addChild(Entity child)
 	{
 		AGX_ASSERT_X(*this, "Cannot add child: Entity is null");
 		AGX_ASSERT_X(child, "Cannot add child: Child entity is null");
 
-		auto& parent = child.component<Parent>();
+		auto& parent = child.get<Parent>();
 		if (parent.entity == *this) // Already added as a child
 			return;
 
 		parent.entity = *this;
 
-		auto& children = component<Children>();
+		auto& children = get<Children>();
 		if (children.first)
 		{
-			children.last.component<Siblings>().next = child;
-			child.component<Siblings>().prev = children.last;
+			children.last.get<Siblings>().next = child;
+			child.get<Siblings>().prev = children.last;
 		}
 		else // No children yet
 		{
@@ -67,38 +81,25 @@ namespace Aegix::Scene
 		children.count++;
 	}
 
-	void Entity::removeParent()
-	{
-		AGX_ASSERT_X(*this, "Cannot remove parent: Entity is null");
-		AGX_ASSERT_X(hasComponent<Parent>(), "Cannot remove parent: Entity does not have a parent");
-
-		auto& parent = component<Parent>();
-		if (!parent.entity)
-			return;
-
-		parent.entity.removeChild(Entity{ *this });
-		parent.entity = Entity{};
-	}
-
 	void Entity::removeChild(Entity child)
 	{
 		AGX_ASSERT_X(*this, "Cannot remove child: Entity is null");
-		AGX_ASSERT_X(hasComponent<Children>(), "Cannot remove child: Entity does not have children");
+		AGX_ASSERT_X(has<Children>(), "Cannot remove child: Entity does not have children");
 		AGX_ASSERT_X(child, "Cannot remove child: Child entity is null");
-		AGX_ASSERT_X(child.hasComponent<Parent>(), "Cannot remove child: Entity does not have a parent");
-		AGX_ASSERT_X(child.component<Parent>().entity == *this, "Cannot remove child: Entity is not a child of this entity");
+		AGX_ASSERT_X(child.has<Parent>(), "Cannot remove child: Entity does not have a parent");
+		AGX_ASSERT_X(child.get<Parent>().entity == *this, "Cannot remove child: Entity is not a child of this entity");
 
-		auto& children = component<Children>();
+		auto& children = get<Children>();
 		children.count--;
 		
-		auto& siblings = child.component<Siblings>();
+		auto& siblings = child.get<Siblings>();
 		Entity prevSibling = siblings.prev; 
 		Entity nextSibling = siblings.next;
 		
 		// Update siblings and first/last child
 		if (prevSibling)
 		{
-			prevSibling.component<Siblings>().next = nextSibling;
+			prevSibling.get<Siblings>().next = nextSibling;
 		}
 		else // First Child
 		{
@@ -107,7 +108,7 @@ namespace Aegix::Scene
 
 		if (nextSibling)
 		{
-			nextSibling.component<Siblings>().prev = prevSibling;
+			nextSibling.get<Siblings>().prev = prevSibling;
 		}
 		else // Last Child
 		{
@@ -115,16 +116,16 @@ namespace Aegix::Scene
 		}
 
 		// Remove parent at the end
-		child.component<Parent>() = Parent{};
+		child.get<Parent>() = Parent{};
 	}
 
 	void Entity::removeChildren()
 	{
 		AGX_ASSERT_X(*this, "Cannot remove children: Entity is null");
-		AGX_ASSERT_X(hasComponent<Children>(), "Cannot remove children: Entity does not have children");
+		AGX_ASSERT_X(has<Children>(), "Cannot remove children: Entity does not have children");
 
 		// This needs to be done in two steps to avoid invalidating the iterator
-		auto& children = component<Children>();
+		auto& children = get<Children>();
 		std::vector<Entity> childrenToRemove;
 		childrenToRemove.reserve(children.count);
 		for (auto child : children)
@@ -135,8 +136,8 @@ namespace Aegix::Scene
 		children = Children{};
 		for (auto& child : childrenToRemove)
 		{
-			child.component<Parent>() = Parent{};
-			child.component<Siblings>() = Siblings{};
+			child.get<Parent>() = Parent{};
+			child.get<Siblings>() = Siblings{};
 		}
 	}
 }

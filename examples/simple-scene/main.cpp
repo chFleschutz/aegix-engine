@@ -11,7 +11,7 @@ class Rotator : public Aegix::Scripting::ScriptBase
 protected:
 	void update(float deltaSeconds) override
 	{
-		auto& transform = component<Aegix::Transform>();
+		auto& transform = get<Aegix::Transform>();
 		transform.rotation *= glm::angleAxis(deltaSeconds, Aegix::Math::World::UP);
 	}
 };
@@ -46,15 +46,15 @@ public:
 
 		// ENTITIES
 		auto floorPlane = scene.createEntity("Floor Plane");
-		floorPlane.addComponent<Mesh>(planeMesh);
-		floorPlane.addComponent<Graphics::DefaultMaterial>(paintingMat);
-		floorPlane.component<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		floorPlane.add<Mesh>(planeMesh);
+		floorPlane.add<Graphics::DefaultMaterial>(paintingMat);
+		floorPlane.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
 		auto teapot = scene.createEntity("Teapot");
-		teapot.addComponent<Mesh>(teapotMesh);
-		teapot.addComponent<Graphics::DefaultMaterial>(metalMat);
-		teapot.addComponent<Rotator>();
-		teapot.component<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		teapot.add<Mesh>(teapotMesh);
+		teapot.add<Graphics::DefaultMaterial>(metalMat);
+		teapot.add<Rotator>();
+		teapot.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
 
 		// LIGHTS
 		constexpr int lightCount = 64;
@@ -68,7 +68,7 @@ public:
 			float r = Random::uniformFloat(0.0f, 1.0f);
 			float g = Random::uniformFloat(0.0f, 1.0f);
 			float b = Random::uniformFloat(0.0f, 1.0f);
-			light.addComponent<PointLight>(glm::vec3{ r, g, b }, 200.0f);
+			light.add<PointLight>(glm::vec3{ r, g, b }, 200.0f);
 		}
 	}
 };

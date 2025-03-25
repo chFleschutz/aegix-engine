@@ -31,15 +31,15 @@ namespace Aegix::UI
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags, 
 			std::function<void(T&)> drawFunc)
 		{
-			if (!entity.hasComponent<T>())
+			if (!entity.has<T>())
 				return;
 
 			bool keepComponent = true;
 			if (ImGui::CollapsingHeader(componentName, &keepComponent, flags))
-				drawFunc(entity.component<T>());
+				drawFunc(entity.get<T>());
 
 			if (!keepComponent)
-				entity.removeComponent<T>();
+				entity.remove<T>();
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -50,10 +50,10 @@ namespace Aegix::UI
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags,
 			std::function<void(T&)> drawFunc)
 		{
-			AGX_ASSERT_X(entity.hasComponent<T>(), "Entity does not have the required component");
+			AGX_ASSERT_X(entity.has<T>(), "Entity does not have the required component");
 
 			if (ImGui::CollapsingHeader(componentName, nullptr, flags))
-				drawFunc(entity.component<T>());
+				drawFunc(entity.get<T>());
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -62,12 +62,12 @@ namespace Aegix::UI
 		template<typename T>
 		void drawAddComponentItem(const std::string& itemName)
 		{
-			if (m_selectedEntity.hasComponent<T>())
+			if (m_selectedEntity.has<T>())
 				return;
 
 			if (ImGui::MenuItem(itemName.c_str()))
 			{
-				m_selectedEntity.addComponent<T>();
+				m_selectedEntity.add<T>();
 				ImGui::CloseCurrentPopup();
 			}
 		}

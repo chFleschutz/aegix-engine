@@ -91,10 +91,10 @@ namespace Aegix::Graphics
 	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
 		auto skyBoxEntity = frameInfo.scene.environment();
-		if (!skyBoxEntity || !skyBoxEntity.hasComponent<Environment>())
+		if (!skyBoxEntity || !skyBoxEntity.has<Environment>())
 			return;
 
-		auto& environment = skyBoxEntity.component<Environment>();
+		auto& environment = skyBoxEntity.get<Environment>();
 		if (!environment.skybox)
 			return;
 
@@ -124,7 +124,7 @@ namespace Aegix::Graphics
 
 		m_pipeline->bind(cmd);
 
-		auto& camera = frameInfo.scene.mainCamera().component<Camera>();
+		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		SkyBoxUniforms uniforms{
 			.view = camera.viewMatrix,
 			.projection = camera.projectionMatrix

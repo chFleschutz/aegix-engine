@@ -89,7 +89,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		updateLightingUBO(frameInfo);
-		auto& environment = frameInfo.scene.environment().component<Environment>();
+		auto& environment = frameInfo.scene.environment().get<Environment>();
 		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
 		DescriptorWriter{ *m_gbufferSetLayout }
@@ -136,24 +136,24 @@ namespace Aegix::Graphics
 		LightingUniforms lighting;
 
 		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
-		if (mainCamera && mainCamera.hasComponent<Transform>())
+		if (mainCamera && mainCamera.has<Transform>())
 		{
-			auto& cameraTransform = mainCamera.component<Transform>();
+			auto& cameraTransform = mainCamera.get<Transform>();
 			lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
 		}
 
 		Scene::Entity ambientLight = frameInfo.scene.ambientLight();
-		if (ambientLight && ambientLight.hasComponent<AmbientLight>())
+		if (ambientLight && ambientLight.has<AmbientLight>())
 		{
-			auto& ambient = ambientLight.component<AmbientLight>();
+			auto& ambient = ambientLight.get<AmbientLight>();
 			lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
 		}
 
 		Scene::Entity directionalLight = frameInfo.scene.directionalLight();
-		if (directionalLight && directionalLight.hasComponent<DirectionalLight, Transform>())
+		if (directionalLight && directionalLight.has<DirectionalLight, Transform>())
 		{
-			auto& directional = directionalLight.component<DirectionalLight>();
-			auto& transform = directionalLight.component<Transform>();
+			auto& directional = directionalLight.get<DirectionalLight>();
+			auto& transform = directionalLight.get<Transform>();
 			lighting.directional.color = glm::vec4(directional.color, directional.intensity);
 			lighting.directional.direction = glm::vec4(glm::normalize(transform.forward()), 0.0f);
 		}

@@ -164,7 +164,7 @@ namespace Aegix::Graphics
 			if (!mainCamera)
 				return;
 
-			auto& camera = mainCamera.component<Camera>();
+			auto& camera = mainCamera.get<Camera>();
 			camera.aspect = frameInfo.aspectRatio;
 
 			GBufferUbo ubo{

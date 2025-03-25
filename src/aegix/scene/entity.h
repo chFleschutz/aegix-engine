@@ -38,68 +38,59 @@ namespace Aegix::Scene
 
 		/// @brief Checks if the entity has all components of type T...
 		template<typename... T>
-		auto hasComponent() const -> bool
+		auto has() const -> bool
 		{
 			return registry().all_of<T...>(m_id);
 		}
 
 		/// @brief Acces to the component of type T
 		template<typename T>
-		auto component() const -> T&
+		auto get() const -> T&
 		{
-			AGX_ASSERT_X(hasComponent<T>(), "Cannot get Component: Entity does not have the component");
+			AGX_ASSERT_X(has<T>(), "Cannot get Component: Entity does not have the component");
 			return registry().get<T>(m_id);
 		}
 
 		/// @brief Adds a component of type T to the entity
 		/// @return A refrence to the new component
 		template<typename T, typename... Args>
-		auto addComponent(Args&&... args) -> T&
+		auto add(Args&&... args) -> T&
 		{
-			AGX_ASSERT_X(!hasComponent<T>(), "Cannot add Component: Entity already has the component");
+			AGX_ASSERT_X(!has<T>(), "Cannot add Component: Entity already has the component");
 			return registry().emplace<T>(m_id, std::forward<Args>(args)...);
 		}
 
 		/// @brief Overload to add a script derived from Aegix::Scripting::ScriptBase to the entity
 		/// @return A refrence to the new script
 		template<Scripting::Script T, typename... Args>
-		auto addComponent(Args&&... args) -> T&
+		auto add(Args&&... args) -> T&
 		{
-			AGX_ASSERT_X(!hasComponent<T>(), "Cannot add Component: Entity already has the component");
+			AGX_ASSERT_X(!has<T>(), "Cannot add Component: Entity already has the component");
 			auto& script = registry().emplace<T>(m_id, std::forward<Args>(args)...);
 			addScript(&script);
 			return script;
 		}
 
 		template<typename T>
-		auto getOrAddComponent() -> T&
+		auto getOrAdd() -> T&
 		{
 			return registry().get_or_emplace<T>(m_id);
 		}
 
 		/// @brief Removes a component of type T from the entity
+		/// @note Entity MUST have the component and it MUST be an optional component
 		template<typename T>
 			requires OptionalComponent<T>
-		void removeComponent()
+		void remove()
 		{
-			AGX_ASSERT_X(hasComponent<T>(), "Cannot remove Component: Entity does not have the component");
+			AGX_ASSERT_X(has<T>(), "Cannot remove Component: Entity does not have the component");
 			registry().remove<T>(m_id);
 		}
 
-		/// @brief Sets the parent of the entity
 		void setParent(Entity parent);
-
-		/// @brief Adds a child to the entity
-		void addChild(Entity child);
-
-		/// @brief Removes the parent of the entity
 		void removeParent();
-
-		/// @brief Removes a child from the entity
-		/// @note Make sure that 'child' is an actual child of this entity
+		void addChild(Entity child);
 		void removeChild(Entity child);
-
-		/// @brief Removes all children from the entity
 		void removeChildren();
 
 	private:

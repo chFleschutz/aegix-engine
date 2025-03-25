@@ -105,7 +105,7 @@ namespace Aegix::Graphics
 	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
 		// Update push constants
-		auto& camera = frameInfo.scene.mainCamera().component<Camera>();
+		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
