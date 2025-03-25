@@ -30,12 +30,9 @@ namespace Aegix::Graphics
 			.build();
 		m_iblSet = std::make_unique<DescriptorSet>(pool, *m_iblSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::ComputeBuilder(device)
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.buildUnique();
-
-		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "lighting.comp.spv")
 			.buildUnique();
 	}
@@ -110,9 +107,9 @@ namespace Aegix::Graphics
 			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout, 
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline->layout(),
 			m_gbufferSet->descriptorSet(frameInfo.frameIndex), 0);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout,
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline->layout(),
 			m_iblSet->descriptorSet(frameInfo.frameIndex), 1);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });

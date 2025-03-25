@@ -11,12 +11,9 @@ namespace Aegix::Graphics
 	PointLightSystem::PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device, globalSetLayout)
 	{
-		m_pipelineLayout = PipelineLayout::Builder(m_device)
+		m_pipeline = Pipeline::GraphicsBuilder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PointLightPushConstants))
-			.buildUnique();
-
-		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, true)
@@ -34,7 +31,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		m_pipeline->bind(cmd);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout, globalSet);
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(), globalSet);
 
 		auto view = frameInfo.scene.registry().view<GlobalTransform, PointLight>();
 		for (auto&& [entity, globalTransform, pointLight] : view.each())
@@ -45,7 +42,7 @@ namespace Aegix::Graphics
 				.radius = pointLight.intensity * pointLightScale * globalTransform.scale.x
 			};
 
-			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, 
+			Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(),
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
 
 			vkCmdDraw(cmd, 6, 1, 0, 0);

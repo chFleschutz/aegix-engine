@@ -25,11 +25,8 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::ComputeBuilder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
-			.buildUnique();
-
-		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
 			.buildUnique();
 
@@ -123,7 +120,7 @@ namespace Aegix::Graphics
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_descriptorSet->bind(cmd, m_pipeline->layout(), frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}

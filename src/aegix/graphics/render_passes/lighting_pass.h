@@ -68,7 +68,6 @@ namespace Aegix::Graphics
 		float m_ambientOcclusionFactor{ 1.0f };
 
 		std::unique_ptr<Pipeline> m_pipeline;
-		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 
 		std::unique_ptr<DescriptorSetLayout> m_gbufferSetLayout;
 		std::unique_ptr<DescriptorSet> m_gbufferSet;

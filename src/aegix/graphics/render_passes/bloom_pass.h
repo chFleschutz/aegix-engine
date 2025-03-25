@@ -56,17 +56,14 @@ namespace Aegix::Graphics
 		BloomUpsample m_upsample;
 
 		std::unique_ptr<Pipeline> m_thresholdPipeline;
-		std::unique_ptr<PipelineLayout> m_thresholdPipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_thresholdSetLayout;
 		std::unique_ptr<DescriptorSet> m_thresholdSet;
 
 		std::unique_ptr<Pipeline> m_downsamplePipeline;
-		std::unique_ptr<PipelineLayout> m_downsamplePipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_downsampleSetLayout;
 		std::vector<std::unique_ptr<DescriptorSet>> m_downsampleSets;
 
 		std::unique_ptr<Pipeline> m_upsamplePipeline;
-		std::unique_ptr<PipelineLayout> m_upsamplePipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_upsampleSetLayout;
 		std::vector<std::unique_ptr<DescriptorSet>> m_upsampleSets;
 	};

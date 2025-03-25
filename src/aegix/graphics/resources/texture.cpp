@@ -65,11 +65,8 @@ namespace Aegix::Graphics
 			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.buildUnique();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
 			.buildUnique();
 
@@ -81,7 +78,7 @@ namespace Aegix::Graphics
 			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t width = irradiance->image().width();
@@ -120,12 +117,9 @@ namespace Aegix::Graphics
 		} pushConstants;
 		pushConstants.envResolution = static_cast<float>(skybox->image().width());
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.buildUnique();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
 			.buildUnique();
 
@@ -163,10 +157,10 @@ namespace Aegix::Graphics
 			
 			for (uint32_t mip = 0; mip < mipLevelCount; ++mip)
 			{
-				descriptorSets[mip].bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+				descriptorSets[mip].bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 				pushConstants.roughness = static_cast<float>(mip) / static_cast<float>(mipLevelCount - 1);
-				vkCmdPushConstants(cmd, *pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pushConstants), &pushConstants);
+				vkCmdPushConstants(cmd, pipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pushConstants), &pushConstants);
 
 				constexpr uint32_t groupSize = 16;
 				uint32_t width = prefiltered->image().width() >> mip;
@@ -213,10 +207,8 @@ namespace Aegix::Graphics
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.buildUnique();
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
 			.buildUnique();
 
@@ -227,7 +219,7 @@ namespace Aegix::Graphics
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			vkCmdDispatch(cmd, (lutSize + groupSize - 1) / groupSize, (lutSize + groupSize - 1) / groupSize, 1);
@@ -357,11 +349,8 @@ namespace Aegix::Graphics
 			.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.buildUnique();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
 			.buildUnique();
 
@@ -373,7 +362,7 @@ namespace Aegix::Graphics
 			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t groupCountX = (width + groupSize - 1) / groupSize;

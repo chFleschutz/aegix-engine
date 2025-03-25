@@ -14,12 +14,9 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::GraphicsBuilder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
-			.buildUnique();
-
-		m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
@@ -129,9 +126,9 @@ namespace Aegix::Graphics
 			.view = camera.viewMatrix,
 			.projection = camera.projectionMatrix
 		};
-		Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
+		Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT, uniforms);
 
-		Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout,
+		Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(),
 			m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };

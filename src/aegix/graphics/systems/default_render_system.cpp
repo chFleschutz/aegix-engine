@@ -43,13 +43,10 @@ namespace Aegix::Graphics
 			.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
-		m_pipelineLayout = PipelineLayout::Builder(m_device)
+		m_pipeline = Pipeline::GraphicsBuilder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
-			.buildUnique();
-
-		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default_geometry.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "default_geometry.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
@@ -68,8 +65,7 @@ namespace Aegix::Graphics
 		m_pipeline->bind(cmd);
 
 		// Global Descriptor Set
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			*m_pipelineLayout, globalSet);
+		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(), globalSet);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, DefaultMaterial>();
@@ -86,7 +82,7 @@ namespace Aegix::Graphics
 				AGX_ASSERT_X(descriptorSet != nullptr, "Material descriptor set is null");
 
 				Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-					*m_pipelineLayout, descriptorSet->descriptorSet(frameInfo.frameIndex), 1);
+					m_pipeline->layout(), descriptorSet->descriptorSet(frameInfo.frameIndex), 1);
 			}
 
 			// Push Constants
@@ -94,7 +90,7 @@ namespace Aegix::Graphics
 			push.modelMatrix = globalTransform.matrix();
 			push.normalMatrix = Math::normalMatrix(globalTransform.rotation, globalTransform.scale);
 
-			Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout,
+			Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(), 
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
 			
 			// Draw

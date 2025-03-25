@@ -24,7 +24,6 @@ namespace Aegix::Graphics
 	protected:
 		VulkanDevice& m_device;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
-		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<Pipeline> m_pipeline;
 	};
 
