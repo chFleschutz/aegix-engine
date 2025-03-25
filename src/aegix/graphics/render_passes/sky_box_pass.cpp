@@ -119,23 +119,20 @@ namespace Aegix::Graphics
 		Tools::vk::cmdViewport(cmd, frameInfo.swapChainExtent);
 		Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
 
-		m_pipeline->bind(cmd);
-
 		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		SkyBoxUniforms uniforms{
 			.view = camera.viewMatrix,
 			.projection = camera.projectionMatrix
 		};
-		Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(), VK_SHADER_STAGE_VERTEX_BIT, uniforms);
-
-		Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(),
-			m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		
+		m_pipeline->bind(cmd);
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
-
 		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);

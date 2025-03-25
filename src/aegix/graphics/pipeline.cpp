@@ -231,6 +231,11 @@ namespace Aegix::Graphics
 		vkCmdBindDescriptorSets(cmd, m_bindPoint, m_Layout, setIndex, 1, &descriptorSet, 0, nullptr);
 	}
 
+	void Pipeline::pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, uint32_t size, const void* data) const
+	{
+		vkCmdPushConstants(cmd, m_Layout, stageFlags, 0, size, data);
+	}
+
 	void Pipeline::defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo)
 	{
 		configInfo.renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

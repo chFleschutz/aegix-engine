@@ -107,10 +107,8 @@ namespace Aegix::Graphics
 			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline->layout(),
-			m_gbufferSet->descriptorSet(frameInfo.frameIndex), 0);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline->layout(),
-			m_iblSet->descriptorSet(frameInfo.frameIndex), 1);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_gbufferSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->bindDescriptorSet(cmd, 1, m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}

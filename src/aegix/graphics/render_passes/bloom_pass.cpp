@@ -143,9 +143,8 @@ namespace Aegix::Graphics
 	void BloomPass::extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo)
 	{
 		m_thresholdPipeline->bind(cmd);
-		m_thresholdSet->bind(cmd, m_thresholdPipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
-
-		Tools::vk::cmdPushConstants(cmd, m_thresholdPipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, m_threshold);
+		m_thresholdPipeline->bindDescriptorSet(cmd, 0, m_thresholdSet->descriptorSet(0));
+		m_thresholdPipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_threshold);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
@@ -184,10 +183,10 @@ namespace Aegix::Graphics
 				1, &barrier
 			);
 
-			m_downsampleSets[srcMip]->bind(cmd, m_downsamplePipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
-
 			m_downsample.mipLevel = srcMip;
-			Tools::vk::cmdPushConstants(cmd, m_downsamplePipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, m_downsample);
+			
+			m_downsamplePipeline->bindDescriptorSet(cmd, 0, m_downsampleSets[srcMip]->descriptorSet(0));
+			m_downsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_downsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip};
 			Tools::vk::cmdDispatch(cmd, mipExtent, { 16, 16 });
@@ -241,9 +240,8 @@ namespace Aegix::Graphics
 			);
 
 			// Upsample the mip level
-			m_upsampleSets[dstMip]->bind(cmd, m_upsamplePipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
-
-			Tools::vk::cmdPushConstants(cmd, m_upsamplePipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, m_upsample);
+			m_upsamplePipeline->bindDescriptorSet(cmd, 0, m_upsampleSets[dstMip]->descriptorSet(0));
+			m_upsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_upsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip };
 			Tools::vk::cmdDispatch(cmd, mipExtent, { 16, 16 });

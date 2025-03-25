@@ -68,9 +68,9 @@ namespace Aegix::Graphics
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, m_pipeline->layout(), frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 
-		Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 

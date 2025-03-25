@@ -106,6 +106,13 @@ namespace Aegix::Graphics
 
 		void bind(VkCommandBuffer commandBuffer) const;
 		void bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const;
+		void pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, uint32_t size, const void* data) const;
+
+		template<typename T>
+		void pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, const T& data) const
+		{
+			pushConstants(cmd, stageFlags, sizeof(T), &data);
+		}
 
 		static void defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo);
 

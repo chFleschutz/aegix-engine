@@ -38,8 +38,6 @@ namespace Aegix::Tools
 
 	namespace vk
 	{
-		void cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout, VkDescriptorSet descriptorSet, uint32_t firstSet = 0);
-
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount);
 
@@ -51,12 +49,6 @@ namespace Aegix::Tools
 
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
-
-		template<typename T>
-		void cmdPushConstants(VkCommandBuffer cmd, VkPipelineLayout layout, VkShaderStageFlags stage, const T& data)
-		{
-			vkCmdPushConstants(cmd, layout, stage, 0, sizeof(T), &data);
-		}
 
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 

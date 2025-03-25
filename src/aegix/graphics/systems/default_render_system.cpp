@@ -63,9 +63,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		m_pipeline->bind(cmd);
-
-		// Global Descriptor Set
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(), globalSet);
+		m_pipeline->bindDescriptorSet(cmd, 0, globalSet);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, DefaultMaterial>();
@@ -81,17 +79,15 @@ namespace Aegix::Graphics
 				auto& descriptorSet = material.instance->m_descriptorSet;
 				AGX_ASSERT_X(descriptorSet != nullptr, "Material descriptor set is null");
 
-				Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-					m_pipeline->layout(), descriptorSet->descriptorSet(frameInfo.frameIndex), 1);
+				m_pipeline->bindDescriptorSet(cmd, 1, descriptorSet->descriptorSet(frameInfo.frameIndex));
 			}
 
 			// Push Constants
-			PushConstantData push{};
-			push.modelMatrix = globalTransform.matrix();
-			push.normalMatrix = Math::normalMatrix(globalTransform.rotation, globalTransform.scale);
-
-			Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(), 
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
+			PushConstantData push{
+				.modelMatrix = globalTransform.matrix(),
+				.normalMatrix = Math::normalMatrix(globalTransform.rotation, globalTransform.scale)
+			};
+			m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
 			
 			// Draw
 			mesh.staticMesh->bind(cmd);

@@ -258,12 +258,6 @@ namespace Aegix::Tools
 		return shaderStage;
 	}
 
-	void vk::cmdBindDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, VkPipelineLayout layout,
-		VkDescriptorSet descriptorSet, uint32_t firstSet)
-	{
-		vkCmdBindDescriptorSets(commandBuffer, bindPoint, layout, firstSet, 1, &descriptorSet, 0, nullptr);
-	}
-
 	void vk::cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent)
 	{
 		VkBufferImageCopy region{};

@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		m_pipeline->bind(cmd);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline->layout(), globalSet);
+		m_pipeline->bindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, globalSet);
 
 		auto view = frameInfo.scene.registry().view<GlobalTransform, PointLight>();
 		for (auto&& [entity, globalTransform, pointLight] : view.each())
@@ -41,9 +41,7 @@ namespace Aegix::Graphics
 				.color = glm::vec4(pointLight.color, 1.0f),
 				.radius = pointLight.intensity * pointLightScale * globalTransform.scale.x
 			};
-
-			Tools::vk::cmdPushConstants(cmd, m_pipeline->layout(),
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
+			m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, push);
 
 			vkCmdDraw(cmd, 6, 1, 0, 0);
 		}
