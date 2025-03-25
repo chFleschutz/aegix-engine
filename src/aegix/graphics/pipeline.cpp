@@ -226,6 +226,11 @@ namespace Aegix::Graphics
 		vkCmdBindPipeline(commandBuffer, m_bindPoint, m_pipeline);
 	}
 
+	void Pipeline::bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const
+	{
+		vkCmdBindDescriptorSets(cmd, m_bindPoint, m_Layout, setIndex, 1, &descriptorSet, 0, nullptr);
+	}
+
 	void Pipeline::defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo)
 	{
 		configInfo.renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

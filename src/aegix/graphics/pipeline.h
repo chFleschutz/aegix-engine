@@ -105,6 +105,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto bindPoint() const -> VkPipelineBindPoint { return m_bindPoint; }
 
 		void bind(VkCommandBuffer commandBuffer) const;
+		void bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const;
 
 		static void defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo);
 
