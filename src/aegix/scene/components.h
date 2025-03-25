@@ -1,12 +1,10 @@
 #pragma once
 
-#include "graphics/resources/texture.h"
+#include "graphics/resources/material.h"
 #include "graphics/resources/static_mesh.h"
+#include "graphics/resources/texture.h"
 #include "math/math.h"
 #include "scene/entity.h"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 namespace Aegix::Scripting
 {
@@ -94,10 +92,14 @@ namespace Aegix
 		auto rend() const -> Children::ReverseIterator { return { Scene::Entity{} }; }
 	};
 
-	/// @brief Holds a pointer to a static mesh
 	struct Mesh
 	{
 		std::shared_ptr<Graphics::StaticMesh> staticMesh;
+	};
+
+	struct Material
+	{
+		std::shared_ptr<Graphics::Material> material;
 	};
 
 	struct AmbientLight

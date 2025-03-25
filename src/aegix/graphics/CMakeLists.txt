@@ -26,6 +26,8 @@ target_sources(aegix-engine PRIVATE
 	"resources/image.h"
 	"resources/image_view.cpp"
 	"resources/image_view.h"
+	"resources/material.h"
+	"resources/material.cpp"
 	"resources/sampler.cpp"
 	"resources/sampler.h"
 	"resources/texture.cpp"
