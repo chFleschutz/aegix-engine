@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 		m_pipelineLayout = PipelineLayout::Builder(m_device)
 			.addDescriptorSetLayout(globalSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PointLightPushConstants))
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")
@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 			.setDepthTest(true, false)
 			.setVertexBindingDescriptions({}) // Clear default vertex binding
 			.setVertexAttributeDescriptions({}) // Clear default vertex attributes
-			.build();
+			.buildUnique();
 	}
 
 	void PointLightSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)

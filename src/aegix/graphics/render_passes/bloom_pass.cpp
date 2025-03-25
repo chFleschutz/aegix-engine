@@ -27,11 +27,11 @@ namespace Aegix::Graphics
 		m_thresholdPipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*m_thresholdSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomThreshold))
-			.build();
+			.buildUnique();
 
 		m_thresholdPipeline = Pipeline::ComputeBuilder{ device, *m_thresholdPipelineLayout }
 			.setShaderStage(SHADER_DIR "bloom_threshold.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Downsample
 		m_downsampleSetLayout = DescriptorSetLayout::Builder{ device }
@@ -47,11 +47,11 @@ namespace Aegix::Graphics
 		m_downsamplePipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*m_downsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomDownsample))
-			.build();
+			.buildUnique();
 
 		m_downsamplePipeline = Pipeline::ComputeBuilder{ device, *m_downsamplePipelineLayout }
 			.setShaderStage(SHADER_DIR "bloom_downsample.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Upsample
 		m_upsampleSetLayout = DescriptorSetLayout::Builder{ device }
@@ -67,11 +67,11 @@ namespace Aegix::Graphics
 		m_upsamplePipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*m_upsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomUpsample))
-			.build();
+			.buildUnique();
 
 		m_upsamplePipeline = Pipeline::ComputeBuilder{ device, *m_upsamplePipelineLayout }
 			.setShaderStage(SHADER_DIR "bloom_upsample.comp.spv")
-			.build();
+			.buildUnique();
 	}
 
 	auto BloomPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo

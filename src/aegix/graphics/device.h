@@ -65,6 +65,7 @@ namespace Aegix::Graphics
 		void destroyImageView(VkImageView view);
 		void destroySampler(VkSampler sampler);
 		void destroyPipeline(VkPipeline pipeline);
+		void destroyPipelineLayout(VkPipelineLayout pipelineLayout);
 		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
 
 		auto querySwapChainSupport() const -> SwapChainSupportDetails;

@@ -166,6 +166,14 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void VulkanDevice::destroyPipelineLayout(VkPipelineLayout pipelineLayout)
+	{
+		if (pipelineLayout)
+		{
+			m_deletionQueue.schedule([=]() { vkDestroyPipelineLayout(m_device, pipelineLayout, nullptr); });
+		}
+	}
+
 	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails
 	{
 		return querySwapChainSupport(m_physicalDevice);

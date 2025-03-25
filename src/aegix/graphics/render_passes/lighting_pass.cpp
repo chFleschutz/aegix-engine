@@ -33,11 +33,11 @@ namespace Aegix::Graphics
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "lighting.comp.spv")
-			.build();
+			.buildUnique();
 	}
 
 	auto LightingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo

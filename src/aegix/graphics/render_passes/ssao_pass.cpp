@@ -27,11 +27,11 @@ namespace Aegix::Graphics
 
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Generate random samples
 		auto& gen = Random::generator();

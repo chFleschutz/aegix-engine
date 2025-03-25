@@ -15,54 +15,84 @@ namespace Aegix::Graphics
 	{
 	}
 
-	PipelineLayout::Builder& PipelineLayout::Builder::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+	auto PipelineLayout::Builder::addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout) -> Builder&
 	{
-		m_descriptorSetLayouts.push_back(descriptorSetLayout);
+		m_config.descriptorSetLayouts.push_back(descriptorSetLayout);
 		return *this;
 	}
 
-	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkPushConstantRange pushConstantRange)
+	auto PipelineLayout::Builder::addPushConstantRange(VkPushConstantRange pushConstantRange) -> Builder&
 	{
-		m_pushConstantRanges.push_back(pushConstantRange);
+		m_config.pushConstantRanges.push_back(pushConstantRange);
 		return *this;
 	}
 
-	PipelineLayout::Builder& PipelineLayout::Builder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset)
+	auto PipelineLayout::Builder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset) -> Builder&
 	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = stageFlags;
 		pushConstantRange.size = size;
 		pushConstantRange.offset = offset;
-		m_pushConstantRanges.push_back(pushConstantRange);
-
+		m_config.pushConstantRanges.push_back(pushConstantRange);
 		return *this;
 	}
 
-	std::unique_ptr<PipelineLayout> PipelineLayout::Builder::build()
+	auto PipelineLayout::Builder::buildUnique() -> std::unique_ptr<PipelineLayout>
 	{
-		return std::make_unique<PipelineLayout>(m_device, m_descriptorSetLayouts, m_pushConstantRanges);
+		return std::make_unique<PipelineLayout>(m_device, m_config);
+	}
+
+	auto PipelineLayout::Builder::build() -> PipelineLayout
+	{
+		return PipelineLayout{ m_device, m_config };
 	}
 
 
 	// PipeLineLayout ------------------------------------------------------------
 
-	Graphics::PipelineLayout::PipelineLayout(VulkanDevice& device, const std::vector<VkDescriptorSetLayout>& setLayouts, 
-		const std::vector<VkPushConstantRange>& pushConstants)
+	PipelineLayout::PipelineLayout(VulkanDevice& device)
+		: m_device{ device }
+	{
+	}
+
+	PipelineLayout::PipelineLayout(VulkanDevice& device, const Config& config)
 		: m_device{ device }
 	{
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
-		pipelineLayoutInfo.pSetLayouts = setLayouts.data();
-		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
-		pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(config.descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = config.descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(config.pushConstantRanges.size());
+		pipelineLayoutInfo.pPushConstantRanges = config.pushConstantRanges.data();
 
 		VK_CHECK(vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout))
 	}
 
-	Graphics::PipelineLayout::~PipelineLayout()
+	PipelineLayout::PipelineLayout(PipelineLayout&& other) noexcept
+		: m_device{ other.m_device }, m_pipelineLayout{ other.m_pipelineLayout }
 	{
-		vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
+		other.m_pipelineLayout = VK_NULL_HANDLE;
+	}
+
+	PipelineLayout::~PipelineLayout()
+	{
+		destroy();
+	}
+
+	auto PipelineLayout::operator=(PipelineLayout&& other) noexcept -> PipelineLayout&
+	{
+		if (this != &other)
+		{
+			destroy();
+			m_pipelineLayout = other.m_pipelineLayout;
+			other.m_pipelineLayout = VK_NULL_HANDLE;
+		}
+		return *this;
+	}
+
+	void PipelineLayout::destroy()
+	{
+		m_device.destroyPipelineLayout(m_pipelineLayout);
 	}
 
 
@@ -83,7 +113,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
+	auto Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath) -> Pipeline::GraphicsBuilder&
 	{
 		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
 		m_config.shaderStges.emplace_back(Tools::createShaderStage(stage, shaderModule));
@@ -91,7 +121,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::addColorAttachment(VkFormat colorFormat, bool alphaBlending)
+	auto Pipeline::GraphicsBuilder::addColorAttachment(VkFormat colorFormat, bool alphaBlending) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.colorAttachmentFormats.emplace_back(colorFormat);
 		m_config.renderingInfo.colorAttachmentCount = static_cast<uint32_t>(m_config.colorAttachmentFormats.size());
@@ -123,19 +153,19 @@ namespace Aegix::Graphics
 	}
 
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setDepthAttachment(VkFormat depthFormat)
+	auto Pipeline::GraphicsBuilder::setDepthAttachment(VkFormat depthFormat) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.renderingInfo.depthAttachmentFormat = depthFormat;
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setStencilFormat(VkFormat stencilFormat)
+	auto Pipeline::GraphicsBuilder::setStencilFormat(VkFormat stencilFormat) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.renderingInfo.stencilAttachmentFormat = stencilFormat;
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setDepthTest(bool enableDepthTest, bool writeDepth, VkCompareOp compareOp)
+	auto Pipeline::GraphicsBuilder::setDepthTest(bool enableDepthTest, bool writeDepth, VkCompareOp compareOp) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.depthStencilInfo.depthTestEnable = enableDepthTest;
 		m_config.depthStencilInfo.depthWriteEnable = writeDepth;
@@ -143,29 +173,34 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setCullMode(VkCullModeFlags cullMode)
+	auto Pipeline::GraphicsBuilder::setCullMode(VkCullModeFlags cullMode) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.rasterizationInfo.cullMode = cullMode;
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions)
+	auto Pipeline::GraphicsBuilder::setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) -> Pipeline::GraphicsBuilder&
 	{
 		m_config.bindingDescriptions = bindingDescriptions;
 		return *this;
 	}
 
-	Pipeline::GraphicsBuilder& Pipeline::GraphicsBuilder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
+	auto Pipeline::GraphicsBuilder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions) 
+		-> Pipeline::GraphicsBuilder&
 	{
 		m_config.attributeDescriptions = attributeDescriptions;
 		return *this;
 	}
 
-	std::unique_ptr<Pipeline> Pipeline::GraphicsBuilder::build()
+	auto Pipeline::GraphicsBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
 		return std::make_unique<Pipeline>(m_device, m_config);
 	}
 
+	auto Pipeline::GraphicsBuilder::build() -> Pipeline
+	{
+		return Pipeline{ m_device, m_config };
+	}
 
 	// ComputeBuilder ------------------------------------------------------------
 
@@ -183,20 +218,29 @@ namespace Aegix::Graphics
 		}
 	}
 
-	Pipeline::ComputeBuilder& Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath)
+	auto Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath) -> Pipeline::ComputeBuilder&
 	{
 		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
 		m_config.shaderStage = Tools::createShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule);
 		return *this;
 	}
 
-	std::unique_ptr<Pipeline> Pipeline::ComputeBuilder::build()
+	auto Pipeline::ComputeBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
 		return std::make_unique<Pipeline>(m_device, m_config);
 	}
 
+	auto Pipeline::ComputeBuilder::build() -> Pipeline
+	{
+		return Pipeline{ m_device, m_config };
+	}
 
 	// Pipeline ------------------------------------------------------------------
+
+	Pipeline::Pipeline(VulkanDevice& device)
+		: m_device{ device }
+	{
+	}
 
 	Pipeline::Pipeline(VulkanDevice& device, const Pipeline::GraphicsConfig& config)
 		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }

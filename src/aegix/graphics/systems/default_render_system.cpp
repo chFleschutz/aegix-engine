@@ -47,7 +47,7 @@ namespace Aegix::Graphics
 			.addDescriptorSetLayout(globalSetLayout)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::GraphicsBuilder(m_device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "default_geometry.vert.spv")
@@ -58,7 +58,7 @@ namespace Aegix::Graphics
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 			.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-			.build();
+			.buildUnique();
 	}
 
 	void DefaultRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)

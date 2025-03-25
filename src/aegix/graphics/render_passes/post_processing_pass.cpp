@@ -21,11 +21,11 @@ namespace Aegix::Graphics
 		m_pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(PostProcessingSettings))
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::ComputeBuilder{ device, *m_pipelineLayout }
 			.setShaderStage(SHADER_DIR "post_process.comp.spv")
-			.build();
+			.buildUnique();
 	}
 
 	auto PostProcessingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo

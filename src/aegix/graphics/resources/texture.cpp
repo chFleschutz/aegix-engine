@@ -67,11 +67,11 @@ namespace Aegix::Graphics
 
 		auto pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
+			.buildUnique();
 
 		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert skybox to irradiance map
 		VkCommandBuffer cmd = device.beginSingleTimeCommands();
@@ -123,11 +123,11 @@ namespace Aegix::Graphics
 		auto pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.build();
+			.buildUnique();
 
 		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Create image views for mip levels
 		auto& pool = Engine::instance().renderer().globalPool();
@@ -215,10 +215,10 @@ namespace Aegix::Graphics
 			.build(descriptorSet->descriptorSet(0));
 		auto pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
+			.buildUnique();
 		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert skybox to irradiance map
 		VkCommandBuffer cmd = device.beginSingleTimeCommands();
@@ -359,11 +359,11 @@ namespace Aegix::Graphics
 
 		auto pipelineLayout = PipelineLayout::Builder{ device }
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
+			.buildUnique();
 
 		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert spherical image to cubemap
 		VkCommandBuffer cmd = device.beginSingleTimeCommands();

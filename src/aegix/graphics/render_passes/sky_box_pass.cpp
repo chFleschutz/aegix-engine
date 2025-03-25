@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 		m_pipelineLayout = PipelineLayout::Builder(device)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 			.setCullMode(VK_CULL_MODE_FRONT_BIT)
 			.setVertexBindingDescriptions({ { 0, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX } })
 			.setVertexAttributeDescriptions({ { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 } })
-			.build();
+			.buildUnique();
 
 		// Create vertex buffer
 		{
