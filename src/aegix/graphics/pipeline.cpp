@@ -2,7 +2,7 @@
 
 #include "pipeline.h"
 
-#include "graphics/static_mesh.h"
+#include "graphics/resources/static_mesh.h"
 #include "graphics/vulkan_tools.h"
 #include "utils/file.h"
 

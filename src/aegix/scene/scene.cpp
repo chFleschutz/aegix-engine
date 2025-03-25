@@ -4,7 +4,7 @@
 
 #include "engine.h"
 #include "core/profiler.h"
-#include "graphics/static_mesh.h"
+#include "graphics/resources/static_mesh.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/gltf_loader.h"

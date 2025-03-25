@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/resources/texture.h"
-#include "graphics/static_mesh.h"
+#include "graphics/resources/static_mesh.h"
 #include "math/math.h"
 #include "scene/entity.h"
 
