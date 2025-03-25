@@ -115,9 +115,11 @@ namespace Aegix::Graphics
 		Pipeline(VulkanDevice& device, const Pipeline::GraphicsConfig& config);
 		Pipeline(VulkanDevice& device, const Pipeline::ComputeConfig& config);
 		Pipeline(const Pipeline&) = delete;
+		Pipeline(Pipeline&& other) noexcept;
 		~Pipeline();
 
-		Pipeline operator=(const Pipeline&) = delete;
+		Pipeline& operator=(const Pipeline&) = delete;
+		Pipeline& operator=(Pipeline&& other) noexcept;
 
 		operator VkPipeline() const { return m_pipeline; }
 		VkPipeline pipeline() const { return m_pipeline; }
@@ -128,6 +130,7 @@ namespace Aegix::Graphics
 
 	private:
 		void createGraphicsPipeline(const Pipeline::GraphicsConfig& configInfo);
+		void destroy();
 
 		VulkanDevice& m_device;
 		VkPipeline m_pipeline = VK_NULL_HANDLE;

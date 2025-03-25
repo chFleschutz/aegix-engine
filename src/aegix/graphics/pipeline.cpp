@@ -220,9 +220,27 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
+	Pipeline::Pipeline(Pipeline&& other) noexcept
+		: m_device{ other.m_device }, m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }
+	{
+		other.m_pipeline = VK_NULL_HANDLE;
+	}
+
 	Pipeline::~Pipeline()
 	{
-		vkDestroyPipeline(m_device.device(), m_pipeline, nullptr);
+		destroy();
+	}
+
+	auto Pipeline::operator=(Pipeline&& other) noexcept -> Pipeline&
+	{
+		if (this != &other)
+		{
+			destroy();
+			m_pipeline = other.m_pipeline;
+			m_bindPoint = other.m_bindPoint;
+			other.m_pipeline = VK_NULL_HANDLE;
+		}
+		return *this;
 	}
 
 	void Pipeline::bind(VkCommandBuffer commandBuffer) const
@@ -328,5 +346,10 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 		VK_CHECK(vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
+	}
+
+	void Aegix::Graphics::Pipeline::destroy()
+	{
+		m_device.destroyPipeline(m_pipeline);
 	}
 }
