@@ -150,12 +150,14 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto Pipeline::ComputeBuilder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset) -> ComputeBuilder&
+	auto Pipeline::ComputeBuilder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size) -> ComputeBuilder&
 	{
+		AGX_ASSERT_X(size <= m_device.properties().limits.maxPushConstantsSize, "Push constant size exceeds device limits");
+
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = stageFlags;
 		pushConstantRange.size = size;
-		pushConstantRange.offset = offset;
+		pushConstantRange.offset = 0;
 		m_layoutConfig.pushConstantRanges.emplace_back(pushConstantRange);
 		return *this;
 	}

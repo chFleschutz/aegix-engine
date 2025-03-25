@@ -75,7 +75,7 @@ namespace Aegix::Graphics
 			~ComputeBuilder();
 
 			auto addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout) -> ComputeBuilder&;
-			auto addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset = 0) -> ComputeBuilder&;
+			auto addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size) -> ComputeBuilder&;
 
 			auto setShaderStage(const std::filesystem::path& shaderPath) -> ComputeBuilder&;
 
