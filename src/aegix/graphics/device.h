@@ -63,14 +63,6 @@ namespace Aegix::Graphics
 		void createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const;
 		void createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo, const VmaAllocationCreateInfo& allocInfo) const;
 
-		void destroyBuffer(VkBuffer buffer, VmaAllocation allocation);
-		void destroyImage(VkImage image, VmaAllocation allocation);
-		void destroyImageView(VkImageView view);
-		void destroySampler(VkSampler sampler);
-		void destroyPipeline(VkPipeline pipeline);
-		void destroyPipelineLayout(VkPipelineLayout pipelineLayout);
-		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
-
 		auto querySwapChainSupport() const -> SwapChainSupportDetails;
 		auto findPhysicalQueueFamilies() const -> QueueFamilyIndices;
 		auto findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) const -> VkFormat;
@@ -117,7 +109,5 @@ namespace Aegix::Graphics
 		VkSurfaceKHR m_surface;
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
-
-		DeletionQueue m_deletionQueue;
 	};
 }

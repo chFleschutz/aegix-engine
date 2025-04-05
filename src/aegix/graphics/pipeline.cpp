@@ -3,6 +3,7 @@
 #include "pipeline.h"
 
 #include "graphics/resources/static_mesh.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 #include "utils/file.h"
 
@@ -362,9 +363,12 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
-	void Aegix::Graphics::Pipeline::destroy()
+	void Pipeline::destroy()
 	{
-		m_device.destroyPipeline(m_pipeline);
-		m_device.destroyPipelineLayout(m_Layout);
+		VulkanContext::destroy(m_pipeline);
+		m_pipeline = VK_NULL_HANDLE;
+
+		VulkanContext::destroy(m_Layout);
+		m_Layout = VK_NULL_HANDLE;
 	}
 }

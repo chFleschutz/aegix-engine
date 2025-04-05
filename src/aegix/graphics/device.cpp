@@ -42,8 +42,6 @@ namespace Aegix::Graphics
 
 	VulkanDevice::~VulkanDevice()
 	{
-		m_deletionQueue.flushAll();
-
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
@@ -122,56 +120,6 @@ namespace Aegix::Graphics
 		const VmaAllocationCreateInfo& allocInfo) const
 	{
 		VK_CHECK(vmaCreateImage(m_allocator, &imageInfo, &allocInfo, &image, &allocation, nullptr));
-	}
-
-	void VulkanDevice::destroyBuffer(VkBuffer buffer, VmaAllocation allocation)
-	{
-		if (buffer)
-		{
-			AGX_ASSERT_X(allocation, "Buffer and allocation must be valid");
-			m_deletionQueue.schedule([=]() { vmaDestroyBuffer(m_allocator, buffer, allocation); });
-		}
-	}
-
-	void VulkanDevice::destroyImage(VkImage image, VmaAllocation allocation)
-	{
-		if (image)
-		{
-			AGX_ASSERT_X(allocation, "Image and allocation must be valid");
-			m_deletionQueue.schedule([=]() { vmaDestroyImage(m_allocator, image, allocation); });
-		}
-	}
-
-	void VulkanDevice::destroyImageView(VkImageView view)
-	{
-		if (view)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); });
-		}
-	}
-
-	void VulkanDevice::destroySampler(VkSampler sampler)
-	{
-		if (sampler)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); });
-		}
-	}
-
-	void VulkanDevice::destroyPipeline(VkPipeline pipeline)
-	{
-		if (pipeline)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroyPipeline(m_device, pipeline, nullptr); });
-		}
-	}
-
-	void VulkanDevice::destroyPipelineLayout(VkPipelineLayout pipelineLayout)
-	{
-		if (pipelineLayout)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroyPipelineLayout(m_device, pipelineLayout, nullptr); });
-		}
 	}
 
 	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails

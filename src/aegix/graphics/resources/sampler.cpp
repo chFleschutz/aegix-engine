@@ -2,6 +2,7 @@
 
 #include "sampler.h"
 
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
@@ -71,7 +72,7 @@ namespace Aegix::Graphics
 
 	void Sampler::destroy()
 	{
-		m_device.destroySampler(m_sampler);
+		VulkanContext::destroy(m_sampler);
 		m_sampler = VK_NULL_HANDLE;
 	}
 }

@@ -5,6 +5,7 @@
 #include "engine.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -321,7 +322,7 @@ namespace Aegix::Graphics
 
 	void Image::destroy()
 	{
-		m_device.destroyImage(m_image, m_allocation);
+		VulkanContext::destroy(m_image, m_allocation);
 		m_image = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
 	}

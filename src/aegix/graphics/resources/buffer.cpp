@@ -3,6 +3,7 @@
 #include "buffer.h"
 
 #include "graphics/vulkan_tools.h"
+#include "graphics/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
@@ -182,7 +183,7 @@ namespace Aegix::Graphics
 
 	void Buffer::destroy()
 	{
-		m_device.destroyBuffer(m_buffer, m_allocation);
+		VulkanContext::destroy(m_buffer, m_allocation);
 		m_buffer = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
 	}

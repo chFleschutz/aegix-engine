@@ -13,6 +13,7 @@
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
+#include "graphics/vulkan_context.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics
@@ -183,7 +184,7 @@ namespace Aegix::Graphics
 		waitIdle();
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-		m_device.flushDeletionQueue(m_currentFrameIndex);
+		VulkanContext::flushDeletionQueue(m_currentFrameIndex);
 
 		m_isFrameStarted = false;
 	}

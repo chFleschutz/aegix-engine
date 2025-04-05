@@ -3,6 +3,7 @@
 #include "image_view.h"
 
 #include "graphics/resources/image.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
@@ -90,7 +91,7 @@ namespace Aegix::Graphics
 
 	void ImageView::destroy()
 	{
-		m_device.destroyImageView(m_imageView);
+		VulkanContext::destroy(m_imageView);
 		m_imageView = VK_NULL_HANDLE;
 	}
 }
