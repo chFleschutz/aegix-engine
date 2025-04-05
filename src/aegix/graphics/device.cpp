@@ -40,17 +40,6 @@ namespace Aegix::Graphics
 
 	// VulkanDevice --------------------------------------------------------------
 
-	VulkanDevice::VulkanDevice(Core::Window& window) 
-	{
-		createInstance();
-		setupDebugUtils();
-		createSurface(window);
-		createPhysicalDevice();
-		createLogicalDevice();
-		createAllocator();
-		createCommandPool();
-	}
-
 	VulkanDevice::~VulkanDevice()
 	{
 		m_deletionQueue.flushAll();
@@ -66,6 +55,17 @@ namespace Aegix::Graphics
 
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
+	}
+
+	void VulkanDevice::initialize(Core::Window& window)
+	{
+		createInstance();
+		setupDebugUtils();
+		createSurface(window);
+		createPhysicalDevice();
+		createLogicalDevice();
+		createAllocator();
+		createCommandPool();
 	}
 
 	auto VulkanDevice::beginSingleTimeCommands() const -> VkCommandBuffer

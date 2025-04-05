@@ -54,6 +54,8 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
+	"vulkan_context.cpp"
+	"vulkan_context.h"
 	"vulkan_tools.cpp"
 	"vulkan_tools.h"
 )

@@ -28,12 +28,13 @@ namespace Aegix::Graphics
 
 	class VulkanDevice
 	{
+		friend class VulkanContext;
+
 	public:
 		static constexpr uint32_t API_VERSION = VK_API_VERSION_1_3;
 		static constexpr auto VALIDATION_LAYERS = std::array{ "VK_LAYER_KHRONOS_validation" };
 		static constexpr auto DEVICE_EXTENSIONS = std::array{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-		VulkanDevice(Core::Window& window);
 		VulkanDevice(const VulkanDevice&) = delete;
 		VulkanDevice(VulkanDevice&&) = delete;
 		~VulkanDevice();
@@ -53,6 +54,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto presentQueue() const -> VkQueue { return m_presentQueue; }
 		[[nodiscard]] auto properties() const -> const VkPhysicalDeviceProperties& { return m_properties; }
 		[[nodiscard]] auto features() const -> const VkPhysicalDeviceFeatures& { return m_features; }
+
+		void initialize(Core::Window& window);
 
 		auto beginSingleTimeCommands() const->VkCommandBuffer;
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
@@ -83,6 +86,8 @@ namespace Aegix::Graphics
 			uint32_t mipLevels = 1) const;
 
 	private:
+		VulkanDevice() = default;
+
 		void createInstance();
 		void setupDebugUtils();
 		void createSurface(Core::Window& window);
