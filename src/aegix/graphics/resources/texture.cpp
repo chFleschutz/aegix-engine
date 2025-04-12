@@ -44,8 +44,6 @@ namespace Aegix::Graphics
 
 	auto Texture::createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create irradiance map
 		constexpr uint32_t irradianceSize = 32;
 		auto irradiance = std::make_shared<Texture>();
@@ -71,7 +69,7 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		// Convert skybox to irradiance map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Irradiance Convolution");
 		{
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -88,15 +86,13 @@ namespace Aegix::Graphics
 			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return irradiance;
 	}
 
 	auto Texture::createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create prefiltered map
 		constexpr uint32_t prefilteredSize = 128;
 		constexpr uint32_t mipLevelCount = 5;
@@ -148,7 +144,7 @@ namespace Aegix::Graphics
 		}
 
 		// Convert skybox to prefiltered map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Prefilter Environment");
 		{
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -171,15 +167,13 @@ namespace Aegix::Graphics
 			prefiltered->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return prefiltered;
 	}
 
 	auto Texture::createBRDFLUT() -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create BRDF LUT
 		constexpr uint32_t lutSize = 512;
 		Image::Config imgageConfig{
@@ -213,7 +207,7 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		// Convert skybox to irradiance map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "BRDF LUT Generation");
 		{
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
@@ -227,7 +221,7 @@ namespace Aegix::Graphics
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return lut;
 	}

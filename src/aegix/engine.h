@@ -26,7 +26,6 @@ namespace Aegix
 		static Engine& instance();
 
 		auto window() -> Core::Window& { return m_window; }
-		auto device() -> Graphics::VulkanDevice& { return m_graphics.device(); }
 		auto renderer() -> Graphics::Renderer& { return m_graphics.renderer(); }
 		auto ui() -> UI::UI& { return m_ui; }
 		auto scene() -> Scene::Scene& { return m_scene; }

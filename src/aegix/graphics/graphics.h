@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 		auto operator=(const Graphics&) -> Graphics& = delete;
 		auto operator=(Graphics&&) -> Graphics& = delete;
 
-		[[nodiscard]] auto device() -> VulkanDevice& { return m_context.device(); }
+		[[nodiscard]] auto context() -> VulkanContext& { return m_context; }
 		[[nodiscard]] auto renderer() -> Renderer& { return m_renderer; }
 
 	private:
