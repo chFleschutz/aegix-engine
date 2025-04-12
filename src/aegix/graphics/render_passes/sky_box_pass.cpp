@@ -6,20 +6,17 @@
 
 namespace Aegix::Graphics
 {
-	SkyBoxPass::SkyBoxPass(VulkanDevice& device, DescriptorPool& pool)
+	SkyBoxPass::SkyBoxPass(DescriptorPool& pool)
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
+		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
-			.build();
-
-		m_pipeline = Pipeline::GraphicsBuilder(device, *m_pipelineLayout)
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.frag.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
@@ -28,7 +25,7 @@ namespace Aegix::Graphics
 			.setCullMode(VK_CULL_MODE_FRONT_BIT)
 			.setVertexBindingDescriptions({ { 0, sizeof(glm::vec3), VK_VERTEX_INPUT_RATE_VERTEX } })
 			.setVertexAttributeDescriptions({ { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 } })
-			.build();
+			.buildUnique();
 
 		// Create vertex buffer
 		{
@@ -44,7 +41,7 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize vertexBufferSize = sizeof(glm::vec3) * vertices.size();
-			m_vertexBuffer = std::make_unique<Buffer>(device, vertexBufferSize, 1,
+			m_vertexBuffer = std::make_unique<Buffer>(vertexBufferSize, 1,
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			m_vertexBuffer->upload(vertices.data(), vertexBufferSize);
 		}
@@ -61,7 +58,7 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize indexBufferSize = sizeof(uint32_t) * indices.size();
-			m_indexBuffer = std::make_unique<Buffer>(device, indexBufferSize, 1,
+			m_indexBuffer = std::make_unique<Buffer>(indexBufferSize, 1,
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			m_indexBuffer->upload(indices.data(), indexBufferSize);
 		}
@@ -91,10 +88,10 @@ namespace Aegix::Graphics
 	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
 		auto skyBoxEntity = frameInfo.scene.environment();
-		if (!skyBoxEntity || !skyBoxEntity.hasComponent<Environment>())
+		if (!skyBoxEntity || !skyBoxEntity.has<Environment>())
 			return;
 
-		auto& environment = skyBoxEntity.component<Environment>();
+		auto& environment = skyBoxEntity.get<Environment>();
 		if (!environment.skybox)
 			return;
 
@@ -122,23 +119,20 @@ namespace Aegix::Graphics
 		Tools::vk::cmdViewport(cmd, frameInfo.swapChainExtent);
 		Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
 
-		m_pipeline->bind(cmd);
-
-		auto& camera = frameInfo.scene.mainCamera().component<Camera>();
+		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		SkyBoxUniforms uniforms{
 			.view = camera.viewMatrix,
 			.projection = camera.projectionMatrix
 		};
-		Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
-
-		Tools::vk::cmdBindDescriptorSet(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_pipelineLayout,
-			m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		
+		m_pipeline->bind(cmd);
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
-
 		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/device.h"
 #include "graphics/globals.h"
 #include "graphics/resources/texture.h"
 
@@ -12,27 +11,27 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
-			Builder(VulkanDevice& device) : m_device{ device } {}
+			Builder() = default;
 
-			Builder& addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
-				uint32_t count = 1);
-			std::unique_ptr<DescriptorSetLayout> build() const;
+			auto addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
+				uint32_t count = 1) -> Builder&;
+			auto build() const -> std::unique_ptr<DescriptorSetLayout>;
 
 		private:
-			VulkanDevice& m_device;
 			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings{};
 		};
 
-		DescriptorSetLayout(VulkanDevice& lveDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
-		~DescriptorSetLayout();
+		DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
-		DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
+		~DescriptorSetLayout();
+
+		auto operator=(const DescriptorSetLayout&) -> DescriptorSetLayout& = delete;
 
 		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
-		VkDescriptorSetLayout descriptorSetLayout() const { return m_descriptorSetLayout; }
+
+		auto descriptorSetLayout() const -> VkDescriptorSetLayout { return m_descriptorSetLayout; }
 
 	private:
-		VulkanDevice& m_device;
 		VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;
 
@@ -47,21 +46,20 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
-			Builder(VulkanDevice& device) : m_device{ device } {}
+			Builder() = default;
 
-			Builder& addPoolSize(VkDescriptorType descriptorType, uint32_t count);
-			Builder& setPoolFlags(VkDescriptorPoolCreateFlags flags);
-			Builder& setMaxSets(uint32_t count);
-			std::unique_ptr<DescriptorPool> build() const;
+			auto addPoolSize(VkDescriptorType descriptorType, uint32_t count) -> Builder&;
+			auto setPoolFlags(VkDescriptorPoolCreateFlags flags) -> Builder&;
+			auto setMaxSets(uint32_t count) -> Builder&;
+			auto build() const -> std::unique_ptr<DescriptorPool>;
 
 		private:
-			VulkanDevice& m_device;
 			std::vector<VkDescriptorPoolSize> m_poolSizes{};
 			uint32_t m_maxSets = 1000;
 			VkDescriptorPoolCreateFlags m_poolFlags = 0;
 		};
 
-		DescriptorPool(VulkanDevice& device, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
+		DescriptorPool(uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
 			const std::vector<VkDescriptorPoolSize>& poolSizes);
 		~DescriptorPool();
 		DescriptorPool(const DescriptorPool&) = delete;
@@ -77,7 +75,6 @@ namespace Aegix::Graphics
 		void resetPool();
 
 	private:
-		VulkanDevice& m_device;
 		VkDescriptorPool m_descriptorPool;
 
 		friend class DescriptorWriter;
@@ -119,7 +116,7 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
-			Builder(VulkanDevice& device, DescriptorPool& pool, DescriptorSetLayout& setLayout);
+			Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 			Builder(const Builder&) = delete;
 			~Builder() = default;
 
@@ -132,7 +129,6 @@ namespace Aegix::Graphics
 			auto build() -> std::unique_ptr<DescriptorSet>;
 
 		private:
-			VulkanDevice& m_device;
 			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
 			std::vector<DescriptorWriter> m_writer;

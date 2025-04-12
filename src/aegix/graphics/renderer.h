@@ -2,7 +2,6 @@
 
 #include "core/window.h"
 #include "graphics/descriptors.h"
-#include "graphics/device.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
@@ -14,7 +13,7 @@ namespace Aegix::Graphics
 	class Renderer
 	{
 	public:
-		Renderer(Core::Window& window, VulkanDevice& device);
+		Renderer(Core::Window& window);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) = delete;
 		~Renderer();
@@ -25,19 +24,18 @@ namespace Aegix::Graphics
 		template<ValidRenderSystem T>
 		auto addRenderSystem() -> RenderSystem&
 		{
-			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, T::STAGE);
+			return m_frameGraph.resourcePool().addRenderSystem<T>(T::STAGE);
 		}
 
 		template<ValidMaterial T, typename... Args>
-			requires std::constructible_from<typename T::Instance, VulkanDevice&, DescriptorSetLayout&, DescriptorPool&, Args...>
+			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, DescriptorPool&, Args...>
 		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
 		{
 			auto& system = addRenderSystem<typename T::RenderSystem>();
-			return std::make_shared<typename T::Instance>(m_device, system.descriptorSetLayout(),
+			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(),
 				*m_globalPool, std::forward<Args>(args)...);
 		}
 
-		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
 		[[nodiscard]] auto globalPool() -> DescriptorPool& { return *m_globalPool; }
@@ -63,7 +61,6 @@ namespace Aegix::Graphics
 		void endFrame(VkCommandBuffer commandBuffer);
 
 		Core::Window& m_window;
-		VulkanDevice& m_device;
 		
 		SwapChain m_swapChain;
 		std::unique_ptr<DescriptorPool> m_globalPool;

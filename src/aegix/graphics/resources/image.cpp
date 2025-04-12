@@ -5,6 +5,7 @@
 #include "engine.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -12,13 +13,7 @@
 
 namespace Aegix::Graphics
 {
-	Image::Image(VulkanDevice& device)
-		: m_device{ device }
-	{
-	}
-
 	Image::Image(Image&& other) noexcept
-		: m_device{ other.m_device }
 	{
 		m_image = other.m_image;
 		m_allocation = other.m_allocation;
@@ -94,7 +89,7 @@ namespace Aegix::Graphics
 		VmaAllocationCreateInfo allocInfo{};
 		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-		m_device.createImage(m_image, m_allocation, imageInfo, allocInfo);
+		VulkanContext::device().createImage(m_image, m_allocation, imageInfo, allocInfo);
 	}
 
 	void Image::create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels, uint32_t layerCount)
@@ -124,7 +119,7 @@ namespace Aegix::Graphics
 
 		m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };
 		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
-		Buffer stagingBuffer{ m_device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 		stagingBuffer.singleWrite(pixels);
 
 		stbi_image_free(pixels);
@@ -143,18 +138,18 @@ namespace Aegix::Graphics
 
 	void Image::fill(const Buffer& buffer)
 	{
-		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 
 		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
 		Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
 		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		m_device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Image::fill(const void* data, VkDeviceSize size)
 	{
-		Buffer stagingBuffer{ m_device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		Buffer stagingBuffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 		stagingBuffer.singleWrite(data);
 
 		fill(stagingBuffer);
@@ -204,9 +199,9 @@ namespace Aegix::Graphics
 	{
 		if (m_layout == newLayout)
 			return;
-		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		transitionLayout(cmd, newLayout);
-		m_device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Image::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)
@@ -321,7 +316,7 @@ namespace Aegix::Graphics
 
 	void Image::destroy()
 	{
-		m_device.destroyImage(m_image, m_allocation);
+		VulkanContext::destroy(m_image, m_allocation);
 		m_image = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
 	}

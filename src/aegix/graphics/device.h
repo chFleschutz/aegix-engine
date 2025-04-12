@@ -1,9 +1,5 @@
 #pragma once
 
-#define ENGINE_DIR PROJECT_DIR "/"
-#define SHADER_DIR ENGINE_DIR "shaders/"
-#define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
-
 #include "graphics/deletion_queue.h"
 #include "core/window.h"
 
@@ -28,12 +24,13 @@ namespace Aegix::Graphics
 
 	class VulkanDevice
 	{
+		friend class VulkanContext;
+
 	public:
 		static constexpr uint32_t API_VERSION = VK_API_VERSION_1_3;
 		static constexpr auto VALIDATION_LAYERS = std::array{ "VK_LAYER_KHRONOS_validation" };
 		static constexpr auto DEVICE_EXTENSIONS = std::array{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-		VulkanDevice(Core::Window& window);
 		VulkanDevice(const VulkanDevice&) = delete;
 		VulkanDevice(VulkanDevice&&) = delete;
 		~VulkanDevice();
@@ -54,17 +51,13 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto properties() const -> const VkPhysicalDeviceProperties& { return m_properties; }
 		[[nodiscard]] auto features() const -> const VkPhysicalDeviceFeatures& { return m_features; }
 
+		void initialize(Core::Window& window);
+
 		auto beginSingleTimeCommands() const->VkCommandBuffer;
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
 
 		void createBuffer(VkBuffer& buffer, VmaAllocation& allocation, VkDeviceSize size, VkBufferUsageFlags bufferUsage, VmaAllocationCreateFlags allocFlags, VmaMemoryUsage memoryUsage) const;
 		void createImage(VkImage& image, VmaAllocation& allocation, const VkImageCreateInfo& imageInfo, const VmaAllocationCreateInfo& allocInfo) const;
-
-		void destroyBuffer(VkBuffer buffer, VmaAllocation allocation);
-		void destroyImage(VkImage image, VmaAllocation allocation);
-		void destroyImageView(VkImageView view);
-		void destroySampler(VkSampler sampler);
-		void flushDeletionQueue(uint32_t frameIndex) { m_deletionQueue.flush(frameIndex); }
 
 		auto querySwapChainSupport() const -> SwapChainSupportDetails;
 		auto findPhysicalQueueFamilies() const -> QueueFamilyIndices;
@@ -81,6 +74,8 @@ namespace Aegix::Graphics
 			uint32_t mipLevels = 1) const;
 
 	private:
+		VulkanDevice() = default;
+
 		void createInstance();
 		void setupDebugUtils();
 		void createSurface(Core::Window& window);
@@ -110,7 +105,5 @@ namespace Aegix::Graphics
 		VkSurfaceKHR m_surface;
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
-
-		DeletionQueue m_deletionQueue;
 	};
 }

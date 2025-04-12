@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 	class PostProcessingPass : public FrameGraphRenderPass
 	{
 	public:
-		PostProcessingPass(VulkanDevice& device, DescriptorPool& pool);
+		PostProcessingPass(DescriptorPool& pool);
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
@@ -38,7 +38,6 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
-		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<Pipeline> m_pipeline;
 	};
 }

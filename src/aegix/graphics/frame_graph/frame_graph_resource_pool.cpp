@@ -159,7 +159,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraphResourcePool::createResources(VulkanDevice& device)
+	void FrameGraphResourcePool::createResources()
 	{
 		// Accumulate usage flags for each resource reference
 		for (auto& initialResource : m_resources)
@@ -185,11 +185,11 @@ namespace Aegix::Graphics
 			switch (resource.type)
 			{
 			case FrameGraphResourceType::Texture:
-				createTexture(device, resource);
+				createTexture(resource);
 				break;
 
 			case FrameGraphResourceType::Buffer:
-				createBuffer(device, resource);
+				createBuffer(resource);
 				break;
 
 			case FrameGraphResourceType::Reference:
@@ -217,7 +217,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraphResourcePool::createTexture(VulkanDevice& device, FrameGraphResource& resource)
+	void FrameGraphResourcePool::createTexture(FrameGraphResource& resource)
 	{
 		auto& info = std::get<FrameGraphResourceTextureInfo>(resource.info);
 		if (info.resizePolicy == ResizePolicy::SwapchainRelative)
@@ -225,13 +225,13 @@ namespace Aegix::Graphics
 			info.extent = { Core::DEFAULT_WIDTH, Core::DEFAULT_HEIGHT };
 		}
 
-		auto& texture = m_textures.emplace_back(device);
+		auto& texture = m_textures.emplace_back();
 		texture.create2D(info.extent.width, info.extent.height, info.format, info.usage, info.mipLevels);
 
 		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}
 
-	void FrameGraphResourcePool::createBuffer(VulkanDevice& device, FrameGraphResource& resource)
+	void FrameGraphResourcePool::createBuffer(FrameGraphResource& resource)
 	{
 		// TODO: Implement
 	}

@@ -10,11 +10,11 @@
 
 namespace Aegix::Graphics
 {
-	SSAOPass::SSAOPass(VulkanDevice& device, DescriptorPool& pool)
-		: m_uniforms{ Buffer::createUniformBuffer(device, sizeof(SSAOUniforms)) },
-		m_ssaoSamples{ Buffer::createUniformBuffer(device, sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
+	SSAOPass::SSAOPass(DescriptorPool& pool)
+		: m_uniforms{ Buffer::createUniformBuffer(sizeof(SSAOUniforms)) },
+		m_ssaoSamples{ Buffer::createUniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder(device)
+		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -25,13 +25,10 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
-			.build();
-
-		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Generate random samples
 		auto& gen = Random::generator();
@@ -64,7 +61,7 @@ namespace Aegix::Graphics
 			n.y = dis(gen) * 2.0f - 1.0f;
 		}
 
-		m_ssaoNoise = std::make_unique<Texture>(device);
+		m_ssaoNoise = std::make_unique<Texture>();
 		m_ssaoNoise->create2D(NOISE_SIZE, NOISE_SIZE, VK_FORMAT_R16G16_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL | VK_IMAGE_USAGE_SAMPLED_BIT);
 		m_ssaoNoise->image().fill(noise.data(), sizeof(glm::vec2) * noise.size());
 		m_ssaoNoise->image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -105,7 +102,7 @@ namespace Aegix::Graphics
 	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
 		// Update push constants
-		auto& camera = frameInfo.scene.mainCamera().component<Camera>();
+		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
@@ -123,7 +120,7 @@ namespace Aegix::Graphics
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_descriptorSet->bind(cmd, m_pipeline->layout(), frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}

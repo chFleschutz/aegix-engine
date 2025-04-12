@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 
 		if (texturePath.extension() == ".hdr")
 		{
-			auto texture = std::make_shared<Texture>(Engine::instance().device());
+			auto texture = std::make_shared<Texture>();
 			texture->createCube(texturePath);
 			return texture;
 		}
@@ -29,14 +29,14 @@ namespace Aegix::Graphics
 
 	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>(Engine::instance().device());
+		auto texture = std::make_shared<Texture>();
 		texture->create2D(texturePath, format);
 		return texture;
 	}
 
 	auto Texture::create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>(Engine::instance().device());
+		auto texture = std::make_shared<Texture>();
 		texture->create2D(1, 1, format, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		texture->m_image.fillRGBA8(color);
 		return texture;
@@ -44,16 +44,14 @@ namespace Aegix::Graphics
 
 	auto Texture::createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create irradiance map
 		constexpr uint32_t irradianceSize = 32;
-		auto irradiance = std::make_shared<Texture>(device);
+		auto irradiance = std::make_shared<Texture>();
 		irradiance->createCube(irradianceSize, irradianceSize, VK_FORMAT_R16G16B16A16_SFLOAT,
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -65,23 +63,20 @@ namespace Aegix::Graphics
 			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert skybox to irradiance map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Irradiance Convolution");
 		{
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t width = irradiance->image().width();
@@ -91,24 +86,22 @@ namespace Aegix::Graphics
 			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return irradiance;
 	}
 
 	auto Texture::createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create prefiltered map
 		constexpr uint32_t prefilteredSize = 128;
 		constexpr uint32_t mipLevelCount = 5;
-		auto prefiltered = std::make_shared<Texture>(device);
+		auto prefiltered = std::make_shared<Texture>();
 		prefiltered->createCube(prefilteredSize, prefilteredSize, VK_FORMAT_R16G16B16A16_SFLOAT,
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, mipLevelCount);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -120,14 +113,11 @@ namespace Aegix::Graphics
 		} pushConstants;
 		pushConstants.envResolution = static_cast<float>(skybox->image().width());
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.build();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Create image views for mip levels
 		auto& pool = Engine::instance().renderer().globalPool();
@@ -137,7 +127,7 @@ namespace Aegix::Graphics
 		mipViews.reserve(mipLevelCount);
 		for (uint32_t i = 0; i < mipLevelCount; ++i)
 		{
-			auto& view = mipViews.emplace_back(device);
+			auto& view = mipViews.emplace_back();
 			view.create(prefiltered->image(), ImageView::Config{
 				.baseMipLevel = i,
 				.levelCount = 1,
@@ -154,7 +144,7 @@ namespace Aegix::Graphics
 		}
 
 		// Convert skybox to prefiltered map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Prefilter Environment");
 		{
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -163,10 +153,10 @@ namespace Aegix::Graphics
 			
 			for (uint32_t mip = 0; mip < mipLevelCount; ++mip)
 			{
-				descriptorSets[mip].bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+				descriptorSets[mip].bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 				pushConstants.roughness = static_cast<float>(mip) / static_cast<float>(mipLevelCount - 1);
-				vkCmdPushConstants(cmd, *pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pushConstants), &pushConstants);
+				vkCmdPushConstants(cmd, pipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pushConstants), &pushConstants);
 
 				constexpr uint32_t groupSize = 16;
 				uint32_t width = prefiltered->image().width() >> mip;
@@ -177,15 +167,13 @@ namespace Aegix::Graphics
 			prefiltered->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return prefiltered;
 	}
 
 	auto Texture::createBRDFLUT() -> std::shared_ptr<Texture>
 	{
-		auto& device = Engine::instance().device();
-
 		// Create BRDF LUT
 		constexpr uint32_t lutSize = 512;
 		Image::Config imgageConfig{
@@ -201,11 +189,11 @@ namespace Aegix::Graphics
 			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		};
-		auto lut = std::make_shared<Texture>(device);
+		auto lut = std::make_shared<Texture>();
 		lut->create2D(imgageConfig, samplerConfig);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 		auto& pool = Engine::instance().renderer().globalPool();
@@ -213,21 +201,19 @@ namespace Aegix::Graphics
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert skybox to irradiance map
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "BRDF LUT Generation");
 		{
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			vkCmdDispatch(cmd, (lutSize + groupSize - 1) / groupSize, (lutSize + groupSize - 1) / groupSize, 1);
@@ -235,17 +221,12 @@ namespace Aegix::Graphics
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 
 		return lut;
 	}
 
 
-
-	Texture::Texture(VulkanDevice& device)
-		: m_image{ device }, m_view{ device }, m_sampler{ device }
-	{
-	}
 
 	void Texture::create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
 	{
@@ -327,15 +308,14 @@ namespace Aegix::Graphics
 		}
 
 		// Upload data to staging buffer
-		auto& device = m_image.device();
 		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
-		Buffer stagingBuffer{ device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 		stagingBuffer.singleWrite(pixels);
 
 		stbi_image_free(pixels);
 
 		// Create spherical image
-		Texture spherialImage{ device };
+		Texture spherialImage{};
 		spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), VK_FORMAT_R32G32B32A32_SFLOAT,
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
@@ -344,7 +324,7 @@ namespace Aegix::Graphics
 		createCube(cubeSize, cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -357,23 +337,20 @@ namespace Aegix::Graphics
 			.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipelineLayout = PipelineLayout::Builder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.build();
-
-		auto pipeline = Pipeline::ComputeBuilder{ device, *pipelineLayout }
 			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
-			.build();
+			.buildUnique();
 
 		// Convert spherical image to cubemap
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
 		{
 			spherialImage.image().copyFrom(cmd, stagingBuffer);
 			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
 			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, *pipelineLayout, 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t groupCountX = (width + groupSize - 1) / groupSize;
@@ -383,7 +360,7 @@ namespace Aegix::Graphics
 			m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)

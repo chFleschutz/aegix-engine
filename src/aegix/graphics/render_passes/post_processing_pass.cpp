@@ -8,9 +8,9 @@
 
 namespace Aegix::Graphics
 {
-	PostProcessingPass::PostProcessingPass(VulkanDevice& device, DescriptorPool& pool)
+	PostProcessingPass::PostProcessingPass(DescriptorPool& pool)
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -18,14 +18,11 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder{ device }
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(PostProcessingSettings))
-			.build();
-
-		m_pipeline = Pipeline::ComputeBuilder{ device, *m_pipelineLayout }
 			.setShaderStage(SHADER_DIR "post_process.comp.spv")
-			.build();
+			.buildUnique();
 	}
 
 	auto PostProcessingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -71,9 +68,9 @@ namespace Aegix::Graphics
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, *m_pipelineLayout, frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 
-		Tools::vk::cmdPushConstants(cmd, *m_pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 

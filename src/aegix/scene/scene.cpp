@@ -4,7 +4,7 @@
 
 #include "engine.h"
 #include "core/profiler.h"
-#include "graphics/static_mesh.h"
+#include "graphics/resources/static_mesh.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/gltf_loader.h"
@@ -22,12 +22,12 @@ namespace Aegix::Scene
 		const glm::vec3& scale) -> Entity
 	{
 		Entity entity = { m_registry.create(), this };
-		entity.addComponent<Name>(name.empty() ? "Entity" : name);
-		entity.addComponent<Transform>(location, rotation, scale);
-		entity.addComponent<GlobalTransform>();
-		entity.addComponent<Parent>();
-		entity.addComponent<Siblings>();
-		entity.addComponent<Children>();
+		entity.add<Name>(name.empty() ? "Entity" : name);
+		entity.add<Transform>(location, rotation, scale);
+		entity.add<GlobalTransform>();
+		entity.add<Parent>();
+		entity.add<Siblings>();
+		entity.add<Children>();
 		return entity;
 	}
 
@@ -63,8 +63,8 @@ namespace Aegix::Scene
 		else if (path.extension() == ".obj")
 		{
 			auto entity = createEntity(path.stem().string());
-			entity.addComponent<Mesh>(Graphics::StaticMesh::create(path));
-			//entity.addComponent<Graphics::DefaultMaterial>(); // TODO: Add default material
+			entity.add<Mesh>(Graphics::StaticMesh::create(path));
+			//entity.add<Graphics::DefaultMaterial>(); // TODO: Add default material
 			return entity;
 		}
 		else
@@ -83,29 +83,29 @@ namespace Aegix::Scene
 		addSystem<TransformSystem>();
 
 		m_mainCamera = createEntity("Main Camera");
-		m_mainCamera.addComponent<Camera>();
-		m_mainCamera.addComponent<Scripting::KinematcMovementController>();
-		m_mainCamera.component<Transform>() = Transform{
+		m_mainCamera.add<Camera>();
+		m_mainCamera.add<Scripting::KinematcMovementController>();
+		m_mainCamera.get<Transform>() = Transform{
 			.location = { 0.0f, -15.0f, 10.0f },
 			.rotation = glm::radians(glm::vec3{ -30.0f, 0.0f, 0.0f })
 		};
 
 		m_ambientLight = createEntity("Ambient Light");
-		m_ambientLight.addComponent<AmbientLight>();
+		m_ambientLight.add<AmbientLight>();
 
 		m_directionalLight = createEntity("Directional Light");
-		m_directionalLight.addComponent<DirectionalLight>();
-		m_directionalLight.component<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 45.0f });
+		m_directionalLight.add<DirectionalLight>();
+		m_directionalLight.get<Transform>().rotation = glm::radians(glm::vec3{ 60.0f, 0.0f, 45.0f });
 
 		m_skybox = createEntity("Skybox");
-		auto& env = m_skybox.addComponent<Environment>();
-		env.skybox = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		auto& env = m_skybox.add<Environment>();
+		env.skybox = std::make_shared<Graphics::Texture>();
 		env.skybox->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.skybox->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		env.irradiance = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.irradiance = std::make_shared<Graphics::Texture>();
 		env.irradiance->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.irradiance->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		env.prefiltered = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.prefiltered = std::make_shared<Graphics::Texture>();
 		env.prefiltered->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.prefiltered->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
 		env.brdfLUT = Graphics::Texture::createBRDFLUT();

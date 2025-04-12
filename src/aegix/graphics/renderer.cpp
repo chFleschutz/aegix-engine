@@ -13,12 +13,13 @@
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
+#include "graphics/vulkan_context.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Core::Window& window, VulkanDevice& device)
-		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extent() }
+	Renderer::Renderer(Core::Window& window)
+		: m_window{ window }, m_swapChain{ window.extent()}
 	{
 		createCommandBuffers();
 		createDescriptorPool();
@@ -28,8 +29,8 @@ namespace Aegix::Graphics
 	Renderer::~Renderer()
 	{
 		vkFreeCommandBuffers(
-			m_device.device(),
-			m_device.commandPool(),
+			VulkanContext::device(),
+			VulkanContext::device().commandPool(),
 			static_cast<uint32_t>(m_commandBuffers.size()),
 			m_commandBuffers.data()
 		);
@@ -74,7 +75,7 @@ namespace Aegix::Graphics
 
 	void Renderer::waitIdle()
 	{
-		vkDeviceWaitIdle(m_device.device());
+		vkDeviceWaitIdle(VulkanContext::device());
 	}
 
 	void Renderer::createCommandBuffers()
@@ -82,10 +83,10 @@ namespace Aegix::Graphics
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_device.commandPool();
+		allocInfo.commandPool = VulkanContext::device().commandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
 
-		VK_CHECK(vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()))
+		VK_CHECK(vkAllocateCommandBuffers(VulkanContext::device(), &allocInfo, m_commandBuffers.data()))
 	}
 
 	void Renderer::recreateSwapChain()
@@ -105,7 +106,7 @@ namespace Aegix::Graphics
 	void Renderer::createDescriptorPool()
 	{
 		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
-		m_globalPool = DescriptorPool::Builder(m_device)
+		m_globalPool = DescriptorPool::Builder{}
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
 			.setMaxSets(1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
@@ -125,17 +126,17 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.add<GeometryPass>(m_frameGraph, m_device, *m_globalPool);
-		m_frameGraph.add<TransparentPass>(m_frameGraph, m_device, *m_globalPool);
-		m_frameGraph.add<LightingPass>(m_device, *m_globalPool);
+		m_frameGraph.add<GeometryPass>(m_frameGraph, *m_globalPool);
+		m_frameGraph.add<TransparentPass>(m_frameGraph, *m_globalPool);
+		m_frameGraph.add<LightingPass>(*m_globalPool);
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
-		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
-		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
-		m_frameGraph.add<SSAOPass>(m_device, *m_globalPool);
-		m_frameGraph.add<SkyBoxPass>(m_device, *m_globalPool);
+		m_frameGraph.add<PostProcessingPass>(*m_globalPool);
+		m_frameGraph.add<BloomPass>(*m_globalPool);
+		m_frameGraph.add<SSAOPass>(*m_globalPool);
+		m_frameGraph.add<SkyBoxPass>(*m_globalPool);
 
-		m_frameGraph.compile(m_device);
+		m_frameGraph.compile();
 	}
 
 	auto Renderer::beginFrame() -> VkCommandBuffer
@@ -183,7 +184,7 @@ namespace Aegix::Graphics
 		waitIdle();
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-		m_device.flushDeletionQueue(m_currentFrameIndex);
+		VulkanContext::flushDeletionQueue(m_currentFrameIndex);
 
 		m_isFrameStarted = false;
 	}

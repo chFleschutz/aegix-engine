@@ -3,17 +3,13 @@
 #include "image_view.h"
 
 #include "graphics/resources/image.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	ImageView::ImageView(VulkanDevice& device)
-		: m_device{ device }
-	{
-	}
-
 	ImageView::ImageView(ImageView&& other) noexcept
-		: m_device{ other.m_device }, m_imageView{ other.m_imageView }
+		: m_imageView{ other.m_imageView }
 	{
 		other.m_imageView = VK_NULL_HANDLE;
 	}
@@ -46,13 +42,13 @@ namespace Aegix::Graphics
 		viewInfo.image = image.image();
 		viewInfo.viewType = config.viewType;
 		viewInfo.format = image.format();
-		viewInfo.subresourceRange.aspectMask = m_device.findAspectFlags(image.format());
+		viewInfo.subresourceRange.aspectMask = VulkanContext::device().findAspectFlags(image.format());
 		viewInfo.subresourceRange.baseMipLevel = config.baseMipLevel;
 		viewInfo.subresourceRange.levelCount = config.levelCount;
 		viewInfo.subresourceRange.baseArrayLayer = config.baseLayer;
 		viewInfo.subresourceRange.layerCount = config.layerCount;
 
-		VK_CHECK(vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageView));
+		VK_CHECK(vkCreateImageView(VulkanContext::device(), &viewInfo, nullptr, &m_imageView));
 	}
 
 	void ImageView::create(const Image& image, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseLayer, uint32_t layerCount)
@@ -90,7 +86,7 @@ namespace Aegix::Graphics
 
 	void ImageView::destroy()
 	{
-		m_device.destroyImageView(m_imageView);
+		VulkanContext::destroy(m_imageView);
 		m_imageView = VK_NULL_HANDLE;
 	}
 }

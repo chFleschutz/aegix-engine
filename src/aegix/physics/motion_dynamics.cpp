@@ -90,7 +90,7 @@ namespace Aegix::Physics
 
 		applyForces(deltaSeconds);
 		// Update transform
-		auto& transform = component<Transform>();
+		auto& transform = get<Transform>();
 		transform.location += m_linearVelocity * deltaSeconds;
 		transform.rotation *= glm::quat(m_angularVelocity * deltaSeconds);
 	}

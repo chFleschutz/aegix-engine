@@ -40,21 +40,8 @@ namespace Aegix::Graphics
 
 	// VulkanDevice --------------------------------------------------------------
 
-	VulkanDevice::VulkanDevice(Core::Window& window) 
-	{
-		createInstance();
-		setupDebugUtils();
-		createSurface(window);
-		createPhysicalDevice();
-		createLogicalDevice();
-		createAllocator();
-		createCommandPool();
-	}
-
 	VulkanDevice::~VulkanDevice()
 	{
-		m_deletionQueue.flushAll();
-
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
@@ -66,6 +53,17 @@ namespace Aegix::Graphics
 
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
+	}
+
+	void VulkanDevice::initialize(Core::Window& window)
+	{
+		createInstance();
+		setupDebugUtils();
+		createSurface(window);
+		createPhysicalDevice();
+		createLogicalDevice();
+		createAllocator();
+		createCommandPool();
 	}
 
 	auto VulkanDevice::beginSingleTimeCommands() const -> VkCommandBuffer
@@ -122,40 +120,6 @@ namespace Aegix::Graphics
 		const VmaAllocationCreateInfo& allocInfo) const
 	{
 		VK_CHECK(vmaCreateImage(m_allocator, &imageInfo, &allocInfo, &image, &allocation, nullptr));
-	}
-
-	void VulkanDevice::destroyBuffer(VkBuffer buffer, VmaAllocation allocation)
-	{
-		if (buffer)
-		{
-			AGX_ASSERT_X(allocation, "Buffer and allocation must be valid");
-			m_deletionQueue.schedule([=]() { vmaDestroyBuffer(m_allocator, buffer, allocation); });
-		}
-	}
-
-	void VulkanDevice::destroyImage(VkImage image, VmaAllocation allocation)
-	{
-		if (image)
-		{
-			AGX_ASSERT_X(allocation, "Image and allocation must be valid");
-			m_deletionQueue.schedule([=]() { vmaDestroyImage(m_allocator, image, allocation); });
-		}
-	}
-
-	void VulkanDevice::destroyImageView(VkImageView view)
-	{
-		if (view)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroyImageView(m_device, view, nullptr); });
-		}
-	}
-
-	void VulkanDevice::destroySampler(VkSampler sampler)
-	{
-		if (sampler)
-		{
-			m_deletionQueue.schedule([=]() { vkDestroySampler(m_device, sampler, nullptr); });
-		}
 	}
 
 	auto VulkanDevice::querySwapChainSupport() const -> SwapChainSupportDetails

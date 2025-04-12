@@ -2,6 +2,10 @@
 
 #include <chrono>
 
+#define ENGINE_DIR PROJECT_DIR "/"
+#define SHADER_DIR ENGINE_DIR "shaders/"
+#define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
+
 namespace Aegix::Core
 {
 	constexpr uint32_t DEFAULT_WIDTH{ 1920 };

@@ -1,12 +1,10 @@
 #pragma once
 
+#include "graphics/resources/material.h"
+#include "graphics/resources/static_mesh.h"
 #include "graphics/resources/texture.h"
-#include "graphics/static_mesh.h"
 #include "math/math.h"
 #include "scene/entity.h"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 namespace Aegix::Scripting
 {
@@ -71,7 +69,7 @@ namespace Aegix
 			Scene::Entity current{};
 
 			auto operator*() const -> Scene::Entity { return current; }
-			auto operator++() -> Iterator& { current = current.component<Siblings>().next; return *this; }
+			auto operator++() -> Iterator& { current = current.get<Siblings>().next; return *this; }
 			auto operator==(const Iterator& other) const -> bool { return current == other.current; }
 		};
 
@@ -80,7 +78,7 @@ namespace Aegix
 			Scene::Entity current{};
 
 			auto operator*() const -> Scene::Entity { return current; }
-			auto operator++() -> ReverseIterator& { current = current.component<Siblings>().prev; return *this; }
+			auto operator++() -> ReverseIterator& { current = current.get<Siblings>().prev; return *this; }
 			auto operator==(const ReverseIterator& other) const -> bool { return current == other.current; };
 		};
 
@@ -94,10 +92,14 @@ namespace Aegix
 		auto rend() const -> Children::ReverseIterator { return { Scene::Entity{} }; }
 	};
 
-	/// @brief Holds a pointer to a static mesh
 	struct Mesh
 	{
 		std::shared_ptr<Graphics::StaticMesh> staticMesh;
+	};
+
+	struct Material
+	{
+		std::shared_ptr<Graphics::Material> material;
 	};
 
 	struct AmbientLight

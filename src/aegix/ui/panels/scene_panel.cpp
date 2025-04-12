@@ -62,7 +62,7 @@ namespace Aegix::UI
 		for (auto entt : view)
 		{
 			Scene::Entity entity{ entt, &scene };
-			if (entity.hasComponent<Parent>() && entity.component<Parent>().entity)
+			if (entity.has<Parent>() && entity.get<Parent>().entity)
 				continue;
 
 			stack.emplace_back(entity, 0);
@@ -83,7 +83,7 @@ namespace Aegix::UI
 
 			flags |= VISITED;
 
-			auto& children = entity.component<Children>();
+			auto& children = entity.get<Children>();
 			ImGuiTreeNodeFlags treeNodeflags = (children.count == 0) ? ImGuiTreeNodeFlags_Leaf : 0;
 			if (drawEntityTreeNode(entity, treeNodeflags))
 			{
@@ -213,22 +213,22 @@ namespace Aegix::UI
 		drawComponent<Parent>("Parent", m_selectedEntity, 0,
 			[](Parent& parent)
 			{
-				ImGui::Text("Parent: %s", parent.entity ? parent.entity.component<Name>().name.c_str() : "None");
+				ImGui::Text("Parent: %s", parent.entity ? parent.entity.get<Name>().name.c_str() : "None");
 			});
 
 		drawComponent<Siblings>("Siblings", m_selectedEntity, 0,
 			[](Siblings& siblings)
 			{
-				ImGui::Text("Next: %s", siblings.next ? siblings.next.component<Name>().name.c_str() : "None");
-				ImGui::Text("Prev: %s", siblings.prev ? siblings.prev.component<Name>().name.c_str() : "None");
+				ImGui::Text("Next: %s", siblings.next ? siblings.next.get<Name>().name.c_str() : "None");
+				ImGui::Text("Prev: %s", siblings.prev ? siblings.prev.get<Name>().name.c_str() : "None");
 			});
 
 		drawComponent<Children>("Children", m_selectedEntity, 0,
 			[](Children& children)
 			{
 				ImGui::Text("Children: %d", children.count);
-				ImGui::Text("First: %s", children.first ? children.first.component<Name>().name.c_str() : "None");
-				ImGui::Text("Last: %s", children.last ? children.last.component<Name>().name.c_str() : "None");
+				ImGui::Text("First: %s", children.first ? children.first.get<Name>().name.c_str() : "None");
+				ImGui::Text("Last: %s", children.last ? children.last.get<Name>().name.c_str() : "None");
 			});
 
 		drawAddComponent();
@@ -238,7 +238,7 @@ namespace Aegix::UI
 
 	void ScenePanel::drawSingleEntity(Scene::Entity entity)
 	{
-		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
+		auto name = entity.has<Name>() ? entity.get<Name>().name.c_str() : "Entity";
 		auto flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
 		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
 
@@ -251,9 +251,9 @@ namespace Aegix::UI
 
 	auto ScenePanel::drawEntityTreeNode(Scene::Entity entity, ImGuiTreeNodeFlags flags) -> bool
 	{
-		auto& children = entity.getOrAddComponent<Children>();
+		auto& children = entity.getOrAdd<Children>();
 
-		auto name = entity.hasComponent<Name>() ? entity.component<Name>().name.c_str() : "Entity";
+		auto name = entity.has<Name>() ? entity.get<Name>().name.c_str() : "Entity";
 		flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 		flags |= (m_selectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0; // Highlight selection
 

@@ -2,17 +2,13 @@
 
 #include "sampler.h"
 
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	Sampler::Sampler(VulkanDevice& device)
-		: m_device{ device }
-	{
-	}
-
 	Sampler::Sampler(Sampler&& other) noexcept
-		: m_device{ other.m_device }, m_sampler{ other.m_sampler }
+		: m_sampler{ other.m_sampler }
 	{
 		other.m_sampler = VK_NULL_HANDLE;
 	}
@@ -45,7 +41,7 @@ namespace Aegix::Graphics
 		samplerInfo.addressModeV = config.addressMode;
 		samplerInfo.addressModeW = config.addressMode;
 		samplerInfo.anisotropyEnable = config.anisotropy;
-		samplerInfo.maxAnisotropy = m_device.properties().limits.maxSamplerAnisotropy;
+		samplerInfo.maxAnisotropy = VulkanContext::device().properties().limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareEnable = VK_FALSE;
@@ -55,7 +51,7 @@ namespace Aegix::Graphics
 		samplerInfo.minLod = 0.0f;
 		samplerInfo.maxLod = config.maxLod;
 
-		VK_CHECK(vkCreateSampler(m_device.device(), &samplerInfo, nullptr, &m_sampler));
+		VK_CHECK(vkCreateSampler(VulkanContext::device(), &samplerInfo, nullptr, &m_sampler));
 	}
 
 	void Sampler::create(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy)
@@ -71,7 +67,7 @@ namespace Aegix::Graphics
 
 	void Sampler::destroy()
 	{
-		m_device.destroySampler(m_sampler);
+		VulkanContext::destroy(m_sampler);
 		m_sampler = VK_NULL_HANDLE;
 	}
 }

@@ -22,24 +22,24 @@ namespace Aegix::Scripting
 
 		/// @brief Returns true if the entity has all components of type T...
 		template<typename... T>
-		bool hasComponent() const
+		bool has() const
 		{
-			return m_entity.hasComponent<T...>();
+			return m_entity.has<T...>();
 		}
 
 		/// @brief Returns a reference of the component of type T
 		/// @note Component of type T must exist
 		template<typename T>
-		T& component() const
+		T& get() const
 		{
-			return m_entity.component<T>();
+			return m_entity.get<T>();
 		}
 
 		/// @brief Adds a component of type T to the entity and returns a reference to it
 		template<typename T, typename... Args>
-		T& addComponent(Args&&... args)
+		T& add(Args&&... args)
 		{
-			return m_entity.addComponent<T>(std::forward<Args>(args)...);
+			return m_entity.add<T>(std::forward<Args>(args)...);
 		}
 
 		/// @brief Returns the entity

@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 	class DefaultMaterialInstance
 	{
 	public:
-		DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
+		DefaultMaterialInstance(DescriptorSetLayout& setLayout, DescriptorPool& pool,
 			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data = {});
 
@@ -55,7 +55,7 @@ namespace Aegix::Graphics
 
 		constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
 
-		DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
+		DefaultRenderSystem(VkDescriptorSetLayout globalSetLayout);
 
 		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};

@@ -8,10 +8,10 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
-		: m_ubo{ Buffer::createUniformBuffer(device, sizeof(LightingUniforms)) }
+	LightingPass::LightingPass(DescriptorPool& pool)
+		: m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) }
 	{
-		m_gbufferSetLayout = DescriptorSetLayout::Builder(device)
+		m_gbufferSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -23,21 +23,18 @@ namespace Aegix::Graphics
 			.build();
 		m_gbufferSet = std::make_unique<DescriptorSet>(pool, *m_gbufferSetLayout);
 
-		m_iblSetLayout = DescriptorSetLayout::Builder(device)
+		m_iblSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 		m_iblSet = std::make_unique<DescriptorSet>(pool, *m_iblSetLayout);
 
-		m_pipelineLayout = PipelineLayout::Builder(device)
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.build();
-
-		m_pipeline = Pipeline::ComputeBuilder(device, *m_pipelineLayout)
 			.setShaderStage(SHADER_DIR "lighting.comp.spv")
-			.build();
+			.buildUnique();
 	}
 
 	auto LightingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -89,7 +86,7 @@ namespace Aegix::Graphics
 		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		updateLightingUBO(frameInfo);
-		auto& environment = frameInfo.scene.environment().component<Environment>();
+		auto& environment = frameInfo.scene.environment().get<Environment>();
 		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
 		DescriptorWriter{ *m_gbufferSetLayout }
@@ -110,10 +107,8 @@ namespace Aegix::Graphics
 			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		m_pipeline->bind(cmd);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout, 
-			m_gbufferSet->descriptorSet(frameInfo.frameIndex), 0);
-		Tools::vk::cmdBindDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipelineLayout,
-			m_iblSet->descriptorSet(frameInfo.frameIndex), 1);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_gbufferSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->bindDescriptorSet(cmd, 1, m_iblSet->descriptorSet(frameInfo.frameIndex));
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
@@ -136,24 +131,24 @@ namespace Aegix::Graphics
 		LightingUniforms lighting;
 
 		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
-		if (mainCamera && mainCamera.hasComponent<Transform>())
+		if (mainCamera && mainCamera.has<Transform>())
 		{
-			auto& cameraTransform = mainCamera.component<Transform>();
+			auto& cameraTransform = mainCamera.get<Transform>();
 			lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
 		}
 
 		Scene::Entity ambientLight = frameInfo.scene.ambientLight();
-		if (ambientLight && ambientLight.hasComponent<AmbientLight>())
+		if (ambientLight && ambientLight.has<AmbientLight>())
 		{
-			auto& ambient = ambientLight.component<AmbientLight>();
+			auto& ambient = ambientLight.get<AmbientLight>();
 			lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
 		}
 
 		Scene::Entity directionalLight = frameInfo.scene.directionalLight();
-		if (directionalLight && directionalLight.hasComponent<DirectionalLight, Transform>())
+		if (directionalLight && directionalLight.has<DirectionalLight, Transform>())
 		{
-			auto& directional = directionalLight.component<DirectionalLight>();
-			auto& transform = directionalLight.component<Transform>();
+			auto& directional = directionalLight.get<DirectionalLight>();
+			auto& transform = directionalLight.get<Transform>();
 			lighting.directional.color = glm::vec4(directional.color, directional.intensity);
 			lighting.directional.direction = glm::vec4(glm::normalize(transform.forward()), 0.0f);
 		}

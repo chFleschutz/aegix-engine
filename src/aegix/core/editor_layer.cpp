@@ -58,11 +58,11 @@ namespace Aegix::Core
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
 		auto& scene = Engine::instance().scene();
-		auto& camera = scene.mainCamera().component<Camera>();
+		auto& camera = scene.mainCamera().get<Camera>();
 		glm::mat4 projectionMatrix = camera.projectionMatrix;
 		projectionMatrix[1][1] *= -1.0f; // Flip y-axis 
 
-		auto& transform = selected.component<Transform>();
+		auto& transform = selected.get<Transform>();
 		glm::mat4 transformMatrix = transform.matrix();
 
 		float snapValue = 0.5f;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/device.h"
+#include <vulkan/vulkan.h>
 
 namespace Aegix::Graphics
 {
@@ -18,12 +18,12 @@ namespace Aegix::Graphics
 			VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D;
 		};
 
-		explicit ImageView(VulkanDevice& device);
+		ImageView() = default;
 		ImageView(const ImageView&) = delete;
 		ImageView(ImageView&& other) noexcept;
 		~ImageView();
 
-		auto operator=(const ImageView&)->ImageView & = delete;
+		auto operator=(const ImageView&) -> ImageView& = delete;
 		auto operator=(ImageView&& other) noexcept -> ImageView&;
 
 		operator VkImageView() const { return m_imageView; }
@@ -38,7 +38,6 @@ namespace Aegix::Graphics
 	private:
 		void destroy();
 
-		VulkanDevice& m_device;
 		VkImageView m_imageView = VK_NULL_HANDLE;
 	};
 }

@@ -13,19 +13,19 @@ namespace Aegix::Graphics
 	class TransparentPass : public FrameGraphRenderPass
 	{
 	public:
-		TransparentPass(FrameGraph& framegraph, VulkanDevice& device, DescriptorPool& pool)
+		TransparentPass(FrameGraph& framegraph, DescriptorPool& pool)
 		{
 			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Transparency);
 
-			stage.descriptorSetLayout = DescriptorSetLayout::Builder(device)
+			stage.descriptorSetLayout = DescriptorSetLayout::Builder{}
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 				.build();
 
-			auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
-			stage.ubo = std::make_unique<Buffer>(device, sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
+			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
 
-			stage.descriptorSet = DescriptorSet::Builder(device, pool, *stage.descriptorSetLayout)
+			stage.descriptorSet = DescriptorSet::Builder(pool, *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
 				.build();
 		}
@@ -89,7 +89,7 @@ namespace Aegix::Graphics
 			if (!mainCamera)
 				return;
 
-			auto& camera = mainCamera.component<Camera>();
+			auto& camera = mainCamera.get<Camera>();
 			TransparentUbo ubo{
 				.view = camera.viewMatrix,
 				.projection = camera.projectionMatrix

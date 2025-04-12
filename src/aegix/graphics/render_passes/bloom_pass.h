@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 	public:
 		static constexpr uint32_t BLOOM_MIP_LEVELS = 6;
 
-		BloomPass(VulkanDevice& device, DescriptorPool& pool);
+		BloomPass(DescriptorPool& pool);
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void createResources(FrameGraphResourcePool& resources) override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
@@ -56,17 +56,14 @@ namespace Aegix::Graphics
 		BloomUpsample m_upsample;
 
 		std::unique_ptr<Pipeline> m_thresholdPipeline;
-		std::unique_ptr<PipelineLayout> m_thresholdPipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_thresholdSetLayout;
 		std::unique_ptr<DescriptorSet> m_thresholdSet;
 
 		std::unique_ptr<Pipeline> m_downsamplePipeline;
-		std::unique_ptr<PipelineLayout> m_downsamplePipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_downsampleSetLayout;
 		std::vector<std::unique_ptr<DescriptorSet>> m_downsampleSets;
 
 		std::unique_ptr<Pipeline> m_upsamplePipeline;
-		std::unique_ptr<PipelineLayout> m_upsamplePipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_upsampleSetLayout;
 		std::vector<std::unique_ptr<DescriptorSet>> m_upsampleSets;
 	};

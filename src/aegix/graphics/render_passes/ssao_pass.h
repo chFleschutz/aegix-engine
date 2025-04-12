@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 		inline static constexpr uint32_t SAMPLE_COUNT = 64;
 		inline static constexpr uint32_t NOISE_SIZE = 16;
 
-		SSAOPass(VulkanDevice& device, DescriptorPool& pool);
+		SSAOPass(DescriptorPool& pool);
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
@@ -36,7 +36,6 @@ namespace Aegix::Graphics
 		FrameGraphResourceHandle m_ssao;
 
 		std::unique_ptr<Pipeline> m_pipeline;
-		std::unique_ptr<PipelineLayout> m_pipelineLayout;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
