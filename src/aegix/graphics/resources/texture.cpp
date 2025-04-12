@@ -321,7 +321,7 @@ namespace Aegix::Graphics
 		// Upload data to staging buffer
 		auto& device = m_image.device();
 		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
-		Buffer stagingBuffer{ device, imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 		stagingBuffer.singleWrite(pixels);
 
 		stbi_image_free(pixels);

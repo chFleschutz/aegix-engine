@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize vertexBufferSize = sizeof(glm::vec3) * vertices.size();
-			m_vertexBuffer = std::make_unique<Buffer>(device, vertexBufferSize, 1,
+			m_vertexBuffer = std::make_unique<Buffer>(vertexBufferSize, 1,
 				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			m_vertexBuffer->upload(vertices.data(), vertexBufferSize);
 		}
@@ -58,7 +58,7 @@ namespace Aegix::Graphics
 			};
 
 			VkDeviceSize indexBufferSize = sizeof(uint32_t) * indices.size();
-			m_indexBuffer = std::make_unique<Buffer>(device, indexBufferSize, 1,
+			m_indexBuffer = std::make_unique<Buffer>(indexBufferSize, 1,
 				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 			m_indexBuffer->upload(indices.data(), indexBufferSize);
 		}

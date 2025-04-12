@@ -9,7 +9,7 @@
 namespace Aegix::Graphics
 {
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
-		: m_ubo{ Buffer::createUniformBuffer(device, sizeof(LightingUniforms)) }
+		: m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) }
 	{
 		m_gbufferSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)

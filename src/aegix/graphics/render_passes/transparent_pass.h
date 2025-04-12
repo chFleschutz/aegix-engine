@@ -22,7 +22,7 @@ namespace Aegix::Graphics
 				.build();
 
 			auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
-			stage.ubo = std::make_unique<Buffer>(device, sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
 
 			stage.descriptorSet = DescriptorSet::Builder(pool, *stage.descriptorSetLayout)

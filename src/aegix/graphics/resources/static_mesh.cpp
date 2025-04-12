@@ -115,7 +115,7 @@ namespace Aegix::Graphics
 			return;
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
-		m_indexBuffer = std::make_unique<Buffer>(m_device, bufferSize, 1,
+		m_indexBuffer = std::make_unique<Buffer>(bufferSize, 1,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 		m_indexBuffer->upload(indices.data(), bufferSize);
 	}

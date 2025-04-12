@@ -1,6 +1,9 @@
 #pragma once
 
-#include "graphics/device.h"
+#include "graphics/globals.h"
+
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics
 {
@@ -8,10 +11,10 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
-		static auto createUniformBuffer(VulkanDevice& device, VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
-		static auto createStagingBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer;
+		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
+		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
 
-		Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
+		Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
 			VmaAllocationCreateFlags allocFlags = 0, VkDeviceSize minOffsetAlignment = 0);
 		Buffer(const Buffer&) = delete;
 		Buffer(Buffer&& other) noexcept;
@@ -69,8 +72,6 @@ namespace Aegix::Graphics
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 
 		void destroy();
-
-		VulkanDevice& m_device;
 
 		VkBuffer m_buffer = VK_NULL_HANDLE;
 		VmaAllocation m_allocation = VK_NULL_HANDLE;

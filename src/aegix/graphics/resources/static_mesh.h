@@ -42,7 +42,7 @@ namespace Aegix::Graphics
 			AGX_ASSERT_X(attribute.size() >= 3, "Vertex attribute must have at least 3 elements");
 
 			size_t bufferSize = sizeof(T) * attribute.size();
-			auto attributeBuffer = std::make_unique<Buffer>(m_device, bufferSize, 1,
+			auto attributeBuffer = std::make_unique<Buffer>(bufferSize, 1,
 				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 			attributeBuffer->upload(attribute.data(), bufferSize);
 

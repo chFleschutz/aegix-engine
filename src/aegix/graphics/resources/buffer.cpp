@@ -2,39 +2,39 @@
 
 #include "buffer.h"
 
-#include "graphics/vulkan_tools.h"
 #include "graphics/vulkan_context.h"
+#include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	auto Buffer::createUniformBuffer(VulkanDevice& device, VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
-		auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
-		return Buffer{ device, size, instanceCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
+		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
 	}
 
-	auto Buffer::createStagingBuffer(VulkanDevice& device, VkDeviceSize size) -> Buffer
+	auto Buffer::createStagingBuffer(VkDeviceSize size) -> Buffer
 	{
-		return Buffer{ device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		return Buffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 	}
 
-	Buffer::Buffer(VulkanDevice& device, VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
+	Buffer::Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
 		VmaAllocationCreateFlags allocFlags, VkDeviceSize minOffsetAlignment)
-		: m_device{ device }, m_instanceSize{ instanceSize }, m_instanceCount{ instanceCount }, m_usage{ bufferUsage }
+		: m_instanceSize{ instanceSize }, m_instanceCount{ instanceCount }, m_usage{ bufferUsage }
 	{
 		m_alignmentSize = computeAlignment(instanceSize, minOffsetAlignment);
 		m_bufferSize = m_alignmentSize * instanceCount;
 
-		device.createBuffer(m_buffer, m_allocation, m_bufferSize, bufferUsage, allocFlags, VMA_MEMORY_USAGE_AUTO);
+		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, bufferUsage, allocFlags, VMA_MEMORY_USAGE_AUTO);
 
 		VmaAllocationInfo allocInfo;
-		vmaGetAllocationInfo(device.allocator(), m_allocation, &allocInfo);
+		vmaGetAllocationInfo(VulkanContext::device().allocator(), m_allocation, &allocInfo);
 		m_mapped = allocInfo.pMappedData;
 	}
 
 	Buffer::Buffer(Buffer&& other) noexcept
-		: m_device{ other.m_device }, m_buffer{ other.m_buffer }, m_allocation{ other.m_allocation },
+		: m_buffer{ other.m_buffer }, m_allocation{ other.m_allocation },
 		m_bufferSize{ other.m_bufferSize }, m_instanceSize{ other.m_instanceSize }, m_alignmentSize{ other.m_alignmentSize },
 		m_instanceCount{ other.m_instanceCount }, m_usage{ other.m_usage }, m_mapped{ other.m_mapped }
 	{
@@ -93,14 +93,14 @@ namespace Aegix::Graphics
 
 	void Buffer::map()
 	{
-		VK_CHECK(vmaMapMemory(m_device.allocator(), m_allocation, &m_mapped));
+		VK_CHECK(vmaMapMemory(VulkanContext::device().allocator(), m_allocation, &m_mapped));
 	}
 
 	void Buffer::unmap()
 	{
 		if (m_mapped)
 		{
-			vmaUnmapMemory(m_device.allocator(), m_allocation);
+			vmaUnmapMemory(VulkanContext::device().allocator(), m_allocation);
 			m_mapped = nullptr;
 		}
 	}
@@ -146,12 +146,12 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
-		VK_CHECK(vmaCopyMemoryToAllocation(m_device.allocator(), data, m_allocation, offset, size));
+		VK_CHECK(vmaCopyMemoryToAllocation(VulkanContext::device().allocator(), data, m_allocation, offset, size));
 	}
 
 	void Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
-		VK_CHECK(vmaFlushAllocation(m_device.allocator(), m_allocation, offset, size));
+		VK_CHECK(vmaFlushAllocation(VulkanContext::device().allocator(), m_allocation, offset, size));
 	}
 
 	void Buffer::flushIndex(int index)
@@ -161,14 +161,14 @@ namespace Aegix::Graphics
 
 	void Buffer::upload(const void* data, VkDeviceSize size)
 	{
-		Buffer stagingBuffer = Buffer::createStagingBuffer(m_device, size);
+		Buffer stagingBuffer = Buffer::createStagingBuffer(size);
 		stagingBuffer.singleWrite(data, size, 0);
 		stagingBuffer.copyTo(*this, size);
 	}
 
 	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
 	{
-		m_device.copyBuffer(m_buffer, dest.m_buffer, size);
+		VulkanContext::device().copyBuffer(m_buffer, dest.m_buffer, size);
 	}
 
 	auto Buffer::computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize
