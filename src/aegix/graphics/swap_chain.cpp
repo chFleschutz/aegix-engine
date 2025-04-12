@@ -3,11 +3,12 @@
 #include "swap_chain.h"
 
 #include "graphics/vulkan_tools.h"
+#include "graphics/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
-	SwapChain::SwapChain(VulkanDevice& device, VkExtent2D windowExtent)
-		: m_device{ device }, m_windowExtent{ windowExtent }
+	SwapChain::SwapChain(VkExtent2D windowExtent)
+		: m_windowExtent{ windowExtent }
 	{
 		createSwapChain();
 		createImageViews();
@@ -22,21 +23,21 @@ namespace Aegix::Graphics
 		// cleanup synchronization objects
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroySemaphore(m_device.device(), m_renderFinishedSemaphores[i], nullptr);
-			vkDestroySemaphore(m_device.device(), m_imageAvailableSemaphores[i], nullptr);
-			vkDestroyFence(m_device.device(), m_inFlightFences[i], nullptr);
+			vkDestroySemaphore(VulkanContext::device(), m_renderFinishedSemaphores[i], nullptr);
+			vkDestroySemaphore(VulkanContext::device(), m_imageAvailableSemaphores[i], nullptr);
+			vkDestroyFence(VulkanContext::device(), m_inFlightFences[i], nullptr);
 		}
 	}
 
 	auto SwapChain::acquireNextImage() -> VkResult
 	{
-		vkWaitForFences(m_device.device(), 
+		vkWaitForFences(VulkanContext::device(),
 			1, 
 			&m_inFlightFences[m_currentFrame],
 			VK_TRUE, 
 			std::numeric_limits<uint64_t>::max());
 
-		VkResult result = vkAcquireNextImageKHR(m_device.device(),
+		VkResult result = vkAcquireNextImageKHR(VulkanContext::device(),
 			m_swapChain,
 			std::numeric_limits<uint64_t>::max(),
 			m_imageAvailableSemaphores[m_currentFrame],  // must be a not signaled semaphore
@@ -49,7 +50,7 @@ namespace Aegix::Graphics
 	auto SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult
 	{
 		if (m_imagesInFlight[m_currentImageIndex] != VK_NULL_HANDLE)
-			vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[m_currentImageIndex], VK_TRUE, UINT64_MAX);
+			vkWaitForFences(VulkanContext::device(), 1, &m_imagesInFlight[m_currentImageIndex], VK_TRUE, UINT64_MAX);
 
 		m_imagesInFlight[m_currentImageIndex] = m_inFlightFences[m_currentFrame];
 
@@ -69,8 +70,8 @@ namespace Aegix::Graphics
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences(m_device.device(), 1, &m_inFlightFences[m_currentFrame]);
-		VK_CHECK(vkQueueSubmit(m_device.graphicsQueue(), 1, &submitInfo, m_inFlightFences[m_currentFrame]));
+		vkResetFences(VulkanContext::device(), 1, &m_inFlightFences[m_currentFrame]);
+		VK_CHECK(vkQueueSubmit(VulkanContext::device().graphicsQueue(), 1, &submitInfo, m_inFlightFences[m_currentFrame]));
 
 		VkSwapchainKHR swapChains[] = { m_swapChain };
 		VkPresentInfoKHR presentInfo = {};
@@ -81,7 +82,7 @@ namespace Aegix::Graphics
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &m_currentImageIndex;
 
-		auto result = vkQueuePresentKHR(m_device.presentQueue(), &presentInfo);
+		auto result = vkQueuePresentKHR(VulkanContext::device().presentQueue(), &presentInfo);
 
 		m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
@@ -102,7 +103,7 @@ namespace Aegix::Graphics
 
 	void SwapChain::createSwapChain()
 	{
-		SwapChainSupportDetails swapChainSupport = m_device.querySwapChainSupport();
+		SwapChainSupportDetails swapChainSupport = VulkanContext::device().querySwapChainSupport();
 		VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 		VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
 		VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
@@ -110,7 +111,7 @@ namespace Aegix::Graphics
 
 		VkSwapchainCreateInfoKHR createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = m_device.surface();
+		createInfo.surface = VulkanContext::device().surface();
 		createInfo.minImageCount = imageCount;
 		createInfo.imageFormat = surfaceFormat.format;
 		createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -123,7 +124,7 @@ namespace Aegix::Graphics
 		createInfo.clipped = VK_TRUE;
 		createInfo.oldSwapchain = m_swapChain;
 
-		QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
+		QueueFamilyIndices indices = VulkanContext::device().findPhysicalQueueFamilies();
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 		
 		std::array<uint32_t, 2> queueFamilyIndices{ indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -140,12 +141,12 @@ namespace Aegix::Graphics
 			createInfo.pQueueFamilyIndices = nullptr;
 		}
 
-		VK_CHECK(vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain));
+		VK_CHECK(vkCreateSwapchainKHR(VulkanContext::device(), &createInfo, nullptr, &m_swapChain));
 		destroySwapChain(createInfo.oldSwapchain);
 
-		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
+		vkGetSwapchainImagesKHR(VulkanContext::device(), m_swapChain, &imageCount, nullptr);
 		m_images.resize(imageCount);
-		vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, m_images.data());
+		vkGetSwapchainImagesKHR(VulkanContext::device(), m_swapChain, &imageCount, m_images.data());
 
 		m_format = surfaceFormat.format;
 		m_extent = extent;
@@ -153,7 +154,7 @@ namespace Aegix::Graphics
 		// At the beginning of a frame all swapchain images should be in present layout
 		for (const auto& image : m_images)
 		{
-			m_device.transitionImageLayout(image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+			VulkanContext::device().transitionImageLayout(image, m_format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		}
 	}
 
@@ -173,7 +174,7 @@ namespace Aegix::Graphics
 			viewInfo.subresourceRange.baseArrayLayer = 0;
 			viewInfo.subresourceRange.layerCount = 1;
 
-			VK_CHECK(vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_imageViews[i]));
+			VK_CHECK(vkCreateImageView(VulkanContext::device().device(), &viewInfo, nullptr, &m_imageViews[i]));
 		}
 	}
 
@@ -193,9 +194,9 @@ namespace Aegix::Graphics
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]));
-			VK_CHECK(vkCreateSemaphore(m_device.device(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]));
-			VK_CHECK(vkCreateFence(m_device.device(), &fenceInfo, nullptr, &m_inFlightFences[i]));
+			VK_CHECK(vkCreateSemaphore(VulkanContext::device(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphores[i]));
+			VK_CHECK(vkCreateSemaphore(VulkanContext::device(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphores[i]));
+			VK_CHECK(vkCreateFence(VulkanContext::device(), &fenceInfo, nullptr, &m_inFlightFences[i]));
 		}
 	}
 
@@ -203,7 +204,7 @@ namespace Aegix::Graphics
 	{
 		for (auto imageView : m_imageViews)
 		{
-			vkDestroyImageView(m_device.device(), imageView, nullptr);
+			vkDestroyImageView(VulkanContext::device(), imageView, nullptr);
 		}
 		m_imageViews.clear();
 	}
@@ -212,7 +213,7 @@ namespace Aegix::Graphics
 	{
 		if (swapChain)
 		{
-			vkDestroySwapchainKHR(m_device.device(), swapChain, nullptr);
+			vkDestroySwapchainKHR(VulkanContext::device(), swapChain, nullptr);
 		}
 	}
 
@@ -279,7 +280,7 @@ namespace Aegix::Graphics
 	auto SwapChain::findDepthFormat() -> VkFormat
 	{
 		// TODO: Rendersystems assume VK_FORMAT_D32_SFLOAT as the depth format
-		return m_device.findSupportedFormat(
+		return VulkanContext::device().findSupportedFormat(
 			{ VK_FORMAT_D32_SFLOAT/*, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT*/ },
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);

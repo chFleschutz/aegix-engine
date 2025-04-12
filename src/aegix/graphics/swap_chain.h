@@ -1,19 +1,17 @@
 #pragma once
 
-#include "graphics/device.h"
+#include <vulkan/vulkan.h>
 
 namespace Aegix::Graphics
 {
 	class SwapChain
 	{
 	public:
-		SwapChain(VulkanDevice& device, VkExtent2D windowExtent);
+		SwapChain(VkExtent2D windowExtent);
 		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
 
 		void operator=(const SwapChain&) = delete;
-
-		[[nodiscard]] auto device() const -> VulkanDevice& { return m_device; }
 
 		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
 		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
@@ -49,8 +47,6 @@ namespace Aegix::Graphics
 		auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) const -> VkPresentModeKHR;
 		auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const -> VkExtent2D;
 		auto chooseImageCount(const VkSurfaceCapabilitiesKHR& capabilities) const -> uint32_t;
-
-		VulkanDevice& m_device;
 
 		VkFormat m_format;
 		VkExtent2D m_extent;

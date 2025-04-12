@@ -4,6 +4,7 @@
 
 #include "core/profiler.h"
 #include "graphics/graphics.h"
+#include "graphics/vulkan_context.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -17,7 +18,7 @@ namespace Aegix::UI
 		: m_layerStack{ layerStack }
 	{
 		auto& renderer = graphics.renderer();
-		auto& device = renderer.device();
+		auto& device = Graphics::VulkanContext::device();
 		auto& window = renderer.window();
 
 		IMGUI_CHECKVERSION();

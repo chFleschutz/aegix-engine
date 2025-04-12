@@ -18,8 +18,8 @@
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Core::Window& window, VulkanDevice& device)
-		: m_window{ window }, m_device{ device }, m_swapChain{ device, window.extent() }
+	Renderer::Renderer(Core::Window& window)
+		: m_window{ window }, m_swapChain{ window.extent()}
 	{
 		createCommandBuffers();
 		createDescriptorPool();
@@ -29,8 +29,8 @@ namespace Aegix::Graphics
 	Renderer::~Renderer()
 	{
 		vkFreeCommandBuffers(
-			m_device.device(),
-			m_device.commandPool(),
+			VulkanContext::device(),
+			VulkanContext::device().commandPool(),
 			static_cast<uint32_t>(m_commandBuffers.size()),
 			m_commandBuffers.data()
 		);
@@ -75,7 +75,7 @@ namespace Aegix::Graphics
 
 	void Renderer::waitIdle()
 	{
-		vkDeviceWaitIdle(m_device.device());
+		vkDeviceWaitIdle(VulkanContext::device());
 	}
 
 	void Renderer::createCommandBuffers()
@@ -83,10 +83,10 @@ namespace Aegix::Graphics
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_device.commandPool();
+		allocInfo.commandPool = VulkanContext::device().commandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
 
-		VK_CHECK(vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()))
+		VK_CHECK(vkAllocateCommandBuffers(VulkanContext::device(), &allocInfo, m_commandBuffers.data()))
 	}
 
 	void Renderer::recreateSwapChain()
