@@ -140,7 +140,7 @@ namespace Aegix::Scene
 		if (info.uvs.size() != vertexCount)
 			info.uvs.resize(vertexCount, glm::vec2{ 0.0f });
 
-		auto mesh = std::make_shared<Graphics::StaticMesh>(Engine::instance().device(), info);
+		auto mesh = std::make_shared<Graphics::StaticMesh>(info);
 		m_meshes[meshIndex].emplace_back(mesh);
 		return mesh;
 	}

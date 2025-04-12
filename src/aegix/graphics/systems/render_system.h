@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/descriptors.h"
+#include "graphics/device.h"
 #include "graphics/frame_graph/render_stage.h"
 #include "graphics/frame_info.h"
 #include "graphics/pipeline.h"

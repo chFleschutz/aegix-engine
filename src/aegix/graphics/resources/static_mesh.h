@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/device.h"
 #include "graphics/resources/buffer.h"
 
 #include "glm/glm.hpp"
@@ -22,15 +21,15 @@ namespace Aegix::Graphics
 			void loadGLTF(const std::filesystem::path& filepath);
 		};
 
-		StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info);
+		explicit StaticMesh(const StaticMesh::MeshInfo& info);
+		StaticMesh(const StaticMesh&) = delete;
 		~StaticMesh() = default;
 
-		StaticMesh(const StaticMesh&) = delete;
-		StaticMesh& operator=(const StaticMesh&) = delete;
+		auto operator=(const StaticMesh&) -> StaticMesh& = delete;
 
-		static std::vector<VkVertexInputBindingDescription> defaultBindingDescriptions();
-		static std::vector<VkVertexInputAttributeDescription> defaultAttributeDescriptions();
-		static std::shared_ptr<StaticMesh> create(const std::filesystem::path& filepath);
+		static auto defaultBindingDescriptions() -> std::vector<VkVertexInputBindingDescription>;
+		static auto defaultAttributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>;
+		static auto create(const std::filesystem::path& filepath) -> std::shared_ptr<StaticMesh>;
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
@@ -53,8 +52,6 @@ namespace Aegix::Graphics
 
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-		VulkanDevice& m_device;
-		
 		std::vector<std::unique_ptr<Buffer>> m_attributeBuffers;
 		uint32_t m_vertexCount;
 

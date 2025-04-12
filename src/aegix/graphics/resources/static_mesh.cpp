@@ -3,17 +3,17 @@
 #include "static_mesh.h"
 
 #include "engine.h"
-#include "utils/file.h"
+#include "graphics/vulkan_context.h"
 
 #include "gltf.h"
 #include "gltf_utils.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 
 namespace Aegix::Graphics
 {
-	StaticMesh::StaticMesh(VulkanDevice& device, const StaticMesh::MeshInfo& info) : m_device{ device }
+	StaticMesh::StaticMesh(const StaticMesh::MeshInfo& info)
 	{
 		// Create vertex buffers (Order: Position, Color, Normal, UV)
 		m_vertexCount = static_cast<uint32_t>(info.positions.size());
@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 		createIndexBuffers(info.indices);
 	}
 
-	std::vector<VkVertexInputBindingDescription> StaticMesh::defaultBindingDescriptions()
+	auto StaticMesh::defaultBindingDescriptions() -> std::vector<VkVertexInputBindingDescription>
 	{
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(4);
 		bindingDescriptions[0].binding = 0;
@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> StaticMesh::defaultAttributeDescriptions()
+	auto StaticMesh::defaultAttributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
 		attributeDescriptions[0].binding = 0;
@@ -68,7 +68,7 @@ namespace Aegix::Graphics
 		return attributeDescriptions;
 	}
 
-	std::shared_ptr<StaticMesh> StaticMesh::create(const std::filesystem::path& filepath)
+	auto StaticMesh::create(const std::filesystem::path& filepath) -> std::shared_ptr<StaticMesh>
 	{
 		MeshInfo info{};
 		
@@ -85,7 +85,7 @@ namespace Aegix::Graphics
 			AGX_ASSERT_X(false, "Unsupported file format");
 		}
 
-		return std::make_shared<StaticMesh>(Engine::instance().device(), info);
+		return std::make_shared<StaticMesh>(info);
 	}
 
 	void StaticMesh::bind(VkCommandBuffer commandBuffer)
