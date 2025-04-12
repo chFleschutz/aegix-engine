@@ -18,7 +18,7 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipeline = Pipeline::ComputeBuilder{ device }
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(PostProcessingSettings))
 			.setShaderStage(SHADER_DIR "post_process.comp.spv")

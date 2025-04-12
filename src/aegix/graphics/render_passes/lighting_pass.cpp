@@ -30,7 +30,7 @@ namespace Aegix::Graphics
 			.build();
 		m_iblSet = std::make_unique<DescriptorSet>(pool, *m_iblSetLayout);
 
-		m_pipeline = Pipeline::ComputeBuilder(device)
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
 			.setShaderStage(SHADER_DIR "lighting.comp.spv")

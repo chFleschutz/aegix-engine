@@ -65,7 +65,7 @@ namespace Aegix::Graphics
 			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipeline = Pipeline::ComputeBuilder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
 			.buildUnique();
@@ -117,7 +117,7 @@ namespace Aegix::Graphics
 		} pushConstants;
 		pushConstants.envResolution = static_cast<float>(skybox->image().width());
 
-		auto pipeline = Pipeline::ComputeBuilder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
 			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
@@ -207,7 +207,7 @@ namespace Aegix::Graphics
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
-		auto pipeline = Pipeline::ComputeBuilder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
 			.buildUnique();
@@ -349,7 +349,7 @@ namespace Aegix::Graphics
 			.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
 
-		auto pipeline = Pipeline::ComputeBuilder{ device }
+		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
 			.buildUnique();

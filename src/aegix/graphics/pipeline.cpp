@@ -5,14 +5,12 @@
 #include "graphics/resources/static_mesh.h"
 #include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
-#include "utils/file.h"
 
 namespace Aegix::Graphics
 {
 	// Pipeline::GraphicsBuilder -------------------------------------------------
 
-	Pipeline::GraphicsBuilder::GraphicsBuilder(VulkanDevice& device)
-		: m_device{ device }
+	Pipeline::GraphicsBuilder::GraphicsBuilder()
 	{
 		Pipeline::defaultGraphicsPipelineConfig(m_graphicsConfig);
 	}
@@ -21,7 +19,7 @@ namespace Aegix::Graphics
 	{
 		for (auto& shaderStage : m_graphicsConfig.shaderStges)
 		{
-			vkDestroyShaderModule(m_device.device(), shaderStage.module, nullptr);
+			vkDestroyShaderModule(VulkanContext::device(), shaderStage.module, nullptr);
 		}
 	}
 
@@ -43,7 +41,7 @@ namespace Aegix::Graphics
 
 	auto Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath) -> Pipeline::GraphicsBuilder&
 	{
-		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
+		VkShaderModule shaderModule = Tools::createShaderModule(VulkanContext::device(), shaderPath);
 		m_graphicsConfig.shaderStges.emplace_back(Tools::createShaderStage(stage, shaderModule));
 
 		return *this;
@@ -122,26 +120,21 @@ namespace Aegix::Graphics
 
 	auto Pipeline::GraphicsBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
-		return std::make_unique<Pipeline>(m_device, m_layoutConfig, m_graphicsConfig);
+		return std::make_unique<Pipeline>(m_layoutConfig, m_graphicsConfig);
 	}
 
 	auto Pipeline::GraphicsBuilder::build() -> Pipeline
 	{
-		return Pipeline{ m_device, m_layoutConfig, m_graphicsConfig };
+		return Pipeline{ m_layoutConfig, m_graphicsConfig };
 	}
 
 	// ComputeBuilder ------------------------------------------------------------
-
-	Pipeline::ComputeBuilder::ComputeBuilder(VulkanDevice& device)
-		: m_device{ device }
-	{
-	}
 
 	Pipeline::ComputeBuilder::~ComputeBuilder()
 	{
 		if (m_computeConfig.shaderStage.module)
 		{
-			vkDestroyShaderModule(m_device, m_computeConfig.shaderStage.module, nullptr);
+			vkDestroyShaderModule(VulkanContext::device(), m_computeConfig.shaderStage.module, nullptr);
 		}
 	}
 
@@ -153,7 +146,7 @@ namespace Aegix::Graphics
 
 	auto Pipeline::ComputeBuilder::addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size) -> ComputeBuilder&
 	{
-		AGX_ASSERT_X(size <= m_device.properties().limits.maxPushConstantsSize, "Push constant size exceeds device limits");
+		AGX_ASSERT_X(size <= VulkanContext::device().properties().limits.maxPushConstantsSize, "Push constant size exceeds device limits");
 
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = stageFlags;
@@ -165,44 +158,39 @@ namespace Aegix::Graphics
 
 	auto Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath) -> Pipeline::ComputeBuilder&
 	{
-		VkShaderModule shaderModule = Tools::createShaderModule(m_device, shaderPath);
+		VkShaderModule shaderModule = Tools::createShaderModule(VulkanContext::device(), shaderPath);
 		m_computeConfig.shaderStage = Tools::createShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule);
 		return *this;
 	}
 
 	auto Pipeline::ComputeBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
-		return std::make_unique<Pipeline>(m_device, m_layoutConfig, m_computeConfig);
+		return std::make_unique<Pipeline>(m_layoutConfig, m_computeConfig);
 	}
 
 	auto Pipeline::ComputeBuilder::build() -> Pipeline
 	{
-		return Pipeline{ m_device, m_layoutConfig, m_computeConfig };
+		return Pipeline{ m_layoutConfig, m_computeConfig };
 	}
 
 	// Pipeline ------------------------------------------------------------------
 
-	Pipeline::Pipeline(VulkanDevice& device)
-		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
-	{
-	}
-
-	Pipeline::Pipeline(VulkanDevice& device, const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig)
-		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
+	Pipeline::Pipeline(const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig)
+		: m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
 	{
 		createPipelineLayout(layoutConfig);
 		createGraphicsPipeline(graphicsConfig);
 	}
 
-	Pipeline::Pipeline(VulkanDevice& device, const LayoutConfig& layoutConfig, const ComputeConfig& computeConfig)
-		: m_device{ device }, m_bindPoint{ VK_PIPELINE_BIND_POINT_COMPUTE }
+	Pipeline::Pipeline(const LayoutConfig& layoutConfig, const ComputeConfig& computeConfig)
+		: m_bindPoint{ VK_PIPELINE_BIND_POINT_COMPUTE }
 	{
 		createPipelineLayout(layoutConfig);
 		createComputePipeline(computeConfig);
 	}
 
 	Pipeline::Pipeline(Pipeline&& other) noexcept
-		: m_device{ other.m_device }, m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }
+		: m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }
 	{
 		other.m_pipeline = VK_NULL_HANDLE;
 	}
@@ -313,7 +301,7 @@ namespace Aegix::Graphics
 		layoutInfo.pushConstantRangeCount = static_cast<uint32_t>(config.pushConstantRanges.size());
 		layoutInfo.pPushConstantRanges = config.pushConstantRanges.data();
 
-		VK_CHECK(vkCreatePipelineLayout(m_device, &layoutInfo, nullptr, &m_Layout));
+		VK_CHECK(vkCreatePipelineLayout(VulkanContext::device(), &layoutInfo, nullptr, &m_Layout));
 	}
 
 	void Pipeline::createGraphicsPipeline(const Pipeline::GraphicsConfig& config)
@@ -346,7 +334,7 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		VK_CHECK(vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
+		VK_CHECK(vkCreateGraphicsPipelines(VulkanContext::device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
 	void Pipeline::createComputePipeline(const ComputeConfig& config)
@@ -360,7 +348,7 @@ namespace Aegix::Graphics
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
-		VK_CHECK(vkCreateComputePipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
+		VK_CHECK(vkCreateComputePipelines(VulkanContext::device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
 
 	void Pipeline::destroy()

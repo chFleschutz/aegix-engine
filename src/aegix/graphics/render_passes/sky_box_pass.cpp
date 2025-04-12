@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipeline = Pipeline::GraphicsBuilder(device)
+		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")

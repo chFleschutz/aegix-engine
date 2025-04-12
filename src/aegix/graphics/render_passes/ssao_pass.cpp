@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
 
-		m_pipeline = Pipeline::ComputeBuilder(device)
+		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "ssao.comp.spv")
 			.buildUnique();

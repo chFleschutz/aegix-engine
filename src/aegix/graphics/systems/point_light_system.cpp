@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	PointLightSystem::PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device, globalSetLayout)
 	{
-		m_pipeline = Pipeline::GraphicsBuilder(m_device)
+		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(globalSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PointLightPushConstants))
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")

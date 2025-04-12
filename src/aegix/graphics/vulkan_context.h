@@ -16,6 +16,7 @@ namespace Aegix::Graphics
 		auto operator=(VulkanContext&&) -> VulkanContext& = delete;
 
 		[[nodiscard]] static auto instance() -> VulkanContext&;
+		[[nodiscard]] static auto device() -> VulkanDevice& { return instance().m_device; }
 
 		static auto initialize(Core::Window& window) -> VulkanContext&;
 		static void destroy();
@@ -27,8 +28,6 @@ namespace Aegix::Graphics
 		static void destroy(VkPipeline pipeline);
 		static void destroy(VkPipelineLayout pipelineLayout);
 		static void flushDeletionQueue(uint32_t frameIndex);
-
-		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
 
 	private:
 		VulkanContext() = default;

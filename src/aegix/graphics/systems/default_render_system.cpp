@@ -43,7 +43,7 @@ namespace Aegix::Graphics
 			.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
-		m_pipeline = Pipeline::GraphicsBuilder(m_device)
+		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(globalSetLayout)
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PushConstantData))

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/device.h"
+#include <vulkan/vulkan.h>
 
 namespace Aegix::Graphics
 {
@@ -39,7 +39,7 @@ namespace Aegix::Graphics
 		class GraphicsBuilder
 		{
 		public:
-			GraphicsBuilder(VulkanDevice& device);
+			GraphicsBuilder();
 			~GraphicsBuilder();
 
 			auto addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout) -> GraphicsBuilder&;
@@ -58,7 +58,6 @@ namespace Aegix::Graphics
 			auto build() -> Pipeline;
 
 		private:
-			VulkanDevice& m_device;
 			LayoutConfig m_layoutConfig;
 			GraphicsConfig m_graphicsConfig;
 		};
@@ -71,7 +70,7 @@ namespace Aegix::Graphics
 		class ComputeBuilder
 		{
 		public:
-			ComputeBuilder(VulkanDevice& device);
+			ComputeBuilder() = default;
 			~ComputeBuilder();
 
 			auto addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout) -> ComputeBuilder&;
@@ -83,14 +82,13 @@ namespace Aegix::Graphics
 			auto build() -> Pipeline;
 
 		private:
-			VulkanDevice& m_device;
 			LayoutConfig m_layoutConfig;
 			ComputeConfig m_computeConfig;
 		};
 
-		Pipeline(VulkanDevice& device);
-		Pipeline(VulkanDevice& device, const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig);
-		Pipeline(VulkanDevice& device, const LayoutConfig& layoutConfig, const ComputeConfig& computeConfig);
+		Pipeline() = default;
+		Pipeline(const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig);
+		Pipeline(const LayoutConfig& layoutConfig, const ComputeConfig& computeConfig);
 		Pipeline(const Pipeline&) = delete;
 		Pipeline(Pipeline&& other) noexcept;
 		~Pipeline();
@@ -122,9 +120,8 @@ namespace Aegix::Graphics
 		void createComputePipeline(const ComputeConfig& config);
 		void destroy();
 
-		VulkanDevice& m_device;
 		VkPipelineLayout m_Layout = VK_NULL_HANDLE;
 		VkPipeline m_pipeline = VK_NULL_HANDLE;
-		VkPipelineBindPoint m_bindPoint;
+		VkPipelineBindPoint m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	};
 }
