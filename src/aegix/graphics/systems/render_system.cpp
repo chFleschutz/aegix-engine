@@ -4,8 +4,7 @@
 
 namespace Aegix::Graphics
 {
-	RenderSystem::RenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
-		: m_device{ device } 
+	RenderSystem::RenderSystem(VkDescriptorSetLayout globalSetLayout)
 	{
 	}
 }

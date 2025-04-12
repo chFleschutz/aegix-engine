@@ -6,7 +6,7 @@
 
 namespace Aegix::Graphics
 {
-	BloomPass::BloomPass(VulkanDevice& device, DescriptorPool& pool)
+	BloomPass::BloomPass(DescriptorPool& pool)
 	{
 		m_sampler.create(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false);
 

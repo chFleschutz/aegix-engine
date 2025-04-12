@@ -159,7 +159,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraphResourcePool::createResources(VulkanDevice& device)
+	void FrameGraphResourcePool::createResources()
 	{
 		// Accumulate usage flags for each resource reference
 		for (auto& initialResource : m_resources)

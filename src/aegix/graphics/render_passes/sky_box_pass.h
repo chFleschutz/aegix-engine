@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 	class SkyBoxPass : public FrameGraphRenderPass
 	{
 	public:
-		SkyBoxPass(VulkanDevice& device, DescriptorPool& pool);
+		SkyBoxPass(DescriptorPool& pool);
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;

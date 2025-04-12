@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics/descriptors.h"
-#include "graphics/device.h"
 #include "graphics/frame_graph/render_stage.h"
 #include "graphics/frame_info.h"
 #include "graphics/pipeline.h"
@@ -12,7 +11,7 @@ namespace Aegix::Graphics
 	class RenderSystem
 	{
 	public:
-		RenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
+		RenderSystem(VkDescriptorSetLayout globalSetLayout);
 		RenderSystem(const RenderSystem&) = delete;
 		virtual ~RenderSystem() = default;
 
@@ -23,7 +22,6 @@ namespace Aegix::Graphics
 		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) = 0;
 
 	protected:
-		VulkanDevice& m_device;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<Pipeline> m_pipeline;
 	};

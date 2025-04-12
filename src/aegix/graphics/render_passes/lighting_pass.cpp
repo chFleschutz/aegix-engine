@@ -8,7 +8,7 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
+	LightingPass::LightingPass(DescriptorPool& pool)
 		: m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) }
 	{
 		m_gbufferSetLayout = DescriptorSetLayout::Builder{}

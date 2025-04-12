@@ -25,15 +25,15 @@ namespace Aegix::Graphics
 		template<ValidRenderSystem T>
 		auto addRenderSystem() -> RenderSystem&
 		{
-			return m_frameGraph.resourcePool().addRenderSystem<T>(m_device, T::STAGE);
+			return m_frameGraph.resourcePool().addRenderSystem<T>(T::STAGE);
 		}
 
 		template<ValidMaterial T, typename... Args>
-			requires std::constructible_from<typename T::Instance, VulkanDevice&, DescriptorSetLayout&, DescriptorPool&, Args...>
+			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, DescriptorPool&, Args...>
 		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
 		{
 			auto& system = addRenderSystem<typename T::RenderSystem>();
-			return std::make_shared<typename T::Instance>(m_device, system.descriptorSetLayout(),
+			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(),
 				*m_globalPool, std::forward<Args>(args)...);
 		}
 

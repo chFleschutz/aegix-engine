@@ -18,7 +18,7 @@ namespace Aegix::Graphics
 
 		static constexpr RenderStage::Type STAGE = RenderStage::Type::Transparency;
 
-		PointLightSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout);
+		PointLightSystem(VkDescriptorSetLayout globalSetLayout);
 
 		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
 	};

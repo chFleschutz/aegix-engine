@@ -6,7 +6,7 @@
 
 namespace Aegix::Graphics
 {
-	SkyBoxPass::SkyBoxPass(VulkanDevice& device, DescriptorPool& pool)
+	SkyBoxPass::SkyBoxPass(DescriptorPool& pool)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)

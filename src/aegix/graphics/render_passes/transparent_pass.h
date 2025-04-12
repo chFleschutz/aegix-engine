@@ -13,7 +13,7 @@ namespace Aegix::Graphics
 	class TransparentPass : public FrameGraphRenderPass
 	{
 	public:
-		TransparentPass(FrameGraph& framegraph, VulkanDevice& device, DescriptorPool& pool)
+		TransparentPass(FrameGraph& framegraph, DescriptorPool& pool)
 		{
 			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Transparency);
 
@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 				.build();
 
-			auto aligment = device.properties().limits.minUniformBufferOffsetAlignment;
+			auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
 			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
 

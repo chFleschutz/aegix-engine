@@ -126,17 +126,17 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.add<GeometryPass>(m_frameGraph, m_device, *m_globalPool);
-		m_frameGraph.add<TransparentPass>(m_frameGraph, m_device, *m_globalPool);
-		m_frameGraph.add<LightingPass>(m_device, *m_globalPool);
+		m_frameGraph.add<GeometryPass>(m_frameGraph, *m_globalPool);
+		m_frameGraph.add<TransparentPass>(m_frameGraph, *m_globalPool);
+		m_frameGraph.add<LightingPass>(*m_globalPool);
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
-		m_frameGraph.add<PostProcessingPass>(m_device, *m_globalPool);
-		m_frameGraph.add<BloomPass>(m_device, *m_globalPool);
-		m_frameGraph.add<SSAOPass>(m_device, *m_globalPool);
-		m_frameGraph.add<SkyBoxPass>(m_device, *m_globalPool);
+		m_frameGraph.add<PostProcessingPass>(*m_globalPool);
+		m_frameGraph.add<BloomPass>(*m_globalPool);
+		m_frameGraph.add<SSAOPass>(*m_globalPool);
+		m_frameGraph.add<SkyBoxPass>(*m_globalPool);
 
-		m_frameGraph.compile(m_device);
+		m_frameGraph.compile();
 	}
 
 	auto Renderer::beginFrame() -> VkCommandBuffer

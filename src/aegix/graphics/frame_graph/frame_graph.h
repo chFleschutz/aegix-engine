@@ -30,7 +30,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNodeHandle>& { return m_nodeHandles; }
 
 		/// @brief Compiles the frame graph by sorting the nodes and creating resources
-		void compile(VulkanDevice& device);
+		void compile();
 
 		/// @brief Executes the frame graph by executing each node in order
 		void execute(const FrameInfo& frameInfo);

@@ -2,23 +2,19 @@
 
 #include "default_render_system.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan_tools.h"
 #include "math/math.h"
 
 namespace Aegix::Graphics
 {
-	DefaultMaterialInstance::DefaultMaterialInstance(VulkanDevice& device, DescriptorSetLayout& setLayout, DescriptorPool& pool,
+	DefaultMaterialInstance::DefaultMaterialInstance(DescriptorSetLayout& setLayout, DescriptorPool& pool,
 		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data)
 		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
 		m_aoTexture{ ao }, m_emissiveTexture{ emissive }, 
 		m_uniformBuffer{ Buffer::createUniformBuffer(sizeof(DefaultMaterial::Data)) }
 	{
-		//for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		//{
-		//	m_uniformBuffer.writeToIndex(&data, i);
-		//}
-
 		m_uniformBuffer.singleWrite(&data);
 
 		m_descriptorSet = DescriptorSet::Builder(pool, setLayout)
@@ -31,8 +27,8 @@ namespace Aegix::Graphics
 			.build();
 	}
 
-	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
-		: RenderSystem(device, globalSetLayout)
+	DefaultRenderSystem::DefaultRenderSystem(VkDescriptorSetLayout globalSetLayout)
+		: RenderSystem(globalSetLayout)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)

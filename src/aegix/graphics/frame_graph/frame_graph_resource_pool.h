@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/globals.h"
-#include "graphics/device.h"
 #include "graphics/frame_graph/render_stage.h"
 #include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
@@ -156,7 +155,7 @@ namespace Aegix::Graphics
 
 		template<typename T>
 			requires std::is_base_of_v<RenderSystem, T>
-		RenderSystem& addRenderSystem(VulkanDevice& device, RenderStage::Type stageType)
+		RenderSystem& addRenderSystem(RenderStage::Type stageType)
 		{
 			auto& stage = renderStage(stageType);
 
@@ -167,7 +166,7 @@ namespace Aegix::Graphics
 					return *system;
 			}
 
-			stage.renderSystems.emplace_back(std::make_unique<T>(device, *stage.descriptorSetLayout));
+			stage.renderSystems.emplace_back(std::make_unique<T>(*stage.descriptorSetLayout));
 			return *stage.renderSystems.back();
 		}
 
@@ -176,7 +175,7 @@ namespace Aegix::Graphics
 
 		/// @brief For all reference resources, resolve the handle to the actual resource
 		void resolveReferences();
-		void createResources(VulkanDevice& device);
+		void createResources();
 
 		void resizeImages(uint32_t width, uint32_t height);
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#define ENGINE_DIR PROJECT_DIR "/"
-#define SHADER_DIR ENGINE_DIR "shaders/"
-#define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
-
 #include "graphics/deletion_queue.h"
 #include "core/window.h"
 

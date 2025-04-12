@@ -48,7 +48,7 @@ namespace Aegix::Graphics
 
 	// FrameGraph ----------------------------------------------------------------
 
-	void FrameGraph::compile(VulkanDevice& device)
+	void FrameGraph::compile()
 	{
 		m_resourcePool.resolveReferences();
 
@@ -57,7 +57,7 @@ namespace Aegix::Graphics
 
 		// TODO: Resource aliasing
 
-		m_resourcePool.createResources(device);
+		m_resourcePool.createResources();
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);

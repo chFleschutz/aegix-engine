@@ -8,7 +8,7 @@
 
 namespace Aegix::Graphics
 {
-	PostProcessingPass::PostProcessingPass(VulkanDevice& device, DescriptorPool& pool)
+	PostProcessingPass::PostProcessingPass(DescriptorPool& pool)
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)

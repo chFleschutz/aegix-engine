@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 	class PostProcessingPass : public FrameGraphRenderPass
 	{
 	public:
-		PostProcessingPass(VulkanDevice& device, DescriptorPool& pool);
+		PostProcessingPass(DescriptorPool& pool);
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;

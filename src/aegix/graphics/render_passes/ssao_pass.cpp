@@ -10,7 +10,7 @@
 
 namespace Aegix::Graphics
 {
-	SSAOPass::SSAOPass(VulkanDevice& device, DescriptorPool& pool)
+	SSAOPass::SSAOPass(DescriptorPool& pool)
 		: m_uniforms{ Buffer::createUniformBuffer(sizeof(SSAOUniforms)) },
 		m_ssaoSamples{ Buffer::createUniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
