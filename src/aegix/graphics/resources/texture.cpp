@@ -53,7 +53,7 @@ namespace Aegix::Graphics
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -105,7 +105,7 @@ namespace Aegix::Graphics
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, mipLevelCount);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -199,7 +199,7 @@ namespace Aegix::Graphics
 		lut->create2D(imgageConfig, samplerConfig);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 		auto& pool = Engine::instance().renderer().globalPool();
@@ -336,7 +336,7 @@ namespace Aegix::Graphics
 		createCube(cubeSize, cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
 		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{ device }
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();

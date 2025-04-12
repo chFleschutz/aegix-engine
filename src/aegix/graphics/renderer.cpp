@@ -106,7 +106,7 @@ namespace Aegix::Graphics
 	void Renderer::createDescriptorPool()
 	{
 		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
-		m_globalPool = DescriptorPool::Builder(m_device)
+		m_globalPool = DescriptorPool::Builder{}
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
 			.setMaxSets(1000)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)

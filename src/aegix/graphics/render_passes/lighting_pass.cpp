@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	LightingPass::LightingPass(VulkanDevice& device, DescriptorPool& pool)
 		: m_ubo{ Buffer::createUniformBuffer(device, sizeof(LightingUniforms)) }
 	{
-		m_gbufferSetLayout = DescriptorSetLayout::Builder(device)
+		m_gbufferSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 			.build();
 		m_gbufferSet = std::make_unique<DescriptorSet>(pool, *m_gbufferSetLayout);
 
-		m_iblSetLayout = DescriptorSetLayout::Builder(device)
+		m_iblSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)

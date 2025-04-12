@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 		}
 
 		// Threshold
-		m_thresholdSetLayout = DescriptorSetLayout::Builder{ device }
+		m_thresholdSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		// Downsample
-		m_downsampleSetLayout = DescriptorSetLayout::Builder{ device }
+		m_downsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
@@ -48,7 +48,7 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		// Upsample
-		m_upsampleSetLayout = DescriptorSetLayout::Builder{ device }
+		m_upsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();

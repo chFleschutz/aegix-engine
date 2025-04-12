@@ -21,7 +21,7 @@ namespace Aegix::Graphics
 
 		m_uniformBuffer.singleWrite(&data);
 
-		m_descriptorSet = DescriptorSet::Builder(device, pool, setLayout)
+		m_descriptorSet = DescriptorSet::Builder(pool, setLayout)
 			.addBuffer(0, m_uniformBuffer)
 			.addTexture(1, m_albedoTexture)
 			.addTexture(2, m_normalTexture)
@@ -34,7 +34,7 @@ namespace Aegix::Graphics
 	DefaultRenderSystem::DefaultRenderSystem(VulkanDevice& device, VkDescriptorSetLayout globalSetLayout)
 		: RenderSystem(device, globalSetLayout)
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder(m_device)
+		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
