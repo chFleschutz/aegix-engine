@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/globals.h"
+#include "graphics/device.h"
 #include "graphics/frame_graph/render_stage.h"
 #include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
@@ -180,8 +181,8 @@ namespace Aegix::Graphics
 		void resizeImages(uint32_t width, uint32_t height);
 
 	private:
-		void createTexture(VulkanDevice& device, FrameGraphResource& resource);
-		void createBuffer(VulkanDevice& device, FrameGraphResource& resource);
+		void createTexture(FrameGraphResource& resource);
+		void createBuffer(FrameGraphResource& resource);
 
 		std::vector<FrameGraphNode> m_nodes;
 		std::vector<FrameGraphResource> m_resources;

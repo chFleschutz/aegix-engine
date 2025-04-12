@@ -1,9 +1,9 @@
 #pragma once
 
-#include "graphics/device.h"
 #include "graphics/resources/buffer.h"
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include <glm/glm.hpp>
 
@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 			VkImageCreateFlags flags = 0;
 		};
 
-		Image(VulkanDevice& device);
+		Image() = default;
 		Image(const Image&) = delete;
 		Image(Image&& other) noexcept;
 		~Image();
@@ -35,7 +35,6 @@ namespace Aegix::Graphics
 
 		operator VkImage() const { return m_image; }
 
-		[[nodiscard]] auto device() -> VulkanDevice& { return m_device; }
 		[[nodiscard]] auto image() const -> VkImage { return m_image; }
 		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
 		[[nodiscard]] auto extent() const -> VkExtent3D { return m_extent; }
@@ -68,7 +67,6 @@ namespace Aegix::Graphics
 	private:
 		void destroy();
 
-		VulkanDevice& m_device;
 		VkImage m_image = VK_NULL_HANDLE;
 		VmaAllocation m_allocation = VK_NULL_HANDLE;
 		VkFormat m_format = VK_FORMAT_UNDEFINED;

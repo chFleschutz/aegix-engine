@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 
 		if (texturePath.extension() == ".hdr")
 		{
-			auto texture = std::make_shared<Texture>(Engine::instance().device());
+			auto texture = std::make_shared<Texture>();
 			texture->createCube(texturePath);
 			return texture;
 		}
@@ -29,14 +29,14 @@ namespace Aegix::Graphics
 
 	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>(Engine::instance().device());
+		auto texture = std::make_shared<Texture>();
 		texture->create2D(texturePath, format);
 		return texture;
 	}
 
 	auto Texture::create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>(Engine::instance().device());
+		auto texture = std::make_shared<Texture>();
 		texture->create2D(1, 1, format, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		texture->m_image.fillRGBA8(color);
 		return texture;
@@ -48,7 +48,7 @@ namespace Aegix::Graphics
 
 		// Create irradiance map
 		constexpr uint32_t irradianceSize = 32;
-		auto irradiance = std::make_shared<Texture>(device);
+		auto irradiance = std::make_shared<Texture>();
 		irradiance->createCube(irradianceSize, irradianceSize, VK_FORMAT_R16G16B16A16_SFLOAT,
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
@@ -100,7 +100,7 @@ namespace Aegix::Graphics
 		// Create prefiltered map
 		constexpr uint32_t prefilteredSize = 128;
 		constexpr uint32_t mipLevelCount = 5;
-		auto prefiltered = std::make_shared<Texture>(device);
+		auto prefiltered = std::make_shared<Texture>();
 		prefiltered->createCube(prefilteredSize, prefilteredSize, VK_FORMAT_R16G16B16A16_SFLOAT,
 			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, mipLevelCount);
 
@@ -131,7 +131,7 @@ namespace Aegix::Graphics
 		mipViews.reserve(mipLevelCount);
 		for (uint32_t i = 0; i < mipLevelCount; ++i)
 		{
-			auto& view = mipViews.emplace_back(device);
+			auto& view = mipViews.emplace_back();
 			view.create(prefiltered->image(), ImageView::Config{
 				.baseMipLevel = i,
 				.levelCount = 1,
@@ -195,7 +195,7 @@ namespace Aegix::Graphics
 			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		};
-		auto lut = std::make_shared<Texture>(device);
+		auto lut = std::make_shared<Texture>();
 		lut->create2D(imgageConfig, samplerConfig);
 
 		// Create pipeline resources
@@ -233,11 +233,6 @@ namespace Aegix::Graphics
 	}
 
 
-
-	Texture::Texture(VulkanDevice& device)
-		: m_image{ device }, m_view{ device }, m_sampler{ device }
-	{
-	}
 
 	void Texture::create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
 	{
@@ -319,7 +314,6 @@ namespace Aegix::Graphics
 		}
 
 		// Upload data to staging buffer
-		auto& device = m_image.device();
 		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
 		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
 		stagingBuffer.singleWrite(pixels);
@@ -327,7 +321,7 @@ namespace Aegix::Graphics
 		stbi_image_free(pixels);
 
 		// Create spherical image
-		Texture spherialImage{ device };
+		Texture spherialImage{};
 		spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), VK_FORMAT_R32G32B32A32_SFLOAT,
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 
@@ -355,7 +349,7 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		// Convert spherical image to cubemap
-		VkCommandBuffer cmd = device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
 		{
 			spherialImage.image().copyFrom(cmd, stagingBuffer);
@@ -372,7 +366,7 @@ namespace Aegix::Graphics
 			m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)

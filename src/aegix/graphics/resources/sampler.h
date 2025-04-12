@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/device.h"
+#include <vulkan/vulkan.h>
 
 namespace Aegix::Graphics
 {
@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 			bool anisotropy = true;
 		};
 
-		Sampler(VulkanDevice& device);
+		Sampler() = default;
 		Sampler(const Sampler&) = delete;
 		Sampler(Sampler&& other) noexcept;
 		~Sampler();
@@ -35,7 +35,6 @@ namespace Aegix::Graphics
 	private:
 		void destroy();
 
-		VulkanDevice& m_device;
 		VkSampler m_sampler = VK_NULL_HANDLE;
 	};
 }

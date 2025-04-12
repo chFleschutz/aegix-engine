@@ -13,13 +13,7 @@
 
 namespace Aegix::Graphics
 {
-	Image::Image(VulkanDevice& device)
-		: m_device{ device }
-	{
-	}
-
 	Image::Image(Image&& other) noexcept
-		: m_device{ other.m_device }
 	{
 		m_image = other.m_image;
 		m_allocation = other.m_allocation;
@@ -95,7 +89,7 @@ namespace Aegix::Graphics
 		VmaAllocationCreateInfo allocInfo{};
 		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-		m_device.createImage(m_image, m_allocation, imageInfo, allocInfo);
+		VulkanContext::device().createImage(m_image, m_allocation, imageInfo, allocInfo);
 	}
 
 	void Image::create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels, uint32_t layerCount)
@@ -144,13 +138,13 @@ namespace Aegix::Graphics
 
 	void Image::fill(const Buffer& buffer)
 	{
-		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 
 		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
 		Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
 		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		m_device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Image::fill(const void* data, VkDeviceSize size)
@@ -205,9 +199,9 @@ namespace Aegix::Graphics
 	{
 		if (m_layout == newLayout)
 			return;
-		VkCommandBuffer cmd = m_device.beginSingleTimeCommands();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
 		transitionLayout(cmd, newLayout);
-		m_device.endSingleTimeCommands(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	void Image::transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout)

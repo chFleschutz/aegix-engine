@@ -99,13 +99,13 @@ namespace Aegix::Scene
 
 		m_skybox = createEntity("Skybox");
 		auto& env = m_skybox.add<Environment>();
-		env.skybox = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.skybox = std::make_shared<Graphics::Texture>();
 		env.skybox->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.skybox->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		env.irradiance = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.irradiance = std::make_shared<Graphics::Texture>();
 		env.irradiance->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.irradiance->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
-		env.prefiltered = std::make_shared<Graphics::Texture>(Engine::instance().device());
+		env.prefiltered = std::make_shared<Graphics::Texture>();
 		env.prefiltered->createCube(1, 1, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
 		env.prefiltered->image().fillSFLOAT(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
 		env.brdfLUT = Graphics::Texture::createBRDFLUT();

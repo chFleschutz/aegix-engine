@@ -18,7 +18,7 @@ namespace Aegix::Graphics
 		static auto createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
 		static auto createBRDFLUT() -> std::shared_ptr<Texture>;
 
-		explicit Texture(VulkanDevice& device);
+		Texture() = default;
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) noexcept = default;
 		~Texture() = default;

@@ -7,13 +7,12 @@
 namespace Aegix::Graphics
 {
 	BloomPass::BloomPass(VulkanDevice& device, DescriptorPool& pool)
-		: m_sampler{ device }
 	{
 		m_sampler.create(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false);
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 		{
-			m_mipViews.emplace_back(device);
+			m_mipViews.emplace_back();
 		}
 
 		// Threshold
