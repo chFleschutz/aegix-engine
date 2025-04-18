@@ -56,7 +56,7 @@ namespace Aegix::Graphics
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		auto descriptorSet = std::make_shared<DescriptorSet>(VulkanContext::descriptorPool(), *descriptorSetLayout);
+		auto descriptorSet = std::make_shared<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
 			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
@@ -134,7 +134,7 @@ namespace Aegix::Graphics
 				.viewType = VK_IMAGE_VIEW_TYPE_CUBE
 				});
 
-			descriptorSets.emplace_back(VulkanContext::descriptorPool(), *descriptorSetLayout);
+			descriptorSets.emplace_back(*descriptorSetLayout);
 			DescriptorWriter{ *descriptorSetLayout }
 				.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
 				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, view, VK_IMAGE_LAYOUT_GENERAL })
@@ -195,7 +195,7 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		auto descriptorSet = std::make_shared<DescriptorSet>(VulkanContext::descriptorPool(), *descriptorSetLayout);
+		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.build(descriptorSet->descriptorSet(0));
@@ -327,8 +327,7 @@ namespace Aegix::Graphics
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-
-		auto descriptorSet = std::make_shared<DescriptorSet>(VulkanContext::descriptorPool(), *descriptorSetLayout);
+		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 
 		DescriptorWriter{ *descriptorSetLayout }
 			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))

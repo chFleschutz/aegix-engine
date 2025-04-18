@@ -22,14 +22,14 @@ namespace Aegix::Graphics
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
-		m_gbufferSet = std::make_unique<DescriptorSet>(VulkanContext::descriptorPool(), *m_gbufferSetLayout);
+		m_gbufferSet = std::make_unique<DescriptorSet>(*m_gbufferSetLayout);
 
 		m_iblSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
-		m_iblSet = std::make_unique<DescriptorSet>(VulkanContext::descriptorPool(), *m_iblSetLayout);
+		m_iblSet = std::make_unique<DescriptorSet>(*m_iblSetLayout);
 
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)

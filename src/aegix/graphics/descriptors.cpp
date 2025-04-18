@@ -109,7 +109,7 @@ namespace Aegix::Graphics
 		vkDestroyDescriptorPool(VulkanContext::device(), m_descriptorPool, nullptr);
 	}
 
-	bool DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
+	void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
 	{
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -117,12 +117,7 @@ namespace Aegix::Graphics
 		allocInfo.pSetLayouts = &descriptorSetLayout;
 		allocInfo.descriptorSetCount = 1;
 
-		// Todo: Might want to create a "DescriptorPoolManager" class that handles this case, and builds
-		// a new pool whenever an old pool fills up, see https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/
-		if (vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptor) != VK_SUCCESS)
-			return false;
-
-		return true;
+		VK_CHECK(vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptor))
 	}
 
 	void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
@@ -258,7 +253,7 @@ namespace Aegix::Graphics
 
 	auto DescriptorSet::Builder::build() -> std::unique_ptr<DescriptorSet>
 	{
-		auto set = std::make_unique<DescriptorSet>(m_pool, m_setLayout);
+		auto set = std::make_unique<DescriptorSet>(m_setLayout);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			m_writer[i].build(set->m_descriptorSets[i]);
@@ -266,12 +261,11 @@ namespace Aegix::Graphics
 		return set;
 	}
 
-	DescriptorSet::DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout)
+	DescriptorSet::DescriptorSet(DescriptorSetLayout& setLayout)
 	{
 		for (auto& set : m_descriptorSets)
 		{
-			auto result = pool.allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
-			AGX_ASSERT_X(result, "Failed to allocate descriptor set");
+			VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
 		}
 	}
 

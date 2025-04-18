@@ -13,7 +13,7 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(VulkanContext::descriptorPool(), *m_descriptorSetLayout);
+		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
 		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)

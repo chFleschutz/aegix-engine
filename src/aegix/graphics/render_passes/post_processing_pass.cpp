@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(VulkanContext::descriptorPool(), *m_descriptorSetLayout);
+		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
