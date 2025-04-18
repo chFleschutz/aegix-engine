@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 	class DefaultMaterialInstance
 	{
 	public:
-		DefaultMaterialInstance(DescriptorSetLayout& setLayout, DescriptorPool& pool,
+		DefaultMaterialInstance(DescriptorSetLayout& setLayout, 
 			std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 			std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data = {});
 

@@ -28,17 +28,15 @@ namespace Aegix::Graphics
 		}
 
 		template<ValidMaterial T, typename... Args>
-			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, DescriptorPool&, Args...>
+			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, Args...>
 		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
 		{
 			auto& system = addRenderSystem<typename T::RenderSystem>();
-			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(),
-				*m_globalPool, std::forward<Args>(args)...);
+			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(), std::forward<Args>(args)...);
 		}
 
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
-		[[nodiscard]] auto globalPool() -> DescriptorPool& { return *m_globalPool; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
 		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
 		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }
@@ -54,7 +52,6 @@ namespace Aegix::Graphics
 	private:
 		void createCommandBuffers();
 		void recreateSwapChain();
-		void createDescriptorPool();
 		void createFrameGraph();
 
 		auto beginFrame() -> VkCommandBuffer;
@@ -63,7 +60,6 @@ namespace Aegix::Graphics
 		Core::Window& m_window;
 		
 		SwapChain m_swapChain;
-		std::unique_ptr<DescriptorPool> m_globalPool;
 		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
 
 		int m_currentFrameIndex = 0;

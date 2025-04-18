@@ -33,7 +33,7 @@ namespace Aegix::Graphics
 	public:
 		static constexpr uint32_t BLOOM_MIP_LEVELS = 6;
 
-		BloomPass(DescriptorPool& pool);
+		BloomPass();
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void createResources(FrameGraphResourcePool& resources) override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;

@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 	class LightingPass : public FrameGraphRenderPass
 	{
 	public:
-		LightingPass(DescriptorPool& pool);
+		LightingPass();
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;

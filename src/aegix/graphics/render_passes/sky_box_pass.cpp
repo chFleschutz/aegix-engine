@@ -2,17 +2,18 @@
 
 #include "sky_box_pass.h"
 
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	SkyBoxPass::SkyBoxPass(DescriptorPool& pool)
+	SkyBoxPass::SkyBoxPass()
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
+		m_descriptorSet = std::make_unique<DescriptorSet>(VulkanContext::descriptorPool(), *m_descriptorSetLayout);
 
 		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)

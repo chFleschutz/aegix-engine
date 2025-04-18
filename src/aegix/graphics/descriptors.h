@@ -42,6 +42,8 @@ namespace Aegix::Graphics
 
 	class DescriptorPool
 	{
+		friend class DescriptorWriter;
+
 	public:
 		class Builder
 		{
@@ -51,7 +53,8 @@ namespace Aegix::Graphics
 			auto addPoolSize(VkDescriptorType descriptorType, uint32_t count) -> Builder&;
 			auto setPoolFlags(VkDescriptorPoolCreateFlags flags) -> Builder&;
 			auto setMaxSets(uint32_t count) -> Builder&;
-			auto build() const -> std::unique_ptr<DescriptorPool>;
+			auto build() const -> DescriptorPool;
+			auto buildUnique() const -> std::unique_ptr<DescriptorPool>;
 
 		private:
 			std::vector<VkDescriptorPoolSize> m_poolSizes{};
@@ -61,23 +64,22 @@ namespace Aegix::Graphics
 
 		DescriptorPool(uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
 			const std::vector<VkDescriptorPoolSize>& poolSizes);
-		~DescriptorPool();
 		DescriptorPool(const DescriptorPool&) = delete;
-		DescriptorPool& operator=(const DescriptorPool&) = delete;
+		DescriptorPool(DescriptorPool&&) = default;
+		~DescriptorPool();
+
+		auto operator=(const DescriptorPool&) -> DescriptorPool& = delete;
+		auto operator=(DescriptorPool&&) -> DescriptorPool& = default;
 
 		operator VkDescriptorPool() const { return m_descriptorPool; }
-		VkDescriptorPool descriptorPool() const { return m_descriptorPool; }
+		auto descriptorPool() const -> VkDescriptorPool { return m_descriptorPool; }
 
 		bool allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
-
 		void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
-
 		void resetPool();
 
 	private:
-		VkDescriptorPool m_descriptorPool;
-
-		friend class DescriptorWriter;
+		VkDescriptorPool m_descriptorPool{ VK_NULL_HANDLE };
 	};
 
 

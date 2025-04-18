@@ -65,19 +65,24 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags)
+	auto DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) -> DescriptorPool::Builder&
 	{
 		m_poolFlags = flags;
 		return *this;
 	}
 
-	DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count)
+	auto DescriptorPool::Builder::setMaxSets(uint32_t count) -> DescriptorPool::Builder&
 	{
 		m_maxSets = count;
 		return *this;
 	}
 
-	std::unique_ptr<DescriptorPool> DescriptorPool::Builder::build() const
+	auto DescriptorPool::Builder::build() const -> DescriptorPool
+	{
+		return DescriptorPool{ m_maxSets, m_poolFlags, m_poolSizes };
+	}
+
+	auto DescriptorPool::Builder::buildUnique() const -> std::unique_ptr<DescriptorPool>
 	{
 		return std::make_unique<DescriptorPool>(m_maxSets, m_poolFlags, m_poolSizes);
 	}
