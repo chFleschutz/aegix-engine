@@ -62,14 +62,15 @@ namespace Aegix::Graphics
 			VkDescriptorPoolCreateFlags m_poolFlags = 0;
 		};
 
+		DescriptorPool() = default;
 		DescriptorPool(uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
 			const std::vector<VkDescriptorPoolSize>& poolSizes);
 		DescriptorPool(const DescriptorPool&) = delete;
-		DescriptorPool(DescriptorPool&&) = default;
+		DescriptorPool(DescriptorPool&& other);
 		~DescriptorPool();
 
 		auto operator=(const DescriptorPool&) -> DescriptorPool& = delete;
-		auto operator=(DescriptorPool&&) -> DescriptorPool& = default;
+		auto operator=(DescriptorPool&& other) noexcept -> DescriptorPool&;
 
 		operator VkDescriptorPool() const { return m_descriptorPool; }
 		auto descriptorPool() const -> VkDescriptorPool { return m_descriptorPool; }

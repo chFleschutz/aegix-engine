@@ -18,7 +18,7 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] static auto instance() -> VulkanContext&;
 		[[nodiscard]] static auto device() -> VulkanDevice& { return instance().m_device; }
-		[[nodiscard]] static auto descriptorPool() -> DescriptorPool& { return *instance().m_descriptorPool; }
+		[[nodiscard]] static auto descriptorPool() -> DescriptorPool& { return instance().m_descriptorPool; }
 		[[nodiscard]] static auto deletionQueue() -> DeletionQueue& { return instance().m_deletionQueue; }
 
 		static auto initialize(Core::Window& window) -> VulkanContext&;
@@ -42,7 +42,7 @@ namespace Aegix::Graphics
 		// Deletion Queue
 
 		VulkanDevice m_device{};
-		std::unique_ptr<DescriptorPool> m_descriptorPool{};
+		DescriptorPool m_descriptorPool{};
 		DeletionQueue m_deletionQueue{};
 	};
 }

@@ -104,9 +104,28 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateDescriptorPool(VulkanContext::device(), &descriptorPoolInfo, nullptr, &m_descriptorPool))
 	}
 
+	DescriptorPool::DescriptorPool(DescriptorPool&& other)
+		: m_descriptorPool{ other.m_descriptorPool }
+	{
+		other.m_descriptorPool = VK_NULL_HANDLE;
+	}
+
 	DescriptorPool::~DescriptorPool()
 	{
-		vkDestroyDescriptorPool(VulkanContext::device(), m_descriptorPool, nullptr);
+		if (m_descriptorPool)
+		{
+			vkDestroyDescriptorPool(VulkanContext::device(), m_descriptorPool, nullptr);
+		}
+	}
+
+	auto DescriptorPool::operator=(DescriptorPool&& other) noexcept -> DescriptorPool&
+	{
+		if (this != &other)
+		{
+			m_descriptorPool = other.m_descriptorPool;
+			other.m_descriptorPool = VK_NULL_HANDLE;
+		}
+		return *this;
 	}
 
 	void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
