@@ -2,10 +2,10 @@
 
 namespace Aegix::Graphics
 {
-	class Material
+	class MaterialTemplate
 	{
 	public:
-
+		
 	private:
 
 	};
