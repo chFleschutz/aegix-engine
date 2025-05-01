@@ -3,12 +3,13 @@
 #include "post_processing_pass.h"
 
 #include "graphics/vulkan_tools.h"
+#include "graphics/vulkan_context.h"
 
 #include <imgui.h>
 
 namespace Aegix::Graphics
 {
-	PostProcessingPass::PostProcessingPass(DescriptorPool& pool)
+	PostProcessingPass::PostProcessingPass()
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
@@ -16,7 +17,7 @@ namespace Aegix::Graphics
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
+		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)

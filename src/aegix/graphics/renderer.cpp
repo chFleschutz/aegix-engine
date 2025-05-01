@@ -22,7 +22,6 @@ namespace Aegix::Graphics
 		: m_window{ window }, m_swapChain{ window.extent()}
 	{
 		createCommandBuffers();
-		createDescriptorPool();
 		createFrameGraph();
 	}
 
@@ -103,38 +102,17 @@ namespace Aegix::Graphics
 		m_frameGraph.swapChainResized(extent.width, extent.height);
 	}
 
-	void Renderer::createDescriptorPool()
-	{
-		// TODO: Let the pool grow dynamically (see: https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/)
-		m_globalPool = DescriptorPool::Builder{}
-			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
-			.setMaxSets(1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 500)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 4000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 2000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 500)
-			.build();
-	}
-
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.add<GeometryPass>(m_frameGraph, *m_globalPool);
-		m_frameGraph.add<TransparentPass>(m_frameGraph, *m_globalPool);
-		m_frameGraph.add<LightingPass>(*m_globalPool);
+		m_frameGraph.add<GeometryPass>(m_frameGraph);
+		m_frameGraph.add<TransparentPass>(m_frameGraph);
+		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
-		m_frameGraph.add<PostProcessingPass>(*m_globalPool);
-		m_frameGraph.add<BloomPass>(*m_globalPool);
-		m_frameGraph.add<SSAOPass>(*m_globalPool);
-		m_frameGraph.add<SkyBoxPass>(*m_globalPool);
+		m_frameGraph.add<PostProcessingPass>();
+		m_frameGraph.add<BloomPass>();
+		m_frameGraph.add<SSAOPass>();
+		m_frameGraph.add<SkyBoxPass>();
 
 		m_frameGraph.compile();
 	}

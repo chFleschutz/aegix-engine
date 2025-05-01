@@ -45,7 +45,7 @@ namespace Aegix::UI
 		initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
 		initInfo.Queue = device.graphicsQueue();
 		initInfo.PipelineCache = VK_NULL_HANDLE;
-		initInfo.DescriptorPool = renderer.globalPool();
+		initInfo.DescriptorPool = Graphics::VulkanContext::descriptorPool();
 		initInfo.Subpass = 0;
 		initInfo.MinImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
 		initInfo.ImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;

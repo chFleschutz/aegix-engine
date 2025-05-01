@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/device.h"
+#include "graphics/descriptors.h"
 #include "graphics/deletion_queue.h"
 
 namespace Aegix::Graphics
@@ -17,6 +18,8 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] static auto instance() -> VulkanContext&;
 		[[nodiscard]] static auto device() -> VulkanDevice& { return instance().m_device; }
+		[[nodiscard]] static auto descriptorPool() -> DescriptorPool& { return instance().m_descriptorPool; }
+		[[nodiscard]] static auto deletionQueue() -> DeletionQueue& { return instance().m_deletionQueue; }
 
 		static auto initialize(Core::Window& window) -> VulkanContext&;
 		static void destroy();
@@ -39,7 +42,7 @@ namespace Aegix::Graphics
 		// Deletion Queue
 
 		VulkanDevice m_device{};
-
+		DescriptorPool m_descriptorPool{};
 		DeletionQueue m_deletionQueue{};
 	};
 }

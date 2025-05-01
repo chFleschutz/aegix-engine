@@ -3,12 +3,13 @@
 #include "default_render_system.h"
 
 #include "core/globals.h"
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 #include "math/math.h"
 
 namespace Aegix::Graphics
 {
-	DefaultMaterialInstance::DefaultMaterialInstance(DescriptorSetLayout& setLayout, DescriptorPool& pool,
+	DefaultMaterialInstance::DefaultMaterialInstance(DescriptorSetLayout& setLayout, 
 		std::shared_ptr<Texture> albedo, std::shared_ptr<Texture> normal, std::shared_ptr<Texture> metalRoughness,
 		std::shared_ptr<Texture> ao, std::shared_ptr<Texture> emissive, DefaultMaterial::Data data)
 		: m_albedoTexture{ albedo }, m_normalTexture{ normal },	m_metalRoughnessTexture{ metalRoughness },
@@ -17,7 +18,7 @@ namespace Aegix::Graphics
 	{
 		m_uniformBuffer.singleWrite(&data);
 
-		m_descriptorSet = DescriptorSet::Builder(pool, setLayout)
+		m_descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), setLayout)
 			.addBuffer(0, m_uniformBuffer)
 			.addTexture(1, m_albedoTexture)
 			.addTexture(2, m_normalTexture)

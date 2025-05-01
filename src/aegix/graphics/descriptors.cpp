@@ -65,19 +65,24 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags)
+	auto DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) -> DescriptorPool::Builder&
 	{
 		m_poolFlags = flags;
 		return *this;
 	}
 
-	DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count)
+	auto DescriptorPool::Builder::setMaxSets(uint32_t count) -> DescriptorPool::Builder&
 	{
 		m_maxSets = count;
 		return *this;
 	}
 
-	std::unique_ptr<DescriptorPool> DescriptorPool::Builder::build() const
+	auto DescriptorPool::Builder::build() const -> DescriptorPool
+	{
+		return DescriptorPool{ m_maxSets, m_poolFlags, m_poolSizes };
+	}
+
+	auto DescriptorPool::Builder::buildUnique() const -> std::unique_ptr<DescriptorPool>
 	{
 		return std::make_unique<DescriptorPool>(m_maxSets, m_poolFlags, m_poolSizes);
 	}
@@ -99,12 +104,31 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateDescriptorPool(VulkanContext::device(), &descriptorPoolInfo, nullptr, &m_descriptorPool))
 	}
 
-	DescriptorPool::~DescriptorPool()
+	DescriptorPool::DescriptorPool(DescriptorPool&& other)
+		: m_descriptorPool{ other.m_descriptorPool }
 	{
-		vkDestroyDescriptorPool(VulkanContext::device(), m_descriptorPool, nullptr);
+		other.m_descriptorPool = VK_NULL_HANDLE;
 	}
 
-	bool DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
+	DescriptorPool::~DescriptorPool()
+	{
+		if (m_descriptorPool)
+		{
+			vkDestroyDescriptorPool(VulkanContext::device(), m_descriptorPool, nullptr);
+		}
+	}
+
+	auto DescriptorPool::operator=(DescriptorPool&& other) noexcept -> DescriptorPool&
+	{
+		if (this != &other)
+		{
+			m_descriptorPool = other.m_descriptorPool;
+			other.m_descriptorPool = VK_NULL_HANDLE;
+		}
+		return *this;
+	}
+
+	void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
 	{
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -112,12 +136,7 @@ namespace Aegix::Graphics
 		allocInfo.pSetLayouts = &descriptorSetLayout;
 		allocInfo.descriptorSetCount = 1;
 
-		// Todo: Might want to create a "DescriptorPoolManager" class that handles this case, and builds
-		// a new pool whenever an old pool fills up, see https://vkguide.dev/docs/extra-chapter/abstracting_descriptors/
-		if (vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptor) != VK_SUCCESS)
-			return false;
-
-		return true;
+		VK_CHECK(vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptor))
 	}
 
 	void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
@@ -253,7 +272,7 @@ namespace Aegix::Graphics
 
 	auto DescriptorSet::Builder::build() -> std::unique_ptr<DescriptorSet>
 	{
-		auto set = std::make_unique<DescriptorSet>(m_pool, m_setLayout);
+		auto set = std::make_unique<DescriptorSet>(m_setLayout);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			m_writer[i].build(set->m_descriptorSets[i]);
@@ -261,12 +280,11 @@ namespace Aegix::Graphics
 		return set;
 	}
 
-	DescriptorSet::DescriptorSet(DescriptorPool& pool, DescriptorSetLayout& setLayout)
+	DescriptorSet::DescriptorSet(DescriptorSetLayout& setLayout)
 	{
 		for (auto& set : m_descriptorSets)
 		{
-			auto result = pool.allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
-			AGX_ASSERT_X(result, "Failed to allocate descriptor set");
+			VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
 		}
 	}
 

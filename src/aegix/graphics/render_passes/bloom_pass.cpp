@@ -2,11 +2,14 @@
 
 #include "bloom_pass.h"
 
+#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan_context.h"
+
 #include <imgui.h>
 
 namespace Aegix::Graphics
 {
-	BloomPass::BloomPass(DescriptorPool& pool)
+	BloomPass::BloomPass()
 	{
 		m_sampler.create(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false);
 
@@ -21,7 +24,7 @@ namespace Aegix::Graphics
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		m_thresholdSet = std::make_unique<DescriptorSet>(pool, *m_thresholdSetLayout);
+		m_thresholdSet = std::make_unique<DescriptorSet>(*m_thresholdSetLayout);
 
 		m_thresholdPipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_thresholdSetLayout)
@@ -37,7 +40,7 @@ namespace Aegix::Graphics
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
-			m_downsampleSets.emplace_back(std::make_unique<DescriptorSet>(pool, *m_downsampleSetLayout));
+			m_downsampleSets.emplace_back(std::make_unique<DescriptorSet>(*m_downsampleSetLayout));
 		}
 
 		m_downsamplePipeline = Pipeline::ComputeBuilder{}
@@ -54,7 +57,7 @@ namespace Aegix::Graphics
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
-			m_upsampleSets.emplace_back(std::make_unique<DescriptorSet>(pool, *m_upsampleSetLayout));
+			m_upsampleSets.emplace_back(std::make_unique<DescriptorSet>(*m_upsampleSetLayout));
 		}
 
 		m_upsamplePipeline = Pipeline::ComputeBuilder{}

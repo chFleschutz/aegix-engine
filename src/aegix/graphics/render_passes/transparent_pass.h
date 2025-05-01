@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
@@ -13,7 +14,7 @@ namespace Aegix::Graphics
 	class TransparentPass : public FrameGraphRenderPass
 	{
 	public:
-		TransparentPass(FrameGraph& framegraph, DescriptorPool& pool)
+		TransparentPass(FrameGraph& framegraph)
 		{
 			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Transparency);
 
@@ -25,7 +26,7 @@ namespace Aegix::Graphics
 			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
 
-			stage.descriptorSet = DescriptorSet::Builder(pool, *stage.descriptorSetLayout)
+			stage.descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
 				.build();
 		}

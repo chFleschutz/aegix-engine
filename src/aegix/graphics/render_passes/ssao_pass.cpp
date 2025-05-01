@@ -2,6 +2,7 @@
 
 #include "ssao_pass.h"
 
+#include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 #include "math/interpolation.h"
 #include "math/random.h"
@@ -10,7 +11,7 @@
 
 namespace Aegix::Graphics
 {
-	SSAOPass::SSAOPass(DescriptorPool& pool)
+	SSAOPass::SSAOPass()
 		: m_uniforms{ Buffer::createUniformBuffer(sizeof(SSAOUniforms)) },
 		m_ssaoSamples{ Buffer::createUniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
@@ -23,7 +24,7 @@ namespace Aegix::Graphics
 			.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
-		m_descriptorSet = std::make_unique<DescriptorSet>(pool, *m_descriptorSetLayout);
+		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_descriptorSetLayout)
