@@ -9,33 +9,68 @@ namespace Aegix::Graphics
 	{
 	}
 
-	void MaterialTemplate::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath)
+	auto MaterialTemplate::alignTo(size_t size, size_t alignment) -> size_t
 	{
-		// TODO
+		return (size + alignment - 1) & ~(alignment - 1);
 	}
 
-	void MaterialTemplate::addDesciptor(const std::string& name, uint32_t set, uint32_t binding, VkDescriptorType type, VkShaderStageFlags stageFlags)
+	auto MaterialTemplate::std140Alignment(MaterialParamType type) -> size_t
 	{
-		// TODO
+		switch (type)
+		{
+		case MaterialParamType::Int: return 4;
+		case MaterialParamType::Float: return 4;
+		case MaterialParamType::Vec2: return 8;
+		case MaterialParamType::Vec3: return 16;
+		case MaterialParamType::Vec4: return 16;
+		default: return 16;
+		}
 	}
 
-	void MaterialTemplate::addPushConstant(VkShaderStageFlags stageFlags, size_t size)
+	auto MaterialTemplate::std140Size(MaterialParamType type) -> size_t
 	{
-		// TODO
+		switch (type)
+		{
+		case MaterialParamType::Int: return 4;
+		case MaterialParamType::Float: return 4;
+		case MaterialParamType::Vec2: return 8;
+		case MaterialParamType::Vec3: return 16;
+		case MaterialParamType::Vec4: return 16;
+		default: return 16; 
+		}
 	}
 
-	void MaterialTemplate::addColorAttachment(VkFormat format)
+	void MaterialTemplate::bind(VkCommandBuffer cmd)
 	{
-		// TODO
+		m_pipeline.bind(cmd);
 	}
 
-	void MaterialTemplate::setDepthAttachment(VkFormat format)
+	auto MaterialTemplate::hasParameter(const std::string& name) const -> bool
 	{
-		// TODO
+		return m_parameters.contains(name);
 	}
 
-	void MaterialTemplate::bind()
+	auto MaterialTemplate::queryDefaultParameter(const std::string& name) const -> MaterialParamValue
 	{
-		// TODO
+		auto it = m_parameters.find(name);
+		if (it != m_parameters.end())
+			return it->second.defaultValue;
+
+		AGX_ASSERT_X(false, "Material parameter not found");
+		return {};
+	}
+
+	void MaterialTemplate::addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue)
+	{
+		m_parameterSize = alignTo(m_parameterSize, std140Alignment(type));
+
+		m_parameters[name] = MaterialParameter{ 
+			.type = type,
+			.offset = m_parameterSize,
+			.size = std140Size(type),
+			.defaultValue = defaultValue,
+		};
+
+		m_parameterSize += m_parameters[name].size;
 	}
 }

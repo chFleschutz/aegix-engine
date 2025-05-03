@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/resources/material_template.h"
+#include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
 {
@@ -9,16 +10,21 @@ namespace Aegix::Graphics
 	public:
 		MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate);
 	
-		template <typename T>
-		void set(const std::string& name, const T& value)
+		template<typename T>
+		[[nodiscard]] auto queryParameter(const std::string& name) const -> T
 		{
-			// TODO
+			return std::get<T>(queryParameter(name));
 		}
+
+		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParamValue;
+		void setParameter(const std::string& name, const MaterialParamValue& value);
 
 		void bindPipeline(VkCommandBuffer cmd) const;
 		void bindDescriptorSet(VkCommandBuffer cmd) const;
 
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;
+		std::vector<DescriptorSet> m_descriptorSets;
+		std::unordered_map<std::string, MaterialParamValue> m_overrides;
 	};
 }
