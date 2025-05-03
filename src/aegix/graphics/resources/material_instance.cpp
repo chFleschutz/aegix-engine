@@ -8,4 +8,14 @@ namespace Aegix::Graphics
 		: m_template(std::move(materialTemplate))
 	{
 	}
+
+	void MaterialInstance::bindPipeline(VkCommandBuffer cmd) const
+	{
+		// TODO
+	}
+
+	void MaterialInstance::bindDescriptorSet(VkCommandBuffer cmd) const
+	{
+		// TODO
+	}
 }
