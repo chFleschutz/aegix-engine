@@ -45,6 +45,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] static auto std140Size(MaterialParamType type) -> size_t;
 
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
+		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
+		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
 		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
