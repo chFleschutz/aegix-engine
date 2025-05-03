@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 
 			stage.descriptorSetLayout = DescriptorSetLayout::Builder{}
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-				.build();
+				.buildUnique();
 
 			auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
 			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

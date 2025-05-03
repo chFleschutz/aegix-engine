@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build();
+			.buildUnique();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 

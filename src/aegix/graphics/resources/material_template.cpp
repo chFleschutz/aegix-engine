@@ -4,8 +4,10 @@
 
 namespace Aegix::Graphics
 {
-	MaterialTemplate::MaterialTemplate(Pipeline pipeline)
-		: m_pipeline{ std::move(pipeline) }
+	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
+		: m_pipeline{ std::move(pipeline) },
+		m_globalSetLayout{ std::move(globalSetLayout) },
+		m_materialSetLayout{ std::move(materialSetLayout) }
 	{
 	}
 
@@ -36,7 +38,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Vec2: return 8;
 		case MaterialParamType::Vec3: return 16;
 		case MaterialParamType::Vec4: return 16;
-		default: return 16; 
+		default: return 16;
 		}
 	}
 
@@ -64,7 +66,7 @@ namespace Aegix::Graphics
 	{
 		m_parameterSize = alignTo(m_parameterSize, std140Alignment(type));
 
-		m_parameters[name] = MaterialParameter{ 
+		m_parameters[name] = MaterialParameter{
 			.type = type,
 			.offset = m_parameterSize,
 			.size = std140Size(type),

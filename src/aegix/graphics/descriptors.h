@@ -7,6 +7,8 @@ namespace Aegix::Graphics
 {
 	class DescriptorSetLayout
 	{
+		friend class DescriptorWriter;
+
 	public:
 		class Builder
 		{
@@ -15,7 +17,8 @@ namespace Aegix::Graphics
 
 			auto addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
 				uint32_t count = 1) -> Builder&;
-			auto build() const -> std::unique_ptr<DescriptorSetLayout>;
+			auto buildUnique() const -> std::unique_ptr<DescriptorSetLayout>;
+			auto build() const -> DescriptorSetLayout;
 
 		private:
 			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings{};
@@ -23,19 +26,18 @@ namespace Aegix::Graphics
 
 		DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
+		DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
 		~DescriptorSetLayout();
 
 		auto operator=(const DescriptorSetLayout&) -> DescriptorSetLayout& = delete;
+		auto operator=(DescriptorSetLayout&& other) -> DescriptorSetLayout&;
 
 		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
-
 		auto descriptorSetLayout() const -> VkDescriptorSetLayout { return m_descriptorSetLayout; }
 
 	private:
 		VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;
-
-		friend class DescriptorWriter;
 	};
 
 

@@ -38,7 +38,7 @@ namespace Aegix::Graphics
 			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build();
+			.buildUnique();
 
 		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(globalSetLayout)

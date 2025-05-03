@@ -22,7 +22,7 @@ namespace Aegix::Graphics
 			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(4, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 

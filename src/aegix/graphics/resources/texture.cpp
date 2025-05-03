@@ -54,7 +54,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_shared<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
@@ -103,7 +103,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		struct PushConstants
 		{
@@ -193,7 +193,7 @@ namespace Aegix::Graphics
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
@@ -325,7 +325,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 

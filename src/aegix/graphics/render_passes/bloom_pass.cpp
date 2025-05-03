@@ -22,7 +22,7 @@ namespace Aegix::Graphics
 		m_thresholdSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		m_thresholdSet = std::make_unique<DescriptorSet>(*m_thresholdSetLayout);
 
@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 		m_downsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
@@ -53,7 +53,7 @@ namespace Aegix::Graphics
 		m_upsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{

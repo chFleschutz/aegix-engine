@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
 #include "graphics/resources/texture.h"
 #include "math/math.h"
@@ -38,7 +39,7 @@ namespace Aegix::Graphics
 	class MaterialTemplate
 	{
 	public:
-		MaterialTemplate(Pipeline pipeline);
+		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
 
 		[[nodiscard]] static auto alignTo(size_t size, size_t alignment) -> size_t;
 		[[nodiscard]] static auto std140Alignment(MaterialParamType type) -> size_t;
@@ -54,6 +55,8 @@ namespace Aegix::Graphics
 
 	private:
 		Pipeline m_pipeline;
+		DescriptorSetLayout m_globalSetLayout;		// Set 0
+		DescriptorSetLayout m_materialSetLayout;	// Set 1
 		size_t m_parameterSize = 0;
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 	};
