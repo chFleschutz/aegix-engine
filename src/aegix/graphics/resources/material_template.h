@@ -25,12 +25,13 @@ namespace Aegix::Graphics
 		Vec2,
 		Vec3,
 		Vec4,
-		Texture
+		Texture2D
 	};
 
 	struct MaterialParameter
 	{
 		MaterialParamType type;
+		uint32_t binding = 0;
 		size_t offset = 0;
 		size_t size = 0;
 		MaterialParamValue defaultValue;
@@ -52,6 +53,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
 		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
+
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
@@ -60,7 +62,8 @@ namespace Aegix::Graphics
 		Pipeline m_pipeline;
 		DescriptorSetLayout m_globalSetLayout;		// Set 0
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
-		size_t m_parameterSize = 0;
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
+		size_t m_parameterSize = 0;
+		uint32_t m_textureCount = 0;
 	};
 }

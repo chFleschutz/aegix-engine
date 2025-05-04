@@ -64,15 +64,29 @@ namespace Aegix::Graphics
 
 	void MaterialTemplate::addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue)
 	{
-		m_parameterSize = alignTo(m_parameterSize, std140Alignment(type));
+		AGX_ASSERT_X(!m_parameters.contains(name), "Material parameter already exists");
 
-		m_parameters[name] = MaterialParameter{
+		MaterialParameter param{
 			.type = type,
-			.offset = m_parameterSize,
-			.size = std140Size(type),
+			.binding = 0,
+			.offset = 0,
+			.size = 0,
 			.defaultValue = defaultValue,
 		};
 
-		m_parameterSize += m_parameters[name].size;
+		if (type == MaterialParamType::Texture2D)
+		{
+			m_textureCount++;
+			param.binding = m_textureCount;
+		}
+		else
+		{
+			size_t alignment = std140Alignment(type);
+			param.size = std140Size(type);
+			param.offset = alignTo(m_parameterSize, alignment);
+			m_parameterSize = param.offset + param.size;
+		}
+
+		m_parameters.emplace(name, std::move(param));
 	}
 }
