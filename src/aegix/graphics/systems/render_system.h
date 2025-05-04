@@ -2,7 +2,7 @@
 
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/render_stage.h"
-#include "graphics/frame_info.h"
+#include "graphics/render_context.h"
 #include "graphics/pipeline.h"
 
 namespace Aegix::Graphics
@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 
 		DescriptorSetLayout& descriptorSetLayout() { return *m_descriptorSetLayout; }
 
-		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) = 0;
+		virtual void render(const RenderContext& ctx, VkDescriptorSet globalSet) = 0;
 
 	protected:
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;

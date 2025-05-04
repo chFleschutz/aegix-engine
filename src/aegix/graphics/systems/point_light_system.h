@@ -20,6 +20,6 @@ namespace Aegix::Graphics
 
 		PointLightSystem(VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override;
+		virtual void render(const RenderContext& ctx, VkDescriptorSet globalSet) override;
 	};
 } 

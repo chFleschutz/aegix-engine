@@ -2,8 +2,9 @@
 
 #include "lighting_pass.h"
 
-#include "graphics/vulkan_tools.h"
 #include "graphics/vulkan_context.h"
+#include "graphics/vulkan_tools.h"
+#include "scene/components.h"
 
 #include <imgui.h>
 
@@ -82,12 +83,10 @@ namespace Aegix::Graphics
 		};
 	}
 
-	void LightingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void LightingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
-
-		updateLightingUBO(frameInfo);
-		auto& environment = frameInfo.scene.environment().get<Environment>();
+		updateLightingUBO(ctx);
+		auto& environment = ctx.scene.environment().get<Environment>();
 		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
 		DescriptorWriter{ *m_gbufferSetLayout }
@@ -98,20 +97,20 @@ namespace Aegix::Graphics
 			.writeImage(4, resources.texture(m_arm))
 			.writeImage(5, resources.texture(m_emissive))
 			.writeImage(6, resources.texture(m_ssao))
-			.writeBuffer(7, m_ubo, frameInfo.frameIndex)
-			.build(m_gbufferSet->descriptorSet(frameInfo.frameIndex));
+			.writeBuffer(7, m_ubo, ctx.frameIndex)
+			.build(m_gbufferSet->descriptorSet(ctx.frameIndex));
 
 		DescriptorWriter{ *m_iblSetLayout }
 			.writeImage(0, *environment.irradiance)
 			.writeImage(1, *environment.prefiltered)
 			.writeImage(2, *environment.brdfLUT)
-			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
+			.build(m_iblSet->descriptorSet(ctx.frameIndex));
 
-		m_pipeline->bind(cmd);
-		m_pipeline->bindDescriptorSet(cmd, 0, m_gbufferSet->descriptorSet(frameInfo.frameIndex));
-		m_pipeline->bindDescriptorSet(cmd, 1, m_iblSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->bind(ctx.cmd);
+		m_pipeline->bindDescriptorSet(ctx.cmd, 0, m_gbufferSet->descriptorSet(ctx.frameIndex));
+		m_pipeline->bindDescriptorSet(ctx.cmd, 1, m_iblSet->descriptorSet(ctx.frameIndex));
 
-		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
+		Tools::vk::cmdDispatch(ctx.cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
 	void LightingPass::drawUI()
@@ -127,25 +126,25 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
+	void LightingPass::updateLightingUBO(const RenderContext& ctx)
 	{
 		LightingUniforms lighting;
 
-		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+		Scene::Entity mainCamera = ctx.scene.mainCamera();
 		if (mainCamera && mainCamera.has<Transform>())
 		{
 			auto& cameraTransform = mainCamera.get<Transform>();
 			lighting.cameraPosition = glm::vec4(cameraTransform.location, 1.0f);
 		}
 
-		Scene::Entity ambientLight = frameInfo.scene.ambientLight();
+		Scene::Entity ambientLight = ctx.scene.ambientLight();
 		if (ambientLight && ambientLight.has<AmbientLight>())
 		{
 			auto& ambient = ambientLight.get<AmbientLight>();
 			lighting.ambient.color = glm::vec4(ambient.color, ambient.intensity);
 		}
 
-		Scene::Entity directionalLight = frameInfo.scene.directionalLight();
+		Scene::Entity directionalLight = ctx.scene.directionalLight();
 		if (directionalLight && directionalLight.has<DirectionalLight, Transform>())
 		{
 			auto& directional = directionalLight.get<DirectionalLight>();
@@ -155,7 +154,7 @@ namespace Aegix::Graphics
 		}
 
 		int32_t lighIndex = 0;
-		auto view = frameInfo.scene.registry().view<Transform, PointLight>();
+		auto view = ctx.scene.registry().view<Transform, PointLight>();
 		for (auto&& [entity, transform, pointLight] : view.each())
 		{
 			AGX_ASSERT_X(lighIndex < MAX_POINT_LIGHTS, "Point lights exceed maximum number of point lights");
@@ -170,6 +169,6 @@ namespace Aegix::Graphics
 		lighting.ambientOcclusionFactor = m_ambientOcclusionFactor;
 		lighting.viewMode = m_viewMode;
 
-		m_ubo.writeToIndex(&lighting, frameInfo.frameIndex);
+		m_ubo.writeToIndex(&lighting, ctx.frameIndex);
 	}
 }

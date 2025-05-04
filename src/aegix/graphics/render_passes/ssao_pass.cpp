@@ -6,6 +6,7 @@
 #include "graphics/vulkan_tools.h"
 #include "math/interpolation.h"
 #include "math/random.h"
+#include "scene/components.h"
 
 #include <imgui.h>
 
@@ -100,16 +101,14 @@ namespace Aegix::Graphics
 		};
 	}
 
-	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
 	{
 		// Update push constants
-		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
+		auto& camera = ctx.scene.mainCamera().get<Camera>();
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
-		m_uniforms.writeToIndex(&m_uniformData, frameInfo.frameIndex);
-
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
+		m_uniforms.writeToIndex(&m_uniformData, ctx.frameIndex);
 
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_ssao))
@@ -117,13 +116,13 @@ namespace Aegix::Graphics
 			.writeImage(2, resources.texture(m_normal))
 			.writeImage(3, *m_ssaoNoise)
 			.writeBuffer(4, m_ssaoSamples)
-			.writeBuffer(5, m_uniforms, frameInfo.frameIndex)
-			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+			.writeBuffer(5, m_uniforms, ctx.frameIndex)
+			.build(m_descriptorSet->descriptorSet(ctx.frameIndex));
 
-		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, m_pipeline->layout(), frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_pipeline->bind(ctx.cmd);
+		m_descriptorSet->bind(ctx.cmd, m_pipeline->layout(), ctx.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
+		Tools::vk::cmdDispatch(ctx.cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
 	void SSAOPass::drawUI()

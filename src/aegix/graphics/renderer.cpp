@@ -61,10 +61,6 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
 		FrameInfo frameInfo{
-			scene,
-			ui,
-			m_currentFrameIndex,
-			commandBuffer,
 			m_swapChain.extent(),
 			m_swapChain.aspectRatio()
 		};
@@ -76,7 +72,7 @@ namespace Aegix::Graphics
 			.frameIndex = m_currentFrameIndex
 		};
 		
-		m_frameGraph.execute(frameInfo); // TODO: Pass RenderContext to frame graph
+		m_frameGraph.execute(frameInfo, ctx);
 
 		endFrame(commandBuffer);
 	}

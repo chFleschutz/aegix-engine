@@ -4,6 +4,7 @@
 
 #include "engine.h"
 #include "math/math.h"
+#include "scene/components.h"
 
 #include <ImGuizmo.h>
 

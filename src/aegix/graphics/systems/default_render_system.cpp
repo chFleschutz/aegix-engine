@@ -6,6 +6,7 @@
 #include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 #include "math/math.h"
+#include "scene/components.h"
 
 namespace Aegix::Graphics
 {
@@ -55,15 +56,15 @@ namespace Aegix::Graphics
 			.buildUnique();
 	}
 
-	void DefaultRenderSystem::render(const FrameInfo& frameInfo, VkDescriptorSet globalSet)
+	void DefaultRenderSystem::render(const RenderContext& ctx, VkDescriptorSet globalSet)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
+		VkCommandBuffer cmd = ctx.cmd;
 
 		m_pipeline->bind(cmd);
 		m_pipeline->bindDescriptorSet(cmd, 0, globalSet);
 
 		DefaultMaterialInstance* lastMaterial = nullptr;
-		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, DefaultMaterial>();
+		auto view = ctx.scene.registry().view<GlobalTransform, Mesh, DefaultMaterial>();
 		for (auto&& [entity, globalTransform, mesh, material] : view.each())
 		{
 			if (mesh.staticMesh == nullptr || material.instance == nullptr)
@@ -76,7 +77,7 @@ namespace Aegix::Graphics
 				auto& descriptorSet = material.instance->m_descriptorSet;
 				AGX_ASSERT_X(descriptorSet != nullptr, "Material descriptor set is null");
 
-				m_pipeline->bindDescriptorSet(cmd, 1, descriptorSet->descriptorSet(frameInfo.frameIndex));
+				m_pipeline->bindDescriptorSet(cmd, 1, descriptorSet->descriptorSet(ctx.frameIndex));
 			}
 
 			// Push Constants

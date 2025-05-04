@@ -7,12 +7,9 @@ namespace Aegix::Graphics
 	class StaticMeshRenderSystem : public RenderSystemBase
 	{
 	public:
-		virtual void render(const FrameInfo& frameInfo, VkDescriptorSet globalSet) override
+		virtual void render(const RenderContext& ctx) override
 		{
 			// TODO
 		}
-
-	private:
-
 	};
 }

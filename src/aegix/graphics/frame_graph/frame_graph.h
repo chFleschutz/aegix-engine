@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/frame_info.h"
+#include "graphics/render_context.h"
 
 namespace Aegix::Graphics
 {
@@ -33,7 +34,7 @@ namespace Aegix::Graphics
 		void compile();
 
 		/// @brief Executes the frame graph by executing each node in order
-		void execute(const FrameInfo& frameInfo);
+		void execute(const FrameInfo& frameInfo, const RenderContext& ctx);
 
 		/// @brief Resizes all swapchain relative resources textures
 		void swapChainResized(uint32_t width, uint32_t height);

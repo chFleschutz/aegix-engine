@@ -72,16 +72,18 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraph::execute(const FrameInfo& frameInfo)
+	void FrameGraph::execute(const FrameInfo& frameInfo, const RenderContext& ctx)
 	{
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 
-			Tools::vk::cmdBeginDebugUtilsLabel(frameInfo.commandBuffer, node.name.c_str());
-			placeBarriers(frameInfo.commandBuffer, node);
-			node.pass->execute(m_resourcePool, frameInfo);
-			Tools::vk::cmdEndDebugUtilsLabel(frameInfo.commandBuffer);
+			Tools::vk::cmdBeginDebugUtilsLabel(ctx.cmd, node.name.c_str());
+			{
+				placeBarriers(ctx.cmd, node);
+				node.pass->execute(m_resourcePool, frameInfo, ctx);
+			}
+			Tools::vk::cmdEndDebugUtilsLabel(ctx.cmd);
 		}
 	}
 
@@ -135,17 +137,17 @@ namespace Aegix::Graphics
 		// Topological sort
 
 		// Contains the sorted nodes in reverse order at the end
-		std::vector<FrameGraphNodeHandle> sortedNodes; 
+		std::vector<FrameGraphNodeHandle> sortedNodes;
 		sortedNodes.reserve(m_nodeHandles.size());
 
 		// Stack for DFS
-		std::vector<FrameGraphNodeHandle> stack; 
+		std::vector<FrameGraphNodeHandle> stack;
 		stack.reserve(m_nodeHandles.size());
 
 		// Track nodes to avoid adding duplicates
 		constexpr uint8_t VISITED_ONCE = 1;
 		constexpr uint8_t ALREADY_ADDED = 2;
-		std::vector<uint8_t> visited(m_nodeHandles.size(), 0); 
+		std::vector<uint8_t> visited(m_nodeHandles.size(), 0);
 
 		// Depth First Search starting at each node 
 		for (const auto& nodeHandle : m_nodeHandles)

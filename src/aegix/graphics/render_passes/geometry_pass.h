@@ -4,6 +4,7 @@
 #include "graphics/systems/render_system.h"
 #include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
+#include "scene/components.h"
 
 namespace Aegix::Graphics
 {
@@ -109,11 +110,10 @@ namespace Aegix::Graphics
 			return info;
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override
 		{
-			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
 			auto& stage = resources.renderStage(RenderStage::Type::Geometry);
-			updateUBO(stage, frameInfo);
+			updateUBO(stage, frameInfo, ctx);
 
 			auto& position = resources.texture(m_position);
 			auto& normal = resources.texture(m_normal);
@@ -144,24 +144,24 @@ namespace Aegix::Graphics
 			renderInfo.pColorAttachments = colorAttachments.data();
 			renderInfo.pDepthAttachment = &depthAttachment;
 
-			vkCmdBeginRendering(commandBuffer, &renderInfo);
+			vkCmdBeginRendering(ctx.cmd, &renderInfo);
 
-			Tools::vk::cmdViewport(commandBuffer, extent);
-			Tools::vk::cmdScissor(commandBuffer, extent);
+			Tools::vk::cmdViewport(ctx.cmd, extent);
+			Tools::vk::cmdScissor(ctx.cmd, extent);
 
-			VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(frameInfo.frameIndex);
+			VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(ctx.frameIndex);
 			for (const auto& system : stage.renderSystems)
 			{
-				system->render(frameInfo, globalSet);
+				system->render(ctx, globalSet);
 			}
 
-			vkCmdEndRendering(commandBuffer);
+			vkCmdEndRendering(ctx.cmd);
 		}
 
 	private:
-		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
+		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo, const RenderContext& ctx)
 		{
-			Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+			Scene::Entity mainCamera = ctx.scene.mainCamera();
 			if (!mainCamera)
 				return;
 
@@ -174,7 +174,7 @@ namespace Aegix::Graphics
 				.inverseView = camera.inverseViewMatrix
 			};
 
-			stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
+			stage.ubo->writeToIndex(&ubo, ctx.frameIndex);
 		}
 
 		FrameGraphResourceHandle m_position;

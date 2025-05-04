@@ -124,14 +124,13 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void BloomPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void BloomPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
 		auto& bloom = resources.texture(m_bloom);
 
-		extractBrightRegions(cmd, frameInfo);
-		downSample(cmd, bloom);
-		upSample(cmd, bloom);
+		extractBrightRegions(ctx.cmd, frameInfo);
+		downSample(ctx.cmd, bloom);
+		upSample(ctx.cmd, bloom);
 	}
 
 	void BloomPass::drawUI()

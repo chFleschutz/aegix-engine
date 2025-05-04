@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan_context.h"
+#include "scene/components.h"
 
 namespace Aegix::Graphics
 {
@@ -49,12 +50,10 @@ namespace Aegix::Graphics
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override
 		{
-			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
-
 			auto& stage = resources.renderStage(RenderStage::Type::Transparency);
-			updateUBO(stage, frameInfo);
+			updateUBO(stage, ctx);
 
 			auto& sceneColor = resources.texture(m_sceneColor);
 			auto& depth = resources.texture(m_depth);
@@ -70,23 +69,23 @@ namespace Aegix::Graphics
 			renderingInfo.pColorAttachments = &colorAttachment;
 			renderingInfo.pDepthAttachment = &depthAttachment;
 
-			vkCmdBeginRendering(commandBuffer, &renderingInfo);
+			vkCmdBeginRendering(ctx.cmd, &renderingInfo);
 
-			Tools::vk::cmdViewport(commandBuffer, extent);
-			Tools::vk::cmdScissor(commandBuffer, extent);
+			Tools::vk::cmdViewport(ctx.cmd, extent);
+			Tools::vk::cmdScissor(ctx.cmd, extent);
 
 			for (const auto& system : stage.renderSystems)
 			{
-				system->render(frameInfo, stage.descriptorSet->descriptorSet(frameInfo.frameIndex));
+				system->render(ctx, stage.descriptorSet->descriptorSet(ctx.frameIndex));
 			}
 
-			vkCmdEndRendering(commandBuffer);
+			vkCmdEndRendering(ctx.cmd);
 		}
 
 	private:
-		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
+		void updateUBO(RenderStage& stage, const RenderContext& ctx)
 		{
-			Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+			Scene::Entity mainCamera = ctx.scene.mainCamera();
 			if (!mainCamera)
 				return;
 
@@ -96,7 +95,7 @@ namespace Aegix::Graphics
 				.projection = camera.projectionMatrix
 			};
 
-			stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
+			stage.ubo->writeToIndex(&ubo, ctx.frameIndex);
 		}
 
 		FrameGraphResourceHandle m_sceneColor;
