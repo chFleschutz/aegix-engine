@@ -28,7 +28,7 @@ namespace Aegix::Graphics
 
 			stage.descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), *stage.descriptorSetLayout)
 				.addBuffer(0, *stage.ubo)
-				.build();
+				.buildUnique();
 		}
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override

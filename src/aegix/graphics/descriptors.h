@@ -130,8 +130,8 @@ namespace Aegix::Graphics
 			auto addBuffer(uint32_t binding, const Buffer& buffer) -> Builder&;
 			auto addTexture(uint32_t binding, const Texture& texture) -> Builder&;
 			auto addTexture(uint32_t binding, std::shared_ptr<Texture> texture) -> Builder&;
-
-			auto build() -> std::unique_ptr<DescriptorSet>;
+			auto build() -> DescriptorSet;
+			auto buildUnique() -> std::unique_ptr<DescriptorSet>;
 
 		private:
 			DescriptorPool& m_pool;
@@ -140,7 +140,12 @@ namespace Aegix::Graphics
 		};
 
 		DescriptorSet(DescriptorSetLayout& setLayout);
+		DescriptorSet(const DescriptorSet&) = delete;
+		DescriptorSet(DescriptorSet&&) = default;
 		~DescriptorSet() = default;
+
+		auto operator=(const DescriptorSet&) -> DescriptorSet& = delete;
+		auto operator=(DescriptorSet&&) -> DescriptorSet& = default;
 
 		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }

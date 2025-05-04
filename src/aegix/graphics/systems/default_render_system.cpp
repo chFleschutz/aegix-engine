@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 			.addTexture(3, m_metalRoughnessTexture)
 			.addTexture(4, m_aoTexture)
 			.addTexture(5, m_emissiveTexture)
-			.build();
+			.buildUnique();
 	}
 
 	DefaultRenderSystem::DefaultRenderSystem(VkDescriptorSetLayout globalSetLayout)

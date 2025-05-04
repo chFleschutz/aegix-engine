@@ -292,7 +292,17 @@ namespace Aegix::Graphics
 		return addTexture(binding, *texture);
 	}
 
-	auto DescriptorSet::Builder::build() -> std::unique_ptr<DescriptorSet>
+	auto DescriptorSet::Builder::build() -> DescriptorSet
+	{
+		auto set = DescriptorSet{ m_setLayout };
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_writer[i].build(set.m_descriptorSets[i]);
+		}
+		return set;
+	}
+
+	auto DescriptorSet::Builder::buildUnique() -> std::unique_ptr<DescriptorSet>
 	{
 		auto set = std::make_unique<DescriptorSet>(m_setLayout);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
