@@ -4,6 +4,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
+#include "graphics/render_systems/render_system_registry.h"
 #include "graphics/swap_chain.h"
 #include "graphics/systems/render_system.h"
 #include "scene/scene.h"
@@ -53,6 +54,7 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void recreateSwapChain();
 		void createFrameGraph();
+		void createRenderSystems();
 
 		auto beginFrame() -> VkCommandBuffer;
 		void endFrame(VkCommandBuffer commandBuffer);
@@ -66,5 +68,6 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		FrameGraph m_frameGraph;
+		RenderSystemRegistry m_renderSystemRegistry;
 	};
 }
