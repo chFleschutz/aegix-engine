@@ -8,6 +8,8 @@ namespace Aegix::Graphics
 	{
 		Opaque,
 		Transparent,
+
+		Count
 	};
 
 	class RenderSystemBase

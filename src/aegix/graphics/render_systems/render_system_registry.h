@@ -4,6 +4,8 @@
 
 namespace Aegix::Graphics
 {
+	using RenderSystemList = std::vector<std::unique_ptr<RenderSystemBase>>;
+
 	class RenderSystemRegistry
 	{
 	public:
@@ -16,18 +18,20 @@ namespace Aegix::Graphics
 		auto operator=(RenderSystemRegistry&&) -> RenderSystemRegistry& = delete;
 
 		template <typename T>
-			requires std::is_base_of_v<RenderSystemBase, T>
+			requires std::is_base_of_v<RenderSystemBase, T> && std::is_default_constructible_v<T>
 		void add(RenderStageType stage)
 		{
-			m_renderSystems[stage].emplace_back(std::make_unique<T>());
+			AGX_ASSERT_X(stage < RenderStageType::Count, "Invalid render stage");
+			m_renderSystems[static_cast<size_t>(stage)].emplace_back(std::make_unique<T>());
 		}
 
-		auto get(RenderStageType stage) -> std::vector<std::unique_ptr<RenderSystemBase>>&
+		auto get(RenderStageType stage) -> RenderSystemList&
 		{
-			return m_renderSystems[stage];
+			AGX_ASSERT_X(stage < RenderStageType::Count, "Invalid render stage");
+			return m_renderSystems[static_cast<size_t>(stage)];
 		}
 
 	private:
-		std::unordered_map<RenderStageType, std::vector<std::unique_ptr<RenderSystemBase>>> m_renderSystems;
+		std::array<RenderSystemList, static_cast<size_t>(RenderStageType::Count)> m_renderSystems;
 	};
 }
