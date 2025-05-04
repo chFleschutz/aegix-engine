@@ -27,6 +27,7 @@ namespace Aegix::Graphics
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;
 		std::unordered_map<std::string, MaterialParamValue> m_overrides;
+		DescriptorSet m_descriptorSet;
 		Buffer m_uniformBuffer;
 		bool m_dirty = true;
 	};

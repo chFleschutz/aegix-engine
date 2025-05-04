@@ -45,6 +45,9 @@ namespace Aegix::Graphics
 		[[nodiscard]] static auto std140Alignment(MaterialParamType type) -> size_t;
 		[[nodiscard]] static auto std140Size(MaterialParamType type) -> size_t;
 
+		[[nodiscard]] auto pipeline() const -> const Pipeline& { return m_pipeline; }
+		[[nodiscard]] auto globalSetLayout() -> DescriptorSetLayout& { return m_globalSetLayout; }
+		[[nodiscard]] auto materialSetLayout() -> DescriptorSetLayout& { return m_materialSetLayout; }
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }

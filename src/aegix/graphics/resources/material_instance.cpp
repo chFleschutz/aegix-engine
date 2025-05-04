@@ -2,11 +2,19 @@
 
 #include "material_instance.h"
 
+#include "graphics/vulkan_context.h"
+
 namespace Aegix::Graphics
 {
 	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate)
-		: m_template(std::move(materialTemplate)), m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) }
+		: m_template(std::move(materialTemplate)), 
+		m_descriptorSet{ m_template->materialSetLayout() },
+		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) }
 	{
+		m_descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), m_template->materialSetLayout())
+			.addBuffer(0, m_uniformBuffer)
+			.build();
+
 		updateParameters();
 	}
 
