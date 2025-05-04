@@ -9,20 +9,26 @@ namespace Aegix::Graphics
 	{
 	public:
 		MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate);
+		MaterialInstance(const MaterialInstance&) = delete;
+		MaterialInstance(MaterialInstance&&) = delete;
+		~MaterialInstance() = default;
+
+		auto operator=(const MaterialInstance&) -> MaterialInstance& = delete;
+		auto operator=(MaterialInstance&&) noexcept -> MaterialInstance& = delete;
 	
+		[[nodiscard]] auto materialTemplate() const -> std::shared_ptr<MaterialTemplate> { return m_template; }
+		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParamValue;
+
 		template<typename T>
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> T
 		{
 			return std::get<T>(queryParameter(name));
 		}
 
-		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParamValue;
 		void setParameter(const std::string& name, const MaterialParamValue& value);
 
 		void updateParameters();
-
-		void bindPipeline(VkCommandBuffer cmd) const;
-		void bindDescriptorSet(VkCommandBuffer cmd) const;
+		void bind(VkCommandBuffer cmd) const;
 
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;

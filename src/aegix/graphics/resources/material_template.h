@@ -57,6 +57,7 @@ namespace Aegix::Graphics
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
+		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 
 	private:
 		Pipeline m_pipeline;

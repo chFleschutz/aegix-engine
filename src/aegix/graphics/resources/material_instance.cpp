@@ -78,13 +78,8 @@ namespace Aegix::Graphics
 		m_dirty = false;
 	}
 
-	void MaterialInstance::bindPipeline(VkCommandBuffer cmd) const
+	void MaterialInstance::bind(VkCommandBuffer cmd) const
 	{
-		m_template->bind(cmd);
-	}
-
-	void MaterialInstance::bindDescriptorSet(VkCommandBuffer cmd) const
-	{
-		// TODO
+		m_template->pipeline().bindDescriptorSet(cmd, 1, m_descriptorSet);
 	}
 }

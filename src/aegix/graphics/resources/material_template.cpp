@@ -47,6 +47,11 @@ namespace Aegix::Graphics
 		m_pipeline.bind(cmd);
 	}
 
+	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
+	{
+		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS, data, size, offset);
+	}
+
 	auto MaterialTemplate::hasParameter(const std::string& name) const -> bool
 	{
 		return m_parameters.contains(name);

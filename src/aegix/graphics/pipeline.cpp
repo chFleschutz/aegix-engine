@@ -222,9 +222,9 @@ namespace Aegix::Graphics
 		vkCmdBindDescriptorSets(cmd, m_bindPoint, m_Layout, setIndex, 1, &descriptorSet, 0, nullptr);
 	}
 
-	void Pipeline::pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, uint32_t size, const void* data) const
+	void Pipeline::pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, const void* data, uint32_t size, uint32_t offset) const
 	{
-		vkCmdPushConstants(cmd, m_Layout, stageFlags, 0, size, data);
+		vkCmdPushConstants(cmd, m_Layout, stageFlags, offset, size, data);
 	}
 
 	void Pipeline::defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo)
