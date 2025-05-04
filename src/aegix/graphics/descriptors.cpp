@@ -77,6 +77,13 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	auto DescriptorSetLayout::allocateDescriptorSet() const -> VkDescriptorSet
+	{
+		VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
+		VulkanContext::descriptorPool().allocateDescriptorSet(m_descriptorSetLayout, descriptorSet);
+		return descriptorSet;
+	}
+
 
 
 	// DescriptorPool Builder -----------------------------------------------------

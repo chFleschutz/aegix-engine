@@ -35,6 +35,8 @@ namespace Aegix::Graphics
 		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
 		auto descriptorSetLayout() const -> VkDescriptorSetLayout { return m_descriptorSetLayout; }
 
+		auto allocateDescriptorSet() const -> VkDescriptorSet;
+
 	private:
 		VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;

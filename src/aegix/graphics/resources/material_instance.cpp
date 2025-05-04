@@ -8,12 +8,9 @@ namespace Aegix::Graphics
 {
 	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate)
 		: m_template(std::move(materialTemplate)), 
-		m_descriptorSet{ m_template->materialSetLayout() },
 		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) }
 	{
-		m_descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), m_template->materialSetLayout())
-			.addBuffer(0, m_uniformBuffer)
-			.build();
+		m_descriptorSet = m_template->materialSetLayout().allocateDescriptorSet();
 
 		updateParameters();
 	}
@@ -38,8 +35,8 @@ namespace Aegix::Graphics
 		if (!m_dirty)
 			return;
 
+		// Update uniform buffer
 		m_uniformBuffer.map();
-
 		for (const auto& [name, info] : m_template->parameters())
 		{
 			auto it = m_overrides.find(name);
@@ -54,8 +51,30 @@ namespace Aegix::Graphics
 				m_uniformBuffer.write(&defaultValue, info.size, info.offset);
 			}
 		}
-
 		m_uniformBuffer.unmap();
+		
+		// Update descriptor set (Textures may have changed)
+		DescriptorWriter writer{ m_template->materialSetLayout() };
+		writer.writeBuffer(0, m_uniformBuffer);
+		for (const auto& [name, info] : m_template->parameters())
+		{
+			if (info.type != MaterialParamType::Texture2D)
+				continue;
+
+			auto it = m_overrides.find(name);
+			if (it != m_overrides.end())
+			{
+				auto& texture = std::get<std::shared_ptr<Texture>>(it->second);
+				writer.writeImage(info.binding, *texture);
+			}
+			else
+			{
+				auto& texture = std::get<std::shared_ptr<Texture>>(info.defaultValue);
+				writer.writeImage(info.binding, *texture);
+			}
+		}
+		writer.build(m_descriptorSet);
+
 		m_dirty = false;
 	}
 
