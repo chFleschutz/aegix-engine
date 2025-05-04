@@ -55,6 +55,7 @@ target_sources(aegix-engine PRIVATE
 	"pipeline.h"
 	"renderer.cpp"
 	"renderer.h"
+	"render_context.h"
 	"resources/static_mesh.cpp"
 	"resources/static_mesh.h"
 	"swap_chain.cpp"

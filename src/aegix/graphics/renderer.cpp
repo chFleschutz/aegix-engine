@@ -4,6 +4,7 @@
 
 #include "core/profiler.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
+#include "graphics/render_context.h"
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
@@ -67,8 +68,15 @@ namespace Aegix::Graphics
 			m_swapChain.extent(),
 			m_swapChain.aspectRatio()
 		};
+
+		RenderContext ctx{
+			.scene = scene,
+			.ui = ui,
+			.cmd = commandBuffer,
+			.frameIndex = m_currentFrameIndex
+		};
 		
-		m_frameGraph.execute(frameInfo);
+		m_frameGraph.execute(frameInfo); // TODO: Pass RenderContext to frame graph
 
 		endFrame(commandBuffer);
 	}
