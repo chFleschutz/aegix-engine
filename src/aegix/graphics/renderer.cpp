@@ -61,8 +61,9 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
 		FrameInfo frameInfo{
-			m_swapChain.extent(),
-			m_swapChain.aspectRatio()
+			.renderSystems = m_renderSystemRegistry,
+			.swapChainExtent = m_swapChain.extent(),
+			.aspectRatio = m_swapChain.aspectRatio()
 		};
 
 		RenderContext ctx{

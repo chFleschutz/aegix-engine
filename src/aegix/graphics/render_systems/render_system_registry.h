@@ -12,8 +12,8 @@ namespace Aegix::Graphics
 		RenderSystemRegistry(RenderSystemRegistry&&) = delete;
 		~RenderSystemRegistry() = default;
 
-		RenderSystemRegistry& operator=(const RenderSystemRegistry&) = delete;
-		RenderSystemRegistry& operator=(RenderSystemRegistry&&) = delete;
+		auto operator=(const RenderSystemRegistry&) -> RenderSystemRegistry& = delete;
+		auto operator=(RenderSystemRegistry&&) -> RenderSystemRegistry& = delete;
 
 		template <typename T>
 			requires std::is_base_of_v<RenderSystemBase, T>
