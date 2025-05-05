@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 		SkyBoxPass();
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
 
 	private:
 		FrameGraphResourceHandle m_sceneColor;

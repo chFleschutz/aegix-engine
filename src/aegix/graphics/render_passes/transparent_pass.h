@@ -50,10 +50,12 @@ namespace Aegix::Graphics
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
+			VkCommandBuffer cmd = frameInfo.cmd;
+
 			auto& stage = resources.renderStage(RenderStage::Type::Transparency);
-			updateUBO(stage, ctx);
+			updateUBO(stage, frameInfo);
 
 			auto& sceneColor = resources.texture(m_sceneColor);
 			auto& depth = resources.texture(m_depth);
@@ -69,23 +71,30 @@ namespace Aegix::Graphics
 			renderingInfo.pColorAttachments = &colorAttachment;
 			renderingInfo.pDepthAttachment = &depthAttachment;
 
-			vkCmdBeginRendering(ctx.cmd, &renderingInfo);
+			vkCmdBeginRendering(cmd, &renderingInfo);
 
-			Tools::vk::cmdViewport(ctx.cmd, extent);
-			Tools::vk::cmdScissor(ctx.cmd, extent);
+			Tools::vk::cmdViewport(cmd, extent);
+			Tools::vk::cmdScissor(cmd, extent);
+
+			RenderContext ctx{
+				.scene = frameInfo.scene,
+				.ui = frameInfo.ui,
+				.cmd = cmd,
+				.frameIndex = frameInfo.frameIndex,
+			};
 
 			for (const auto& system : stage.renderSystems)
 			{
 				system->render(ctx, stage.descriptorSet->descriptorSet(ctx.frameIndex));
 			}
 
-			vkCmdEndRendering(ctx.cmd);
+			vkCmdEndRendering(cmd);
 		}
 
 	private:
-		void updateUBO(RenderStage& stage, const RenderContext& ctx)
+		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
 		{
-			Scene::Entity mainCamera = ctx.scene.mainCamera();
+			Scene::Entity mainCamera = frameInfo.scene.mainCamera();
 			if (!mainCamera)
 				return;
 
@@ -95,7 +104,7 @@ namespace Aegix::Graphics
 				.projection = camera.projectionMatrix
 			};
 
-			stage.ubo->writeToIndex(&ubo, ctx.frameIndex);
+			stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
 		}
 
 		FrameGraphResourceHandle m_sceneColor;

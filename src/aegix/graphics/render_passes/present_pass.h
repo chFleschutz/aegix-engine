@@ -27,8 +27,10 @@ namespace Aegix::Graphics
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
+			VkCommandBuffer cmd = frameInfo.cmd;
+
 			auto& srcTexture = resources.texture(m_final);
 			AGX_ASSERT_X(m_swapChain.width() == srcTexture.image().width(), "Swapchain extent does not match source texture extent");
 			AGX_ASSERT_X(m_swapChain.height() == srcTexture.image().height(), "Swapchain extent does not match source texture extent");
@@ -36,7 +38,7 @@ namespace Aegix::Graphics
 			VkImage srcImage = srcTexture.image();
 			VkImage dstImage = m_swapChain.currentImage();
 			
-			Tools::vk::cmdPipelineBarrier(ctx.cmd, dstImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			Tools::vk::cmdPipelineBarrier(cmd, dstImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VK_IMAGE_ASPECT_COLOR_BIT);
 
 			VkOffset3D extent = { static_cast<int32_t>(m_swapChain.width()), static_cast<int32_t>(m_swapChain.height()), 1 };
@@ -54,12 +56,12 @@ namespace Aegix::Graphics
 			blitRegion.dstOffsets[0] = { 0, 0, 0 };
 			blitRegion.dstOffsets[1] = extent;
 
-			vkCmdBlitImage(ctx.cmd,
+			vkCmdBlitImage(cmd,
 				srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				1, &blitRegion, VK_FILTER_LINEAR);
 
-			Tools::vk::cmdPipelineBarrier(ctx.cmd, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			Tools::vk::cmdPipelineBarrier(cmd, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
 

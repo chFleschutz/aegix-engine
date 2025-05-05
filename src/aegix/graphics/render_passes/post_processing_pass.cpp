@@ -58,19 +58,21 @@ namespace Aegix::Graphics
 		};
 	}
 
-	void PostProcessingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
+	void PostProcessingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
+		VkCommandBuffer cmd = frameInfo.cmd;
+
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_final))
 			.writeImage(1, resources.texture(m_sceneColor))
 			.writeImage(2, resources.texture(m_bloom))
-			.build(m_descriptorSet->descriptorSet(ctx.frameIndex));
+			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
-		m_pipeline->bind(ctx.cmd);
-		m_pipeline->bindDescriptorSet(ctx.cmd, 0, m_descriptorSet->descriptorSet(ctx.frameIndex));
-		m_pipeline->pushConstants(ctx.cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
+		m_pipeline->bind(cmd);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 
-		Tools::vk::cmdDispatch(ctx.cmd, frameInfo.swapChainExtent, { 16, 16 });
+		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
 
 	void PostProcessingPass::drawUI()

@@ -72,18 +72,18 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraph::execute(const FrameInfo& frameInfo, const RenderContext& ctx)
+	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
 
-			Tools::vk::cmdBeginDebugUtilsLabel(ctx.cmd, node.name.c_str());
+			Tools::vk::cmdBeginDebugUtilsLabel(frameInfo.cmd, node.name.c_str());
 			{
-				placeBarriers(ctx.cmd, node);
-				node.pass->execute(m_resourcePool, frameInfo, ctx);
+				placeBarriers(frameInfo.cmd, node);
+				node.pass->execute(m_resourcePool, frameInfo);
 			}
-			Tools::vk::cmdEndDebugUtilsLabel(ctx.cmd);
+			Tools::vk::cmdEndDebugUtilsLabel(frameInfo.cmd);
 		}
 	}
 

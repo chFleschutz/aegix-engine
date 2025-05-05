@@ -86,9 +86,9 @@ namespace Aegix::Graphics
 		};
 	}
 
-	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
+	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		auto skyBoxEntity = ctx.scene.environment();
+		auto skyBoxEntity = frameInfo.scene.environment();
 		if (!skyBoxEntity || !skyBoxEntity.has<Environment>())
 			return;
 
@@ -96,9 +96,11 @@ namespace Aegix::Graphics
 		if (!environment.skybox)
 			return;
 
+		VkCommandBuffer cmd = frameInfo.cmd;
+
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, environment.skybox->descriptorImageInfo())
-			.build(m_descriptorSet->descriptorSet(ctx.frameIndex));
+			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		auto& sceneColorTexture = resources.texture(m_sceneColor);
 		auto& depthTexture = resources.texture(m_depth);
@@ -114,26 +116,26 @@ namespace Aegix::Graphics
 		renderInfo.colorAttachmentCount = 1;
 		renderInfo.pDepthAttachment = &depthAttachment;
 
-		vkCmdBeginRendering(ctx.cmd, &renderInfo);
-		Tools::vk::cmdViewport(ctx.cmd, frameInfo.swapChainExtent);
-		Tools::vk::cmdScissor(ctx.cmd, frameInfo.swapChainExtent);
+		vkCmdBeginRendering(cmd, &renderInfo);
+		Tools::vk::cmdViewport(cmd, frameInfo.swapChainExtent);
+		Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
 
-		auto& camera = ctx.scene.mainCamera().get<Camera>();
+		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		SkyBoxUniforms uniforms{
 			.view = camera.viewMatrix,
 			.projection = camera.projectionMatrix
 		};
 		
-		m_pipeline->bind(ctx.cmd);
-		m_pipeline->pushConstants(ctx.cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
-		m_pipeline->bindDescriptorSet(ctx.cmd, 0, m_descriptorSet->descriptorSet(ctx.frameIndex));
+		m_pipeline->bind(cmd);
+		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
 
 		VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(ctx.cmd, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(ctx.cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(ctx.cmd, 36, 1, 0, 0, 0);
+		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
-		vkCmdEndRendering(ctx.cmd);
+		vkCmdEndRendering(cmd);
 	}
 }

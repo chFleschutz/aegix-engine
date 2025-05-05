@@ -49,11 +49,11 @@ namespace Aegix::Graphics
 		LightingPass();
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
-		void updateLightingUBO(const RenderContext& frameInfo);
+		void updateLightingUBO(const FrameInfo& frameInfo);
 
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_position;

@@ -61,19 +61,16 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
 		FrameInfo frameInfo{
+			.scene = scene,
+			.ui = ui,
 			.renderSystems = m_renderSystemRegistry,
+			.cmd = commandBuffer,
+			.frameIndex = m_currentFrameIndex,
 			.swapChainExtent = m_swapChain.extent(),
 			.aspectRatio = m_swapChain.aspectRatio()
 		};
-
-		RenderContext ctx{
-			.scene = scene,
-			.ui = ui,
-			.cmd = commandBuffer,
-			.frameIndex = m_currentFrameIndex
-		};
 		
-		m_frameGraph.execute(frameInfo, ctx);
+		m_frameGraph.execute(frameInfo);
 
 		endFrame(commandBuffer);
 	}

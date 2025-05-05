@@ -27,7 +27,7 @@ namespace Aegix::Graphics
 		virtual void createResources(FrameGraphResourcePool& resources) {}
 
 		/// @brief Execute the render pass
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) = 0;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
 
 		/// @brief Draw the UI for the render pass in the renderer panel
 		virtual void drawUI() {}

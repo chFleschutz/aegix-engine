@@ -18,10 +18,10 @@ namespace Aegix::Graphics
 		GeometryPass(FrameGraph& framegraph);
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
 
 	private:
-		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo, const RenderContext& ctx);
+		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo);
 
 		FrameGraphResourceHandle m_position;
 		FrameGraphResourceHandle m_normal;

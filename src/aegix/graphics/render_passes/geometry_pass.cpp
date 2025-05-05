@@ -101,10 +101,11 @@ namespace Aegix::Graphics
 		return info;
 	}
 
-	void GeometryPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx)
+	void GeometryPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
+		VkCommandBuffer cmd = frameInfo.cmd;
 		auto& stage = resources.renderStage(RenderStage::Type::Geometry);
-		updateUBO(stage, frameInfo, ctx);
+		updateUBO(stage, frameInfo);
 
 		auto& position = resources.texture(m_position);
 		auto& normal = resources.texture(m_normal);
@@ -135,23 +136,30 @@ namespace Aegix::Graphics
 		renderInfo.pColorAttachments = colorAttachments.data();
 		renderInfo.pDepthAttachment = &depthAttachment;
 
-		vkCmdBeginRendering(ctx.cmd, &renderInfo);
+		vkCmdBeginRendering(cmd, &renderInfo);
 
-		Tools::vk::cmdViewport(ctx.cmd, extent);
-		Tools::vk::cmdScissor(ctx.cmd, extent);
+		Tools::vk::cmdViewport(cmd, extent);
+		Tools::vk::cmdScissor(cmd, extent);
 
-		VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(ctx.frameIndex);
+		RenderContext ctx{
+			.scene = frameInfo.scene,
+			.ui = frameInfo.ui,
+			.cmd = cmd,
+			.frameIndex = frameInfo.frameIndex,
+		};
+
+		VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(frameInfo.frameIndex);
 		for (const auto& system : stage.renderSystems)
 		{
 			system->render(ctx, globalSet);
 		}
 
-		vkCmdEndRendering(ctx.cmd);
+		vkCmdEndRendering(cmd);
 	}
 
-	void GeometryPass::updateUBO(RenderStage& stage, const FrameInfo& frameInfo, const RenderContext& ctx)
+	void GeometryPass::updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
 	{
-		Scene::Entity mainCamera = ctx.scene.mainCamera();
+		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
 		if (!mainCamera)
 			return;
 
@@ -164,6 +172,6 @@ namespace Aegix::Graphics
 			.inverseView = camera.inverseViewMatrix
 		};
 
-		stage.ubo->writeToIndex(&ubo, ctx.frameIndex);
+		stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
 	}
 }

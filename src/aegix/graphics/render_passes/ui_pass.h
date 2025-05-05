@@ -23,8 +23,10 @@ namespace Aegix::Graphics
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo, const RenderContext& ctx) override
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
+			VkCommandBuffer cmd = frameInfo.cmd;
+
 			auto& texture = resources.texture(m_final);
 			auto attachment = Tools::renderingAttachmentInfo(texture, VK_ATTACHMENT_LOAD_OP_LOAD, {});
 
@@ -36,11 +38,11 @@ namespace Aegix::Graphics
 			renderingInfo.colorAttachmentCount = 1;
 			renderingInfo.pColorAttachments = &attachment;
 
-			vkCmdBeginRendering(ctx.cmd, &renderingInfo);
+			vkCmdBeginRendering(cmd, &renderingInfo);
 
-			ctx.ui.render(ctx.cmd);
+			frameInfo.ui.render(cmd);
 
-			vkCmdEndRendering(ctx.cmd);
+			vkCmdEndRendering(cmd);
 		}
 
 	private:

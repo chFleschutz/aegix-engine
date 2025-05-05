@@ -34,7 +34,7 @@ namespace Aegix::Graphics
 		void compile();
 
 		/// @brief Executes the frame graph by executing each node in order
-		void execute(const FrameInfo& frameInfo, const RenderContext& ctx);
+		void execute(const FrameInfo& frameInfo);
 
 		/// @brief Resizes all swapchain relative resources textures
 		void swapChainResized(uint32_t width, uint32_t height);
