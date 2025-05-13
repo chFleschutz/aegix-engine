@@ -37,7 +37,7 @@ namespace Aegix::UI
 
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
-		VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
+		VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
 		ImGui_ImplVulkan_InitInfo initInfo{};
 		initInfo.Instance = device.instance();
 		initInfo.PhysicalDevice = device.physicalDevice();
