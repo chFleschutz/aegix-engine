@@ -1,6 +1,6 @@
 # Aegix Engine
 
-A small Vulkan game engine written in modern C++. 
+A small render engine developed with Vulkan in modern C++. 
 
 ###
 ![Screenshot 2025-03-20 095757](https://github.com/user-attachments/assets/b5d7ec34-6f00-4b99-b569-0e58ed10c57a)
