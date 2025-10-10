@@ -4,18 +4,11 @@
 
 namespace Aegix::Graphics
 {
-	enum class RenderStageType
-	{
-		Opaque,
-		Transparent,
-
-		Count
-	};
-
-	class RenderSystemBase
+	class RenderSystem
 	{
 	public:
-		virtual ~RenderSystemBase() = default;
+		RenderSystem() = default;
+		virtual ~RenderSystem() = default;
 
 		virtual void render(const RenderContext& ctx) = 0;
 	};

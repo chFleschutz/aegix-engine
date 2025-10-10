@@ -71,7 +71,7 @@ namespace Aegix::Graphics
 		}
 
 		m_graphicsConfig.colorBlendAttachments.emplace_back(colorBlendAttachment);
-		
+
 		m_graphicsConfig.colorBlendInfo.attachmentCount = m_graphicsConfig.renderingInfo.colorAttachmentCount;
 		m_graphicsConfig.colorBlendInfo.pAttachments = m_graphicsConfig.colorBlendAttachments.data();
 
@@ -111,7 +111,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto Pipeline::GraphicsBuilder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions) 
+	auto Pipeline::GraphicsBuilder::setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions)
 		-> Pipeline::GraphicsBuilder&
 	{
 		m_graphicsConfig.attributeDescriptions = attributeDescriptions;
@@ -190,8 +190,9 @@ namespace Aegix::Graphics
 	}
 
 	Pipeline::Pipeline(Pipeline&& other) noexcept
-		: m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }
+		: m_layout{ other.m_layout }, m_pipeline{other.m_pipeline}, m_bindPoint{ other.m_bindPoint }
 	{
+		other.m_layout = VK_NULL_HANDLE;
 		other.m_pipeline = VK_NULL_HANDLE;
 	}
 
@@ -205,8 +206,10 @@ namespace Aegix::Graphics
 		if (this != &other)
 		{
 			destroy();
+			m_layout = other.m_layout;
 			m_pipeline = other.m_pipeline;
 			m_bindPoint = other.m_bindPoint;
+			other.m_layout = VK_NULL_HANDLE;
 			other.m_pipeline = VK_NULL_HANDLE;
 		}
 		return *this;
@@ -219,12 +222,12 @@ namespace Aegix::Graphics
 
 	void Pipeline::bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const
 	{
-		vkCmdBindDescriptorSets(cmd, m_bindPoint, m_Layout, setIndex, 1, &descriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(cmd, m_bindPoint, m_layout, setIndex, 1, &descriptorSet, 0, nullptr);
 	}
 
 	void Pipeline::pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, const void* data, uint32_t size, uint32_t offset) const
 	{
-		vkCmdPushConstants(cmd, m_Layout, stageFlags, offset, size, data);
+		vkCmdPushConstants(cmd, m_layout, stageFlags, offset, size, data);
 	}
 
 	void Pipeline::defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo)
@@ -301,7 +304,7 @@ namespace Aegix::Graphics
 		layoutInfo.pushConstantRangeCount = static_cast<uint32_t>(config.pushConstantRanges.size());
 		layoutInfo.pPushConstantRanges = config.pushConstantRanges.data();
 
-		VK_CHECK(vkCreatePipelineLayout(VulkanContext::device(), &layoutInfo, nullptr, &m_Layout));
+		VK_CHECK(vkCreatePipelineLayout(VulkanContext::device(), &layoutInfo, nullptr, &m_layout));
 	}
 
 	void Pipeline::createGraphicsPipeline(const Pipeline::GraphicsConfig& config)
@@ -328,7 +331,7 @@ namespace Aegix::Graphics
 		pipelineInfo.pColorBlendState = &config.colorBlendInfo;
 		pipelineInfo.pDepthStencilState = &config.depthStencilInfo;
 		pipelineInfo.pDynamicState = &config.dynamicStateInfo;
-		pipelineInfo.layout = m_Layout;
+		pipelineInfo.layout = m_layout;
 		pipelineInfo.renderPass = VK_NULL_HANDLE;
 		pipelineInfo.subpass = config.subpass;
 		pipelineInfo.basePipelineIndex = -1;
@@ -344,7 +347,7 @@ namespace Aegix::Graphics
 		VkComputePipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		pipelineInfo.stage = config.shaderStage;
-		pipelineInfo.layout = m_Layout;
+		pipelineInfo.layout = m_layout;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;
 
@@ -356,7 +359,7 @@ namespace Aegix::Graphics
 		VulkanContext::destroy(m_pipeline);
 		m_pipeline = VK_NULL_HANDLE;
 
-		VulkanContext::destroy(m_Layout);
-		m_Layout = VK_NULL_HANDLE;
+		VulkanContext::destroy(m_layout);
+		m_layout = VK_NULL_HANDLE;
 	}
 }

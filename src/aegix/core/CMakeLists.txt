@@ -9,4 +9,4 @@ target_sources(aegix-engine PRIVATE
 	"profiler.h"
 	"window.cpp"
 	"window.h"
-)
+  "../graphics/render_passes/transparent_pass.cpp")

@@ -22,20 +22,6 @@ namespace Aegix::Graphics
 		auto operator=(const Renderer&) -> Renderer& = delete;
 		auto operator=(Renderer&&) noexcept -> Renderer& = delete;
 
-		template<ValidRenderSystem T>
-		auto addRenderSystem() -> RenderSystem&
-		{
-			return m_frameGraph.resourcePool().addRenderSystem<T>(T::STAGE);
-		}
-
-		template<ValidMaterial T, typename... Args>
-			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, Args...>
-		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
-		{
-			auto& system = addRenderSystem<typename T::RenderSystem>();
-			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(), std::forward<Args>(args)...);
-		}
-
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
@@ -54,7 +40,6 @@ namespace Aegix::Graphics
 		void createCommandBuffers();
 		void recreateSwapChain();
 		void createFrameGraph();
-		void createRenderSystems();
 
 		auto beginFrame() -> VkCommandBuffer;
 		void endFrame(VkCommandBuffer commandBuffer);
@@ -68,6 +53,5 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted = false;
 
 		FrameGraph m_frameGraph;
-		RenderSystemRegistry m_renderSystemRegistry;
 	};
 }

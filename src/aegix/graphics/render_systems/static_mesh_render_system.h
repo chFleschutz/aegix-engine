@@ -10,11 +10,24 @@ namespace Aegix::Graphics
 		glm::mat4 normalMatrix{ 1.0f };
 	};
 
-	class StaticMeshRenderSystem : public RenderSystemBase
+	enum class ObjectType
+	{
+		Opaque = 0,
+		Transparent = 1
+	};
+
+	class StaticMeshRenderSystem : public RenderSystem
 	{
 	public:
+		StaticMeshRenderSystem(ObjectType objectType = ObjectType::Opaque)
+			: m_objectType{ objectType }
+		{
+		}
+
 		virtual void render(const RenderContext& ctx) override
 		{
+			// TODO: use ObjectType to filter objects
+
 			MaterialTemplate* lastMatTemplate = nullptr;
 			MaterialInstance* lastMatInstance = nullptr;
 
@@ -25,11 +38,15 @@ namespace Aegix::Graphics
 				if (!mesh.staticMesh || !material.instance)
 					continue;
 
-				// Bind Pipeline
 				auto currentMatTemplate = material.instance->materialTemplate().get();
+				if (!currentMatTemplate)
+					continue;
+
+				// Bind Pipeline
 				if (lastMatTemplate != currentMatTemplate)
 				{
 					currentMatTemplate->bind(ctx.cmd);
+					currentMatTemplate->bindGlobalSet(ctx.cmd, ctx.globalSet);
 					lastMatTemplate = currentMatTemplate;
 				}
 
@@ -37,6 +54,7 @@ namespace Aegix::Graphics
 				if (lastMatInstance != material.instance.get())
 				{
 					material.instance->bind(ctx.cmd);
+					material.instance->updateParameters();
 					lastMatInstance = material.instance.get();
 				}
 
@@ -52,5 +70,8 @@ namespace Aegix::Graphics
 				mesh.staticMesh->draw(ctx.cmd);
 			}
 		}
+
+	private:
+		ObjectType m_objectType;
 	};
 }

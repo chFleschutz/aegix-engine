@@ -30,7 +30,7 @@ namespace Aegix::Graphics
 		~DescriptorSetLayout();
 
 		auto operator=(const DescriptorSetLayout&) -> DescriptorSetLayout& = delete;
-		auto operator=(DescriptorSetLayout&& other) -> DescriptorSetLayout&;
+		auto operator=(DescriptorSetLayout&& other) noexcept -> DescriptorSetLayout&;
 
 		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
 		auto descriptorSetLayout() const -> VkDescriptorSetLayout { return m_descriptorSetLayout; }
@@ -123,11 +123,12 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
+			Builder(DescriptorSetLayout& setLayout);
 			Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 			Builder(const Builder&) = delete;
 			~Builder() = default;
 
-			auto operator=(const Builder&) -> Builder& = delete;
+			auto operator=(const Builder&) noexcept -> Builder& = delete;
 
 			auto addBuffer(uint32_t binding, const Buffer& buffer) -> Builder&;
 			auto addTexture(uint32_t binding, const Texture& texture) -> Builder&;

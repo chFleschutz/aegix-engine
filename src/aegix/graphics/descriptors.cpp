@@ -66,7 +66,7 @@ namespace Aegix::Graphics
 		vkDestroyDescriptorSetLayout(VulkanContext::device(), m_descriptorSetLayout, nullptr);
 	}
 
-	auto DescriptorSetLayout::operator=(DescriptorSetLayout&& other) -> DescriptorSetLayout&
+	auto DescriptorSetLayout::operator=(DescriptorSetLayout&& other) noexcept -> DescriptorSetLayout&
 	{
 		if (this != &other)
 		{
@@ -264,6 +264,16 @@ namespace Aegix::Graphics
 
 
 	// DescriptorSet Builder -----------------------------------------------------
+
+	DescriptorSet::Builder::Builder(DescriptorSetLayout& setLayout)
+		: m_pool{ VulkanContext::descriptorPool() }, m_setLayout{ setLayout }
+	{
+		m_writer.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_writer.emplace_back(DescriptorWriter{ setLayout });
+		}
+	}
 
 	DescriptorSet::Builder::Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout)
 		: m_pool{ pool }, m_setLayout{ setLayout }

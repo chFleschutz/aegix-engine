@@ -99,7 +99,7 @@ namespace Aegix::Graphics
 		operator VkPipeline() const { return m_pipeline; }
 
 		[[nodiscard]] auto pipeline() const -> VkPipeline { return m_pipeline; }
-		[[nodiscard]] auto layout() const -> VkPipelineLayout { return m_Layout; }
+		[[nodiscard]] auto layout() const -> VkPipelineLayout { return m_layout; }
 		[[nodiscard]] auto bindPoint() const -> VkPipelineBindPoint { return m_bindPoint; }
 
 		void bind(VkCommandBuffer commandBuffer) const;
@@ -120,7 +120,7 @@ namespace Aegix::Graphics
 		void createComputePipeline(const ComputeConfig& config);
 		void destroy();
 
-		VkPipelineLayout m_Layout = VK_NULL_HANDLE;
+		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 		VkPipeline m_pipeline = VK_NULL_HANDLE;
 		VkPipelineBindPoint m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	};

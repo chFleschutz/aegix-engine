@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/frame_info.h"
 #include "graphics/render_context.h"

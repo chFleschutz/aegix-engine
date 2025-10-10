@@ -63,7 +63,6 @@ namespace Aegix::Graphics
 		FrameInfo frameInfo{
 			.scene = scene,
 			.ui = ui,
-			.renderSystems = m_renderSystemRegistry,
 			.cmd = commandBuffer,
 			.frameIndex = m_currentFrameIndex,
 			.swapChainExtent = m_swapChain.extent(),
@@ -107,8 +106,12 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.add<GeometryPass>(m_frameGraph);
-		m_frameGraph.add<TransparentPass>(m_frameGraph);
+		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
+		geoPass.addRenderSystem<StaticMeshRenderSystem>(ObjectType::Opaque);
+
+		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
+		//transparentPass.addRenderSystem<StaticMeshRenderSystem>(ObjectType::Transparent);
+
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
@@ -118,12 +121,6 @@ namespace Aegix::Graphics
 		m_frameGraph.add<SkyBoxPass>();
 
 		m_frameGraph.compile();
-	}
-
-	void Renderer::createRenderSystems()
-	{
-		m_renderSystemRegistry.add<StaticMeshRenderSystem>(RenderStageType::Opaque);
-		m_renderSystemRegistry.add<StaticMeshRenderSystem>(RenderStageType::Transparent);
 	}
 
 	auto Renderer::beginFrame() -> VkCommandBuffer

@@ -10,19 +10,14 @@
 namespace Aegix::Graphics
 {
 	GeometryPass::GeometryPass(FrameGraph& framegraph)
+		: m_globalUbo{ Buffer::createUniformBuffer(sizeof(GBufferUbo)) }
 	{
-		auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Geometry);
-
-		stage.descriptorSetLayout = DescriptorSetLayout::Builder{}
+		m_globalSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.buildUnique();
 
-		auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
-		stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
-
-		stage.descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), *stage.descriptorSetLayout)
-			.addBuffer(0, *stage.ubo)
+		m_globalSet = DescriptorSet::Builder{ *m_globalSetLayout }
+			.addBuffer(0, m_globalUbo)
 			.buildUnique();
 	}
 
@@ -103,9 +98,7 @@ namespace Aegix::Graphics
 
 	void GeometryPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		VkCommandBuffer cmd = frameInfo.cmd;
-		auto& stage = resources.renderStage(RenderStage::Type::Geometry);
-		updateUBO(stage, frameInfo);
+		updateUBO(frameInfo);
 
 		auto& position = resources.texture(m_position);
 		auto& normal = resources.texture(m_normal);
@@ -136,33 +129,35 @@ namespace Aegix::Graphics
 		renderInfo.pColorAttachments = colorAttachments.data();
 		renderInfo.pDepthAttachment = &depthAttachment;
 
+		VkCommandBuffer cmd = frameInfo.cmd;
 		vkCmdBeginRendering(cmd, &renderInfo);
-
-		Tools::vk::cmdViewport(cmd, extent);
-		Tools::vk::cmdScissor(cmd, extent);
-
-		RenderContext ctx{
-			.scene = frameInfo.scene,
-			.ui = frameInfo.ui,
-			.cmd = cmd,
-			.frameIndex = frameInfo.frameIndex,
-		};
-
-		VkDescriptorSet globalSet = stage.descriptorSet->descriptorSet(frameInfo.frameIndex);
-		for (const auto& system : stage.renderSystems)
 		{
-			system->render(ctx, globalSet);
-		}
+			Tools::vk::cmdViewport(cmd, extent);
+			Tools::vk::cmdScissor(cmd, extent);
 
+			RenderContext ctx{
+				.scene = frameInfo.scene,
+				.ui = frameInfo.ui,
+				.frameIndex = frameInfo.frameIndex,
+				.cmd = cmd,
+				.globalSet = m_globalSet->descriptorSet(frameInfo.frameIndex)
+			};
+
+			for (const auto& system : m_renderSystems)
+			{
+				system->render(ctx);
+			}
+		}
 		vkCmdEndRendering(cmd);
 	}
 
-	void GeometryPass::updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
+	void GeometryPass::updateUBO(const FrameInfo& frameInfo)
 	{
 		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
 		if (!mainCamera)
 			return;
 
+		// TODO: Don't update this here (move to renderer or similar)
 		auto& camera = mainCamera.get<Camera>();
 		camera.aspect = frameInfo.aspectRatio;
 
@@ -172,6 +167,6 @@ namespace Aegix::Graphics
 			.inverseView = camera.inverseViewMatrix
 		};
 
-		stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
+		m_globalUbo.writeToIndex(&ubo, frameInfo.frameIndex);
 	}
 }

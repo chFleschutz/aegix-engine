@@ -22,8 +22,10 @@ namespace Aegix::Scene
 		m_defaultBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		m_defaultWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
 		m_defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultMaterial = Engine::instance().renderer().createMaterialInstance<Graphics::DefaultMaterial>(
-			m_defaultWhite, m_defaultNormal, m_defaultWhite, m_defaultBlack, m_defaultBlack);
+
+		// TODO: Use new material system
+		//m_defaultMaterial = Engine::instance().renderer().createMaterialInstance<Graphics::DefaultMaterial>(
+			//m_defaultWhite, m_defaultNormal, m_defaultWhite, m_defaultBlack, m_defaultBlack);
 
 		m_meshes.resize(m_gltf->meshes.size());
 		m_materials.resize(m_gltf->materials.size());
@@ -178,11 +180,13 @@ namespace Aegix::Scene
 		if (auto& emissive = material.emissiveTexture)
 			emissiveTexture = loadTexture(emissive->index, VK_FORMAT_R8G8B8A8_SRGB);
 
-		auto& renderer = Engine::instance().renderer();
-		auto materialInstance = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			baseColorTexture, normalTexture, metallicRoughnessTexture, occlusionTexture, emissiveTexture);
-		m_materials[materialIndex] = materialInstance;
-		return materialInstance;
+		// TODO: use new material system
+		//auto& renderer = Engine::instance().renderer();
+		//auto materialInstance = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
+		//	baseColorTexture, normalTexture, metallicRoughnessTexture, occlusionTexture, emissiveTexture);
+		//m_materials[materialIndex] = materialInstance;
+		//return materialInstance;
+		return nullptr;
 	}
 
 	auto GLTFLoader::loadTexture(size_t textureIndex, VkFormat format) -> std::shared_ptr<Graphics::Texture>

@@ -47,6 +47,16 @@ namespace Aegix::Graphics
 		m_pipeline.bind(cmd);
 	}
 
+	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
+	}
+
+	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
+	}
+
 	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
 	{
 		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS, data, size, offset);
@@ -86,6 +96,9 @@ namespace Aegix::Graphics
 		}
 		else
 		{
+			// TODO: Aligment is not correct according to std140 rules
+			// vec3 + float should be 16 bytes total, but this will use 20 bytes
+			// Need to look at previous params to determine if offset can be packed
 			size_t alignment = std140Alignment(type);
 			param.size = std140Size(type);
 			param.offset = alignTo(m_parameterSize, alignment);

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "graphics/render_systems/render_system_registry.h"
+#include "scene/scene.h"
+#include "ui/ui.h"
 
 #include <vulkan/vulkan.h>
 
@@ -10,7 +11,6 @@ namespace Aegix::Graphics
 	{
 		Scene::Scene& scene;
 		UI::UI& ui;
-		RenderSystemRegistry& renderSystems;
 		VkCommandBuffer cmd{ VK_NULL_HANDLE };
 		int frameIndex{ 0 };
 		VkExtent2D swapChainExtent;

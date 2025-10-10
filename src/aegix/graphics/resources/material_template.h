@@ -57,11 +57,13 @@ namespace Aegix::Graphics
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
+		void bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
+		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 
 	private:
 		Pipeline m_pipeline;
-		DescriptorSetLayout m_globalSetLayout;		// Set 0
+		DescriptorSetLayout m_globalSetLayout;		// Set 0 // TODO: check if this is actually needed here
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 		size_t m_parameterSize = 0;

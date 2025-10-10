@@ -8,7 +8,7 @@ namespace Aegix::Graphics
 {
 	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate)
 		: m_template(std::move(materialTemplate)), 
-		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) }
+		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) } // TODO: Maybe use frames in flight
 	{
 		m_descriptorSet = m_template->materialSetLayout().allocateDescriptorSet();
 
@@ -28,6 +28,7 @@ namespace Aegix::Graphics
 	{
 		AGX_ASSERT_X(m_template->hasParameter(name), "Material parameter not found");
 		m_overrides[name] = value;
+		m_dirty = true;
 	}
 
 	void MaterialInstance::updateParameters()
@@ -80,6 +81,6 @@ namespace Aegix::Graphics
 
 	void MaterialInstance::bind(VkCommandBuffer cmd) const
 	{
-		m_template->pipeline().bindDescriptorSet(cmd, 1, m_descriptorSet);
+		m_template->bindMaterialSet(cmd, m_descriptorSet);
 	}
 }

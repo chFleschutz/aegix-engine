@@ -44,19 +44,19 @@ namespace Aegix::Graphics
 		friend DefaultRenderSystem;
 	};
 
-	class DefaultRenderSystem : public RenderSystem
-	{
-	public:
-		struct PushConstantData // max 128 bytes
-		{
-			glm::mat4 modelMatrix{ 1.0f };
-			glm::mat4 normalMatrix{ 1.0f };
-		};
+	//class DefaultRenderSystem : public RenderSystem
+	//{
+	//public:
+	//	struct PushConstantData // max 128 bytes
+	//	{
+	//		glm::mat4 modelMatrix{ 1.0f };
+	//		glm::mat4 normalMatrix{ 1.0f };
+	//	};
 
-		constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
+	//	constexpr static RenderStage::Type STAGE = RenderStage::Type::Geometry;
 
-		DefaultRenderSystem(VkDescriptorSetLayout globalSetLayout);
+	//	DefaultRenderSystem(VkDescriptorSetLayout globalSetLayout);
 
-		virtual void render(const RenderContext& ctx, VkDescriptorSet globalSet) override;
-	};
+	//	virtual void render(const RenderContext& ctx, VkDescriptorSet globalSet) override;
+	//};
 }

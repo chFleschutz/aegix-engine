@@ -75,11 +75,11 @@ namespace Aegix::Graphics
 
 		VkBuffer m_buffer = VK_NULL_HANDLE;
 		VmaAllocation m_allocation = VK_NULL_HANDLE;
-		VkDeviceSize m_bufferSize;
-		VkDeviceSize m_instanceSize;
-		VkDeviceSize m_alignmentSize;
-		uint32_t m_instanceCount;
-		VkBufferUsageFlags m_usage;
+		VkDeviceSize m_bufferSize = 0;
+		VkDeviceSize m_instanceSize = 0;
+		VkDeviceSize m_alignmentSize = 0;
+		uint32_t m_instanceCount = 0;
+		VkBufferUsageFlags m_usage = 0;
 		void* m_mapped = nullptr;
 	};
 }

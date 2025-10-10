@@ -11,7 +11,8 @@ namespace Aegix::Graphics
 	{
 		Scene::Scene& scene;
 		UI::UI& ui;
-		VkCommandBuffer cmd{ VK_NULL_HANDLE };
 		int frameIndex{ 0 };
+		VkCommandBuffer cmd{ VK_NULL_HANDLE };
+		VkDescriptorSet globalSet{ VK_NULL_HANDLE };
 	};
 }
