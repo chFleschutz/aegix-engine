@@ -27,7 +27,6 @@ layout(set = 1, binding = 0, std140) uniform Material
 {
 	vec3 albedo;
     vec3 emissive;
-    float padding1; // TODO: Adjust alignment in materialsystem to account for this
 	float metallic;
 	float roughness;
 	float ambientOcclusion;

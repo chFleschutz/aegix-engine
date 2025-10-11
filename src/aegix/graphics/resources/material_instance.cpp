@@ -11,7 +11,6 @@ namespace Aegix::Graphics
 		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) } // TODO: Maybe use frames in flight
 	{
 		m_descriptorSet = m_template->materialSetLayout().allocateDescriptorSet();
-
 		updateParameters();
 	}
 

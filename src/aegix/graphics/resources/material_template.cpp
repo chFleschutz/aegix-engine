@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Int: return 4;
 		case MaterialParamType::Float: return 4;
 		case MaterialParamType::Vec2: return 8;
-		case MaterialParamType::Vec3: return 16;
+		case MaterialParamType::Vec3: return 12;
 		case MaterialParamType::Vec4: return 16;
 		default: return 16;
 		}
@@ -96,12 +96,8 @@ namespace Aegix::Graphics
 		}
 		else
 		{
-			// TODO: Aligment is not correct according to std140 rules
-			// vec3 + float should be 16 bytes total, but this will use 20 bytes
-			// Need to look at previous params to determine if offset can be packed
-			size_t alignment = std140Alignment(type);
 			param.size = std140Size(type);
-			param.offset = alignTo(m_parameterSize, alignment);
+			param.offset = alignTo(m_parameterSize, std140Alignment(type));
 			m_parameterSize = param.offset + param.size;
 		}
 

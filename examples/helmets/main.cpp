@@ -7,14 +7,29 @@
 #include <aegix/graphics/resources/material_instance.h>
 #include <scene/components.h>
 
+#include <aegix/scripting/script_base.h>
+
 #include "core/logging.h"
 
-struct AlignTest
+class ColorChanger : public Aegix::Scripting::ScriptBase
 {
-	alignas(16) glm::vec3 x; // 12 bytes
-	alignas(16) glm::vec3 a; // 12 bytes
-	alignas(4) float b;    // 4 bytes
+public:
+	void update(float deltaSeconds) override
+	{
+		// Cycle through colors
+		constexpr float speed = 0.5f;
+		float time = static_cast<float>(glfwGetTime()) * speed;
+		glm::vec3 color{
+			(sin(time + 0.0f) + 1.0f) / 2.0f,
+			(sin(time + 2.0f) + 1.0f) / 2.0f,
+			(sin(time + 4.0f) + 1.0f) / 2.0f
+		};
+
+		auto& material = get<Aegix::Material>().instance;
+		material->setParameter("albedo", color);
+	}
 };
+
 
 void createMyMaterial(Aegix::Scene::Scene& scene)
 {
@@ -63,20 +78,21 @@ void createMyMaterial(Aegix::Scene::Scene& scene)
 	auto myMatInstance = std::make_shared<MaterialInstance>(pbrMatTemplate);
 	myMatInstance->setParameter("albedo", glm::vec3{ 1.0f, 0.0f, 0.0f });
 	myMatInstance->setParameter("emissive", glm::vec3{ 10.0f, 10.0f, 10.0f });
-	myMatInstance->setParameter("roughness", 1.0f);
+	myMatInstance->setParameter("roughness", 0.5f);
 
 	auto otherMatInstance = std::make_shared<MaterialInstance>(pbrMatTemplate);
 	otherMatInstance->setParameter("albedo", glm::vec3{ 0.0f, 1.0f, 0.0f });
 
 	auto myMesh = StaticMesh::create(ASSETS_DIR "Misc/cube.obj");
 
-	auto entity = scene.createEntity("MyEntity");
+	auto entity = scene.createEntity("MyEntity", { -2.0f, 0.0f, 1.0f });
 	entity.add<Mesh>(myMesh);
 	entity.add<Material>(myMatInstance);
 
-	auto entity2 = scene.createEntity("MyEntity2", { 2.0f, 0.0f, 0.0f });
+	auto entity2 = scene.createEntity("MyEntity2", { 2.0f, 0.0f, 1.0f });
 	entity2.add<Mesh>(myMesh);
 	entity2.add<Material>(otherMatInstance);
+	entity2.add<ColorChanger>();
 
 	for (const auto& [name, param] : pbrMatTemplate->parameters())
 	{
@@ -85,7 +101,6 @@ void createMyMaterial(Aegix::Scene::Scene& scene)
 
 		ALOG::info("Param: {:20} Size {:8} Offset{:8}", name, param.size, param.offset);
 	}
-
 }
 
 /// @brief Scene with two helmets
