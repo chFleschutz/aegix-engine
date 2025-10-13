@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/frame_info.h"
+#include "graphics/render_context.h"
 
 namespace Aegix::Graphics
 {
@@ -19,11 +20,11 @@ namespace Aegix::Graphics
 
 		template<typename T, typename... Args>
 			requires std::is_base_of_v<FrameGraphRenderPass, T> && std::is_constructible_v<T, Args...>
-		auto add(Args&&... args) -> FrameGraphNodeHandle
+		auto add(Args&&... args) -> T&
 		{
 			auto handle = m_resourcePool.addNode(std::make_unique<T>(std::forward<Args>(args)...));
 			m_nodeHandles.emplace_back(handle);
-			return handle;
+			return static_cast<T&>(*m_resourcePool.node(handle).pass);
 		}
 
 		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
@@ -43,7 +44,7 @@ namespace Aegix::Graphics
 		void sortNodes();
 		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
 
-		std::vector<FrameGraphNodeHandle> m_nodeHandles;
+		std::vector<FrameGraphNodeHandle> m_nodeHandles; // Sorted render passes
 		FrameGraphResourcePool m_resourcePool;
 	};
 }

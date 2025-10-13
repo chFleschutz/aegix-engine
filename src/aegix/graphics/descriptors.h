@@ -7,6 +7,8 @@ namespace Aegix::Graphics
 {
 	class DescriptorSetLayout
 	{
+		friend class DescriptorWriter;
+
 	public:
 		class Builder
 		{
@@ -15,7 +17,8 @@ namespace Aegix::Graphics
 
 			auto addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
 				uint32_t count = 1) -> Builder&;
-			auto build() const -> std::unique_ptr<DescriptorSetLayout>;
+			auto buildUnique() const -> std::unique_ptr<DescriptorSetLayout>;
+			auto build() const -> DescriptorSetLayout;
 
 		private:
 			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings{};
@@ -23,19 +26,20 @@ namespace Aegix::Graphics
 
 		DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
+		DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
 		~DescriptorSetLayout();
 
 		auto operator=(const DescriptorSetLayout&) -> DescriptorSetLayout& = delete;
+		auto operator=(DescriptorSetLayout&& other) noexcept -> DescriptorSetLayout&;
 
 		operator VkDescriptorSetLayout() const { return m_descriptorSetLayout; }
-
 		auto descriptorSetLayout() const -> VkDescriptorSetLayout { return m_descriptorSetLayout; }
+
+		auto allocateDescriptorSet() const -> VkDescriptorSet;
 
 	private:
 		VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;
-
-		friend class DescriptorWriter;
 	};
 
 
@@ -119,17 +123,18 @@ namespace Aegix::Graphics
 		class Builder
 		{
 		public:
+			Builder(DescriptorSetLayout& setLayout);
 			Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 			Builder(const Builder&) = delete;
 			~Builder() = default;
 
-			auto operator=(const Builder&) -> Builder& = delete;
+			auto operator=(const Builder&) noexcept -> Builder& = delete;
 
 			auto addBuffer(uint32_t binding, const Buffer& buffer) -> Builder&;
 			auto addTexture(uint32_t binding, const Texture& texture) -> Builder&;
 			auto addTexture(uint32_t binding, std::shared_ptr<Texture> texture) -> Builder&;
-
-			auto build() -> std::unique_ptr<DescriptorSet>;
+			auto build() -> DescriptorSet;
+			auto buildUnique() -> std::unique_ptr<DescriptorSet>;
 
 		private:
 			DescriptorPool& m_pool;
@@ -138,7 +143,12 @@ namespace Aegix::Graphics
 		};
 
 		DescriptorSet(DescriptorSetLayout& setLayout);
+		DescriptorSet(const DescriptorSet&) = delete;
+		DescriptorSet(DescriptorSet&&) = default;
 		~DescriptorSet() = default;
+
+		auto operator=(const DescriptorSet&) -> DescriptorSet& = delete;
+		auto operator=(DescriptorSet&&) -> DescriptorSet& = default;
 
 		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
 		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }

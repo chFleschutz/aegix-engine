@@ -7,13 +7,12 @@
 
 namespace Aegix::Graphics
 {
-	struct FrameInfo
+	struct RenderContext
 	{
 		Scene::Scene& scene;
 		UI::UI& ui;
-		VkCommandBuffer cmd{ VK_NULL_HANDLE };
 		int frameIndex{ 0 };
-		VkExtent2D swapChainExtent;
-		float aspectRatio;
+		VkCommandBuffer cmd{ VK_NULL_HANDLE };
+		VkDescriptorSet globalSet{ VK_NULL_HANDLE };
 	};
 }

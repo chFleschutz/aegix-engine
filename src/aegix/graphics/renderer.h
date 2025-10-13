@@ -5,7 +5,6 @@
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
-#include "graphics/systems/render_system.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics
@@ -20,20 +19,6 @@ namespace Aegix::Graphics
 
 		auto operator=(const Renderer&) -> Renderer& = delete;
 		auto operator=(Renderer&&) noexcept -> Renderer& = delete;
-
-		template<ValidRenderSystem T>
-		auto addRenderSystem() -> RenderSystem&
-		{
-			return m_frameGraph.resourcePool().addRenderSystem<T>(T::STAGE);
-		}
-
-		template<ValidMaterial T, typename... Args>
-			requires std::constructible_from<typename T::Instance, DescriptorSetLayout&, Args...>
-		auto createMaterialInstance(Args&&... args) -> std::shared_ptr<typename T::Instance>
-		{
-			auto& system = addRenderSystem<typename T::RenderSystem>();
-			return std::make_shared<typename T::Instance>(system.descriptorSetLayout(), std::forward<Args>(args)...);
-		}
 
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }

@@ -3,6 +3,7 @@
 #include "texture.h"
 
 #include "engine.h"
+#include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"
 
 #include <stb_image.h>
@@ -54,7 +55,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_shared<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
@@ -64,7 +65,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.comp.spv")
 			.buildUnique();
 
 		// Convert skybox to irradiance map
@@ -103,7 +104,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		struct PushConstants
 		{
@@ -115,7 +116,7 @@ namespace Aegix::Graphics
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.comp.spv")
 			.buildUnique();
 
 		// Create image views for mip levels
@@ -193,7 +194,7 @@ namespace Aegix::Graphics
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 		DescriptorWriter{ *descriptorSetLayout }
@@ -201,7 +202,7 @@ namespace Aegix::Graphics
 			.build(descriptorSet->descriptorSet(0));
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/brdf_lut.comp.spv")
 			.buildUnique();
 
 		// Convert skybox to irradiance map
@@ -325,7 +326,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
 
@@ -336,7 +337,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
 			.buildUnique();
 
 		// Convert spherical image to cubemap

@@ -1,5 +1,6 @@
 #include <aegix/engine.h>
 #include <aegix/scene/description.h>
+#include <aegix/scene/components.h>
 
 class Sponza : public Aegix::Scene::Description
 {

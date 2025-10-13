@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/render_systems/render_system.h"
 
 namespace Aegix::Graphics
 {
@@ -14,92 +14,29 @@ namespace Aegix::Graphics
 	class TransparentPass : public FrameGraphRenderPass
 	{
 	public:
-		TransparentPass(FrameGraph& framegraph)
+		TransparentPass(FrameGraph& framegraph);
+
+		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
+		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+
+		template<typename T, typename... Args>
+			requires std::is_base_of_v<RenderSystem, T>&& std::is_constructible_v<T, Args...>
+		auto addRenderSystem(Args&&... args) -> T&
 		{
-			auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Transparency);
-
-			stage.descriptorSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-				.build();
-
-			auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
-			stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
-
-			stage.descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), *stage.descriptorSetLayout)
-				.addBuffer(0, *stage.ubo)
-				.build();
-		}
-
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
-		{
-			m_sceneColor = builder.add({ "SceneColor",
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::ColorAttachment
-				});
-			m_depth = builder.add({ "Depth",
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::DepthStencilAttachment
-				});
-
-			return FrameGraphNodeCreateInfo{
-				.name = "Transparent",
-				.inputs = { m_sceneColor, m_depth },
-				.outputs = { m_sceneColor }
-			};
-		}
-
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
-		{
-			VkCommandBuffer commandBuffer = frameInfo.commandBuffer;
-
-			auto& stage = resources.renderStage(RenderStage::Type::Transparency);
-			updateUBO(stage, frameInfo);
-
-			auto& sceneColor = resources.texture(m_sceneColor);
-			auto& depth = resources.texture(m_depth);
-			auto colorAttachment = Tools::renderingAttachmentInfo(sceneColor, VK_ATTACHMENT_LOAD_OP_LOAD, {});
-			auto depthAttachment = Tools::renderingAttachmentInfo(depth, VK_ATTACHMENT_LOAD_OP_LOAD, {});
-
-			VkExtent2D extent = frameInfo.swapChainExtent;
-			VkRenderingInfo renderingInfo{};
-			renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-			renderingInfo.renderArea = { 0, 0, extent.width, extent.height };
-			renderingInfo.layerCount = 1;
-			renderingInfo.colorAttachmentCount = 1;
-			renderingInfo.pColorAttachments = &colorAttachment;
-			renderingInfo.pDepthAttachment = &depthAttachment;
-
-			vkCmdBeginRendering(commandBuffer, &renderingInfo);
-
-			Tools::vk::cmdViewport(commandBuffer, extent);
-			Tools::vk::cmdScissor(commandBuffer, extent);
-
-			for (const auto& system : stage.renderSystems)
-			{
-				system->render(frameInfo, stage.descriptorSet->descriptorSet(frameInfo.frameIndex));
-			}
-
-			vkCmdEndRendering(commandBuffer);
+			m_renderSystems.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+			return static_cast<T&>(*m_renderSystems.back());
 		}
 
 	private:
-		void updateUBO(RenderStage& stage, const FrameInfo& frameInfo)
-		{
-			Scene::Entity mainCamera = frameInfo.scene.mainCamera();
-			if (!mainCamera)
-				return;
-
-			auto& camera = mainCamera.get<Camera>();
-			TransparentUbo ubo{
-				.view = camera.viewMatrix,
-				.projection = camera.projectionMatrix
-			};
-
-			stage.ubo->writeToIndex(&ubo, frameInfo.frameIndex);
-		}
+		void updateUBO(const FrameInfo& frameInfo);
 
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_depth;
+
+		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
+
+		Buffer m_globalUbo;
+		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
+		std::unique_ptr<DescriptorSet> m_globalSet;
 	};
 }

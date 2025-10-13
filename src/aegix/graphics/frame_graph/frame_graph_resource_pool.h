@@ -153,26 +153,6 @@ namespace Aegix::Graphics
 		/// @brief Adds an existing texture as a resource
 		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
 
-		template<typename T>
-			requires std::is_base_of_v<RenderSystem, T>
-		RenderSystem& addRenderSystem(RenderStage::Type stageType)
-		{
-			auto& stage = renderStage(stageType);
-
-			// Check if rendersystem type already exists
-			for (auto& system : stage.renderSystems)
-			{
-				if (dynamic_cast<T*>(system.get()))
-					return *system;
-			}
-
-			stage.renderSystems.emplace_back(std::make_unique<T>(*stage.descriptorSetLayout));
-			return *stage.renderSystems.back();
-		}
-
-		auto renderStage(RenderStage::Type type) -> RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
-		auto renderStage(RenderStage::Type type) const -> const RenderStage& { return m_renderStages[static_cast<size_t>(type)]; }
-
 		/// @brief For all reference resources, resolve the handle to the actual resource
 		void resolveReferences();
 		void createResources();
@@ -187,8 +167,6 @@ namespace Aegix::Graphics
 		std::vector<FrameGraphResource> m_resources;
 		std::vector<Texture> m_textures;
 		std::vector<Buffer> m_buffers;
-
-		std::array<RenderStage, static_cast<size_t>(RenderStage::Type::Count)> m_renderStages;
 	};
 
 

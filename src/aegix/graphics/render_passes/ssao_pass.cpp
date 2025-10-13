@@ -6,6 +6,7 @@
 #include "graphics/vulkan_tools.h"
 #include "math/interpolation.h"
 #include "math/random.h"
+#include "scene/components.h"
 
 #include <imgui.h>
 
@@ -22,7 +23,7 @@ namespace Aegix::Graphics
 			.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(4, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(5, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
@@ -102,14 +103,14 @@ namespace Aegix::Graphics
 
 	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
+		VkCommandBuffer cmd = frameInfo.cmd;
+
 		// Update push constants
 		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
 		m_uniformData.view = camera.viewMatrix;
 		m_uniformData.projection = camera.projectionMatrix;
 		m_uniformData.noiseScale.x = m_uniformData.noiseScale.y * camera.aspect;
 		m_uniforms.writeToIndex(&m_uniformData, frameInfo.frameIndex);
-
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_ssao))

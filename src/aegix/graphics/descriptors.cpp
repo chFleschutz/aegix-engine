@@ -24,9 +24,14 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto DescriptorSetLayout::Builder::build() const -> std::unique_ptr<DescriptorSetLayout>
+	auto DescriptorSetLayout::Builder::buildUnique() const -> std::unique_ptr<DescriptorSetLayout>
 	{
 		return std::make_unique<DescriptorSetLayout>(m_bindings);
+	}
+
+	auto DescriptorSetLayout::Builder::build() const -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout{ m_bindings };
 	}
 
 
@@ -50,9 +55,33 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateDescriptorSetLayout(VulkanContext::device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout))
 	}
 
+	DescriptorSetLayout::DescriptorSetLayout(DescriptorSetLayout&& other) noexcept
+		: m_descriptorSetLayout{ other.m_descriptorSetLayout }, m_bindings{ std::move(other.m_bindings) }
+	{
+		other.m_descriptorSetLayout = VK_NULL_HANDLE;
+	}
+
 	DescriptorSetLayout::~DescriptorSetLayout()
 	{
 		vkDestroyDescriptorSetLayout(VulkanContext::device(), m_descriptorSetLayout, nullptr);
+	}
+
+	auto DescriptorSetLayout::operator=(DescriptorSetLayout&& other) noexcept -> DescriptorSetLayout&
+	{
+		if (this != &other)
+		{
+			m_descriptorSetLayout = other.m_descriptorSetLayout;
+			m_bindings = std::move(other.m_bindings);
+			other.m_descriptorSetLayout = VK_NULL_HANDLE;
+		}
+		return *this;
+	}
+
+	auto DescriptorSetLayout::allocateDescriptorSet() const -> VkDescriptorSet
+	{
+		VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
+		VulkanContext::descriptorPool().allocateDescriptorSet(m_descriptorSetLayout, descriptorSet);
+		return descriptorSet;
 	}
 
 
@@ -236,6 +265,16 @@ namespace Aegix::Graphics
 
 	// DescriptorSet Builder -----------------------------------------------------
 
+	DescriptorSet::Builder::Builder(DescriptorSetLayout& setLayout)
+		: m_pool{ VulkanContext::descriptorPool() }, m_setLayout{ setLayout }
+	{
+		m_writer.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_writer.emplace_back(DescriptorWriter{ setLayout });
+		}
+	}
+
 	DescriptorSet::Builder::Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout)
 		: m_pool{ pool }, m_setLayout{ setLayout }
 	{
@@ -270,7 +309,17 @@ namespace Aegix::Graphics
 		return addTexture(binding, *texture);
 	}
 
-	auto DescriptorSet::Builder::build() -> std::unique_ptr<DescriptorSet>
+	auto DescriptorSet::Builder::build() -> DescriptorSet
+	{
+		auto set = DescriptorSet{ m_setLayout };
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_writer[i].build(set.m_descriptorSets[i]);
+		}
+		return set;
+	}
+
+	auto DescriptorSet::Builder::buildUnique() -> std::unique_ptr<DescriptorSet>
 	{
 		auto set = std::make_unique<DescriptorSet>(m_setLayout);
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

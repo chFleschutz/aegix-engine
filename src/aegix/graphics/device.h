@@ -98,12 +98,12 @@ namespace Aegix::Graphics
 		VmaAllocator m_allocator = VK_NULL_HANDLE;
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 
-		VkDebugUtilsMessengerEXT m_debugMessenger;
-		VkPhysicalDeviceProperties m_properties;
-		VkPhysicalDeviceFeatures m_features;
+		VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+		VkPhysicalDeviceProperties m_properties{};
+		VkPhysicalDeviceFeatures m_features{};
 
-		VkSurfaceKHR m_surface;
-		VkQueue m_graphicsQueue;
-		VkQueue m_presentQueue;
+		VkSurfaceKHR m_surface = VK_NULL_HANDLE;
+		VkQueue m_graphicsQueue = VK_NULL_HANDLE;
+		VkQueue m_presentQueue = VK_NULL_HANDLE;
 	};
 }

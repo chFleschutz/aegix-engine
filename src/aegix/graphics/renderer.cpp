@@ -4,6 +4,7 @@
 
 #include "core/profiler.h"
 #include "graphics/frame_graph/frame_graph_blackboard.h"
+#include "graphics/render_context.h"
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
@@ -13,6 +14,8 @@
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
+#include "graphics/render_systems/point_light_render_system.h"
+#include "graphics/render_systems/static_mesh_render_system.h"
 #include "graphics/vulkan_context.h"
 #include "scene/scene.h"
 
@@ -59,12 +62,12 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
 		FrameInfo frameInfo{
-			scene,
-			ui,
-			m_currentFrameIndex,
-			commandBuffer,
-			m_swapChain.extent(),
-			m_swapChain.aspectRatio()
+			.scene = scene,
+			.ui = ui,
+			.cmd = commandBuffer,
+			.frameIndex = m_currentFrameIndex,
+			.swapChainExtent = m_swapChain.extent(),
+			.aspectRatio = m_swapChain.aspectRatio()
 		};
 		
 		m_frameGraph.execute(frameInfo);
@@ -104,8 +107,13 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		m_frameGraph.add<GeometryPass>(m_frameGraph);
-		m_frameGraph.add<TransparentPass>(m_frameGraph);
+		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
+		geoPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Opaque);
+
+		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
+		transparentPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Transparent);
+		transparentPass.addRenderSystem<PointLightRenderSystem>();
+
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();

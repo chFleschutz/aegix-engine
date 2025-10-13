@@ -15,7 +15,7 @@ namespace Aegix::Graphics
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
@@ -60,7 +60,7 @@ namespace Aegix::Graphics
 
 	void PostProcessingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
+		VkCommandBuffer cmd = frameInfo.cmd;
 
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_final))

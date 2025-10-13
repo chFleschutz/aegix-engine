@@ -10,6 +10,7 @@ namespace Aegix
 {
 	Engine::Engine()
 	{
+		m_assets.loadDefaultAssets();
 		m_layerStack.push<Core::EditorLayer>();
 		
 		ALOG::info("Engine Initialized!");

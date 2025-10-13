@@ -2,8 +2,9 @@
 
 #include "lighting_pass.h"
 
-#include "graphics/vulkan_tools.h"
 #include "graphics/vulkan_context.h"
+#include "graphics/vulkan_tools.h"
+#include "scene/components.h"
 
 #include <imgui.h>
 
@@ -21,20 +22,20 @@ namespace Aegix::Graphics
 			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 		m_gbufferSet = std::make_unique<DescriptorSet>(*m_gbufferSetLayout);
 
 		m_iblSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 		m_iblSet = std::make_unique<DescriptorSet>(*m_iblSetLayout);
 
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.setShaderStage(SHADER_DIR "lighting.comp.spv")
+			.setShaderStage(SHADER_DIR "pbr/lighting.comp.spv")
 			.buildUnique();
 	}
 
@@ -84,7 +85,7 @@ namespace Aegix::Graphics
 
 	void LightingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
+		VkCommandBuffer cmd = frameInfo.cmd;
 
 		updateLightingUBO(frameInfo);
 		auto& environment = frameInfo.scene.environment().get<Environment>();

@@ -99,17 +99,17 @@ namespace Aegix::Graphics
 		operator VkPipeline() const { return m_pipeline; }
 
 		[[nodiscard]] auto pipeline() const -> VkPipeline { return m_pipeline; }
-		[[nodiscard]] auto layout() const -> VkPipelineLayout { return m_Layout; }
+		[[nodiscard]] auto layout() const -> VkPipelineLayout { return m_layout; }
 		[[nodiscard]] auto bindPoint() const -> VkPipelineBindPoint { return m_bindPoint; }
 
 		void bind(VkCommandBuffer commandBuffer) const;
 		void bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const;
-		void pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, uint32_t size, const void* data) const;
+		void pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, const void* data, uint32_t size, uint32_t offset = 0) const;
 
 		template<typename T>
 		void pushConstants(VkCommandBuffer cmd, VkShaderStageFlags stageFlags, const T& data) const
 		{
-			pushConstants(cmd, stageFlags, sizeof(T), &data);
+			pushConstants(cmd, stageFlags, &data, sizeof(T));
 		}
 
 		static void defaultGraphicsPipelineConfig(Pipeline::GraphicsConfig& configInfo);
@@ -120,7 +120,7 @@ namespace Aegix::Graphics
 		void createComputePipeline(const ComputeConfig& config);
 		void destroy();
 
-		VkPipelineLayout m_Layout = VK_NULL_HANDLE;
+		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 		VkPipeline m_pipeline = VK_NULL_HANDLE;
 		VkPipelineBindPoint m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	};

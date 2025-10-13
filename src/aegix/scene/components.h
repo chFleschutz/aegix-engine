@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/material.h"
+#include "graphics/resources/material_instance.h"
 #include "graphics/resources/static_mesh.h"
 #include "graphics/resources/texture.h"
 #include "math/math.h"
@@ -99,7 +99,7 @@ namespace Aegix
 
 	struct Material
 	{
-		std::shared_ptr<Graphics::Material> material;
+		std::shared_ptr<Graphics::MaterialInstance> instance;
 	};
 
 	struct AmbientLight

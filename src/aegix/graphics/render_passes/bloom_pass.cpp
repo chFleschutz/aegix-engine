@@ -22,21 +22,21 @@ namespace Aegix::Graphics
 		m_thresholdSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		m_thresholdSet = std::make_unique<DescriptorSet>(*m_thresholdSetLayout);
 
 		m_thresholdPipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_thresholdSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomThreshold))
-			.setShaderStage(SHADER_DIR "bloom_threshold.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_threshold.comp.spv")
 			.buildUnique();
 
 		// Downsample
 		m_downsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
@@ -46,14 +46,14 @@ namespace Aegix::Graphics
 		m_downsamplePipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_downsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomDownsample))
-			.setShaderStage(SHADER_DIR "bloom_downsample.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_downsample.comp.spv")
 			.buildUnique();
 
 		// Upsample
 		m_upsampleSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
+			.buildUnique();
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
@@ -63,7 +63,7 @@ namespace Aegix::Graphics
 		m_upsamplePipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_upsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomUpsample))
-			.setShaderStage(SHADER_DIR "bloom_upsample.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_upsample.comp.spv")
 			.buildUnique();
 	}
 
@@ -126,7 +126,7 @@ namespace Aegix::Graphics
 
 	void BloomPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
+		VkCommandBuffer cmd = frameInfo.cmd;
 		auto& bloom = resources.texture(m_bloom);
 
 		extractBrightRegions(cmd, frameInfo);

@@ -25,7 +25,7 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
-			VkCommandBuffer cmd = frameInfo.commandBuffer;
+			VkCommandBuffer cmd = frameInfo.cmd;
 
 			auto& texture = resources.texture(m_final);
 			auto attachment = Tools::renderingAttachmentInfo(texture, VK_ATTACHMENT_LOAD_OP_LOAD, {});

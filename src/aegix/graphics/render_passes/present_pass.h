@@ -29,11 +29,12 @@ namespace Aegix::Graphics
 
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
 		{
+			VkCommandBuffer cmd = frameInfo.cmd;
+
 			auto& srcTexture = resources.texture(m_final);
 			AGX_ASSERT_X(m_swapChain.width() == srcTexture.image().width(), "Swapchain extent does not match source texture extent");
 			AGX_ASSERT_X(m_swapChain.height() == srcTexture.image().height(), "Swapchain extent does not match source texture extent");
 			
-			VkCommandBuffer cmd = frameInfo.commandBuffer;
 			VkImage srcImage = srcTexture.image();
 			VkImage dstImage = m_swapChain.currentImage();
 			
@@ -55,7 +56,7 @@ namespace Aegix::Graphics
 			blitRegion.dstOffsets[0] = { 0, 0, 0 };
 			blitRegion.dstOffsets[1] = extent;
 
-			vkCmdBlitImage(cmd, 
+			vkCmdBlitImage(cmd,
 				srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				1, &blitRegion, VK_FILTER_LINEAR);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/asset_manager.h"
 #include "core/globals.h"
 #include "core/input.h"
 #include "core/layer_stack.h"
@@ -25,10 +26,12 @@ namespace Aegix
 		/// @brief Returns the instance of the engine
 		static Engine& instance();
 
-		auto window() -> Core::Window& { return m_window; }
-		auto renderer() -> Graphics::Renderer& { return m_graphics.renderer(); }
-		auto ui() -> UI::UI& { return m_ui; }
-		auto scene() -> Scene::Scene& { return m_scene; }
+		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
+		[[nodiscard]] auto renderer() -> Graphics::Renderer& { return m_graphics.renderer(); }
+		[[nodiscard]] auto ui() -> UI::UI& { return m_ui; }
+		[[nodiscard]] auto scene() -> Scene::Scene& { return m_scene; }
+
+		[[nodiscard]] static auto assets() -> Core::AssetManager& { return Engine::instance().m_assets; }
 
 		void run();
 
@@ -46,6 +49,7 @@ namespace Aegix
 		void applyFrameBrake(std::chrono::steady_clock::time_point frameBeginTime);
 
 		Logging m_logging{};
+		Core::AssetManager m_assets{};
 		Core::LayerStack m_layerStack{};
 		Core::Window m_window{ Core::DEFAULT_WIDTH,Core::DEFAULT_HEIGHT, "Aegix" };
 		Graphics::Graphics m_graphics{ m_window };

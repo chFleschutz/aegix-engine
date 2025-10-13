@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/asset.h"
 #include "graphics/resources/image.h"
 #include "graphics/resources/image_view.h"
 #include "graphics/resources/sampler.h"
@@ -8,7 +9,7 @@
 
 namespace Aegix::Graphics
 {
-	class Texture
+	class Texture : public Core::Asset
 	{
 	public:
 		static auto create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>;

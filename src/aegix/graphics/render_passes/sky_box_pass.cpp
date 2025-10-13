@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build();
+			.buildUnique();
 
 		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
 
@@ -96,11 +96,11 @@ namespace Aegix::Graphics
 		if (!environment.skybox)
 			return;
 
+		VkCommandBuffer cmd = frameInfo.cmd;
+
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, environment.skybox->descriptorImageInfo())
 			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
-
-		VkCommandBuffer cmd = frameInfo.commandBuffer;
 
 		auto& sceneColorTexture = resources.texture(m_sceneColor);
 		auto& depthTexture = resources.texture(m_depth);

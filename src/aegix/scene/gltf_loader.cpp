@@ -7,7 +7,10 @@
 
 #include <gltf_utils.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <variant>
+
 
 namespace Aegix::Scene
 {
@@ -19,21 +22,18 @@ namespace Aegix::Scene
 		if (m_gltf->scenes.empty())
 			return;
 
-		m_defaultBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		m_defaultMaterial = Engine::instance().renderer().createMaterialInstance<Graphics::DefaultMaterial>(
-			m_defaultWhite, m_defaultNormal, m_defaultWhite, m_defaultBlack, m_defaultBlack);
-
 		m_meshes.resize(m_gltf->meshes.size());
 		m_materials.resize(m_gltf->materials.size());
 		m_textures.resize(m_gltf->textures.size());
 		m_entities.reserve(m_gltf->nodes.size() + m_gltf->materials.size()); // Rough estimate
-		
+
+		m_pbrTemplate = Engine::assets().get<Graphics::MaterialTemplate>("default/PBR_template");
+		m_pbrDefaultMat = Engine::assets().get<Graphics::MaterialInstance>("default/PBR_instance");
+
 		size_t startScene = m_gltf->startScene.value_or(0);
 		std::string sceneName = m_gltf->scenes[startScene].name.value_or(path.stem().string());
 		m_rootEntity = scene.createEntity(sceneName);
-		
+
 		loadScene(scene, startScene);
 	}
 
@@ -70,7 +70,7 @@ namespace Aegix::Scene
 
 			for (auto& childIndex : node.children)
 				nodeStack.emplace_back(Node{ childIndex, nodeEntity });
-			
+
 			// Mesh
 			if (!node.mesh.has_value())
 				continue;
@@ -81,10 +81,10 @@ namespace Aegix::Scene
 			for (size_t i = 0; i < mesh.primitives.size(); i++)
 			{
 				auto& primitive = mesh.primitives[i];
-				auto material = primitive.material ? loadMaterial(*primitive.material) : m_defaultMaterial;
+				auto matInstance = primitive.material ? loadMaterial(*primitive.material) : m_pbrDefaultMat;
 
 				auto meshEntity = scene.createEntity(mesh.name.value_or("Mesh") + std::to_string(i));
-				meshEntity.add<Graphics::DefaultMaterial>(material);
+				meshEntity.add<Material>(matInstance);
 				meshEntity.add<Mesh>(loadMesh(meshIndex, i));
 				meshEntity.setParent(nodeEntity);
 			}
@@ -145,7 +145,7 @@ namespace Aegix::Scene
 		return mesh;
 	}
 
-	auto GLTFLoader::loadMaterial(size_t materialIndex) -> std::shared_ptr<Graphics::DefaultMaterialInstance>
+	auto GLTFLoader::loadMaterial(size_t materialIndex) -> std::shared_ptr<Graphics::MaterialInstance>
 	{
 		AGX_ASSERT_X(materialIndex < m_gltf->materials.size(), "Material index is out of range");
 
@@ -153,34 +153,33 @@ namespace Aegix::Scene
 		if (m_materials[materialIndex])
 			return m_materials[materialIndex];
 
-		auto& material = m_gltf->materials[materialIndex];
-		std::shared_ptr<Graphics::Texture> baseColorTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> normalTexture = m_defaultNormal;
-		std::shared_ptr<Graphics::Texture> metallicRoughnessTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> occlusionTexture = m_defaultWhite;
-		std::shared_ptr<Graphics::Texture> emissiveTexture = m_defaultBlack;
+		auto materialInstance = Graphics::MaterialInstance::create(m_pbrTemplate);
 
+		auto& material = m_gltf->materials[materialIndex];
 		if (auto& pbr = material.pbrMetallicRoughness)
 		{
 			if (auto& baseColor = pbr->baseColorTexture)
-				baseColorTexture = loadTexture(baseColor->index, VK_FORMAT_R8G8B8A8_SRGB);
+				materialInstance->setParameter("albedoMap", loadTexture(baseColor->index, VK_FORMAT_R8G8B8A8_SRGB));
 
 			if (auto& metallicRoughnes = pbr->metallicRoughnessTexture)
-				metallicRoughnessTexture = loadTexture(metallicRoughnes->index, VK_FORMAT_R8G8B8A8_UNORM);
+				materialInstance->setParameter("metalRoughnessMap", loadTexture(metallicRoughnes->index, VK_FORMAT_R8G8B8A8_UNORM));
+
+			materialInstance->setParameter("albedo", glm::make_vec3(pbr->baseColorFactor.data()));
+			materialInstance->setParameter("metallic", pbr->metallicFactor);
+			materialInstance->setParameter("roughness", pbr->roughnessFactor);
 		}
 
 		if (auto& normal = material.normalTexture)
-			normalTexture = loadTexture(normal->index, VK_FORMAT_R8G8B8A8_UNORM);
+			materialInstance->setParameter("normalMap", loadTexture(normal->index, VK_FORMAT_R8G8B8A8_UNORM));
 
 		if (auto& occlusion = material.occlusionTexture)
-			occlusionTexture = loadTexture(occlusion->index, VK_FORMAT_R8G8B8A8_UNORM);
+			materialInstance->setParameter("ambientOcclusionMap", loadTexture(occlusion->index, VK_FORMAT_R8G8B8A8_UNORM));
 
 		if (auto& emissive = material.emissiveTexture)
-			emissiveTexture = loadTexture(emissive->index, VK_FORMAT_R8G8B8A8_SRGB);
+			materialInstance->setParameter("emissiveMap", loadTexture(emissive->index, VK_FORMAT_R8G8B8A8_SRGB));
 
-		auto& renderer = Engine::instance().renderer();
-		auto materialInstance = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			baseColorTexture, normalTexture, metallicRoughnessTexture, occlusionTexture, emissiveTexture);
+		materialInstance->setParameter("emissive", glm::make_vec3(material.emissiveFactor.data()));
+
 		m_materials[materialIndex] = materialInstance;
 		return materialInstance;
 	}
