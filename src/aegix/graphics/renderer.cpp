@@ -107,10 +107,10 @@ namespace Aegix::Graphics
 	void Renderer::createFrameGraph()
 	{
 		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
-		geoPass.addRenderSystem<StaticMeshRenderSystem>(ObjectType::Opaque);
+		geoPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Opaque);
 
 		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
-		//transparentPass.addRenderSystem<StaticMeshRenderSystem>(ObjectType::Transparent);
+		transparentPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Transparent);
 
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);

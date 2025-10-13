@@ -38,6 +38,12 @@ namespace Aegix::Graphics
 		MaterialParamValue defaultValue;
 	};
 
+	enum class MaterialType
+	{
+		Opaque,
+		Transparent
+	};
+
 	class MaterialTemplate : public Core::Asset
 	{
 	public:
@@ -54,6 +60,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
 		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
+		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
 
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
@@ -69,5 +76,6 @@ namespace Aegix::Graphics
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 		size_t m_parameterSize = 0;
 		uint32_t m_textureCount = 0;
+		MaterialType m_materialType = MaterialType::Opaque;
 	};
 }

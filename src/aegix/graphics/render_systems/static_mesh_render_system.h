@@ -1,6 +1,8 @@
 #pragma once
 
 #include "graphics/render_systems/render_system.h"
+#include "graphics/resources/material_template.h"
+
 
 namespace Aegix::Graphics
 {
@@ -10,23 +12,18 @@ namespace Aegix::Graphics
 		glm::mat4 normalMatrix{ 1.0f };
 	};
 
-	enum class ObjectType
-	{
-		Opaque = 0,
-		Transparent = 1
-	};
-
 	class StaticMeshRenderSystem : public RenderSystem
 	{
 	public:
-		StaticMeshRenderSystem(ObjectType objectType = ObjectType::Opaque)
-			: m_objectType{ objectType }
+		StaticMeshRenderSystem(MaterialType type = MaterialType::Opaque)
+			: m_type{ type }
 		{
 		}
 
 		virtual void render(const RenderContext& ctx) override
 		{
-			// TODO: use ObjectType to filter objects
+			// TODO: Sort for transparent materials back to front
+			// TODO: Maybe also for opaque materials but front to back (avoid overdraw)
 
 			MaterialTemplate* lastMatTemplate = nullptr;
 			MaterialInstance* lastMatInstance = nullptr;
@@ -39,7 +36,7 @@ namespace Aegix::Graphics
 					continue;
 
 				auto currentMatTemplate = material.instance->materialTemplate().get();
-				if (!currentMatTemplate)
+				if (!currentMatTemplate || currentMatTemplate->type() != m_type)
 					continue;
 
 				// Bind Pipeline
@@ -72,6 +69,6 @@ namespace Aegix::Graphics
 		}
 
 	private:
-		ObjectType m_objectType;
+		MaterialType m_type;
 	};
 }
