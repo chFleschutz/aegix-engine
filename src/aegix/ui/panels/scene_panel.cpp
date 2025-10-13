@@ -3,7 +3,6 @@
 #include "scene_panel.h"
 
 #include "engine.h"
-#include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -302,7 +301,7 @@ namespace Aegix::UI
 			drawAddComponentItem<PointLight>("Point Light");
 			drawAddComponentItem<Camera>("Camera");
 			drawAddComponentItem<Mesh>("Mesh");
-			drawAddComponentItem<Graphics::DefaultMaterial>("Default Material");
+			drawAddComponentItem<Material>("Default Material");
 			ImGui::EndPopup();
 		}
 	}

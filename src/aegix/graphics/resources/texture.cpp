@@ -3,6 +3,7 @@
 #include "texture.h"
 
 #include "engine.h"
+#include "graphics/pipeline.h"
 #include "graphics/vulkan_tools.h"
 
 #include <stb_image.h>

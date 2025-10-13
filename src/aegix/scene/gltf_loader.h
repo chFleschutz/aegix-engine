@@ -2,7 +2,6 @@
 
 #include "graphics/resources/static_mesh.h"
 #include "graphics/resources/texture.h"
-#include "graphics/systems/default_render_system.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 

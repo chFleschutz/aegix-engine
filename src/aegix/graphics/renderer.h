@@ -5,7 +5,6 @@
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
-#include "graphics/systems/render_system.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics

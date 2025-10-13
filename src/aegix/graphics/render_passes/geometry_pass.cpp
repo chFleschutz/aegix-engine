@@ -2,7 +2,6 @@
 
 #include "geometry_pass.h"
 
-#include "graphics/systems/render_system.h"
 #include "graphics/vulkan_context.h"
 #include "graphics/vulkan_tools.h"
 #include "scene/components.h"
