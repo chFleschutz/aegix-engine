@@ -35,7 +35,7 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.setShaderStage(SHADER_DIR "lighting.comp.spv")
+			.setShaderStage(SHADER_DIR "pbr/lighting.comp.spv")
 			.buildUnique();
 	}
 

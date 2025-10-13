@@ -64,7 +64,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "irradiance_convolution.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.comp.spv")
 			.buildUnique();
 
 		// Convert skybox to irradiance map
@@ -115,7 +115,7 @@ namespace Aegix::Graphics
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.setShaderStage(SHADER_DIR "prefilter_environment.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.comp.spv")
 			.buildUnique();
 
 		// Create image views for mip levels
@@ -201,7 +201,7 @@ namespace Aegix::Graphics
 			.build(descriptorSet->descriptorSet(0));
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "brdf_lut.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/brdf_lut.comp.spv")
 			.buildUnique();
 
 		// Convert skybox to irradiance map
@@ -336,7 +336,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "equirect_to_cube.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
 			.buildUnique();
 
 		// Convert spherical image to cubemap
