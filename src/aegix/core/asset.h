@@ -5,6 +5,8 @@ namespace Aegix::Core
 	class Asset
 	{
 	public:
+		friend class AssetManager;
+
 		virtual ~Asset() = default;
 
 		[[nodiscard]] auto path() const -> const std::filesystem::path& { return m_path; }

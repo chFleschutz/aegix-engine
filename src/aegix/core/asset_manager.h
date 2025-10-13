@@ -4,6 +4,8 @@
 
 namespace Aegix::Core
 {
+	using AssetID = uint64_t;
+
 	class AssetManager
 	{
 	public:
@@ -14,14 +16,15 @@ namespace Aegix::Core
 		//requires IsLoadable<T> // TODO: Add loadable concept
 		[[nodiscard]] auto get(const std::filesystem::path& path) -> std::shared_ptr<T>
 		{
-			auto it = m_assets.find(path);
+			AssetID id = std::hash<std::filesystem::path>{}(path);
+			auto it = m_assets.find(id);
 			if (it != m_assets.end())
 				return std::static_pointer_cast<T>(it->second);
 
 			// TODO: Implement actual loading logic
 			//std::shared_ptr<T> newAsset = T::load(path);
 			//AGX_ASSERT(newAsset, "Failed to load asset");
-			//m_assets[path] = newAsset;
+			//m_assets[id] = newAsset;
 			//return newAsset;
 
 			AGX_ASSERT_X(false, "Asset loading not implemented yet");
@@ -31,7 +34,9 @@ namespace Aegix::Core
 		template<IsAsset T>
 		void add(const std::filesystem::path& path, const std::shared_ptr<T>& asset)
 		{
-			m_assets[path] = asset;
+			AssetID id = std::hash<std::filesystem::path>{}(path);
+			asset->m_path = path;
+			m_assets[id] = asset;
 		}
 
 		void garbageCollect()
@@ -49,6 +54,6 @@ namespace Aegix::Core
 
 	private:
 		// TODO: Use a weak_ptr for auto release of assets (needs asset file loading first to load on demand)
-		std::unordered_map<std::filesystem::path, std::shared_ptr<Asset>> m_assets;
+		std::unordered_map<AssetID, std::shared_ptr<Asset>> m_assets;
 	};
 }

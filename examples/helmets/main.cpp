@@ -31,33 +31,6 @@ public:
 };
 
 
-void createMyMaterial(Aegix::Scene::Scene& scene)
-{
-	using namespace Aegix::Graphics;
-	using namespace Aegix;
-
-	auto pbrMatTemplate = Engine::assets().get<MaterialTemplate>("default/PBR.agx");
-
-	auto myMatInstance = std::make_shared<MaterialInstance>(pbrMatTemplate);
-	myMatInstance->setParameter("albedo", glm::vec3{ 1.0f, 0.0f, 0.0f });
-	myMatInstance->setParameter("emissive", glm::vec3{ 10.0f, 10.0f, 10.0f });
-	myMatInstance->setParameter("roughness", 0.5f);
-
-	auto otherMatInstance = std::make_shared<MaterialInstance>(pbrMatTemplate);
-	otherMatInstance->setParameter("albedo", glm::vec3{ 0.0f, 1.0f, 0.0f });
-
-	auto myMesh = StaticMesh::create(ASSETS_DIR "Misc/cube.obj");
-
-	auto entity = scene.createEntity("MyEntity", { -2.0f, 0.0f, 1.0f });
-	entity.add<Mesh>(myMesh);
-	entity.add<Material>(myMatInstance);
-
-	auto entity2 = scene.createEntity("MyEntity2", { 2.0f, 0.0f, 1.0f });
-	entity2.add<Mesh>(myMesh);
-	entity2.add<Material>(otherMatInstance);
-	entity2.add<ColorChanger>();
-}
-
 /// @brief Scene with two helmets
 class HelmetScene : public Aegix::Scene::Description
 {
@@ -65,10 +38,6 @@ public:
 	void initialize(Aegix::Scene::Scene& scene) override
 	{
 		using namespace Aegix;
-
-		// TODO: DEBUG
-		createMyMaterial(scene);
-
 
 		// SKYBOX
 		auto& env = scene.environment().get<Environment>();
@@ -86,11 +55,31 @@ public:
 			.location = { -3.0f, -6.0f, 3.0f},
 			.rotation = glm::radians(glm::vec3{ -8.0f, 0.0f, 335.0f })
 		};
+		
+		// ASSETS
+		auto pbrMatTemplate = Engine::assets().get<Graphics::MaterialTemplate>("default/PBR_template");
 
+		auto myMatInstance = std::make_shared<Graphics::MaterialInstance>(pbrMatTemplate);
+		myMatInstance->setParameter("albedo", glm::vec3{ 1.0f, 0.0f, 0.0f });
+		myMatInstance->setParameter("roughness", 0.1f);
+		myMatInstance->setParameter("metallic", 1.0f);
 
+		auto otherMatInstance = std::make_shared<Graphics::MaterialInstance>(pbrMatTemplate);
+		otherMatInstance->setParameter("albedo", glm::vec3{ 0.0f, 1.0f, 0.0f });
 
-
+		auto myMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/cube.obj");
+		
 		// ENTITIES
+		auto entity = scene.createEntity("MyEntity", { -2.0f, 0.0f, 1.0f });
+		entity.add<Mesh>(myMesh);
+		entity.add<Material>(myMatInstance);
+
+		auto entity2 = scene.createEntity("MyEntity2", { 2.0f, 0.0f, 1.0f });
+		entity2.add<Mesh>(myMesh);
+		entity2.add<Material>(otherMatInstance);
+		entity2.add<ColorChanger>();
+
+
 		//auto spheres = scene.load(ASSETS_DIR "MetalRoughSpheres/MetalRoughSpheres.gltf");
 		//spheres.get<Transform>().location = { 0.0f, 5.0f, 5.0f };
 
@@ -115,7 +104,6 @@ public:
 		//auto planeMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
 		//	textureWhite, defaultNormal, defaultMetalRoughness, textureWhite, textureBlack);
 		//plane.add<Graphics::DefaultMaterial>(planeMat);
-
 	}
 };
 
