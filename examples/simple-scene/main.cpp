@@ -1,6 +1,4 @@
 #include <aegix/engine.h>
-#include <aegix/graphics/systems/default_render_system.h>
-#include <aegix/graphics/systems/point_light_system.h>
 #include <aegix/math/random.h>
 #include <aegix/scene/description.h>
 #include <aegix/scripting/script_base.h>
@@ -24,37 +22,34 @@ public:
 	{
 		using namespace Aegix;
 
-		auto& renderer = Engine::instance().renderer();
-		renderer.addRenderSystem<Graphics::PointLightSystem>();
-
 		// MODELS
 		auto teapotMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/teapot.obj");
 		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
 
 		// MATERIALS
-		auto textureBlack = Graphics::Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto textureWhite = Graphics::Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-		auto defaultNormal = Graphics::Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 1.0f }, VK_FORMAT_R8G8B8A8_UNORM);
-
 		auto paintingTexture = Graphics::Texture::create(ASSETS_DIR "Misc/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
-		auto paintingMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			paintingTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
-
 		auto metalTexture = Graphics::Texture::create(ASSETS_DIR "Misc/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
-		auto metalMat = renderer.createMaterialInstance<Graphics::DefaultMaterial>(
-			metalTexture, defaultNormal, textureWhite, textureBlack, textureBlack);
+		
+		auto pbrMatTemplate = Engine::assets().get<Graphics::MaterialTemplate>("default/PBR_template");
 
+		auto paintingMat = Graphics::MaterialInstance::create(pbrMatTemplate);
+		paintingMat->setParameter("albedoMap", paintingTexture);
+
+		auto metalMat = Graphics::MaterialInstance::create(pbrMatTemplate);
+		metalMat->setParameter("albedoMap", metalTexture);
+		metalMat->setParameter("metallic", 1.0f);
+		
 		// ENTITIES
 		auto floorPlane = scene.createEntity("Floor Plane");
-		floorPlane.add<Mesh>(planeMesh);
-		floorPlane.add<Graphics::DefaultMaterial>(paintingMat);
 		floorPlane.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		floorPlane.add<Mesh>(planeMesh);
+		floorPlane.add<Material>(paintingMat);
 
 		auto teapot = scene.createEntity("Teapot");
-		teapot.add<Mesh>(teapotMesh);
-		teapot.add<Graphics::DefaultMaterial>(metalMat);
-		teapot.add<Rotator>();
 		teapot.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
+		teapot.add<Mesh>(teapotMesh);
+		teapot.add<Material>(metalMat);
+		teapot.add<Rotator>();
 
 		// LIGHTS
 		constexpr int lightCount = 64;
