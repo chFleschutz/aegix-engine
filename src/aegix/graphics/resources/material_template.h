@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/asset.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
 #include "graphics/resources/texture.h"
@@ -37,7 +38,7 @@ namespace Aegix::Graphics
 		MaterialParamValue defaultValue;
 	};
 
-	class MaterialTemplate
+	class MaterialTemplate : public Core::Asset
 	{
 	public:
 		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
