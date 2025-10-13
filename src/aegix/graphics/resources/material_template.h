@@ -70,8 +70,10 @@ namespace Aegix::Graphics
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 
 	private:
+		// TODO: Store multiple pipelines for different render passes
+		// TODO: Create pipeline on demand based on render pass
 		Pipeline m_pipeline;
-		DescriptorSetLayout m_globalSetLayout;		// Set 0 // TODO: check if this is actually needed here
+		DescriptorSetLayout m_globalSetLayout;		// Set 0 
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 		size_t m_parameterSize = 0;
