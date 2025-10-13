@@ -15,21 +15,6 @@ namespace Aegix::Graphics
 		m_globalSet = DescriptorSet::Builder{ *m_globalSetLayout }
 			.addBuffer(0, m_globalUbo)
 			.buildUnique();
-
-
-		//auto& stage = framegraph.resourcePool().renderStage(RenderStage::Type::Transparency);
-
-		//stage.descriptorSetLayout = DescriptorSetLayout::Builder{}
-		//	.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-		//	.buildUnique();
-
-		//auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
-		//stage.ubo = std::make_unique<Buffer>(sizeof(GBufferUbo), MAX_FRAMES_IN_FLIGHT, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-		//	VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment);
-
-		//stage.descriptorSet = DescriptorSet::Builder(VulkanContext::descriptorPool(), *stage.descriptorSetLayout)
-		//	.addBuffer(0, *stage.ubo)
-		//	.buildUnique();
 	}
 
 	auto TransparentPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -52,9 +37,6 @@ namespace Aegix::Graphics
 
 	void TransparentPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
 	{
-		VkCommandBuffer cmd = frameInfo.cmd;
-
-		auto& stage = resources.renderStage(RenderStage::Type::Transparency);
 		updateUBO(frameInfo);
 
 		auto& sceneColor = resources.texture(m_sceneColor);
@@ -71,6 +53,7 @@ namespace Aegix::Graphics
 		renderingInfo.pColorAttachments = &colorAttachment;
 		renderingInfo.pDepthAttachment = &depthAttachment;
 
+		VkCommandBuffer cmd = frameInfo.cmd;
 		vkCmdBeginRendering(cmd, &renderingInfo);
 		{
 			Tools::vk::cmdViewport(cmd, extent);
