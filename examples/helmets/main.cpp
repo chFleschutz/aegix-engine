@@ -86,8 +86,8 @@ public:
 		//auto damagedHelmet = scene.load(ASSETS_DIR "DamagedHelmet/DamagedHelmet.gltf");
 		//damagedHelmet.get<Transform>().location = { -2.0f, 0.0f, 2.0f };
 
-		//auto scifiHelmet = scene.load(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
-		//scifiHelmet.get<Transform>().location = { 2.0f, 0.0f, 2.0f };
+		auto scifiHelmet = scene.load(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
+		scifiHelmet.get<Transform>().location = { 0.0f, 2.0f, 3.0f };
 
 		//auto plane = scene.createEntity("Plane");
 		//plane.get<Transform>().scale = { 2.0f, 2.0f, 2.0f };

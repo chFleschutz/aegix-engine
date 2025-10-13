@@ -1,13 +1,19 @@
 #pragma once
 
-#include "graphics/resources/material_template.h"
+#include "core/asset.h"
 #include "graphics/descriptors.h"
+#include "graphics/resources/material_template.h"
 
 namespace Aegix::Graphics
 {
-	class MaterialInstance
+	class MaterialInstance : public Core::Asset
 	{
 	public:
+		static auto create(std::shared_ptr<MaterialTemplate> materialTemplate) -> std::shared_ptr<MaterialInstance>
+		{
+			return std::make_shared<MaterialInstance>(std::move(materialTemplate));
+		}
+
 		MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate);
 		MaterialInstance(const MaterialInstance&) = delete;
 		MaterialInstance(MaterialInstance&&) = delete;

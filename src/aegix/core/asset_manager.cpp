@@ -3,6 +3,7 @@
 #include "core/globals.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/resources/material_instance.h"
 #include "graphics/resources/material_template.h"
 
 namespace Aegix::Core
@@ -60,5 +61,13 @@ namespace Aegix::Core
 		pbrMatTemplate->addParameter("emissiveMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
 
 		add("default/PBR_template", pbrMatTemplate);
+
+
+		// Default PBR Material Instance
+
+		auto defaultPBRMaterial = Graphics::MaterialInstance::create(pbrMatTemplate);
+		defaultPBRMaterial->setParameter("albedo", glm::vec3{ 0.8f, 0.8f, 0.9f });
+
+		add("default/PBR_instance", defaultPBRMaterial);
 	}
 }

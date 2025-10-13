@@ -64,7 +64,7 @@ namespace Aegix::Scene
 		{
 			auto entity = createEntity(path.stem().string());
 			entity.add<Mesh>(Graphics::StaticMesh::create(path));
-			//entity.add<Graphics::DefaultMaterial>(); // TODO: Add default material
+			entity.add<Material>(Engine::assets().get<Graphics::MaterialInstance>("default/PBR_instance"));
 			return entity;
 		}
 		else
