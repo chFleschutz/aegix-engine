@@ -13,20 +13,18 @@ namespace Aegix::Core
 		~AssetManager() = default;
 
 		template<IsAsset T>
-		//requires IsLoadable<T> // TODO: Add loadable concept
 		[[nodiscard]] auto get(const std::filesystem::path& path) -> std::shared_ptr<T>
 		{
 			AssetID id = std::hash<std::filesystem::path>{}(path);
 			auto it = m_assets.find(id);
 			if (it != m_assets.end())
-				return std::static_pointer_cast<T>(it->second);
+			{
+				auto asset = std::dynamic_pointer_cast<T>(it->second);
+				AGX_ASSERT_X(asset, "Asset found but type mismatch");
+				return asset;
+			}
 
-			// TODO: Implement actual loading logic
-			//std::shared_ptr<T> newAsset = T::load(path);
-			//AGX_ASSERT(newAsset, "Failed to load asset");
-			//m_assets[id] = newAsset;
-			//return newAsset;
-
+			// TODO: Implement asset loading from file
 			AGX_ASSERT_X(false, "Asset loading not implemented yet");
 			return nullptr;
 		}
