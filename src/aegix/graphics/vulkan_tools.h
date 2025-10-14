@@ -1,8 +1,7 @@
 #pragma once
 
 #include "graphics/resources/texture.h"
-
-#include <vulkan/vulkan.h>
+#include "graphics/vulkan/volk_include.h"
 
 #define VK_CHECK(f)				\
 {								\

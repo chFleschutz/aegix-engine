@@ -1,9 +1,9 @@
 #pragma once
 
-#include "graphics/deletion_queue.h"
 #include "core/window.h"
+#include "graphics/deletion_queue.h"
+#include "graphics/vulkan/volk_include.h"
 
-#include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics

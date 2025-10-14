@@ -3,8 +3,11 @@
 #include "device.h"
 
 #include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/volk_include.h"
 
 #define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics
@@ -260,6 +263,8 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createInstance()
 	{
+		VK_CHECK(volkInitialize());
+
 		AGX_ASSERT_X(!ENABLE_VALIDATION || checkValidationLayerSupport(), "Validation layers requested, but not available!");
 
 		VkApplicationInfo appInfo{};
@@ -291,9 +296,10 @@ namespace Aegix::Graphics
 		}
 
 		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance));
+		volkLoadInstance(m_instance);
 
 		checkGflwRequiredInstanceExtensions();
-		Tools::loadFunctionPointers(m_instance);
+		Tools::loadFunctionPointers(m_instance); // TODO: Remove this when volk is fully used
 	}
 
 	void VulkanDevice::setupDebugUtils()
@@ -433,6 +439,7 @@ namespace Aegix::Graphics
 		}
 
 		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device));
+		volkLoadDevice(m_device);
 
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
@@ -447,6 +454,10 @@ namespace Aegix::Graphics
 			.instance = m_instance,
 			.vulkanApiVersion = API_VERSION
 		};
+
+		VmaVulkanFunctions vulkanFunctions;
+		vmaImportVulkanFunctionsFromVolk(&allocatorInfo, &vulkanFunctions);
+		allocatorInfo.pVulkanFunctions = &vulkanFunctions;
 
 		VK_CHECK(vmaCreateAllocator(&allocatorInfo, &m_allocator));
 	}

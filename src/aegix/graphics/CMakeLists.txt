@@ -6,6 +6,7 @@ target_sources(aegix-engine PRIVATE
 	"frame_graph/frame_graph_resource_pool.cpp"
 	"frame_graph/frame_graph_resource_pool.h"
 	"frame_graph/render_stage.h"
+
 	"render_passes/bloom_pass.cpp"
 	"render_passes/bloom_pass.h"
 	"render_passes/geometry_pass.cpp"
@@ -21,8 +22,14 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/ssao_pass.cpp"
 	"render_passes/ssao_pass.h"
 	"render_passes/transparent_pass.h"
-	"render_systems/static_mesh_render_system.h"
+	"render_passes/transparent_pass.cpp" 
+
+	"render_systems/point_light_render_system.cpp" 
+	"render_systems/point_light_render_system.h" 
 	"render_systems/render_system.h"
+	"render_systems/static_mesh_render_system.cpp" 
+	"render_systems/static_mesh_render_system.h"
+
 	"resources/buffer.cpp"
 	"resources/buffer.h"
 	"resources/image.cpp"
@@ -37,6 +44,10 @@ target_sources(aegix-engine PRIVATE
 	"resources/sampler.h"
 	"resources/texture.cpp"
 	"resources/texture.h"
+	
+	"vulkan/volk_include.h" 
+	"vulkan/volk_impl.cpp" 
+
 	"deletion_queue.cpp"
 	"deletion_queue.h"
 	"descriptors.cpp"

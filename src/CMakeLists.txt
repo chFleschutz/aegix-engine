@@ -13,7 +13,8 @@ target_include_directories(aegix-engine PUBLIC
 
 target_link_libraries(aegix-engine 
 	PUBLIC 
-		Vulkan::Vulkan
+		Aegix::GLTF
+		Aegix::Log
 		EnTT::EnTT
 		glfw
 		glm::glm
@@ -21,6 +22,5 @@ target_link_libraries(aegix-engine
 		imguizmo
 		tinyobjloader
 		GPUOpen::VulkanMemoryAllocator
-		Aegix::GLTF
-		Aegix::Log
+		volk::volk_headers
 )
