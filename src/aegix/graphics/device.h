@@ -2,6 +2,7 @@
 
 #include "core/window.h"
 #include "graphics/deletion_queue.h"
+#include "graphics/vulkan/debug_utils.h"
 #include "graphics/vulkan/volk_include.h"
 
 #include <vk_mem_alloc.h>
@@ -10,7 +11,7 @@ namespace Aegix::Graphics
 {
 	struct SwapChainSupportDetails
 	{
-		VkSurfaceCapabilitiesKHR capabilities;
+		VkSurfaceCapabilitiesKHR capabilities{};
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
 	};
@@ -86,7 +87,6 @@ namespace Aegix::Graphics
 		VulkanDevice() = default;
 
 		void createInstance();
-		void setupDebugUtils();
 		void createSurface(Core::Window& window);
 		void createPhysicalDevice();
 		void createLogicalDevice();
@@ -96,7 +96,6 @@ namespace Aegix::Graphics
 		auto queryRequiredInstanceExtensions() const -> std::vector<const char*>;
 		auto checkValidationLayerSupport() -> bool;
 		auto findQueueFamilies(VkPhysicalDevice device) const -> QueueFamilyIndices;
-		auto debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT;
 		void checkGflwRequiredInstanceExtensions();
 		auto checkDeviceExtensionSupport(VkPhysicalDevice device) -> bool;
 		auto checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool;
@@ -108,7 +107,8 @@ namespace Aegix::Graphics
 		VmaAllocator m_allocator = VK_NULL_HANDLE;
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 
-		VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+		DebugUtilsMessenger m_debugMessenger;
+
 		VkPhysicalDeviceProperties m_properties{};
 		VulkanFeatures m_features{};
 

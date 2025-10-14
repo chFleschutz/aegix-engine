@@ -12,48 +12,12 @@
 
 namespace Aegix::Graphics
 {
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		void* pUserData)
-	{
-		ALOG::warn("Vulkan Validation: \n{}\n", pCallbackData->pMessage);
-		return VK_FALSE;
-	}
-
-	static auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult
-	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func != nullptr)
-		{
-			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-		}
-
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-
-	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-		if (func != nullptr)
-		{
-			func(instance, debugMessenger, pAllocator);
-		}
-	}
-
-	// VulkanDevice --------------------------------------------------------------
-
 	VulkanDevice::~VulkanDevice()
 	{
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
-
-		if (ENABLE_VALIDATION)
-		{
-			DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-		}
-
+		m_debugMessenger.destroy();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
 	}
@@ -61,7 +25,7 @@ namespace Aegix::Graphics
 	void VulkanDevice::initialize(Core::Window& window)
 	{
 		createInstance();
-		setupDebugUtils();
+		m_debugMessenger.create();
 		createSurface(window);
 		createPhysicalDevice();
 		createLogicalDevice();
@@ -290,7 +254,7 @@ namespace Aegix::Graphics
 			createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
 			createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 
-			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = debugMessengerCreateInfo();
+			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = DebugUtilsMessenger::populateCreateInfo();
 			createInfo.pNext = &debugCreateInfo;
 			ALOG::info("Vulkan Validation Layer enabled");
 		}
@@ -299,16 +263,6 @@ namespace Aegix::Graphics
 		volkLoadInstance(m_instance);
 
 		checkGflwRequiredInstanceExtensions();
-		Tools::loadFunctionPointers(m_instance); // TODO: Remove this when volk is fully used
-	}
-
-	void VulkanDevice::setupDebugUtils()
-	{
-		if constexpr (ENABLE_VALIDATION)
-		{
-			VkDebugUtilsMessengerCreateInfoEXT createInfo = debugMessengerCreateInfo();
-			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
-		}
 	}
 
 	void VulkanDevice::createSurface(Core::Window& window)
@@ -428,7 +382,7 @@ namespace Aegix::Graphics
 			.ppEnabledLayerNames = nullptr,
 			.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size()),
 			.ppEnabledExtensionNames = enabledExtensions.data(),
-			.pEnabledFeatures = nullptr, 
+			.pEnabledFeatures = nullptr,
 		};
 
 		// might not really be necessary anymore because device specific validation layers have been deprecated
@@ -473,20 +427,6 @@ namespace Aegix::Graphics
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		VK_CHECK(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool))
-	}
-
-	auto VulkanDevice::debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT
-	{
-		VkDebugUtilsMessengerCreateInfoEXT info{};
-		info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		info.pfnUserCallback = debugCallback;
-
-		return info;
 	}
 
 	auto VulkanDevice::checkValidationLayerSupport() -> bool

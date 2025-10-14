@@ -5,25 +5,8 @@
 #include "graphics/globals.h"
 #include "utils/file.h"
 
-PFN_vkCmdBeginDebugUtilsLabelEXT vkCmdBeginDebugUtilsLabelEXT_ptr = nullptr;
-PFN_vkCmdEndDebugUtilsLabelEXT vkCmdEndDebugUtilsLabelEXT_ptr = nullptr;
-
 namespace Aegix::Tools
 {
-	void loadFunctionPointers(VkInstance instance)
-	{
-		if constexpr (Graphics::ENABLE_VALIDATION)
-		{
-			vkCmdBeginDebugUtilsLabelEXT_ptr = (PFN_vkCmdBeginDebugUtilsLabelEXT)
-				vkGetInstanceProcAddr(instance, "vkCmdBeginDebugUtilsLabelEXT");
-			AGX_ASSERT_X(vkCmdBeginDebugUtilsLabelEXT_ptr, "Failed to load vkCmdBeginDebugUtilsLabelEXT");
-
-			vkCmdEndDebugUtilsLabelEXT_ptr = (PFN_vkCmdEndDebugUtilsLabelEXT)
-				vkGetInstanceProcAddr(instance, "vkCmdEndDebugUtilsLabelEXT");
-			AGX_ASSERT_X(vkCmdEndDebugUtilsLabelEXT_ptr, "Failed to load vkCmdEndDebugUtilsLabelEXT");
-		}
-	}
-
 	std::string_view resultString(VkResult result)
 	{
 		switch (result)
@@ -414,7 +397,7 @@ namespace Aegix::Tools
 			labelInfo.color[1] = color.g;
 			labelInfo.color[2] = color.b;
 			labelInfo.color[3] = color.a;
-			vkCmdBeginDebugUtilsLabelEXT_ptr(cmd, &labelInfo);
+			vkCmdBeginDebugUtilsLabelEXT(cmd, &labelInfo);
 		}
 	}
 
@@ -422,7 +405,7 @@ namespace Aegix::Tools
 	{
 		if constexpr (Graphics::ENABLE_VALIDATION)
 		{
-			vkCmdEndDebugUtilsLabelEXT_ptr(cmd);
+			vkCmdEndDebugUtilsLabelEXT(cmd);
 		}
 	}
 }

@@ -47,6 +47,8 @@ target_sources(aegix-engine PRIVATE
 	
 	"vulkan/volk_include.h" 
 	"vulkan/volk_impl.cpp" 
+	"vulkan/debug_utils.cpp"
+	"vulkan/debug_utils.h" 
 
 	"deletion_queue.cpp"
 	"deletion_queue.h"
