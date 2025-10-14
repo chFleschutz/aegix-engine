@@ -22,6 +22,15 @@ namespace Aegix::Graphics
 		bool isComplete() const { return graphicsFamily.has_value() && presentFamily.has_value(); }
 	};
 
+	struct VulkanFeatures
+	{
+		VkPhysicalDeviceFeatures2 core{};
+		VkPhysicalDeviceVulkan11Features v11{};
+		VkPhysicalDeviceVulkan12Features v12{};
+		VkPhysicalDeviceVulkan13Features v13{};
+		VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderEXT{};
+	};
+
 	class VulkanDevice
 	{
 		friend class VulkanContext;
@@ -49,7 +58,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto graphicsQueue() const -> VkQueue { return m_graphicsQueue; }
 		[[nodiscard]] auto presentQueue() const -> VkQueue { return m_presentQueue; }
 		[[nodiscard]] auto properties() const -> const VkPhysicalDeviceProperties& { return m_properties; }
-		[[nodiscard]] auto features() const -> const VkPhysicalDeviceFeatures& { return m_features; }
+		[[nodiscard]] auto features() const -> const VulkanFeatures& { return m_features; }
 
 		void initialize(Core::Window& window);
 
@@ -90,6 +99,7 @@ namespace Aegix::Graphics
 		auto debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT;
 		void checkGflwRequiredInstanceExtensions();
 		auto checkDeviceExtensionSupport(VkPhysicalDevice device) -> bool;
+		auto checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool;
 		auto querySwapChainSupport(VkPhysicalDevice device) const -> SwapChainSupportDetails;
 
 		VkInstance m_instance = VK_NULL_HANDLE;
@@ -100,7 +110,7 @@ namespace Aegix::Graphics
 
 		VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties m_properties{};
-		VkPhysicalDeviceFeatures m_features{};
+		VulkanFeatures m_features{};
 
 		VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 		VkQueue m_graphicsQueue = VK_NULL_HANDLE;

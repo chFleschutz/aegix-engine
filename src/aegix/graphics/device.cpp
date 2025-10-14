@@ -327,16 +327,15 @@ namespace Aegix::Graphics
 			QueueFamilyIndices indices = findQueueFamilies(device);
 			if (!indices.isComplete())
 				continue;
-			
+
 			if (!checkDeviceExtensionSupport(device))
+				continue;
+
+			if (!checkDeviceFeatureSupport(device))
 				continue;
 
 			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 			if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
-				continue;
-
-			vkGetPhysicalDeviceFeatures(device, &m_features);
-			if (!m_features.samplerAnisotropy)
 				continue;
 
 			// Found a suitable device
@@ -351,10 +350,45 @@ namespace Aegix::Graphics
 		uint32_t minor = VK_VERSION_MINOR(m_properties.apiVersion);
 		uint32_t patch = VK_VERSION_PATCH(m_properties.apiVersion);
 		ALOG::info("{} (Vulkan {}.{}.{})", m_properties.deviceName, major, minor, patch);
+
+		// Query features
+		m_features = {};
+		m_features.core.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		m_features.core.pNext = &m_features.v11;
+		m_features.v11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+		m_features.v11.pNext = &m_features.v12;
+		m_features.v12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		m_features.v12.pNext = &m_features.v13;
+		m_features.v13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		m_features.v13.pNext = &m_features.meshShaderEXT;
+		m_features.meshShaderEXT.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+
+		vkGetPhysicalDeviceFeatures2(m_physicalDevice, &m_features.core);
+
+		if (!m_features.meshShaderEXT.meshShader || !m_features.meshShaderEXT.taskShader)
+			ALOG::warn("Mesh shaders not supported");
 	}
 
 	void VulkanDevice::createLogicalDevice()
 	{
+		VkPhysicalDeviceMeshShaderFeaturesEXT meshShader{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
+			.taskShader = m_features.meshShaderEXT.taskShader,
+			.meshShader = m_features.meshShaderEXT.meshShader,
+		};
+
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+			.pNext = &meshShader,
+			.dynamicRendering = VK_TRUE,
+		};
+
+		VkPhysicalDeviceFeatures2 deviceFeatures{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+			.pNext = &dynamicRendering,
+		};
+		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+
 		QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 
@@ -372,23 +406,24 @@ namespace Aegix::Graphics
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{};
-		dynamicRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
-		dynamicRendering.dynamicRendering = VK_TRUE;
+		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+		if (m_features.meshShaderEXT.taskShader && m_features.meshShaderEXT.meshShader)
+		{
+			enabledExtensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+		}
 
-		VkPhysicalDeviceFeatures2 deviceFeatures{};
-		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		deviceFeatures.pNext = &dynamicRendering;
-		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
-
-		VkDeviceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pNext = &deviceFeatures;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
-		createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
-		createInfo.enabledLayerCount = 0;
+		VkDeviceCreateInfo createInfo{
+			.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+			.pNext = &deviceFeatures,
+			.flags = 0,
+			.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
+			.pQueueCreateInfos = queueCreateInfos.data(),
+			.enabledLayerCount = 0,
+			.ppEnabledLayerNames = nullptr,
+			.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size()),
+			.ppEnabledExtensionNames = enabledExtensions.data(),
+			.pEnabledFeatures = nullptr, 
+		};
 
 		// might not really be necessary anymore because device specific validation layers have been deprecated
 		if constexpr (ENABLE_VALIDATION)
@@ -433,7 +468,7 @@ namespace Aegix::Graphics
 	{
 		VkDebugUtilsMessengerCreateInfoEXT info{};
 		info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
 			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
@@ -521,6 +556,18 @@ namespace Aegix::Graphics
 		}
 
 		return requiredExtensions.empty();
+	}
+
+	auto VulkanDevice::checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool
+	{
+		VkPhysicalDeviceFeatures features;
+		vkGetPhysicalDeviceFeatures(device, &features);
+		if (!features.samplerAnisotropy)
+			return false;
+
+		// TODO: check for more features (dynamic rendering, mesh shaders, etc.)
+
+		return true;
 	}
 
 	auto VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const -> QueueFamilyIndices
