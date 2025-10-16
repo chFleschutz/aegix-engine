@@ -5,7 +5,7 @@
 #include "core/profiler.h"
 #include "graphics/graphics.h"
 #include "graphics/vulkan/volk_include.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>

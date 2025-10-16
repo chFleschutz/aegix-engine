@@ -2,8 +2,8 @@
 
 #include "ssao_pass.h"
 
-#include "graphics/vulkan_context.h"
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 #include "math/interpolation.h"
 #include "math/random.h"
 #include "scene/components.h"

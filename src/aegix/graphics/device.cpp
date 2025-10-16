@@ -2,7 +2,7 @@
 
 #include "device.h"
 
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/vulkan/volk_include.h"
 
 #define VMA_IMPLEMENTATION

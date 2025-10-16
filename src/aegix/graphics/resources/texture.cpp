@@ -4,7 +4,7 @@
 
 #include "engine.h"
 #include "graphics/pipeline.h"
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 #include <stb_image.h>
 

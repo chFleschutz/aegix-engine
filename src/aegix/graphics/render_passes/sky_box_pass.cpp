@@ -2,8 +2,8 @@
 
 #include "sky_box_pass.h"
 
-#include "graphics/vulkan_context.h"
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {

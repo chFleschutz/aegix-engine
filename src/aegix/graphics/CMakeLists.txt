@@ -45,10 +45,14 @@ target_sources(aegix-engine PRIVATE
 	"resources/texture.cpp"
 	"resources/texture.h"
 	
-	"vulkan/volk_include.h" 
-	"vulkan/volk_impl.cpp" 
-	"vulkan/debug_utils.cpp"
 	"vulkan/debug_utils.h" 
+	"vulkan/debug_utils.cpp"
+	"vulkan/volk_impl.cpp" 
+	"vulkan/volk_include.h" 
+	"vulkan/vulkan_context.cpp"
+	"vulkan/vulkan_context.h"
+	"vulkan/vulkan_tools.cpp"
+	"vulkan/vulkan_tools.h"
 
 	"deletion_queue.cpp"
 	"deletion_queue.h"
@@ -67,8 +71,4 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
-	"vulkan_context.cpp"
-	"vulkan_context.h"
-	"vulkan_tools.cpp"
-	"vulkan_tools.h"
 )
