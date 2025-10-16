@@ -11,6 +11,9 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
+		static auto createVertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
+		static auto createIndexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
+		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
 		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
 		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
 

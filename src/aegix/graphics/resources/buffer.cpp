@@ -7,6 +7,23 @@
 
 namespace Aegix::Graphics
 {
+	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	{
+		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+	}
+
+	auto Buffer::createIndexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	{
+		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+	}
+
+	auto Buffer::createStorageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	{
+		auto aligment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment;
+		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
+	}
+
 	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
 		auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
