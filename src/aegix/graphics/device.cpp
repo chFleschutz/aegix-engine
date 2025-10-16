@@ -339,7 +339,6 @@ namespace Aegix::Graphics
 
 		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
-			.pNext = &meshShader,
 			.dynamicRendering = VK_TRUE,
 		};
 
@@ -348,6 +347,13 @@ namespace Aegix::Graphics
 			.pNext = &dynamicRendering,
 		};
 		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+
+		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+		if (meshShader.taskShader && meshShader.meshShader)
+		{
+			dynamicRendering.pNext = &meshShader;
+			enabledExtensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+		}
 
 		QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
@@ -364,12 +370,6 @@ namespace Aegix::Graphics
 			queueCreateInfo.queueCount = 1;
 			queueCreateInfo.pQueuePriorities = &queuePriority;
 			queueCreateInfos.push_back(queueCreateInfo);
-		}
-
-		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
-		if (m_features.meshShaderEXT.taskShader && m_features.meshShaderEXT.meshShader)
-		{
-			enabledExtensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
 		}
 
 		VkDeviceCreateInfo createInfo{
