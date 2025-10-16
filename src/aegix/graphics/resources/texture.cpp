@@ -55,18 +55,18 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
+			.build();
 
-		auto descriptorSet = std::make_shared<DescriptorSet>(*descriptorSetLayout);
-		DescriptorWriter{ *descriptorSetLayout }
+		DescriptorSet descriptorSet{ descriptorSetLayout };
+		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
 			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
-			.build(descriptorSet->descriptorSet(0));
+			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*descriptorSetLayout)
+			.addDescriptorSetLayout(descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.comp.spv")
-			.buildUnique();
+			.build();
 
 		// Convert skybox to irradiance map
 		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
@@ -75,8 +75,8 @@ namespace Aegix::Graphics
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			irradiance->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
-			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			pipeline.bind(cmd);
+			pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t width = irradiance->image().width();
@@ -104,7 +104,7 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
+			.build();
 
 		struct PushConstants
 		{
@@ -114,20 +114,18 @@ namespace Aegix::Graphics
 		pushConstants.envResolution = static_cast<float>(skybox->image().width());
 
 		auto pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*descriptorSetLayout)
+			.addDescriptorSetLayout(descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
 			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.comp.spv")
-			.buildUnique();
+			.build();
 
 		// Create image views for mip levels
+		std::vector<ImageView> mipViews(mipLevelCount);
 		std::vector<DescriptorSet> descriptorSets;
 		descriptorSets.reserve(mipLevelCount);
-		std::vector<ImageView> mipViews;
-		mipViews.reserve(mipLevelCount);
 		for (uint32_t i = 0; i < mipLevelCount; ++i)
 		{
-			auto& view = mipViews.emplace_back();
-			view.create(prefiltered->image(), ImageView::Config{
+			mipViews[i].create(prefiltered->image(), ImageView::Config{
 				.baseMipLevel = i,
 				.levelCount = 1,
 				.baseLayer = 0,
@@ -135,11 +133,11 @@ namespace Aegix::Graphics
 				.viewType = VK_IMAGE_VIEW_TYPE_CUBE
 				});
 
-			descriptorSets.emplace_back(*descriptorSetLayout);
-			DescriptorWriter{ *descriptorSetLayout }
+			descriptorSets.emplace_back(descriptorSetLayout);
+			DescriptorWriter{ descriptorSetLayout }
 				.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, view, VK_IMAGE_LAYOUT_GENERAL })
-				.build(descriptorSets.back().descriptorSet(0));
+				.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, mipViews[i], VK_IMAGE_LAYOUT_GENERAL })
+				.update(descriptorSets[i]);
 		}
 
 		// Convert skybox to prefiltered map
@@ -148,14 +146,14 @@ namespace Aegix::Graphics
 		{
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			prefiltered->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-			pipeline->bind(cmd);
+			pipeline.bind(cmd);
 			
 			for (uint32_t mip = 0; mip < mipLevelCount; ++mip)
 			{
-				descriptorSets[mip].bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+				pipeline.bindDescriptorSet(cmd, 0, descriptorSets[mip]);
 
 				pushConstants.roughness = static_cast<float>(mip) / static_cast<float>(mipLevelCount - 1);
-				vkCmdPushConstants(cmd, pipeline->layout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pushConstants), &pushConstants);
+				pipeline.pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, &pushConstants, sizeof(pushConstants));
 
 				constexpr uint32_t groupSize = 16;
 				uint32_t width = prefiltered->image().width() >> mip;
@@ -194,16 +192,17 @@ namespace Aegix::Graphics
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
+			.build();
 
-		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
-		DescriptorWriter{ *descriptorSetLayout }
+		DescriptorSet descriptorSet{ descriptorSetLayout };
+		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, lut->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
-			.build(descriptorSet->descriptorSet(0));
+			.update(descriptorSet);
+
 		auto pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*descriptorSetLayout)
+			.addDescriptorSetLayout(descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "ibl/brdf_lut.comp.spv")
-			.buildUnique();
+			.build();
 
 		// Convert skybox to irradiance map
 		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
@@ -211,8 +210,8 @@ namespace Aegix::Graphics
 		{
 			lut->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
-			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			pipeline.bind(cmd);
+			pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
 
 			constexpr uint32_t groupSize = 16;
 			vkCmdDispatch(cmd, (lutSize + groupSize - 1) / groupSize, (lutSize + groupSize - 1) / groupSize, 1);
@@ -326,19 +325,19 @@ namespace Aegix::Graphics
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
+			.build();
 
-		auto descriptorSet = std::make_unique<DescriptorSet>(*descriptorSetLayout);
+		DescriptorSet descriptorSet{ descriptorSetLayout };
 
-		DescriptorWriter{ *descriptorSetLayout }
+		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
 			.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
-			.build(descriptorSet->descriptorSet(0));
+			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*descriptorSetLayout)
+			.addDescriptorSetLayout(descriptorSetLayout)
 			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
-			.buildUnique();
+			.build();
 
 		// Convert spherical image to cubemap
 		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
@@ -347,8 +346,8 @@ namespace Aegix::Graphics
 			spherialImage.image().copyFrom(cmd, stagingBuffer);
 			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
-			pipeline->bind(cmd);
-			descriptorSet->bind(cmd, pipeline->layout(), 0, VK_PIPELINE_BIND_POINT_COMPUTE);
+			pipeline.bind(cmd);
+			pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
 
 			constexpr uint32_t groupSize = 16;
 			uint32_t groupCountX = (width + groupSize - 1) / groupSize;

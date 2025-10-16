@@ -108,19 +108,19 @@ namespace Aegix::Graphics
 		DescriptorWriter{ *m_thresholdSetLayout }
 			.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, sceneColor.view(), VK_IMAGE_LAYOUT_GENERAL })
 			.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], VK_IMAGE_LAYOUT_GENERAL })
-			.build(m_thresholdSet->descriptorSet(0));
+			.update(*m_thresholdSet);
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
 			DescriptorWriter{ *m_upsampleSetLayout }
 				.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[i], VK_IMAGE_LAYOUT_GENERAL })
 				.writeImage(1, VkDescriptorImageInfo{ m_sampler, m_mipViews[i + 1], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL })
-				.build(m_upsampleSets[i]->descriptorSet(0));
+				.update(*m_upsampleSets[i]);
 
 			DescriptorWriter{ *m_downsampleSetLayout }
 				.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[i + 1], VK_IMAGE_LAYOUT_GENERAL })
 				.writeImage(1, VkDescriptorImageInfo{ m_sampler, m_mipViews[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL })
-				.build(m_downsampleSets[i]->descriptorSet(0));
+				.update(*m_downsampleSets[i]);
 		}
 	}
 
@@ -145,7 +145,7 @@ namespace Aegix::Graphics
 	void BloomPass::extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo)
 	{
 		m_thresholdPipeline->bind(cmd);
-		m_thresholdPipeline->bindDescriptorSet(cmd, 0, m_thresholdSet->descriptorSet(0));
+		m_thresholdPipeline->bindDescriptorSet(cmd, 0, *m_thresholdSet);
 		m_thresholdPipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_threshold);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
@@ -187,7 +187,7 @@ namespace Aegix::Graphics
 
 			m_downsample.mipLevel = srcMip;
 			
-			m_downsamplePipeline->bindDescriptorSet(cmd, 0, m_downsampleSets[srcMip]->descriptorSet(0));
+			m_downsamplePipeline->bindDescriptorSet(cmd, 0, *m_downsampleSets[srcMip]);
 			m_downsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_downsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip};
@@ -242,7 +242,7 @@ namespace Aegix::Graphics
 			);
 
 			// Upsample the mip level
-			m_upsamplePipeline->bindDescriptorSet(cmd, 0, m_upsampleSets[dstMip]->descriptorSet(0));
+			m_upsamplePipeline->bindDescriptorSet(cmd, 0, *m_upsampleSets[dstMip]);
 			m_upsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_upsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip };

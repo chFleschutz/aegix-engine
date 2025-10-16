@@ -100,7 +100,7 @@ namespace Aegix::Graphics
 
 		DescriptorWriter{ *m_descriptorSetLayout }
 			.writeImage(0, environment.skybox->descriptorImageInfo())
-			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+			.update(*m_descriptorSet);
 
 		auto& sceneColorTexture = resources.texture(m_sceneColor);
 		auto& depthTexture = resources.texture(m_depth);
@@ -128,12 +128,12 @@ namespace Aegix::Graphics
 		
 		m_pipeline->bind(cmd);
 		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
-		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->bindDescriptorSet(cmd, 0, *m_descriptorSet);
 
-		VkBuffer vertexBuffers[] = { m_vertexBuffer->buffer() };
+		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(cmd, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(cmd, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);

@@ -33,14 +33,16 @@ namespace Aegix::Graphics
 
 		void setParameter(const std::string& name, const MaterialParamValue& value);
 
-		void updateParameters();
-		void bind(VkCommandBuffer cmd) const;
+		void updateParameters(int index);
+		void bind(VkCommandBuffer cmd, int index) const;
 
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;
 		std::unordered_map<std::string, MaterialParamValue> m_overrides;
-		VkDescriptorSet m_descriptorSet{ VK_NULL_HANDLE };
+
+		std::vector<DescriptorSet> m_descriptorSets;
 		Buffer m_uniformBuffer;
-		bool m_dirty = true;
+
+		std::array<bool, MAX_FRAMES_IN_FLIGHT> m_dirtyFlags;
 	};
 }

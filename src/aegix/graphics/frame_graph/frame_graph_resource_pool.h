@@ -179,6 +179,9 @@ namespace Aegix::Graphics
 			: m_pool{ pool }, m_node{ node } {
 		}
 
+		[[nodiscard]] auto pool() -> FrameGraphResourcePool& { return m_pool; }
+		[[nodiscard]] auto node() const -> FrameGraphNodeHandle { return m_node; }
+
 		auto add(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 		{
 			return m_pool.addResource(createInfo, m_node);

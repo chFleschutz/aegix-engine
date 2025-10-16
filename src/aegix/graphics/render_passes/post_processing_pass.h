@@ -26,18 +26,22 @@ namespace Aegix::Graphics
 		PostProcessingPass();
 
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
+		virtual void createResources(FrameGraphResourcePool& resources) override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
+		auto createDescriptorSetLayout() -> DescriptorSetLayout;
+		auto createPipeline() -> Pipeline;
+
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_bloom;
 		FrameGraphResourceHandle m_final;
 
 		PostProcessingSettings m_settings;
 
-		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
-		std::unique_ptr<DescriptorSet> m_descriptorSet;
-		std::unique_ptr<Pipeline> m_pipeline;
+		DescriptorSetLayout m_descriptorSetLayout;
+		DescriptorSet m_descriptorSet;
+		Pipeline m_pipeline;
 	};
 }

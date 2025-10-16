@@ -119,10 +119,10 @@ namespace Aegix::Graphics
 			.writeImage(3, *m_ssaoNoise)
 			.writeBuffer(4, m_ssaoSamples)
 			.writeBuffer(5, m_uniforms, frameInfo.frameIndex)
-			.build(m_descriptorSet->descriptorSet(frameInfo.frameIndex));
+			.update(*m_descriptorSet);
 
 		m_pipeline->bind(cmd);
-		m_descriptorSet->bind(cmd, m_pipeline->layout(), frameInfo.frameIndex, VK_PIPELINE_BIND_POINT_COMPUTE);
+		m_descriptorSet->bind(cmd, m_pipeline->layout(), VK_PIPELINE_BIND_POINT_COMPUTE);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
