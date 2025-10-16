@@ -133,7 +133,7 @@ namespace Aegix::Graphics
 		VK_CHECK(vkCreateDescriptorPool(VulkanContext::device(), &descriptorPoolInfo, nullptr, &m_descriptorPool))
 	}
 
-	DescriptorPool::DescriptorPool(DescriptorPool&& other)
+	DescriptorPool::DescriptorPool(DescriptorPool&& other) noexcept
 		: m_descriptorPool{ other.m_descriptorPool }
 	{
 		other.m_descriptorPool = VK_NULL_HANDLE;
@@ -223,7 +223,7 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	void DescriptorWriter::build(VkDescriptorSet set)
+	void DescriptorWriter::update(VkDescriptorSet set)
 	{
 		std::vector<VkWriteDescriptorSet> writes;
 		writes.reserve(m_bufferInfos.size() + m_imageInfos.size());
@@ -266,40 +266,19 @@ namespace Aegix::Graphics
 	// DescriptorSet Builder -----------------------------------------------------
 
 	DescriptorSet::Builder::Builder(DescriptorSetLayout& setLayout)
-		: m_pool{ VulkanContext::descriptorPool() }, m_setLayout{ setLayout }
+		: m_setLayout{ setLayout }, m_writer{ setLayout,  }
 	{
-		m_writer.reserve(MAX_FRAMES_IN_FLIGHT);
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_writer.emplace_back(DescriptorWriter{ setLayout });
-		}
-	}
-
-	DescriptorSet::Builder::Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout)
-		: m_pool{ pool }, m_setLayout{ setLayout }
-	{
-		m_writer.reserve(MAX_FRAMES_IN_FLIGHT);
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_writer.emplace_back(DescriptorWriter{ setLayout });
-		}
 	}
 
 	auto DescriptorSet::Builder::addBuffer(uint32_t binding, const Buffer& buffer) -> DescriptorSet::Builder&
 	{
-		for (size_t i = 0; i < m_writer.size(); i++)
-		{
-			m_writer[i].writeBuffer(binding, buffer.descriptorInfoForIndex(i));
-		}
+		m_writer.writeBuffer(binding, buffer);
 		return *this;
 	}
 
 	auto DescriptorSet::Builder::addTexture(uint32_t binding, const Texture& texture) -> DescriptorSet::Builder&
 	{
-		for (size_t i = 0; i < m_writer.size(); i++)
-		{
-			m_writer[i].writeImage(binding, texture, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		}
+		m_writer.writeImage(binding, texture);
 		return *this;
 	}
 
@@ -312,33 +291,29 @@ namespace Aegix::Graphics
 	auto DescriptorSet::Builder::build() -> DescriptorSet
 	{
 		auto set = DescriptorSet{ m_setLayout };
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_writer[i].build(set.m_descriptorSets[i]);
-		}
+		m_writer.update(set.descriptorSet());
 		return set;
 	}
 
 	auto DescriptorSet::Builder::buildUnique() -> std::unique_ptr<DescriptorSet>
 	{
 		auto set = std::make_unique<DescriptorSet>(m_setLayout);
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_writer[i].build(set->m_descriptorSets[i]);
-		}
+		m_writer.update(set->descriptorSet());
 		return set;
 	}
 
+
+
+	// DescriptorSet -----------------------------------------------------
+
 	DescriptorSet::DescriptorSet(DescriptorSetLayout& setLayout)
 	{
-		for (auto& set : m_descriptorSets)
-		{
-			VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), set);
-		}
+		VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), m_descriptorSet);
 	}
 
-	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int index, VkPipelineBindPoint bindPoint) const
+	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, 
+		VkPipelineBindPoint bindPoint) const
 	{
-		vkCmdBindDescriptorSets(commandBuffer, bindPoint, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, bindPoint, pipelineLayout, 0, 1, &m_descriptorSet, 0, nullptr);
 	}
 }

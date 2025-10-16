@@ -100,17 +100,17 @@ namespace Aegix::Graphics
 			.writeImage(5, resources.texture(m_emissive))
 			.writeImage(6, resources.texture(m_ssao))
 			.writeBuffer(7, m_ubo, frameInfo.frameIndex)
-			.build(m_gbufferSet->descriptorSet(frameInfo.frameIndex));
+			.update(*m_gbufferSet);
 
 		DescriptorWriter{ *m_iblSetLayout }
 			.writeImage(0, *environment.irradiance)
 			.writeImage(1, *environment.prefiltered)
 			.writeImage(2, *environment.brdfLUT)
-			.build(m_iblSet->descriptorSet(frameInfo.frameIndex));
+			.update(*m_iblSet);
 
 		m_pipeline->bind(cmd);
-		m_pipeline->bindDescriptorSet(cmd, 0, m_gbufferSet->descriptorSet(frameInfo.frameIndex));
-		m_pipeline->bindDescriptorSet(cmd, 1, m_iblSet->descriptorSet(frameInfo.frameIndex));
+		m_pipeline->bindDescriptorSet(cmd, 0, *m_gbufferSet);
+		m_pipeline->bindDescriptorSet(cmd, 1, *m_iblSet);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}

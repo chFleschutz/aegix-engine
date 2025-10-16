@@ -6,12 +6,22 @@
 
 namespace Aegix::Graphics
 {
-	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate)
-		: m_template(std::move(materialTemplate)), 
-		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), 1) } // TODO: Maybe use frames in flight
+	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate) : 
+		m_template(std::move(materialTemplate)), 
+		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), MAX_FRAMES_IN_FLIGHT) } 
 	{
-		m_descriptorSet = m_template->materialSetLayout().allocateDescriptorSet();
-		updateParameters();
+		AGX_ASSERT_X(m_template, "Material template cannot be null");
+
+		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_descriptorSets.emplace_back(m_template->materialSetLayout());
+			DescriptorWriter{ m_template->materialSetLayout() }
+				.writeBuffer(0, m_uniformBuffer, i)
+				.update(m_descriptorSets[i]);
+		}
+
+		m_dirtyFlags.fill(true);
 	}
 
 	auto MaterialInstance::queryParameter(const std::string& name) const -> MaterialParamValue
@@ -27,12 +37,12 @@ namespace Aegix::Graphics
 	{
 		AGX_ASSERT_X(m_template->hasParameter(name), "Material parameter not found");
 		m_overrides[name] = value;
-		m_dirty = true;
+		m_dirtyFlags.fill(true);
 	}
 
-	void MaterialInstance::updateParameters()
+	void MaterialInstance::updateParameters(int index)
 	{
-		if (!m_dirty)
+		if (!m_dirtyFlags[index])
 			return;
 
 		// Update uniform buffer
@@ -73,13 +83,13 @@ namespace Aegix::Graphics
 				writer.writeImage(info.binding, *texture);
 			}
 		}
-		writer.build(m_descriptorSet);
+		writer.update(m_descriptorSets[index]);
 
-		m_dirty = false;
+		m_dirtyFlags[index] = false;
 	}
 
-	void MaterialInstance::bind(VkCommandBuffer cmd) const
+	void MaterialInstance::bind(VkCommandBuffer cmd, int index) const
 	{
-		m_template->bindMaterialSet(cmd, m_descriptorSet);
+		m_template->bindMaterialSet(cmd, m_descriptorSets[index]);
 	}
 }

@@ -28,6 +28,7 @@ namespace Aegix::Graphics
 		}
 
 	private:
+		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 		void updateUBO(const FrameInfo& frameInfo);
 
 		FrameGraphResourceHandle m_sceneColor;
@@ -36,7 +37,7 @@ namespace Aegix::Graphics
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 
 		Buffer m_globalUbo;
-		std::unique_ptr<DescriptorSetLayout> m_globalSetLayout;
-		std::unique_ptr<DescriptorSet> m_globalSet;
+		DescriptorSetLayout m_globalSetLayout;
+		std::vector<DescriptorSet> m_globalSets;
 	};
 }

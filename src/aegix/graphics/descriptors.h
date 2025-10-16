@@ -38,7 +38,7 @@ namespace Aegix::Graphics
 		auto allocateDescriptorSet() const -> VkDescriptorSet;
 
 	private:
-		VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+		VkDescriptorSetLayout m_descriptorSetLayout{ VK_NULL_HANDLE };
 		std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;
 	};
 
@@ -70,7 +70,7 @@ namespace Aegix::Graphics
 		DescriptorPool(uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags,
 			const std::vector<VkDescriptorPoolSize>& poolSizes);
 		DescriptorPool(const DescriptorPool&) = delete;
-		DescriptorPool(DescriptorPool&& other);
+		DescriptorPool(DescriptorPool&& other) noexcept;
 		~DescriptorPool();
 
 		auto operator=(const DescriptorPool&) -> DescriptorPool& = delete;
@@ -108,13 +108,14 @@ namespace Aegix::Graphics
 		auto writeBuffer(uint32_t binding, const Buffer& buffer, uint32_t index) -> DescriptorWriter&;
 		auto writeBuffer(uint32_t binding, VkDescriptorBufferInfo bufferInfo) -> DescriptorWriter&;
 
-		void build(VkDescriptorSet set);
+		void update(VkDescriptorSet set);
 
 	private:
 		DescriptorSetLayout& m_setLayout;
 		std::vector<std::pair<uint32_t, VkDescriptorImageInfo>> m_imageInfos;
 		std::vector<std::pair<uint32_t, VkDescriptorBufferInfo>> m_bufferInfos;
 	};
+
 
 
 	class DescriptorSet
@@ -124,7 +125,6 @@ namespace Aegix::Graphics
 		{
 		public:
 			Builder(DescriptorSetLayout& setLayout);
-			Builder(DescriptorPool& pool, DescriptorSetLayout& setLayout);
 			Builder(const Builder&) = delete;
 			~Builder() = default;
 
@@ -137,9 +137,8 @@ namespace Aegix::Graphics
 			auto buildUnique() -> std::unique_ptr<DescriptorSet>;
 
 		private:
-			DescriptorPool& m_pool;
 			DescriptorSetLayout& m_setLayout;
-			std::vector<DescriptorWriter> m_writer;
+			DescriptorWriter m_writer;
 		};
 
 		DescriptorSet(DescriptorSetLayout& setLayout);
@@ -150,13 +149,13 @@ namespace Aegix::Graphics
 		auto operator=(const DescriptorSet&) -> DescriptorSet& = delete;
 		auto operator=(DescriptorSet&&) -> DescriptorSet& = default;
 
-		const VkDescriptorSet& operator[](int index) const { return m_descriptorSets[index]; }
-		const VkDescriptorSet& descriptorSet(int index) const { return m_descriptorSets[index]; }
+		operator VkDescriptorSet() const { return m_descriptorSet; }
+		auto descriptorSet() const -> VkDescriptorSet { return m_descriptorSet; }
 
-		void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, int index, 
+		void bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, 
 			VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
 
 	private:
-		std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> m_descriptorSets{};
+		VkDescriptorSet m_descriptorSet{ VK_NULL_HANDLE };
 	};
 }

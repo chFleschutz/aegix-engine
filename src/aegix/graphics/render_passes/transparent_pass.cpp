@@ -5,16 +5,18 @@
 
 namespace Aegix::Graphics
 {
-	TransparentPass::TransparentPass(FrameGraph& framegraph)
-		: m_globalUbo{ Buffer::createUniformBuffer(sizeof(TransparentUbo)) }
+	TransparentPass::TransparentPass(FrameGraph& framegraph) : 
+		m_globalUbo{ Buffer::createUniformBuffer(sizeof(TransparentUbo)) },
+		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
-		m_globalSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.buildUnique();
-
-		m_globalSet = DescriptorSet::Builder{ *m_globalSetLayout }
-			.addBuffer(0, m_globalUbo)
-			.buildUnique();
+		m_globalSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_globalSets.emplace_back(m_globalSetLayout);
+			DescriptorWriter{ m_globalSetLayout }
+				.writeBuffer(0, m_globalUbo, i)
+				.update(m_globalSets[i]);
+		}
 	}
 
 	auto TransparentPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -64,7 +66,7 @@ namespace Aegix::Graphics
 				.ui = frameInfo.ui,
 				.frameIndex = frameInfo.frameIndex,
 				.cmd = cmd,
-				.globalSet = m_globalSet->descriptorSet(frameInfo.frameIndex)
+				.globalSet = m_globalSets[frameInfo.frameIndex]
 			};
 
 			for (const auto& system : m_renderSystems)
@@ -73,6 +75,13 @@ namespace Aegix::Graphics
 			}
 		}
 		vkCmdEndRendering(cmd);
+	}
+
+	auto TransparentPass::createDescriptorSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.build();
 	}
 
 	void TransparentPass::updateUBO(const FrameInfo& frameInfo)

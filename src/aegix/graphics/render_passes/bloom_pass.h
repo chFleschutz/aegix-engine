@@ -34,6 +34,7 @@ namespace Aegix::Graphics
 		static constexpr uint32_t BLOOM_MIP_LEVELS = 6;
 
 		BloomPass();
+
 		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
 		virtual void createResources(FrameGraphResourcePool& resources) override;
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
@@ -43,7 +44,6 @@ namespace Aegix::Graphics
 		void extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo);
 		void downSample(VkCommandBuffer cmd, Texture& bloom);
 		void upSample(VkCommandBuffer cmd, Texture& bloom);
-
 
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_bloom;
@@ -55,9 +55,9 @@ namespace Aegix::Graphics
 		BloomDownsample m_downsample;
 		BloomUpsample m_upsample;
 
-		std::unique_ptr<Pipeline> m_thresholdPipeline;
 		std::unique_ptr<DescriptorSetLayout> m_thresholdSetLayout;
 		std::unique_ptr<DescriptorSet> m_thresholdSet;
+		std::unique_ptr<Pipeline> m_thresholdPipeline;
 
 		std::unique_ptr<Pipeline> m_downsamplePipeline;
 		std::unique_ptr<DescriptorSetLayout> m_downsampleSetLayout;

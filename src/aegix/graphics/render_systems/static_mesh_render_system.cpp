@@ -40,8 +40,8 @@ namespace Aegix::Graphics
 			// Bind Descriptor Set
 			if (lastMatInstance != material.instance.get())
 			{
-				material.instance->bind(ctx.cmd);
-				material.instance->updateParameters();
+				material.instance->bind(ctx.cmd, ctx.frameIndex);
+				material.instance->updateParameters(ctx.frameIndex);
 				lastMatInstance = material.instance.get();
 			}
 
