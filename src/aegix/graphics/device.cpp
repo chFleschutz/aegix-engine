@@ -2,55 +2,22 @@
 
 #include "device.h"
 
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_tools.h"
+#include "graphics/vulkan/volk_include.h"
 
 #define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics
 {
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		void* pUserData)
-	{
-		ALOG::warn("Vulkan Validation: \n{}\n", pCallbackData->pMessage);
-		return VK_FALSE;
-	}
-
-	static auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-		const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult
-	{
-		auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-		if (func != nullptr)
-		{
-			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-		}
-
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-
-	static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-		if (func != nullptr)
-		{
-			func(instance, debugMessenger, pAllocator);
-		}
-	}
-
-	// VulkanDevice --------------------------------------------------------------
-
 	VulkanDevice::~VulkanDevice()
 	{
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vmaDestroyAllocator(m_allocator);
 		vkDestroyDevice(m_device, nullptr);
-
-		if (ENABLE_VALIDATION)
-		{
-			DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-		}
-
+		m_debugMessenger.destroy();
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
 	}
@@ -58,7 +25,7 @@ namespace Aegix::Graphics
 	void VulkanDevice::initialize(Core::Window& window)
 	{
 		createInstance();
-		setupDebugUtils();
+		m_debugMessenger.create();
 		createSurface(window);
 		createPhysicalDevice();
 		createLogicalDevice();
@@ -260,6 +227,8 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createInstance()
 	{
+		VK_CHECK(volkInitialize());
+
 		AGX_ASSERT_X(!ENABLE_VALIDATION || checkValidationLayerSupport(), "Validation layers requested, but not available!");
 
 		VkApplicationInfo appInfo{};
@@ -285,24 +254,15 @@ namespace Aegix::Graphics
 			createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
 			createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
 
-			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = debugMessengerCreateInfo();
+			VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = DebugUtilsMessenger::populateCreateInfo();
 			createInfo.pNext = &debugCreateInfo;
 			ALOG::info("Vulkan Validation Layer enabled");
 		}
 
 		VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance));
+		volkLoadInstance(m_instance);
 
 		checkGflwRequiredInstanceExtensions();
-		Tools::loadFunctionPointers(m_instance);
-	}
-
-	void VulkanDevice::setupDebugUtils()
-	{
-		if constexpr (ENABLE_VALIDATION)
-		{
-			VkDebugUtilsMessengerCreateInfoEXT createInfo = debugMessengerCreateInfo();
-			VK_CHECK(CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger));
-		}
 	}
 
 	void VulkanDevice::createSurface(Core::Window& window)
@@ -327,16 +287,15 @@ namespace Aegix::Graphics
 			QueueFamilyIndices indices = findQueueFamilies(device);
 			if (!indices.isComplete())
 				continue;
-			
+
 			if (!checkDeviceExtensionSupport(device))
+				continue;
+
+			if (!checkDeviceFeatureSupport(device))
 				continue;
 
 			SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 			if (swapChainSupport.formats.empty() || swapChainSupport.presentModes.empty())
-				continue;
-
-			vkGetPhysicalDeviceFeatures(device, &m_features);
-			if (!m_features.samplerAnisotropy)
 				continue;
 
 			// Found a suitable device
@@ -351,10 +310,51 @@ namespace Aegix::Graphics
 		uint32_t minor = VK_VERSION_MINOR(m_properties.apiVersion);
 		uint32_t patch = VK_VERSION_PATCH(m_properties.apiVersion);
 		ALOG::info("{} (Vulkan {}.{}.{})", m_properties.deviceName, major, minor, patch);
+
+		// Query features
+		m_features = {};
+		m_features.core.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		m_features.core.pNext = &m_features.v11;
+		m_features.v11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+		m_features.v11.pNext = &m_features.v12;
+		m_features.v12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		m_features.v12.pNext = &m_features.v13;
+		m_features.v13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		m_features.v13.pNext = &m_features.meshShaderEXT;
+		m_features.meshShaderEXT.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+
+		vkGetPhysicalDeviceFeatures2(m_physicalDevice, &m_features.core);
+
+		if (!m_features.meshShaderEXT.meshShader || !m_features.meshShaderEXT.taskShader)
+			ALOG::warn("Mesh shaders not supported");
 	}
 
 	void VulkanDevice::createLogicalDevice()
 	{
+		VkPhysicalDeviceMeshShaderFeaturesEXT meshShader{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
+			.taskShader = m_features.meshShaderEXT.taskShader,
+			.meshShader = m_features.meshShaderEXT.meshShader,
+		};
+
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+			.dynamicRendering = VK_TRUE,
+		};
+
+		VkPhysicalDeviceFeatures2 deviceFeatures{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+			.pNext = &dynamicRendering,
+		};
+		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+
+		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+		if (meshShader.taskShader && meshShader.meshShader)
+		{
+			dynamicRendering.pNext = &meshShader;
+			enabledExtensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+		}
+
 		QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 
@@ -372,23 +372,18 @@ namespace Aegix::Graphics
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
-		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{};
-		dynamicRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
-		dynamicRendering.dynamicRendering = VK_TRUE;
-
-		VkPhysicalDeviceFeatures2 deviceFeatures{};
-		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		deviceFeatures.pNext = &dynamicRendering;
-		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
-
-		VkDeviceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pNext = &deviceFeatures;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
-		createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
-		createInfo.enabledLayerCount = 0;
+		VkDeviceCreateInfo createInfo{
+			.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+			.pNext = &deviceFeatures,
+			.flags = 0,
+			.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
+			.pQueueCreateInfos = queueCreateInfos.data(),
+			.enabledLayerCount = 0,
+			.ppEnabledLayerNames = nullptr,
+			.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size()),
+			.ppEnabledExtensionNames = enabledExtensions.data(),
+			.pEnabledFeatures = nullptr,
+		};
 
 		// might not really be necessary anymore because device specific validation layers have been deprecated
 		if constexpr (ENABLE_VALIDATION)
@@ -398,6 +393,7 @@ namespace Aegix::Graphics
 		}
 
 		VK_CHECK(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device));
+		volkLoadDevice(m_device);
 
 		AGX_ASSERT_X(indices.isComplete(), "Queue family indices are not complete");
 		vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
@@ -413,6 +409,10 @@ namespace Aegix::Graphics
 			.vulkanApiVersion = API_VERSION
 		};
 
+		VmaVulkanFunctions vulkanFunctions;
+		vmaImportVulkanFunctionsFromVolk(&allocatorInfo, &vulkanFunctions);
+		allocatorInfo.pVulkanFunctions = &vulkanFunctions;
+
 		VK_CHECK(vmaCreateAllocator(&allocatorInfo, &m_allocator));
 	}
 
@@ -427,20 +427,6 @@ namespace Aegix::Graphics
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		VK_CHECK(vkCreateCommandPool(m_device, &poolInfo, nullptr, &m_commandPool))
-	}
-
-	auto VulkanDevice::debugMessengerCreateInfo() const -> VkDebugUtilsMessengerCreateInfoEXT
-	{
-		VkDebugUtilsMessengerCreateInfoEXT info{};
-		info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		info.pfnUserCallback = debugCallback;
-
-		return info;
 	}
 
 	auto VulkanDevice::checkValidationLayerSupport() -> bool
@@ -521,6 +507,18 @@ namespace Aegix::Graphics
 		}
 
 		return requiredExtensions.empty();
+	}
+
+	auto VulkanDevice::checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool
+	{
+		VkPhysicalDeviceFeatures features;
+		vkGetPhysicalDeviceFeatures(device, &features);
+		if (!features.samplerAnisotropy)
+			return false;
+
+		// TODO: check for more features (dynamic rendering, mesh shaders, etc.)
+
+		return true;
 	}
 
 	auto VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const -> QueueFamilyIndices

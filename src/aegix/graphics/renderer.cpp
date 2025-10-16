@@ -16,7 +16,7 @@
 #include "graphics/render_passes/ui_pass.h"
 #include "graphics/render_systems/point_light_render_system.h"
 #include "graphics/render_systems/static_mesh_render_system.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_context.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics

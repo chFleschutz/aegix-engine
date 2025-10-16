@@ -2,7 +2,7 @@
 
 #include "material_instance.h"
 
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {

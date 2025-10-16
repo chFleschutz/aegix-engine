@@ -4,7 +4,8 @@
 
 #include "core/profiler.h"
 #include "graphics/graphics.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/volk_include.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -38,25 +39,30 @@ namespace Aegix::UI
 		ImGui_ImplGlfw_InitForVulkan(window.glfwWindow(), true);
 
 		VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		ImGui_ImplVulkan_InitInfo initInfo{};
-		initInfo.Instance = device.instance();
-		initInfo.PhysicalDevice = device.physicalDevice();
-		initInfo.Device = device.device();
-		initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value();
-		initInfo.Queue = device.graphicsQueue();
-		initInfo.PipelineCache = VK_NULL_HANDLE;
-		initInfo.DescriptorPool = Graphics::VulkanContext::descriptorPool();
-		initInfo.Subpass = 0;
-		initInfo.MinImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
-		initInfo.ImageCount = Graphics::MAX_FRAMES_IN_FLIGHT;
-		initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		initInfo.UseDynamicRendering = true;
-		initInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-		initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-		initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
-		ImGui_ImplVulkan_Init(&initInfo);
+		ImGui_ImplVulkan_InitInfo initInfo{
+			.ApiVersion = Graphics::VulkanDevice::API_VERSION,
+			.Instance = device.instance(),
+			.PhysicalDevice = device.physicalDevice(),
+			.Device = device.device(),
+			.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily.value(),
+			.Queue = device.graphicsQueue(),
+			.DescriptorPool = Graphics::VulkanContext::descriptorPool(),
+			.MinImageCount = Graphics::MAX_FRAMES_IN_FLIGHT,
+			.ImageCount = Graphics::MAX_FRAMES_IN_FLIGHT,
+			.PipelineInfoMain = {
+				.RenderPass = VK_NULL_HANDLE,
+				.Subpass = 0,
+				.MSAASamples = VK_SAMPLE_COUNT_1_BIT,
+				.PipelineRenderingCreateInfo = {
+					.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+					.colorAttachmentCount = 1,
+					.pColorAttachmentFormats = &colorFormat,
+				}
+			},
+			.UseDynamicRendering = true,
+		};
 
-		ImGui_ImplVulkan_CreateFontsTexture();
+		ImGui_ImplVulkan_Init(&initInfo);
 
 		// Adjust Style
 		ImGuiStyle& style = ImGui::GetStyle();

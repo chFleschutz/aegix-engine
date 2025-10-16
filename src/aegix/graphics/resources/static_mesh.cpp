@@ -3,7 +3,7 @@
 #include "static_mesh.h"
 
 #include "engine.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 #include "gltf.h"
 #include "gltf_utils.h"

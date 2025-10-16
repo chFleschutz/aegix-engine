@@ -2,7 +2,7 @@
 
 #include "graphics/globals.h"
 #include "graphics/renderer.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {

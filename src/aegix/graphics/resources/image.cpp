@@ -5,8 +5,8 @@
 #include "engine.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
-#include "graphics/vulkan_context.h"
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

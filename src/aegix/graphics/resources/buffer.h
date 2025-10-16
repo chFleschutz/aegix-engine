@@ -1,8 +1,8 @@
 #pragma once
 
 #include "graphics/globals.h"
+#include "graphics/vulkan/volk_include.h"
 
-#include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics

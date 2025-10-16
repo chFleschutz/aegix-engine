@@ -6,6 +6,7 @@ add_subdirectory(glfw)
 
 add_subdirectory(glm)
 
+set(IMGUI_USE_VOLK ON)
 add_subdirectory(imgui)
 
 add_subdirectory(imguizmo)
@@ -13,3 +14,5 @@ add_subdirectory(imguizmo)
 add_subdirectory(tinyobjloader)
 
 add_subdirectory(vma)
+
+add_subdirectory(volk)

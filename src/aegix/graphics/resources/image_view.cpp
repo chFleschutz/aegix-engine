@@ -3,8 +3,8 @@
 #include "image_view.h"
 
 #include "graphics/resources/image.h"
-#include "graphics/vulkan_context.h"
-#include "graphics/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {

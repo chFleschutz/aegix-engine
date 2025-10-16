@@ -1,4 +1,7 @@
 target_sources(aegix-engine PRIVATE
+	"asset.h" 
+	"asset_manager.h" 
+	"asset_manager.cpp" 
 	"editor_layer.cpp"
 	"editor_layer.h"
 	"input.cpp"
@@ -9,4 +12,4 @@ target_sources(aegix-engine PRIVATE
 	"profiler.h"
 	"window.cpp"
 	"window.h"
-  "../graphics/render_passes/transparent_pass.cpp" "asset.h" "asset_manager.h" "asset_manager.cpp" "../graphics/render_systems/point_light_render_system.h" "../graphics/render_systems/static_mesh_render_system.cpp" "../graphics/render_systems/point_light_render_system.cpp")
+)

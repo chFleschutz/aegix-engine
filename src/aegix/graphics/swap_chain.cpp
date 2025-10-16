@@ -2,8 +2,8 @@
 
 #include "swap_chain.h"
 
-#include "graphics/vulkan_tools.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
