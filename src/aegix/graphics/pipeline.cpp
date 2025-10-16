@@ -118,6 +118,12 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	auto Pipeline::GraphicsBuilder::disableVertexInput() -> GraphicsBuilder&
+	{
+		m_graphicsConfig.useVertexInput = false;
+		return *this;
+	}
+
 	auto Pipeline::GraphicsBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
 		return std::make_unique<Pipeline>(m_layoutConfig, m_graphicsConfig);
@@ -323,8 +329,8 @@ namespace Aegix::Graphics
 		pipelineInfo.pNext = &config.renderingInfo;
 		pipelineInfo.stageCount = static_cast<uint32_t>(config.shaderStges.size());
 		pipelineInfo.pStages = config.shaderStges.data();
-		pipelineInfo.pVertexInputState = &vertexInputInfo;
-		pipelineInfo.pInputAssemblyState = &config.inputAssemblyInfo;
+		pipelineInfo.pVertexInputState = config.useVertexInput ? &vertexInputInfo : nullptr;
+		pipelineInfo.pInputAssemblyState = config.useVertexInput ? &config.inputAssemblyInfo : nullptr;
 		pipelineInfo.pViewportState = &config.viewportInfo;
 		pipelineInfo.pRasterizationState = &config.rasterizationInfo;
 		pipelineInfo.pMultisampleState = &config.multisampleInfo;

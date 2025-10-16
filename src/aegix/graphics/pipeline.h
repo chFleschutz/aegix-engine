@@ -34,6 +34,7 @@ namespace Aegix::Graphics
 			std::vector<VkDynamicState> dynamicStateEnables{};
 			VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 			uint32_t subpass = 0;
+			bool useVertexInput = true;
 		};
 
 		class GraphicsBuilder
@@ -53,6 +54,7 @@ namespace Aegix::Graphics
 			auto setCullMode(VkCullModeFlags cullMode) -> GraphicsBuilder&;
 			auto setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) -> GraphicsBuilder&;
 			auto setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions) -> GraphicsBuilder&;
+			auto disableVertexInput() -> GraphicsBuilder&;
 
 			auto buildUnique() -> std::unique_ptr<Pipeline>;
 			auto build() -> Pipeline;
