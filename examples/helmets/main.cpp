@@ -59,12 +59,10 @@ public:
 		damagedHelmet.get<Transform>().location = { -2.0f, 0.0f, 2.0f };
 
 		auto scifiHelmet = scene.load(ASSETS_DIR "SciFiHelmet/ScifiHelmet.gltf");
-		scifiHelmet.get<Transform>().location = { 0.0f, 2.0f, 3.0f };
+		scifiHelmet.get<Transform>().location = { 2.0f, 0.0f, 2.0f };
 
-		auto plane = scene.createEntity("Plane");
+		auto plane = scene.load(ASSETS_DIR "Misc/plane.obj");
 		plane.get<Transform>().scale = { 2.0f, 2.0f, 2.0f };
-		plane.add<Mesh>(Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj"));
-		plane.add<Material>(Engine::assets().get<Graphics::MaterialInstance>("default/PBR_instance"));
 		plane.add<ColorChanger>();
 	}
 };

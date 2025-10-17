@@ -2,12 +2,13 @@
 
 #include "Scene.h"
 
-#include "engine.h"
 #include "core/profiler.h"
+#include "engine.h"
 #include "graphics/resources/static_mesh.h"
 #include "scene/components.h"
 #include "scene/entity.h"
 #include "scene/gltf_loader.h"
+#include "scene/loader/obj_loader.h"
 #include "scene/systems/camera_system.h"
 #include "scene/systems/transform_system.h"
 #include "scripting/movement/kinematic_movement_controller.h"
@@ -62,10 +63,8 @@ namespace Aegix::Scene
 		}
 		else if (path.extension() == ".obj")
 		{
-			auto entity = createEntity(path.stem().string());
-			entity.add<Mesh>(Graphics::StaticMesh::create(path));
-			entity.add<Material>(Engine::assets().get<Graphics::MaterialInstance>("default/PBR_instance"));
-			return entity;
+			OBJLoader loader{ *this, path };
+			return loader.rootEntity();
 		}
 		else
 		{
