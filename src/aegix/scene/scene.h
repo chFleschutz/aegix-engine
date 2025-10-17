@@ -20,7 +20,7 @@ namespace Aegix::Scene
 		friend class Entity;
 
 	public:
-		Scene();
+		Scene() = default;
 		Scene(const Scene&) = delete;
 		Scene(Scene&&) = delete;
 		~Scene() = default;
