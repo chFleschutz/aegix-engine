@@ -3,6 +3,7 @@
 #include "core/asset.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/resources/static_mesh.h"
 #include "graphics/resources/texture.h"
 #include "math/math.h"
 
@@ -56,18 +57,19 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto pipeline() const -> const Pipeline& { return m_pipeline; }
 		[[nodiscard]] auto globalSetLayout() -> DescriptorSetLayout& { return m_globalSetLayout; }
 		[[nodiscard]] auto materialSetLayout() -> DescriptorSetLayout& { return m_materialSetLayout; }
-		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
-		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
 		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
 
+		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
+		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
 		void bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
+		void draw(VkCommandBuffer cmd, const StaticMesh& mesh);
 
 	private:
 		// TODO: Store multiple pipelines for different render passes
@@ -75,9 +77,11 @@ namespace Aegix::Graphics
 		Pipeline m_pipeline;
 		DescriptorSetLayout m_globalSetLayout;		// Set 0 
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
+
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 		size_t m_parameterSize = 0;
 		uint32_t m_textureCount = 0;
+
 		MaterialType m_materialType = MaterialType::Opaque;
 	};
 }

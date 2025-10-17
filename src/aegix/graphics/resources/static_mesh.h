@@ -55,6 +55,12 @@ namespace Aegix::Graphics
 		auto operator=(const StaticMesh&) -> StaticMesh& = delete;
 		auto operator=(StaticMesh&&) -> StaticMesh& = default;
 
+		[[nodiscard]] auto vertexCount() const -> uint32_t { return m_vertexCount; }
+		[[nodiscard]] auto indexCount() const -> uint32_t { return m_indexCount; }
+		[[nodiscard]] auto meshletCount() const -> uint32_t { return m_meshletCount; }
+		[[nodiscard]] auto meshletDescriptorSet() const -> const DescriptorSet& { return m_meshletDescriptor; }
+		[[nodiscard]] auto attributeDescriptorSet() const -> const DescriptorSet& { return m_attributeDescriptor; }
+
 		void draw(VkCommandBuffer cmd) const;
 		void drawMeshlets(VkCommandBuffer cmd) const;
 

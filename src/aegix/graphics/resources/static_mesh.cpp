@@ -122,8 +122,6 @@ namespace Aegix::Graphics
 
 	void StaticMesh::drawMeshlets(VkCommandBuffer cmd) const
 	{
-		// TODO: Bind descriptor set for meshlet buffer (pipeline layout needed)
-
 		vkCmdDrawMeshTasksEXT(cmd, m_meshletCount, 1, 1);
 	}
 }

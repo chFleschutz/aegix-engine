@@ -71,6 +71,7 @@ namespace Aegix::Core
 		}
 
 		// Default PBR Mesh Shader Material
+		if constexpr (false) // TODO: skipped until mesh shaders are here
 		{
 			auto globalSetLayout = DescriptorSetLayout::Builder{}
 				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
@@ -98,7 +99,7 @@ namespace Aegix::Core
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
 				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-				.disableVertexInput()
+				.addFlag(Pipeline::Flags::MeshShader)
 				.build();
 
 			auto pbrMeshMatTemplate = std::make_shared<MaterialTemplate>(std::move(meshPipeline), std::move(globalSetLayout), std::move(materialSetLayout));
