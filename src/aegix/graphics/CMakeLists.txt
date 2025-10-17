@@ -45,8 +45,8 @@ target_sources(aegix-engine PRIVATE
 	"resources/texture.cpp"
 	"resources/texture.h"
 
-	"resources/mesh.cpp"
-	"resources/mesh.h"
+	
+	
 	"resources/mesh_preprocessor.cpp"
 	"resources/mesh_preprocessor.h" 
 	

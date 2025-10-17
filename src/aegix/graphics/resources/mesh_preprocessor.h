@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/mesh.h"
+#include "graphics/resources/static_mesh.h"
 
 namespace Aegix::Graphics
 {
@@ -22,10 +22,10 @@ namespace Aegix::Graphics
 			float coneWeight = 0; 
 		};
 
-		static auto process(const Input& input) -> Mesh::CreateInfo;
+		static auto process(const Input& input) -> StaticMesh::CreateInfo;
 
 	private:
-		static auto interleave(const Input& input) -> std::vector<Mesh::Vertex>;
-		static void deinterleave(Mesh::CreateInfo& info);
+		static auto interleave(const Input& input) -> std::vector<StaticMesh::Vertex>;
+		static void deinterleave(StaticMesh::CreateInfo& info);
 	};
 }

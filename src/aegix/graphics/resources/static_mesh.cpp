@@ -1,206 +1,129 @@
 #include "pch.h"
-
 #include "static_mesh.h"
 
-#include "engine.h"
-#include "graphics/vulkan/vulkan_context.h"
-
-#include "gltf.h"
-#include "gltf_utils.h"
-
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include "graphics/vulkan/volk_include.h"
 
 namespace Aegix::Graphics
 {
-	StaticMesh::StaticMesh(const StaticMesh::MeshInfo& info)
+	auto StaticMesh::bindingDescription() -> VkVertexInputBindingDescription
 	{
-		// Create vertex buffers (Order: Position, Color, Normal, UV)
-		m_vertexCount = static_cast<uint32_t>(info.positions.size());
-		AGX_ASSERT_X(info.colors.size() == m_vertexCount && info.normals.size() == m_vertexCount && info.uvs.size() == m_vertexCount, 
-			"Vertex attribute count has to match");
-
-		createVertexAttributeBuffer(info.positions);
-		createVertexAttributeBuffer(info.colors);
-		createVertexAttributeBuffer(info.normals);
-		createVertexAttributeBuffer(info.uvs);
-
-		createIndexBuffers(info.indices);
+		static VkVertexInputBindingDescription bindingDescription{
+			.binding = 0,
+			.stride = sizeof(Vertex),
+			.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+		};
+		return bindingDescription;
 	}
 
-	auto StaticMesh::defaultBindingDescriptions() -> std::vector<VkVertexInputBindingDescription>
+	auto StaticMesh::attributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>
 	{
-		std::vector<VkVertexInputBindingDescription> bindingDescriptions(4);
-		bindingDescriptions[0].binding = 0;
-		bindingDescriptions[0].stride = sizeof(glm::vec3);
-		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		bindingDescriptions[1].binding = 1;
-		bindingDescriptions[1].stride = sizeof(glm::vec3);
-		bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		bindingDescriptions[2].binding = 2;
-		bindingDescriptions[2].stride = sizeof(glm::vec3);
-		bindingDescriptions[2].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		bindingDescriptions[3].binding = 3;
-		bindingDescriptions[3].stride = sizeof(glm::vec2);
-		bindingDescriptions[3].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		return bindingDescriptions;
-	}
-
-	auto StaticMesh::defaultAttributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>
-	{
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset = 0;
-		attributeDescriptions[1].binding = 1;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = 0;
-		attributeDescriptions[2].binding = 2;
-		attributeDescriptions[2].location = 2;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[2].offset = 0;
-		attributeDescriptions[3].binding = 3;
-		attributeDescriptions[3].location = 3;
-		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[3].offset = 0;
+		static auto attributeDescriptions = std::vector{
+			VkVertexInputAttributeDescription{
+				.location = 0,
+				.binding = 0,
+				.format = VK_FORMAT_R32G32B32_SFLOAT,
+				.offset = offsetof(Vertex, position)
+			},
+			VkVertexInputAttributeDescription{
+				.location = 1,
+				.binding = 0,
+				.format = VK_FORMAT_R32G32B32_SFLOAT,
+				.offset = offsetof(Vertex, normal)
+			},
+			VkVertexInputAttributeDescription{
+				.location = 2,
+				.binding = 0,
+				.format = VK_FORMAT_R32G32_SFLOAT,
+				.offset = offsetof(Vertex, uv)
+			},
+			VkVertexInputAttributeDescription{
+				.location = 3,
+				.binding = 0,
+				.format = VK_FORMAT_R32G32B32_SFLOAT,
+				.offset = offsetof(Vertex, color)
+			}
+		};
 		return attributeDescriptions;
 	}
 
-	auto StaticMesh::create(const std::filesystem::path& filepath) -> std::shared_ptr<StaticMesh>
+	auto StaticMesh::meshletDescriptorSetLayout() -> DescriptorSetLayout&
 	{
-		MeshInfo info{};
-		
-		if (filepath.extension() == ".gltf" || filepath.extension() == ".glb")
-		{
-			info.loadGLTF(filepath);
-		}
-		else if (filepath.extension() == ".obj")
-		{
-			info.loadOBJ(filepath);
-		}
-		else
-		{
-			AGX_ASSERT_X(false, "Unsupported file format");
-		}
-
-		return std::make_shared<StaticMesh>(info);
+		static DescriptorSetLayout meshletDescriptorSetLayout = DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet 
+			.build();
+		return meshletDescriptorSetLayout;
 	}
 
-	void StaticMesh::bind(VkCommandBuffer commandBuffer)
+	auto StaticMesh::attributeDescriptorSetLayout() -> DescriptorSetLayout&
 	{
-		vkCmdBindVertexBuffers(commandBuffer, 0, m_vkBuffers.size(), m_vkBuffers.data(), m_bufferOffsets.data());
-
-		if (m_indexBuffer)
-			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer(), 0, VK_INDEX_TYPE_UINT32);
+		static DescriptorSetLayout attributeDescriptorSetLayout = DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet Indices 
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Position 
+			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Normal 
+			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // UV 
+			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Color 
+			.build();
+		return attributeDescriptorSetLayout;
 	}
 
-	void StaticMesh::draw(VkCommandBuffer commandBuffer)
+	StaticMesh::StaticMesh(const CreateInfo& info) :
+		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertexCount) },
+		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indexCount) },
+		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshletCount) },
+		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.indexCount) }, // TODO: check size
+		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.vertexCount) },
+		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.vertexCount) },
+		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.vertexCount) },
+		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.vertexCount) },
+		m_meshletDescriptor{ meshletDescriptorSetLayout() },
+		m_attributeDescriptor{ attributeDescriptorSetLayout() },
+		m_vertexCount{ info.vertexCount },
+		m_indexCount{ info.indexCount },
+		m_meshletCount{ info.meshletCount }
 	{
-		if (m_indexBuffer)
-		{
-			vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
-		}
-		else
-		{
-			vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
-		}
+		AGX_ASSERT_X(info.vertices.size() == info.vertexCount, "Vertex count does not match size of vertex array");
+		AGX_ASSERT_X(info.indices.size() == info.indexCount, "Index count does not match size of index array");
+		AGX_ASSERT_X(info.meshlets.size() == info.meshletCount, "Meshlet count does not match size of meshlet array");
+		AGX_ASSERT_X(info.positions.size() == info.vertexCount, "Vertex count does not match size of position array");
+		AGX_ASSERT_X(info.normals.size() == info.vertexCount, "Vertex count does not match size of normal array");
+		AGX_ASSERT_X(info.uvs.size() == info.vertexCount, "Vertex count does not match size of UV array");
+		AGX_ASSERT_X(info.colors.size() == info.vertexCount, "Vertex count does not match size of color array");
+
+		m_vertexBuffer.upload(info.vertices.data(), sizeof(Vertex) * info.vertexCount);
+		m_indexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+		m_meshletBuffer.upload(info.meshlets.data(), sizeof(Meshlet) * info.meshletCount);
+		m_meshletIndexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+		m_positonBuffer.upload(info.positions.data(), sizeof(Vertex::position) * info.vertexCount);
+		m_normalBuffer.upload(info.normals.data(), sizeof(Vertex::normal) * info.vertexCount);
+		m_uvBuffer.upload(info.uvs.data(), sizeof(Vertex::uv) * info.vertexCount);
+		m_colorBuffer.upload(info.colors.data(), sizeof(Vertex::color) * info.vertexCount);
+
+		DescriptorWriter{ meshletDescriptorSetLayout() }
+			.writeBuffer(0, m_meshletBuffer)
+			.update(m_meshletDescriptor);
+
+		DescriptorWriter{ attributeDescriptorSetLayout() }
+			.writeBuffer(0, m_meshletIndexBuffer)
+			.writeBuffer(1, m_positonBuffer)
+			.writeBuffer(2, m_normalBuffer)
+			.writeBuffer(3, m_uvBuffer)
+			.writeBuffer(4, m_colorBuffer)
+			.update(m_attributeDescriptor);
 	}
 
-	void StaticMesh::createIndexBuffers(const std::vector<uint32_t>& indices)
+	void StaticMesh::draw(VkCommandBuffer cmd) const
 	{
-		m_indexCount = static_cast<uint32_t>(indices.size());
-		if (m_indexCount <= 0)
-			return;
-
-		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
-		m_indexBuffer = std::make_unique<Buffer>(bufferSize, 1,
-			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-		m_indexBuffer->upload(indices.data(), bufferSize);
+		VkBuffer vertexBuffers[] = { m_vertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(cmd, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, m_indexCount, 1, 0, 0, 0);
 	}
 
-	void StaticMesh::MeshInfo::loadOBJ(const std::filesystem::path& filepath)
+	void StaticMesh::drawMeshlets(VkCommandBuffer cmd) const
 	{
-		tinyobj::attrib_t attrib;
-		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> materials;
-		std::string warn, err;
+		// TODO: Bind descriptor set for meshlet buffer (pipeline layout needed)
 
-		bool result = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.string().c_str());
-		AGX_ASSERT_X(result, "Failed to load OBJ file");
-
-		positions.clear();
-		colors.clear();
-		normals.clear();
-		uvs.clear();
-		indices.clear();
-
-		for (const auto& shape : shapes)
-		{
-			for (const auto& index : shape.mesh.indices)
-			{
-				glm::vec3 position{};
-				glm::vec3 color{};
-				glm::vec3 normal{};
-				glm::vec2 uv{};
-
-				if (index.vertex_index >= 0)
-				{
-					position.x = attrib.vertices[3 * index.vertex_index + 0];
-					position.y = attrib.vertices[3 * index.vertex_index + 1];
-					position.z = attrib.vertices[3 * index.vertex_index + 2];
-
-					color.r = attrib.colors[3 * index.vertex_index + 0];
-					color.g = attrib.colors[3 * index.vertex_index + 1];
-					color.b = attrib.colors[3 * index.vertex_index + 2];
-				}
-
-				if (index.normal_index >= 0)
-				{
-					normal.x = attrib.normals[3 * index.normal_index + 0];
-					normal.y = attrib.normals[3 * index.normal_index + 1];
-					normal.z = attrib.normals[3 * index.normal_index + 2];
-				}
-
-				if (index.texcoord_index >= 0)
-				{
-					uv.x = attrib.texcoords[2 * index.texcoord_index + 0];
-					uv.y = attrib.texcoords[2 * index.texcoord_index + 1];
-				}
-
-				positions.emplace_back(position);
-				colors.emplace_back(color);
-				normals.emplace_back(normal);
-				uvs.emplace_back(uv);
-			}
-		}
-	}
-
-	void StaticMesh::MeshInfo::loadGLTF(const std::filesystem::path& filepath)
-	{
-		auto gltf = GLTF::load(filepath);
-		AGX_ASSERT_X(gltf.has_value(), "Failed to load GLTF file");
-
-		// TODO: Support multiple meshes and primitives
-		auto& primitive = gltf->meshes[0].primitives[0];
-
-		GLTF::copyIndices(indices, primitive, *gltf);
-		GLTF::copyAttribute("POSITION", positions, primitive, *gltf);
-		GLTF::copyAttribute("COLOR_0", colors, primitive, *gltf);
-		GLTF::copyAttribute("NORMAL", normals, primitive, *gltf);
-		GLTF::copyAttribute("TEXCOORD_0", uvs, primitive, *gltf);
-
-		// Ensure all attributes have the same size
-		AGX_ASSERT_X(!positions.empty(), "Failed to load positions");
-		auto vertexCount = positions.size();
-		if (colors.size() != vertexCount)
-			colors.resize(vertexCount);
-
-		if (normals.size() != vertexCount)
-			normals.resize(vertexCount);
-
-		if (uvs.size() != vertexCount)
-			uvs.resize(vertexCount);
+		vkCmdDrawMeshTasksEXT(cmd, m_meshletCount, 1, 1);
 	}
 }

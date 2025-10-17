@@ -5,43 +5,36 @@
 
 namespace Aegix::Graphics
 {
-	auto MeshPreprocessor::process(const Input& input) -> Mesh::CreateInfo
+	auto MeshPreprocessor::process(const Input& input) -> StaticMesh::CreateInfo
 	{
-		Mesh::CreateInfo info{};
+		StaticMesh::CreateInfo info{};
 		auto vertices = interleave(input);
 
 		// Vertex and Index remapping
+		size_t indexCount = input.indices.size() == 0 ? vertices.size() : input.indices.size();
+		const uint32_t* indexData = input.indices.size() == 0 ? nullptr : input.indices.data();
 
-		std::vector<uint32_t> remapIndices(input.indices.size());
-		size_t vertexCount = meshopt_generateVertexRemap(
-			remapIndices.data(),
-			input.indices.data(),
-			input.indices.size(),
-			vertices.data(),
-			vertices.size(),
-			sizeof(Mesh::Vertex));
+		std::vector<uint32_t> remapIndices(indexCount);
+		size_t vertexCount = meshopt_generateVertexRemap(remapIndices.data(), indexData, indexCount, vertices.data(),
+			vertices.size(), sizeof(StaticMesh::Vertex));
 
-		size_t indexCount = input.indices.size();
 		info.indices.resize(indexCount);
 		info.vertices.resize(vertexCount);
 		info.indexCount = static_cast<uint32_t>(indexCount);
 		info.vertexCount = static_cast<uint32_t>(vertexCount);
 
 		meshopt_remapIndexBuffer(info.indices.data(), input.indices.data(), indexCount, remapIndices.data());
-
-		meshopt_remapVertexBuffer(info.vertices.data(), vertices.data(), vertices.size(), sizeof(Mesh::Vertex),
+		meshopt_remapVertexBuffer(info.vertices.data(), vertices.data(), vertices.size(), sizeof(StaticMesh::Vertex),
 			remapIndices.data());
 
 
 		// Vertex optimizations
 
 		meshopt_optimizeVertexCache(info.indices.data(), info.indices.data(), indexCount, vertexCount);
-
 		meshopt_optimizeOverdraw(info.indices.data(), info.indices.data(), indexCount, &(info.vertices[0].position.x),
-			vertexCount, sizeof(Mesh::Vertex), input.overdrawThreshold);
-
+			vertexCount, sizeof(StaticMesh::Vertex), input.overdrawThreshold);
 		meshopt_optimizeVertexFetch(info.vertices.data(), info.indices.data(), indexCount, info.vertices.data(),
-			vertexCount, sizeof(Mesh::Vertex));
+			vertexCount, sizeof(StaticMesh::Vertex));
 
 
 		// Meshlet generation
@@ -53,7 +46,7 @@ namespace Aegix::Graphics
 		std::vector<uint32_t> meshletVertices(info.indexCount);
 		std::vector<uint8_t> meshletTriangles(info.indexCount);
 		info.meshletCount = meshopt_buildMeshlets(meshlets.data(), meshletVertices.data(), meshletTriangles.data(),
-			info.indices.data(), info.indexCount, &(info.vertices[0].position.x), info.vertices.size(), sizeof(Mesh::Vertex),
+			info.indices.data(), info.indexCount, &(info.vertices[0].position.x), info.vertices.size(), sizeof(StaticMesh::Vertex),
 			input.maxVerticesPerMeshlet, input.maxTrianglesPerMeshlet, input.coneWeight);
 
 		const auto& lastMeshlet = meshlets[info.meshletCount - 1];
@@ -66,9 +59,9 @@ namespace Aegix::Graphics
 		{
 			meshopt_Bounds bounds = meshopt_computeMeshletBounds(&meshletVertices[meshlet.vertex_offset],
 				&meshletTriangles[meshlet.triangle_offset], meshlet.triangle_count, &(info.vertices[0].position.x),
-				info.vertexCount, sizeof(Mesh::Vertex));
+				info.vertexCount, sizeof(StaticMesh::Vertex));
 
-			info.meshlets.emplace_back(Mesh::Meshlet{
+			info.meshlets.emplace_back(StaticMesh::Meshlet{
 				.vertexOffset = meshlet.vertex_offset,
 				.vertexCount = meshlet.vertex_count,
 				.triangleOffset = meshlet.triangle_offset,
@@ -84,11 +77,11 @@ namespace Aegix::Graphics
 		return info;
 	}
 
-	auto MeshPreprocessor::interleave(const Input& input) -> std::vector<Mesh::Vertex>
+	auto MeshPreprocessor::interleave(const Input& input) -> std::vector<StaticMesh::Vertex>
 	{
 		AGX_ASSERT_X(input.positions.size() == input.normals.size(), "Positions and normals size mismatch");
 
-		std::vector<Mesh::Vertex> vertices(input.positions.size());
+		std::vector<StaticMesh::Vertex> vertices(input.positions.size());
 		for (size_t i = 0; i < input.positions.size(); i++)
 		{
 			vertices[i].position = input.positions[i];
@@ -99,7 +92,7 @@ namespace Aegix::Graphics
 		return vertices;
 	}
 
-	void MeshPreprocessor::deinterleave(Mesh::CreateInfo& info)
+	void MeshPreprocessor::deinterleave(StaticMesh::CreateInfo& info)
 	{
 		info.positions.reserve(info.vertexCount);
 		info.normals.reserve(info.vertexCount);

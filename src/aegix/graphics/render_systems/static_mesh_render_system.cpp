@@ -52,8 +52,7 @@ namespace Aegix::Graphics
 			};
 			currentMatTemplate->pushConstants(ctx.cmd, &push, sizeof(push));
 
-			// Bind and Draw Mesh
-			mesh.staticMesh->bind(ctx.cmd);
+			// Draw the Mesh
 			mesh.staticMesh->draw(ctx.cmd);
 		}
 	}
