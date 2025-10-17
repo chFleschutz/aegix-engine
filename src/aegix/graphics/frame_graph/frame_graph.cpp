@@ -2,6 +2,7 @@
 
 #include "frame_graph.h"
 
+#include "core/profiler.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
@@ -74,6 +75,8 @@ namespace Aegix::Graphics
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
+		AGX_PROFILE_FUNCTION();
+
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			auto& node = m_resourcePool.node(nodeHandle);
