@@ -118,9 +118,9 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto Pipeline::GraphicsBuilder::disableVertexInput() -> GraphicsBuilder&
+	auto Pipeline::GraphicsBuilder::addFlag(Flags flag) -> GraphicsBuilder&
 	{
-		m_graphicsConfig.useVertexInput = false;
+		m_graphicsConfig.flags = static_cast<Flags>(static_cast<uint32_t>(m_graphicsConfig.flags) | static_cast<uint32_t>(flag));
 		return *this;
 	}
 
@@ -182,7 +182,7 @@ namespace Aegix::Graphics
 	// Pipeline ------------------------------------------------------------------
 
 	Pipeline::Pipeline(const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig)
-		: m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
+		: m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }, m_flags{ graphicsConfig.flags }
 	{
 		createPipelineLayout(layoutConfig);
 		createGraphicsPipeline(graphicsConfig);
@@ -196,7 +196,7 @@ namespace Aegix::Graphics
 	}
 
 	Pipeline::Pipeline(Pipeline&& other) noexcept
-		: m_layout{ other.m_layout }, m_pipeline{other.m_pipeline}, m_bindPoint{ other.m_bindPoint }
+		: m_layout{ other.m_layout }, m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }, m_flags{ other.m_flags }
 	{
 		other.m_layout = VK_NULL_HANDLE;
 		other.m_pipeline = VK_NULL_HANDLE;
@@ -215,10 +215,16 @@ namespace Aegix::Graphics
 			m_layout = other.m_layout;
 			m_pipeline = other.m_pipeline;
 			m_bindPoint = other.m_bindPoint;
+			m_flags = other.m_flags;
 			other.m_layout = VK_NULL_HANDLE;
 			other.m_pipeline = VK_NULL_HANDLE;
 		}
 		return *this;
+	}
+
+	auto Pipeline::hasFlag(Flags flag) const -> bool
+	{
+		return (static_cast<uint32_t>(m_flags) & static_cast<uint32_t>(flag)) != 0;
 	}
 
 	void Pipeline::bind(VkCommandBuffer commandBuffer) const
@@ -329,8 +335,8 @@ namespace Aegix::Graphics
 			.pNext = &config.renderingInfo,
 			.stageCount = static_cast<uint32_t>(config.shaderStges.size()),
 			.pStages = config.shaderStges.data(),
-			.pVertexInputState = config.useVertexInput ? &vertexInputInfo : nullptr,
-			.pInputAssemblyState = config.useVertexInput ? &config.inputAssemblyInfo : nullptr,
+			.pVertexInputState = hasFlag(Flags::MeshShader) ? nullptr : &vertexInputInfo,
+			.pInputAssemblyState = hasFlag(Flags::MeshShader) ? nullptr : &config.inputAssemblyInfo,
 			.pTessellationState = nullptr,
 			.pViewportState = &config.viewportInfo,
 			.pRasterizationState = &config.rasterizationInfo,

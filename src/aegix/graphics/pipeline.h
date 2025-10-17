@@ -7,6 +7,12 @@ namespace Aegix::Graphics
 	class Pipeline
 	{
 	public:
+		enum class Flags
+		{
+			None = 0,
+			MeshShader = 1 << 0,
+		};
+
 		struct LayoutConfig
 		{
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
@@ -34,7 +40,7 @@ namespace Aegix::Graphics
 			std::vector<VkDynamicState> dynamicStateEnables{};
 			VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 			uint32_t subpass = 0;
-			bool useVertexInput = true;
+			Flags flags = Flags::None;
 		};
 
 		class GraphicsBuilder
@@ -54,7 +60,7 @@ namespace Aegix::Graphics
 			auto setCullMode(VkCullModeFlags cullMode) -> GraphicsBuilder&;
 			auto setVertexBindingDescriptions(const std::vector<VkVertexInputBindingDescription>& bindingDescriptions) -> GraphicsBuilder&;
 			auto setVertexAttributeDescriptions(const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions) -> GraphicsBuilder&;
-			auto disableVertexInput() -> GraphicsBuilder&;
+			auto addFlag(Flags flag) -> GraphicsBuilder&;
 
 			auto buildUnique() -> std::unique_ptr<Pipeline>;
 			auto build() -> Pipeline;
@@ -103,6 +109,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto pipeline() const -> VkPipeline { return m_pipeline; }
 		[[nodiscard]] auto layout() const -> VkPipelineLayout { return m_layout; }
 		[[nodiscard]] auto bindPoint() const -> VkPipelineBindPoint { return m_bindPoint; }
+		[[nodiscard]] auto hasFlag(Flags flag) const -> bool;
 
 		void bind(VkCommandBuffer commandBuffer) const;
 		void bindDescriptorSet(VkCommandBuffer cmd, uint32_t setIndex, VkDescriptorSet descriptorSet) const;
@@ -125,5 +132,6 @@ namespace Aegix::Graphics
 		VkPipelineLayout m_layout = VK_NULL_HANDLE;
 		VkPipeline m_pipeline = VK_NULL_HANDLE;
 		VkPipelineBindPoint m_bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		Flags m_flags = Flags::None;
 	};
 }
