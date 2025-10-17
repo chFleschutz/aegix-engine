@@ -1,4 +1,6 @@
 target_sources(aegix-engine PRIVATE
+	"loader/gltf_loader.cpp"
+	"loader/gltf_loader.h"
 	"loader/obj_loader.cpp"
 	"loader/obj_loader.h"
 
@@ -11,8 +13,6 @@ target_sources(aegix-engine PRIVATE
 	"description.h"
 	"entity.cpp"
 	"entity.h"
-	"gltf_loader.cpp"
-	"gltf_loader.h"
 	"scene.cpp"
 	"scene.h"
 	"system.h"
