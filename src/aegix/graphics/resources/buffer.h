@@ -11,10 +11,12 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
+		/// @brief Factory methods for common buffer types
+		/// @note Use multiple instances only if intended to be used with dynamic offsets (accessed by multiple descriptors)
+		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
+		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
 		static auto createVertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
 		static auto createIndexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
 		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
 
 		Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,

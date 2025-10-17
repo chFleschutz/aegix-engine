@@ -20,8 +20,8 @@ namespace Aegix::Graphics
 		{
 			uint32_t vertexOffset;
 			uint32_t vertexCount;
-			uint32_t indexOffset;
-			uint32_t indexCount;
+			uint32_t triangleOffset;
+			uint32_t triangleCount;
 			glm::vec3 center;
 			float radius;
 			glm::vec3 coneAxis;
@@ -30,6 +30,13 @@ namespace Aegix::Graphics
 
 		struct CreateInfo
 		{
+			std::vector<Vertex> vertices;
+			std::vector<uint32_t> indices;
+			std::vector<Meshlet> meshlets;
+			std::vector<glm::vec3> positions;
+			std::vector<glm::vec3> normals;
+			std::vector<glm::vec2> uvs;
+			std::vector<glm::vec3> colors;
 			uint32_t vertexCount;
 			uint32_t indexCount;
 			uint32_t meshletCount;
@@ -53,16 +60,17 @@ namespace Aegix::Graphics
 
 	private:
 		// Vertex and index buffers for traditional rendering
-		Buffer vertexBuffer;
-		Buffer indexBuffer;
+		Buffer m_vertexBuffer;
+		Buffer m_indexBuffer;
 
-		// Storage buffers for mesh shading
-		Buffer meshletBuffer;
-		Buffer positonBuffer;
-		Buffer normalBuffer;
-		Buffer uvBuffer;
-		Buffer colorBuffer;
-		DescriptorSet meshletDescriptor;
-		DescriptorSet attributeDescriptor;
+		// Storage buffers for mesh shaders
+		Buffer m_meshletBuffer;
+		Buffer m_meshletIndexBuffer;
+		Buffer m_positonBuffer;
+		Buffer m_normalBuffer;
+		Buffer m_uvBuffer;
+		Buffer m_colorBuffer;
+		DescriptorSet m_meshletDescriptor;
+		DescriptorSet m_attributeDescriptor;
 	};
 }

@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "mesh.h"
 
 #include "graphics/vulkan/volk_include.h"
@@ -67,30 +66,59 @@ namespace Aegix::Graphics
 	}
 
 	Mesh::Mesh(const CreateInfo& info) :
-		vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex), info.vertexCount) },
-		indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t), info.indexCount) },
-		meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet), info.meshletCount) },
-		positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position), info.vertexCount) },
-		normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal), info.vertexCount) },
-		uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv), info.vertexCount) },
-		colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color), info.vertexCount) },
-		meshletDescriptor{ meshletDescriptorSetLayout() },
-		attributeDescriptor{ attributeDescriptorSetLayout() }
+		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertexCount) },
+		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indexCount) },
+		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshletCount) },
+		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.indexCount) }, // TODO: check size
+		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.vertexCount) },
+		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.vertexCount) },
+		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.vertexCount) },
+		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.vertexCount) },
+		m_meshletDescriptor{ meshletDescriptorSetLayout() },
+		m_attributeDescriptor{ attributeDescriptorSetLayout() }
 	{
+		AGX_ASSERT_X(info.vertices.size() == info.vertexCount, "Vertex count does not match size of vertex array");
+		AGX_ASSERT_X(info.indices.size() == info.indexCount, "Index count does not match size of index array");
+		AGX_ASSERT_X(info.meshlets.size() == info.meshletCount, "Meshlet count does not match size of meshlet array");
+		AGX_ASSERT_X(info.positions.size() == info.vertexCount, "Vertex count does not match size of position array");
+		AGX_ASSERT_X(info.normals.size() == info.vertexCount, "Vertex count does not match size of normal array");
+		AGX_ASSERT_X(info.uvs.size() == info.vertexCount, "Vertex count does not match size of UV array");
+		AGX_ASSERT_X(info.colors.size() == info.vertexCount, "Vertex count does not match size of color array");
+
+		m_vertexBuffer.upload(info.vertices.data(), sizeof(Vertex) * info.vertexCount);
+		m_indexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+		m_meshletBuffer.upload(info.meshlets.data(), sizeof(Meshlet) * info.meshletCount);
+		m_meshletIndexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+		m_positonBuffer.upload(info.positions.data(), sizeof(Vertex::position) * info.vertexCount);
+		m_normalBuffer.upload(info.normals.data(), sizeof(Vertex::normal) * info.vertexCount);
+		m_uvBuffer.upload(info.uvs.data(), sizeof(Vertex::uv) * info.vertexCount);
+		m_colorBuffer.upload(info.colors.data(), sizeof(Vertex::color) * info.vertexCount);
+
+		DescriptorWriter{ meshletDescriptorSetLayout() }
+		 	.writeBuffer(0, m_meshletBuffer)
+			.update(m_meshletDescriptor);
+
+		DescriptorWriter{ attributeDescriptorSetLayout() }
+			.writeBuffer(0, m_meshletIndexBuffer)
+			.writeBuffer(1, m_positonBuffer)
+			.writeBuffer(2, m_normalBuffer)
+			.writeBuffer(3, m_uvBuffer)
+			.writeBuffer(4, m_colorBuffer)
+			.update(m_attributeDescriptor);
 	}
 
 	void Mesh::Draw(VkCommandBuffer cmd) const
 	{
-		VkBuffer vertexBuffers[] = { vertexBuffer };
+		VkBuffer vertexBuffers[] = { m_vertexBuffer };
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, 0);
-		vkCmdBindIndexBuffer(cmd, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(cmd, indexBuffer.instanceCount(), 1, 0, 0, 0);
+		vkCmdBindIndexBuffer(cmd, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(cmd, m_indexBuffer.instanceCount(), 1, 0, 0, 0);
 	}
 
 	void Mesh::DrawMeshlets(VkCommandBuffer cmd) const
 	{
-		// TODO: Bind descriptor set for meshlet buffer
+		// TODO: Bind descriptor set for meshlet buffer (pipeline layout needed)
 
-		vkCmdDrawMeshTasksEXT(cmd, meshletBuffer.instanceCount(), 1, 1);
+		vkCmdDrawMeshTasksEXT(cmd, m_meshletBuffer.instanceCount(), 1, 1);
 	}
 }
