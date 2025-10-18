@@ -342,6 +342,8 @@ namespace Aegix::Graphics
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
 			.storageBuffer8BitAccess = VK_TRUE,
 			.uniformAndStorageBuffer8BitAccess = VK_TRUE,
+			.storagePushConstant8 = VK_TRUE,
+			.shaderInt8 = VK_TRUE,
 			.scalarBlockLayout = VK_TRUE,
 		};
 

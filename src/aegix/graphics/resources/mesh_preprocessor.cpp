@@ -111,14 +111,14 @@ namespace Aegix::Graphics
 				sizeof(StaticMesh::Vertex));
 
 			meshlets.emplace_back(StaticMesh::Meshlet{
-				.vertexOffset = meshlet.vertex_offset,
-				.vertexCount = meshlet.vertex_count,
-				.primitiveOffset = meshlet.triangle_offset,
-				.primitiveCount = meshlet.triangle_count,
-				.center = glm::vec3{ bounds.center[0], bounds.center[1], bounds.center[2] },
+				.center = { bounds.center[0], bounds.center[1], bounds.center[2] },
 				.radius = bounds.radius,
-				.coneAxis = glm::vec3{ bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2] },
-				.coneCutoff = bounds.cone_cutoff
+				.coneAxis = { bounds.cone_axis_s8[0], bounds.cone_axis_s8[1], bounds.cone_axis_s8[2] },
+				.coneCutoff = bounds.cone_cutoff_s8,
+				.vertexOffset = meshlet.vertex_offset,
+				.primitiveOffset = meshlet.triangle_offset,
+				.vertexCount = static_cast<uint8_t>(meshlet.vertex_count),
+				.primitiveCount = static_cast<uint8_t>(meshlet.triangle_count),
 				});
 		}
 

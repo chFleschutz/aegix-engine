@@ -18,14 +18,14 @@ namespace Aegix::Graphics
 
 		struct Meshlet
 		{
-			uint32_t vertexOffset;
-			uint32_t vertexCount;
-			uint32_t primitiveOffset;
-			uint32_t primitiveCount;
 			glm::vec3 center;
 			float radius;
-			glm::vec3 coneAxis;
-			float coneCutoff;
+			int8_t coneAxis[3];
+			int8_t coneCutoff;
+			uint32_t vertexOffset;
+			uint32_t primitiveOffset;
+			uint8_t vertexCount;
+			uint8_t primitiveCount;
 		};
 
 		struct CreateInfo

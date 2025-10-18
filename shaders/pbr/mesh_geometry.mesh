@@ -1,21 +1,21 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
-#extension GL_EXT_shader_8bit_storage : require
 #extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_shader_explicit_arithmetic_types : require
 
 layout(local_size_x = 32) in;
 layout(triangles, max_vertices = 64, max_primitives = 126) out;
 
 struct Meshlet
 {
-    uint vertexOffset;
-    uint vertexCount;
-    uint primitiveOffset;
-    uint primitiveCount;
-    vec3 center;
-    float radius;
-    vec3 coneAxis;
-    float coneCutoff;
+	vec3 center;
+	float radius;
+	int8_t coneAxis[3];
+	int8_t coneCutoff;
+	uint vertexOffset;
+	uint primitiveOffset;
+	uint8_t vertexCount;
+	uint8_t primitiveCount;
 };
 
 layout(push_constant, std140) uniform Push 
@@ -31,8 +31,8 @@ layout(set = 0, binding = 0) uniform Global
     mat4 inverseView;
 } global;
 
-layout(set = 2, binding = 0, scalar) readonly buffer Meshlets { Meshlet meshlets[]; };
-layout(set = 3, binding = 0, scalar) readonly buffer VertexIndices { uint vertexIndices[]; };
+layout(set = 2, binding = 0, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(set = 3, binding = 0, std430) readonly buffer VertexIndices { uint vertexIndices[]; };
 layout(set = 3, binding = 1, scalar) readonly buffer PrimitiveIndices { uint8_t primitiveIndices[]; };
 layout(set = 3, binding = 2, scalar) readonly buffer Positions { vec3 positions[]; };
 layout(set = 3, binding = 3, scalar) readonly buffer Normals { vec3 normals[]; };
@@ -47,9 +47,9 @@ layout(location = 3) out vec3 outLocalPos[];
 void main()
 {
     Meshlet meshlet = meshlets[gl_WorkGroupID.x];
-    SetMeshOutputsEXT(meshlet.vertexCount, meshlet.primitiveCount);
+    SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.primitiveCount));
 
-    for (uint i = gl_LocalInvocationIndex; i < meshlet.vertexCount; i += gl_WorkGroupSize.x)
+    for (uint i = gl_LocalInvocationIndex; i < uint(meshlet.vertexCount); i += gl_WorkGroupSize.x)
     {
         uint index = vertexIndices[meshlet.vertexOffset + i];
         vec4 worldPosition = push.model * vec4(positions[index], 1.0);
@@ -60,7 +60,7 @@ void main()
         outLocalPos[i] = positions[index];
     }
 
-    for (uint i = gl_LocalInvocationIndex; i < meshlet.primitiveCount; i += gl_WorkGroupSize.x)
+    for (uint i = gl_LocalInvocationIndex; i < uint(meshlet.primitiveCount); i += gl_WorkGroupSize.x)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
