@@ -71,14 +71,13 @@ namespace Aegix::Core
 		}
 
 		// Default PBR Mesh Shader Material
-		if constexpr (false) // TODO: skipped until mesh shaders are here
 		{
 			auto globalSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
 
 			auto materialSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
@@ -89,7 +88,9 @@ namespace Aegix::Core
 			auto meshPipeline = Pipeline::GraphicsBuilder{}
 				.addDescriptorSetLayout(globalSetLayout)
 				.addDescriptorSetLayout(materialSetLayout)
-				.addPushConstantRange(VK_SHADER_STAGE_ALL_GRAPHICS, 128)
+				.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
+				.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
+				.addPushConstantRange(VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 128)
 				.addShaderStage(VK_SHADER_STAGE_TASK_BIT_EXT, SHADER_DIR "pbr/mesh_geometry.task.spv")
 				.addShaderStage(VK_SHADER_STAGE_MESH_BIT_EXT, SHADER_DIR "pbr/mesh_geometry.mesh.spv")
 				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/default_geometry.frag.spv")

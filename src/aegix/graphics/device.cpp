@@ -331,24 +331,36 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createLogicalDevice()
 	{
+		VkPhysicalDeviceFeatures2 features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+			.features = VkPhysicalDeviceFeatures{
+				.samplerAnisotropy = VK_TRUE,
+				},
+		};
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+			.storageBuffer8BitAccess = VK_TRUE,
+			.uniformAndStorageBuffer8BitAccess = VK_TRUE,
+		};
+
+		VkPhysicalDeviceVulkan13Features vulkan13Features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+			.shaderDemoteToHelperInvocation = VK_TRUE,
+			.dynamicRendering = VK_TRUE,
+			.maintenance4 = VK_TRUE,
+		};
+
 		VkPhysicalDeviceMeshShaderFeaturesEXT meshShader{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
 			.taskShader = m_features.meshShaderEXT.taskShader,
 			.meshShader = m_features.meshShaderEXT.meshShader,
 		};
 
-		VkPhysicalDeviceVulkan13Features vulkan13Features{
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
-			.pNext = nullptr, // Will be set to meshShader if supported
-			.shaderDemoteToHelperInvocation = VK_TRUE,
-			.dynamicRendering = VK_TRUE,
-		};
-
-		VkPhysicalDeviceFeatures2 deviceFeatures{
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-			.pNext = &vulkan13Features,
-		};
-		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+		// Build the pNext chain
+		features.pNext = &vulkan12Features;
+		vulkan12Features.pNext = &vulkan13Features;
+		vulkan13Features.pNext = nullptr; 
 
 		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
 		if (meshShader.taskShader && meshShader.meshShader)
@@ -376,7 +388,7 @@ namespace Aegix::Graphics
 
 		VkDeviceCreateInfo createInfo{
 			.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-			.pNext = &deviceFeatures,
+			.pNext = &features,
 			.flags = 0,
 			.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
 			.pQueueCreateInfos = queueCreateInfos.data(),

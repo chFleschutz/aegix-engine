@@ -12,6 +12,8 @@ file(GLOB_RECURSE GLSL_SOURCES
     *.geom
     *.frag
     *.comp 
+    *.task
+    *.mesh
 )
 
 set(SPIRV_FILES "")
