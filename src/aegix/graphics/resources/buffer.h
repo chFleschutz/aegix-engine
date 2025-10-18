@@ -73,6 +73,12 @@ namespace Aegix::Graphics
 		/// @brief Copy the buffer to another buffer
 		void copyTo(Buffer& dest, VkDeviceSize size);
 
+		template<typename T>
+		void upload(const std::vector<T>& data)
+		{
+			upload(data.data(), sizeof(T) * data.size());
+		}
+
 	private:
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 

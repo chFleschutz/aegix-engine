@@ -125,18 +125,12 @@ namespace Aegix::Graphics
 		// Fill CreateInfo
 
 		StaticMesh::CreateInfo info{
-			.vertexCount = static_cast<uint32_t>(vertices.size()),
-			.indexCount = static_cast<uint32_t>(indices.size()),
-			.meshletCount = static_cast<uint32_t>(meshlets.size()),
-			.vertexIndexCount = static_cast<uint32_t>(meshletVertices.size()),
-			.primitiveIndexCount = static_cast<uint32_t>(meshletPrimitives.size())
+			.vertices = std::move(vertices),
+			.indices = std::move(indices),
+			.meshlets = std::move(meshlets),
+			.vertexIndices = std::move(meshletVertices),
+			.primitiveIndices = std::move(meshletPrimitives),
 		};
-
-		info.vertices = std::move(vertices);
-		info.indices = std::move(indices);
-		info.meshlets = std::move(meshlets);
-		info.vertexIndices = std::move(meshletVertices);
-		info.primitiveIndices = std::move(meshletPrimitives);
 		deinterleave(info);
 		return info;
 	}
@@ -158,10 +152,11 @@ namespace Aegix::Graphics
 
 	void MeshPreprocessor::deinterleave(StaticMesh::CreateInfo& info)
 	{
-		info.positions.reserve(info.vertexCount);
-		info.normals.reserve(info.vertexCount);
-		info.uvs.reserve(info.vertexCount);
-		info.colors.reserve(info.vertexCount);
+		size_t vertexCount = info.vertices.size();
+		info.positions.reserve(vertexCount);
+		info.normals.reserve(vertexCount);
+		info.uvs.reserve(vertexCount);
+		info.colors.reserve(vertexCount);
 		for (const auto& vertex : info.vertices)
 		{
 			info.positions.emplace_back(vertex.position);

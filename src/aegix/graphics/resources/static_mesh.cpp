@@ -68,43 +68,37 @@ namespace Aegix::Graphics
 	}
 
 	StaticMesh::StaticMesh(const CreateInfo& info) :
-		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertexCount) },
-		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indexCount) },
-		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshletCount) },
-		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.vertexIndexCount) },
-		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.primitiveIndexCount) },
-		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.vertexCount) },
-		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.vertexCount) },
-		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.vertexCount) },
-		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.vertexCount) },
+		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertices.size()) },
+		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indices.size()) },
+		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshlets.size()) },
+		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
+		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.primitiveIndices.size()) },
+		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.positions.size()) },
+		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.normals.size()) },
+		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.uvs.size()) },
+		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.colors.size()) },
 		m_meshletDescriptor{ meshletDescriptorSetLayout() },
 		m_attributeDescriptor{ attributeDescriptorSetLayout() },
-		m_vertexCount{ info.vertexCount },
-		m_indexCount{ info.indexCount },
-		m_meshletCount{ info.meshletCount },
-		m_meshletIndexCount{ info.vertexIndexCount },
-		m_meshletPrimitiveCount{ info.primitiveIndexCount }
+		m_vertexCount{ static_cast<uint32_t>(info.vertices.size()) },
+		m_indexCount{ static_cast<uint32_t>(info.indices.size()) },
+		m_meshletCount{ static_cast<uint32_t>(info.meshlets.size()) },
+		m_meshletIndexCount{ static_cast<uint32_t>(info.vertexIndices.size()) },
+		m_meshletPrimitiveCount{ static_cast<uint32_t>(info.primitiveIndices.size()) }
 	{
-		AGX_ASSERT_X(info.vertices.size() == info.vertexCount, "Vertex count does not match size of vertex array");
-		AGX_ASSERT_X(info.indices.size() == info.indexCount, "Index count does not match size of index array");
-		AGX_ASSERT_X(info.meshlets.size() == info.meshletCount, "Meshlet count does not match size of meshlet array");
-		AGX_ASSERT_X(info.vertexIndices.size() == info.vertexIndexCount, "Meshlet index count does not match size of meshlet index array");
-		AGX_ASSERT_X(info.primitiveIndices.size() == info.primitiveIndexCount, "Meshlet primitive count does not match size of meshlet primitive array");
-		AGX_ASSERT_X(info.positions.size() == info.vertexCount, "Vertex count does not match size of position array");
-		AGX_ASSERT_X(info.normals.size() == info.vertexCount, "Vertex count does not match size of normal array");
-		AGX_ASSERT_X(info.uvs.size() == info.vertexCount, "Vertex count does not match size of UV array");
-		AGX_ASSERT_X(info.colors.size() == info.vertexCount, "Vertex count does not match size of color array");
+		AGX_ASSERT_X(info.positions.size() == m_vertexCount, "Vertex count does not match size of position array");
+		AGX_ASSERT_X(info.normals.size() == m_vertexCount, "Vertex count does not match size of normal array");
+		AGX_ASSERT_X(info.uvs.size() == m_vertexCount, "Vertex count does not match size of UV array");
+		AGX_ASSERT_X(info.colors.size() == m_vertexCount, "Vertex count does not match size of color array");
 
-		m_vertexBuffer.upload(info.vertices.data(), sizeof(Vertex) * info.vertexCount);
-		m_indexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
-
-		m_meshletBuffer.upload(info.meshlets.data(), sizeof(Meshlet) * info.meshletCount);
-		m_meshletIndexBuffer.upload(info.vertexIndices.data(), sizeof(uint32_t) * info.vertexIndexCount);
-		m_meshletPrimitiveBuffer.upload(info.primitiveIndices.data(), sizeof(uint8_t) * info.primitiveIndexCount);
-		m_positonBuffer.upload(info.positions.data(), sizeof(Vertex::position) * info.vertexCount);
-		m_normalBuffer.upload(info.normals.data(), sizeof(Vertex::normal) * info.vertexCount);
-		m_uvBuffer.upload(info.uvs.data(), sizeof(Vertex::uv) * info.vertexCount);
-		m_colorBuffer.upload(info.colors.data(), sizeof(Vertex::color) * info.vertexCount);
+		m_vertexBuffer.upload(info.vertices);
+		m_indexBuffer.upload(info.indices);
+		m_meshletBuffer.upload(info.meshlets);
+		m_meshletIndexBuffer.upload(info.vertexIndices);
+		m_meshletPrimitiveBuffer.upload(info.primitiveIndices);
+		m_positonBuffer.upload(info.positions);
+		m_normalBuffer.upload(info.normals);
+		m_uvBuffer.upload(info.uvs);
+		m_colorBuffer.upload(info.colors);
 
 		DescriptorWriter{ meshletDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletBuffer)
