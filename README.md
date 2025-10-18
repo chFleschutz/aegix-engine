@@ -18,6 +18,7 @@ A small render engine developed with Vulkan in modern C++.
 - **HDR Rendering and Tone Mapping** - Enables wider color range for more visible details
 - **Physically Based Bloom** - Realistic glow effect around bright areas created using convolution
 - **Screen Space Ambient Occlusion (SSAO)** - Enhanced depth perception
+- **Mesh Shaders Pipeline** - Modern geometry rendering
 
 ## Prerequisites <a name="prerequisites"></a>
 
@@ -52,7 +53,9 @@ The engine relies on the following external libraries:
 - [glm](https://github.com/g-truc/glm) - Math library
 - [imgui](https://github.com/ocornut/imgui) - Immediate mode UI
 - [imguizmo](https://github.com/CedricGuillemet/ImGuizmo) - Gizmos
+- [meshoptimizer](https://github.com/zeux/meshoptimizer) - Generating meshlets
 - [stb](https://github.com/nothings/stb) - Image loading
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader) - OBJ 3D model loader
 - [Vulkan](https://www.vulkan.org/) - Graphics API
 - [Vulkan Memory Allocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator) - Vulkan Memory Management
+- [Volk](https://github.com/zeux/volk) - Vulkan Function loader
