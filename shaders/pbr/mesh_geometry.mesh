@@ -1,10 +1,10 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 #extension GL_EXT_shader_8bit_storage : require
+#extension GL_EXT_scalar_block_layout : require
 
 layout(local_size_x = 32) in;
-layout(max_vertices = 64, max_primitives = 126) out;
-layout(triangles) out;
+layout(triangles, max_vertices = 64, max_primitives = 126) out;
 
 struct Meshlet
 {
@@ -31,41 +31,41 @@ layout(set = 0, binding = 0) uniform Global
     mat4 inverseView;
 } global;
 
-layout(set = 2, binding = 0) readonly buffer Meshlets { Meshlet meshlets[]; };
-layout(set = 3, binding = 0) readonly buffer MeshletIndices { uint meshletIndices[]; };
-layout(set = 3, binding = 1) readonly buffer MeshletPrimitives { uint8_t  meshletPrimitives[]; };
-layout(set = 3, binding = 2) readonly buffer Positions { vec3 positions[]; };
-layout(set = 3, binding = 3) readonly buffer Normals { vec3 normals[]; };
-layout(set = 3, binding = 4) readonly buffer TexCoords { vec2 texCoords[]; };
-layout(set = 3, binding = 5) readonly buffer Colors { vec3 colors[]; };
+layout(set = 2, binding = 0, scalar) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(set = 3, binding = 0, scalar) readonly buffer VertexIndices { uint vertexIndices[]; };
+layout(set = 3, binding = 1, scalar) readonly buffer PrimitiveIndices { uint8_t primitiveIndices[]; };
+layout(set = 3, binding = 2, scalar) readonly buffer Positions { vec3 positions[]; };
+layout(set = 3, binding = 3, scalar) readonly buffer Normals { vec3 normals[]; };
+layout(set = 3, binding = 4, scalar) readonly buffer TexCoords { vec2 texCoords[]; };
+layout(set = 3, binding = 5, scalar) readonly buffer Colors { vec3 colors[]; };
 
 layout(location = 0) out vec3 outWorldPosition[];
 layout(location = 1) out vec3 outWorldNormal[];
 layout(location = 2) out vec2 outUV[];
+layout(location = 3) out vec3 outLocalPos[];
 
 void main()
 {
     Meshlet meshlet = meshlets[gl_WorkGroupID.x];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.primitiveCount);
 
-    mat4 viewProjection = global.projection * global.view;
-
     for (uint i = gl_LocalInvocationIndex; i < meshlet.vertexCount; i += gl_WorkGroupSize.x)
     {
-        uint index = meshletIndices[meshlet.vertexOffset + i];
+        uint index = vertexIndices[meshlet.vertexOffset + i];
         vec4 worldPosition = push.model * vec4(positions[index], 1.0);
-        gl_MeshVerticesEXT[i].gl_Position = viewProjection * worldPosition;
+        gl_MeshVerticesEXT[i].gl_Position = global.projection * global.view * worldPosition;
         outWorldPosition[i] = worldPosition.xyz;
         outWorldNormal[i] = normalize(mat3(push.normal) * normals[index]);
         outUV[i] = texCoords[index];
+        outLocalPos[i] = positions[index];
     }
 
     for (uint i = gl_LocalInvocationIndex; i < meshlet.primitiveCount; i += gl_WorkGroupSize.x)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
-            meshletPrimitives[offset + 0], 
-            meshletPrimitives[offset + 1], 
-            meshletPrimitives[offset + 2]);
+            primitiveIndices[offset + 0], 
+            primitiveIndices[offset + 1], 
+            primitiveIndices[offset + 2]);
     }
 }

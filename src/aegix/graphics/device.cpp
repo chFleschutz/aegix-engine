@@ -342,6 +342,7 @@ namespace Aegix::Graphics
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
 			.storageBuffer8BitAccess = VK_TRUE,
 			.uniformAndStorageBuffer8BitAccess = VK_TRUE,
+			.scalarBlockLayout = VK_TRUE,
 		};
 
 		VkPhysicalDeviceVulkan13Features vulkan13Features{
