@@ -20,8 +20,8 @@ namespace Aegix::Graphics
 		{
 			uint32_t vertexOffset;
 			uint32_t vertexCount;
-			uint32_t triangleOffset;
-			uint32_t triangleCount;
+			uint32_t primitiveOffset;
+			uint32_t primitiveCount;
 			glm::vec3 center;
 			float radius;
 			glm::vec3 coneAxis;
@@ -32,14 +32,20 @@ namespace Aegix::Graphics
 		{
 			std::vector<Vertex> vertices;
 			std::vector<uint32_t> indices;
+
 			std::vector<Meshlet> meshlets;
+			std::vector<uint32_t> meshletIndices;
+			std::vector<uint8_t> meshletPrimitives;
 			std::vector<glm::vec3> positions;
 			std::vector<glm::vec3> normals;
 			std::vector<glm::vec2> uvs;
 			std::vector<glm::vec3> colors;
+
 			uint32_t vertexCount;
 			uint32_t indexCount;
 			uint32_t meshletCount;
+			uint32_t meshletIndexCount;
+			uint32_t meshletPrimitiveCount;
 		};
 
 		static auto bindingDescription() -> VkVertexInputBindingDescription;
@@ -72,6 +78,7 @@ namespace Aegix::Graphics
 		// Storage buffers for mesh shaders
 		Buffer m_meshletBuffer;
 		Buffer m_meshletIndexBuffer;
+		Buffer m_meshletPrimitiveBuffer;
 		Buffer m_positonBuffer;
 		Buffer m_normalBuffer;
 		Buffer m_uvBuffer;

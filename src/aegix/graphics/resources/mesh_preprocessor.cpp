@@ -43,29 +43,32 @@ namespace Aegix::Graphics
 			input.maxTrianglesPerMeshlet);
 
 		std::vector<meshopt_Meshlet> meshlets(maxMeshlets);
-		std::vector<uint32_t> meshletVertices(info.indexCount);
-		std::vector<uint8_t> meshletTriangles(info.indexCount);
-		info.meshletCount = meshopt_buildMeshlets(meshlets.data(), meshletVertices.data(), meshletTriangles.data(),
-			info.indices.data(), info.indexCount, &(info.vertices[0].position.x), info.vertices.size(), sizeof(StaticMesh::Vertex),
-			input.maxVerticesPerMeshlet, input.maxTrianglesPerMeshlet, input.coneWeight);
+		info.meshletIndices.resize(info.indexCount);
+		info.meshletPrimitives.resize(info.indexCount);
+		info.meshletCount = meshopt_buildMeshlets(meshlets.data(), info.meshletIndices.data(),
+			info.meshletPrimitives.data(), info.indices.data(), info.indexCount, &(info.vertices[0].position.x),
+			info.vertices.size(), sizeof(StaticMesh::Vertex), input.maxVerticesPerMeshlet, input.maxTrianglesPerMeshlet, 
+			input.coneWeight);
 
 		const auto& lastMeshlet = meshlets[info.meshletCount - 1];
-		meshletVertices.resize(lastMeshlet.vertex_offset + lastMeshlet.vertex_count);
-		meshletTriangles.resize(lastMeshlet.triangle_offset + lastMeshlet.triangle_count * 3);
+		info.meshletIndexCount = lastMeshlet.triangle_offset + lastMeshlet.triangle_count;
+		info.meshletPrimitiveCount = lastMeshlet.triangle_offset + lastMeshlet.triangle_count * 3;
+		info.meshletIndices.resize(info.meshletIndexCount);
+		info.meshletPrimitives.resize(info.meshletPrimitiveCount);
 		meshlets.resize(info.meshletCount);
 
 		info.meshlets.reserve(info.meshletCount);
 		for (auto& meshlet : meshlets)
 		{
-			meshopt_Bounds bounds = meshopt_computeMeshletBounds(&meshletVertices[meshlet.vertex_offset],
-				&meshletTriangles[meshlet.triangle_offset], meshlet.triangle_count, &(info.vertices[0].position.x),
+			meshopt_Bounds bounds = meshopt_computeMeshletBounds(&info.meshletIndices[meshlet.vertex_offset],
+				&info.meshletPrimitives[meshlet.triangle_offset], meshlet.triangle_count, &(info.vertices[0].position.x),
 				info.vertexCount, sizeof(StaticMesh::Vertex));
 
 			info.meshlets.emplace_back(StaticMesh::Meshlet{
 				.vertexOffset = meshlet.vertex_offset,
 				.vertexCount = meshlet.vertex_count,
-				.triangleOffset = meshlet.triangle_offset,
-				.triangleCount = meshlet.triangle_count,
+				.primitiveOffset = meshlet.triangle_offset,
+				.primitiveCount = meshlet.triangle_count,
 				.center = glm::vec3{ bounds.center[0], bounds.center[1], bounds.center[2] },
 				.radius = bounds.radius,
 				.coneAxis = glm::vec3{ bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2] },

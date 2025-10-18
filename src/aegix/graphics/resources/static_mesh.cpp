@@ -70,8 +70,9 @@ namespace Aegix::Graphics
 		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertexCount) },
 		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indexCount) },
 		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshletCount) },
-		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.indexCount) }, // TODO: check size
-		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.vertexCount) },
+		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.indexCount) }, 
+		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.meshletIndexCount) },
+		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.meshletPrimitiveCount) },
 		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.vertexCount) },
 		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.vertexCount) },
 		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.vertexCount) },
@@ -91,8 +92,10 @@ namespace Aegix::Graphics
 
 		m_vertexBuffer.upload(info.vertices.data(), sizeof(Vertex) * info.vertexCount);
 		m_indexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+
 		m_meshletBuffer.upload(info.meshlets.data(), sizeof(Meshlet) * info.meshletCount);
-		m_meshletIndexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
+		m_meshletIndexBuffer.upload(info.meshletIndices.data(), sizeof(uint32_t) * info.meshletIndexCount);
+		m_meshletPrimitiveBuffer.upload(info.meshletPrimitives.data(), sizeof(uint8_t) * info.meshletPrimitiveCount);
 		m_positonBuffer.upload(info.positions.data(), sizeof(Vertex::position) * info.vertexCount);
 		m_normalBuffer.upload(info.normals.data(), sizeof(Vertex::normal) * info.vertexCount);
 		m_uvBuffer.upload(info.uvs.data(), sizeof(Vertex::uv) * info.vertexCount);
@@ -104,10 +107,11 @@ namespace Aegix::Graphics
 
 		DescriptorWriter{ attributeDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletIndexBuffer)
-			.writeBuffer(1, m_positonBuffer)
-			.writeBuffer(2, m_normalBuffer)
-			.writeBuffer(3, m_uvBuffer)
-			.writeBuffer(4, m_colorBuffer)
+			.writeBuffer(1, m_meshletPrimitiveBuffer)
+			.writeBuffer(2, m_positonBuffer)
+			.writeBuffer(3, m_normalBuffer)
+			.writeBuffer(4, m_uvBuffer)
+			.writeBuffer(5, m_colorBuffer)
 			.update(m_attributeDescriptor);
 	}
 
