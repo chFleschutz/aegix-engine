@@ -103,7 +103,7 @@ namespace Aegix::Graphics
 
 	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
 	{
-		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS, data, size, offset);
+		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, data, size, offset);
 	}
 
 	void MaterialTemplate::draw(VkCommandBuffer cmd, const StaticMesh& mesh)

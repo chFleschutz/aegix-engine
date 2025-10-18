@@ -80,7 +80,7 @@ namespace Aegix::Graphics
 	auto TransparentPass::createDescriptorSetLayout() -> DescriptorSetLayout
 	{
 		return DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT)
 			.build();
 	}
 
