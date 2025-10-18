@@ -1,0 +1,71 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_EXT_shader_8bit_storage : require
+
+layout(local_size_x = 32) in;
+layout(max_vertices = 64, max_primitives = 126) out;
+layout(triangles) out;
+
+struct Meshlet
+{
+    uint vertexOffset;
+    uint vertexCount;
+    uint primitiveOffset;
+    uint primitiveCount;
+    vec3 center;
+    float radius;
+    vec3 coneAxis;
+    float coneCutoff;
+};
+
+layout(push_constant, std140) uniform Push 
+{
+    mat4 model; 
+    mat4 normal;
+} push;
+
+layout(set = 0, binding = 0) uniform Global
+{
+    mat4 projection;
+    mat4 view;
+    mat4 inverseView;
+} global;
+
+layout(set = 2, binding = 0) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(set = 3, binding = 0) readonly buffer MeshletIndices { uint meshletIndices[]; };
+layout(set = 3, binding = 1) readonly buffer MeshletPrimitives { uint8_t  meshletPrimitives[]; };
+layout(set = 3, binding = 2) readonly buffer Positions { vec3 positions[]; };
+layout(set = 3, binding = 3) readonly buffer Normals { vec3 normals[]; };
+layout(set = 3, binding = 4) readonly buffer TexCoords { vec2 texCoords[]; };
+layout(set = 3, binding = 5) readonly buffer Colors { vec3 colors[]; };
+
+layout(location = 0) out vec3 outWorldPosition[];
+layout(location = 1) out vec3 outWorldNormal[];
+layout(location = 2) out vec2 outUV[];
+
+void main()
+{
+    Meshlet meshlet = meshlets[gl_WorkGroupID.x];
+    SetMeshOutputsEXT(meshlet.vertexCount, meshlet.primitiveCount);
+
+    mat4 viewProjection = global.projection * global.view;
+
+    for (uint i = gl_LocalInvocationIndex; i < meshlet.vertexCount; i += gl_WorkGroupSize.x)
+    {
+        uint index = meshletIndices[meshlet.vertexOffset + i];
+        vec4 worldPosition = push.model * vec4(positions[index], 1.0);
+        gl_MeshVerticesEXT[i].gl_Position = viewProjection * worldPosition;
+        outWorldPosition[i] = worldPosition.xyz;
+        outWorldNormal[i] = normalize(mat3(push.normal) * normals[index]);
+        outUV[i] = texCoords[index];
+    }
+
+    for (uint i = gl_LocalInvocationIndex; i < meshlet.primitiveCount; i += gl_WorkGroupSize.x)
+    {
+        uint offset = meshlet.primitiveOffset + i * 3;
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            meshletPrimitives[offset + 0], 
+            meshletPrimitives[offset + 1], 
+            meshletPrimitives[offset + 2]);
+    }
+}
