@@ -89,5 +89,7 @@ namespace Aegix::Graphics
 		uint32_t m_vertexCount{};
 		uint32_t m_indexCount{};
 		uint32_t m_meshletCount{};
+		uint32_t m_meshletIndexCount{};
+		uint32_t m_meshletPrimitiveCount{};
 	};
 }
