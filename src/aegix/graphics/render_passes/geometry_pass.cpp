@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "geometry_pass.h"
 
 #include "scene/components.h"

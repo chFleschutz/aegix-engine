@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "vulkan_context.h"
 
 namespace Aegix::Graphics

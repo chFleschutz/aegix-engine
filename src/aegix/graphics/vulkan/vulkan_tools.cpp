@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "vulkan_tools.h"
 
 #include "graphics/globals.h"

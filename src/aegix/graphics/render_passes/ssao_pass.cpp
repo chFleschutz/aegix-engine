@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "ssao_pass.h"
 
 #include "graphics/vulkan/vulkan_context.h"

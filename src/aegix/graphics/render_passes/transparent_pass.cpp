@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "transparent_pass.h"
 
 #include "graphics/vulkan/vulkan_tools.h"

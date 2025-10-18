@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "static_mesh_render_system.h"
 
 #include "graphics/resources/material_instance.h"

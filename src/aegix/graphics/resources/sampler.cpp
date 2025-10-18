@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "sampler.h"
 
 #include "graphics/vulkan/vulkan_context.h"

@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "bloom_pass.h"
 
 #include "graphics/vulkan/vulkan_tools.h"

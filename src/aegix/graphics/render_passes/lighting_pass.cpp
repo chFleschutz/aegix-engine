@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "lighting_pass.h"
 
 #include "graphics/vulkan/vulkan_context.h"

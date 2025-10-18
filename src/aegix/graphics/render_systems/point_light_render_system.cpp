@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "point_light_render_system.h"
 
 #include "core/globals.h"

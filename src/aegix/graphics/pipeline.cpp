@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "pipeline.h"
 
 #include "graphics/resources/static_mesh.h"

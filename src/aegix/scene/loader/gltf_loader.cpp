@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "gltf_loader.h"
 
 #include "engine.h"
@@ -11,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <variant>
-
 
 namespace Aegix::Scene
 {

@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "frame_graph.h"
 
 #include "core/profiler.h"

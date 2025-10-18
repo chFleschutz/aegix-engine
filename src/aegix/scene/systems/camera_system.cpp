@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "camera_system.h"
 
 #include "math/math.h"

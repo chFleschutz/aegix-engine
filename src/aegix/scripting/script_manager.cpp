@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "script_manager.h"
 
 #include "scripting/script_base.h"
