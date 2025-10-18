@@ -337,21 +337,23 @@ namespace Aegix::Graphics
 			.meshShader = m_features.meshShaderEXT.meshShader,
 		};
 
-		VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES,
+		VkPhysicalDeviceVulkan13Features vulkan13Features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+			.pNext = nullptr, // Will be set to meshShader if supported
+			.shaderDemoteToHelperInvocation = VK_TRUE,
 			.dynamicRendering = VK_TRUE,
 		};
 
 		VkPhysicalDeviceFeatures2 deviceFeatures{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-			.pNext = &dynamicRendering,
+			.pNext = &vulkan13Features,
 		};
 		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
 
 		std::vector<const char*> enabledExtensions(DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
 		if (meshShader.taskShader && meshShader.meshShader)
 		{
-			dynamicRendering.pNext = &meshShader;
+			vulkan13Features.pNext = &meshShader;
 			enabledExtensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
 		}
 

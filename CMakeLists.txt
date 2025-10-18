@@ -9,7 +9,7 @@ option(BUILD_EXAMPLES "Build example projects" ON)
 option(COMPILE_SHADERS "Compile GLSL shaders to SPIR-V" ON)
 
 # Find the Vulkan package
-find_package(Vulkan COMPONENTS glslc REQUIRED)
+find_package(Vulkan REQUIRED)
 if(NOT Vulkan_FOUND)
     message(FATAL_ERROR "Vulkan was not found. Make sure the Vulkan SDK is installed")
 endif()
