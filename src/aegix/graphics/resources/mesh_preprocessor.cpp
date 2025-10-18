@@ -124,15 +124,13 @@ namespace Aegix::Graphics
 
 		// Fill CreateInfo
 
-		StaticMesh::CreateInfo info{
+		return StaticMesh::CreateInfo{
 			.vertices = std::move(vertices),
 			.indices = std::move(indices),
 			.meshlets = std::move(meshlets),
 			.vertexIndices = std::move(meshletVertices),
 			.primitiveIndices = std::move(meshletPrimitives),
 		};
-		deinterleave(info);
-		return info;
 	}
 
 	auto MeshPreprocessor::interleave(const Input& input) -> std::vector<StaticMesh::Vertex>
@@ -148,21 +146,5 @@ namespace Aegix::Graphics
 			vertices[i].color = (i < input.colors.size()) ? input.colors[i] : glm::vec3{ 1.0f };
 		}
 		return vertices;
-	}
-
-	void MeshPreprocessor::deinterleave(StaticMesh::CreateInfo& info)
-	{
-		size_t vertexCount = info.vertices.size();
-		info.positions.reserve(vertexCount);
-		info.normals.reserve(vertexCount);
-		info.uvs.reserve(vertexCount);
-		info.colors.reserve(vertexCount);
-		for (const auto& vertex : info.vertices)
-		{
-			info.positions.emplace_back(vertex.position);
-			info.normals.emplace_back(vertex.normal);
-			info.uvs.emplace_back(vertex.uv);
-			info.colors.emplace_back(vertex.color);
-		}
 	}
 }

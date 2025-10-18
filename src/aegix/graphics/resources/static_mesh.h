@@ -35,10 +35,6 @@ namespace Aegix::Graphics
 			std::vector<Meshlet> meshlets;
 			std::vector<uint32_t> vertexIndices;
 			std::vector<uint8_t> primitiveIndices;
-			std::vector<glm::vec3> positions;
-			std::vector<glm::vec3> normals;
-			std::vector<glm::vec2> uvs;
-			std::vector<glm::vec3> colors;
 		};
 
 		static auto bindingDescription() -> VkVertexInputBindingDescription;
@@ -72,10 +68,6 @@ namespace Aegix::Graphics
 		Buffer m_meshletBuffer;
 		Buffer m_meshletIndexBuffer;
 		Buffer m_meshletPrimitiveBuffer;
-		Buffer m_positonBuffer;
-		Buffer m_normalBuffer;
-		Buffer m_uvBuffer;
-		Buffer m_colorBuffer;
 		DescriptorSet m_meshletDescriptor;
 		DescriptorSet m_attributeDescriptor;
 

@@ -59,24 +59,18 @@ namespace Aegix::Graphics
 		static DescriptorSetLayout attributeDescriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet Indices 
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet Primitives 
-			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Positions
-			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Normals
-			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // UVs
-			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Colors
+			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Vertices
 			.build();
 		return attributeDescriptorSetLayout;
 	}
 
 	StaticMesh::StaticMesh(const CreateInfo& info) :
-		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertices.size()) },
+		m_vertexBuffer{ sizeof(Vertex) * info.vertices.size(), 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT },
 		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indices.size()) },
 		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshlets.size()) },
 		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
 		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.primitiveIndices.size()) },
-		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.positions.size()) },
-		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.normals.size()) },
-		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.uvs.size()) },
-		m_colorBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::color) * info.colors.size()) },
 		m_meshletDescriptor{ meshletDescriptorSetLayout() },
 		m_attributeDescriptor{ attributeDescriptorSetLayout() },
 		m_vertexCount{ static_cast<uint32_t>(info.vertices.size()) },
@@ -85,20 +79,11 @@ namespace Aegix::Graphics
 		m_meshletIndexCount{ static_cast<uint32_t>(info.vertexIndices.size()) },
 		m_meshletPrimitiveCount{ static_cast<uint32_t>(info.primitiveIndices.size()) }
 	{
-		AGX_ASSERT_X(info.positions.size() == m_vertexCount, "Vertex count does not match size of position array");
-		AGX_ASSERT_X(info.normals.size() == m_vertexCount, "Vertex count does not match size of normal array");
-		AGX_ASSERT_X(info.uvs.size() == m_vertexCount, "Vertex count does not match size of UV array");
-		AGX_ASSERT_X(info.colors.size() == m_vertexCount, "Vertex count does not match size of color array");
-
 		m_vertexBuffer.upload(info.vertices);
 		m_indexBuffer.upload(info.indices);
 		m_meshletBuffer.upload(info.meshlets);
 		m_meshletIndexBuffer.upload(info.vertexIndices);
 		m_meshletPrimitiveBuffer.upload(info.primitiveIndices);
-		m_positonBuffer.upload(info.positions);
-		m_normalBuffer.upload(info.normals);
-		m_uvBuffer.upload(info.uvs);
-		m_colorBuffer.upload(info.colors);
 
 		DescriptorWriter{ meshletDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletBuffer)
@@ -107,10 +92,7 @@ namespace Aegix::Graphics
 		DescriptorWriter{ attributeDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletIndexBuffer)
 			.writeBuffer(1, m_meshletPrimitiveBuffer)
-			.writeBuffer(2, m_positonBuffer)
-			.writeBuffer(3, m_normalBuffer)
-			.writeBuffer(4, m_uvBuffer)
-			.writeBuffer(5, m_colorBuffer)
+			.writeBuffer(2, m_vertexBuffer)
 			.update(m_attributeDescriptor);
 	}
 

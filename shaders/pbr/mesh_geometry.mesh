@@ -6,6 +6,14 @@
 layout(local_size_x = 32) in;
 layout(triangles, max_vertices = 64, max_primitives = 126) out;
 
+struct Vertex
+{
+    vec3 position;
+    vec3 normal;
+    vec2 uv;
+    vec3 color;
+};
+
 struct Meshlet
 {
 	vec3 center;
@@ -24,7 +32,7 @@ layout(push_constant, std140) uniform Push
     mat4 normal;
 } push;
 
-layout(set = 0, binding = 0) uniform Global
+layout(set = 0, binding = 0, std140) uniform Global
 {
     mat4 projection;
     mat4 view;
@@ -34,30 +42,27 @@ layout(set = 0, binding = 0) uniform Global
 layout(set = 2, binding = 0, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 3, binding = 0, std430) readonly buffer VertexIndices { uint vertexIndices[]; };
 layout(set = 3, binding = 1, scalar) readonly buffer PrimitiveIndices { uint8_t primitiveIndices[]; };
-layout(set = 3, binding = 2, scalar) readonly buffer Positions { vec3 positions[]; };
-layout(set = 3, binding = 3, scalar) readonly buffer Normals { vec3 normals[]; };
-layout(set = 3, binding = 4, scalar) readonly buffer TexCoords { vec2 texCoords[]; };
-layout(set = 3, binding = 5, scalar) readonly buffer Colors { vec3 colors[]; };
+layout(set = 3, binding = 2, scalar) readonly buffer Vertices { Vertex vertices[]; };
 
 layout(location = 0) out vec3 outWorldPosition[];
 layout(location = 1) out vec3 outWorldNormal[];
 layout(location = 2) out vec2 outUV[];
-layout(location = 3) out vec3 outLocalPos[];
 
 void main()
 {
     Meshlet meshlet = meshlets[gl_WorkGroupID.x];
-    SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.primitiveCount));
+    SetMeshOutputsEXT(meshlet.vertexCount, meshlet.primitiveCount);
 
     for (uint i = gl_LocalInvocationIndex; i < uint(meshlet.vertexCount); i += gl_WorkGroupSize.x)
     {
         uint index = vertexIndices[meshlet.vertexOffset + i];
-        vec4 worldPosition = push.model * vec4(positions[index], 1.0);
+        Vertex v = vertices[index];
+
+        vec4 worldPosition = push.model * vec4(v.position, 1.0);
         gl_MeshVerticesEXT[i].gl_Position = global.projection * global.view * worldPosition;
         outWorldPosition[i] = worldPosition.xyz;
-        outWorldNormal[i] = normalize(mat3(push.normal) * normals[index]);
-        outUV[i] = texCoords[index];
-        outLocalPos[i] = positions[index];
+        outWorldNormal[i] = normalize(mat3(push.normal) * v.normal);
+        outUV[i] = v.uv;
     }
 
     for (uint i = gl_LocalInvocationIndex; i < uint(meshlet.primitiveCount); i += gl_WorkGroupSize.x)
