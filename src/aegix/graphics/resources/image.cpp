@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "image.h"
 
 #include "engine.h"

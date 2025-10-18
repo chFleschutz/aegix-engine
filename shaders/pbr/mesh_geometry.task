@@ -1,0 +1,15 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+
+layout(local_size_x = 1) in;
+
+taskPayloadSharedEXT struct
+{
+    uint meshletIndex;
+} payload;
+
+void main()
+{
+    payload.meshletIndex = gl_WorkGroupID.x;
+    EmitMeshTasksEXT(1, 1, 1);
+}

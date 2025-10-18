@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "descriptors.h"
 
 #include "graphics/vulkan/vulkan_tools.h"
@@ -230,6 +229,7 @@ namespace Aegix::Graphics
 
 		for (const auto& [binding, info] : m_imageInfos)
 		{
+			AGX_ASSERT_X(m_setLayout.m_bindings.contains(binding), "Binding was not found in Descriptor Set Layout");
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
 			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple images to a single descriptor");
 
@@ -245,8 +245,9 @@ namespace Aegix::Graphics
 
 		for (const auto& [binding, info] : m_bufferInfos)
 		{
+			AGX_ASSERT_X(m_setLayout.m_bindings.contains(binding), "Binding was not found in Descriptor Set Layout");
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
-			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple images to a single descriptor");
+			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple buffers to a single descriptor");
 
 			VkWriteDescriptorSet write{};
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

@@ -20,6 +20,7 @@ target_link_libraries(aegix-engine
 		glm::glm
 		imgui
 		imguizmo
+		meshoptimizer
 		tinyobjloader
 		GPUOpen::VulkanMemoryAllocator
 		volk::volk_headers

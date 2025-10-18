@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "math.h"
 
 namespace Aegix::Math

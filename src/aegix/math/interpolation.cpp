@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "interpolation.h"
 
 namespace Aegix::Math

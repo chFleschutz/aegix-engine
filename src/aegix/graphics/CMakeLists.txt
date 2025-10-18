@@ -44,6 +44,11 @@ target_sources(aegix-engine PRIVATE
 	"resources/sampler.h"
 	"resources/texture.cpp"
 	"resources/texture.h"
+
+	
+	
+	"resources/mesh_preprocessor.cpp"
+	"resources/mesh_preprocessor.h" 
 	
 	"vulkan/debug_utils.h" 
 	"vulkan/debug_utils.cpp"
@@ -71,4 +76,5 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
+
 )

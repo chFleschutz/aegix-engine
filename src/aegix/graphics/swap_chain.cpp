@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "swap_chain.h"
 
 #include "graphics/vulkan/vulkan_tools.h"

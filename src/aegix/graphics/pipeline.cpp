@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "pipeline.h"
 
 #include "graphics/resources/static_mesh.h"
@@ -118,6 +117,12 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+	auto Pipeline::GraphicsBuilder::addFlag(Flags flag) -> GraphicsBuilder&
+	{
+		m_graphicsConfig.flags = static_cast<Flags>(static_cast<uint32_t>(m_graphicsConfig.flags) | static_cast<uint32_t>(flag));
+		return *this;
+	}
+
 	auto Pipeline::GraphicsBuilder::buildUnique() -> std::unique_ptr<Pipeline>
 	{
 		return std::make_unique<Pipeline>(m_layoutConfig, m_graphicsConfig);
@@ -176,7 +181,7 @@ namespace Aegix::Graphics
 	// Pipeline ------------------------------------------------------------------
 
 	Pipeline::Pipeline(const LayoutConfig& layoutConfig, const GraphicsConfig& graphicsConfig)
-		: m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }
+		: m_bindPoint{ VK_PIPELINE_BIND_POINT_GRAPHICS }, m_flags{ graphicsConfig.flags }
 	{
 		createPipelineLayout(layoutConfig);
 		createGraphicsPipeline(graphicsConfig);
@@ -190,7 +195,7 @@ namespace Aegix::Graphics
 	}
 
 	Pipeline::Pipeline(Pipeline&& other) noexcept
-		: m_layout{ other.m_layout }, m_pipeline{other.m_pipeline}, m_bindPoint{ other.m_bindPoint }
+		: m_layout{ other.m_layout }, m_pipeline{ other.m_pipeline }, m_bindPoint{ other.m_bindPoint }, m_flags{ other.m_flags }
 	{
 		other.m_layout = VK_NULL_HANDLE;
 		other.m_pipeline = VK_NULL_HANDLE;
@@ -209,10 +214,16 @@ namespace Aegix::Graphics
 			m_layout = other.m_layout;
 			m_pipeline = other.m_pipeline;
 			m_bindPoint = other.m_bindPoint;
+			m_flags = other.m_flags;
 			other.m_layout = VK_NULL_HANDLE;
 			other.m_pipeline = VK_NULL_HANDLE;
 		}
 		return *this;
+	}
+
+	auto Pipeline::hasFlag(Flags flag) const -> bool
+	{
+		return (static_cast<uint32_t>(m_flags) & static_cast<uint32_t>(flag)) != 0;
 	}
 
 	void Pipeline::bind(VkCommandBuffer commandBuffer) const
@@ -291,51 +302,53 @@ namespace Aegix::Graphics
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.bindingDescriptions = StaticMesh::defaultBindingDescriptions();
-		configInfo.attributeDescriptions = StaticMesh::defaultAttributeDescriptions();
+		configInfo.bindingDescriptions = { StaticMesh::bindingDescription() };
+		configInfo.attributeDescriptions = StaticMesh::attributeDescriptions();
 	}
 
 	void Pipeline::createPipelineLayout(const LayoutConfig& config)
 	{
-		VkPipelineLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		layoutInfo.setLayoutCount = static_cast<uint32_t>(config.descriptorSetLayouts.size());
-		layoutInfo.pSetLayouts = config.descriptorSetLayouts.data();
-		layoutInfo.pushConstantRangeCount = static_cast<uint32_t>(config.pushConstantRanges.size());
-		layoutInfo.pPushConstantRanges = config.pushConstantRanges.data();
+		VkPipelineLayoutCreateInfo layoutInfo{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+			.setLayoutCount = static_cast<uint32_t>(config.descriptorSetLayouts.size()),
+			.pSetLayouts = config.descriptorSetLayouts.data(),
+			.pushConstantRangeCount = static_cast<uint32_t>(config.pushConstantRanges.size()),
+			.pPushConstantRanges = config.pushConstantRanges.data(),
+		};
 
 		VK_CHECK(vkCreatePipelineLayout(VulkanContext::device(), &layoutInfo, nullptr, &m_layout));
 	}
 
 	void Pipeline::createGraphicsPipeline(const Pipeline::GraphicsConfig& config)
 	{
-		auto& bindingDescriptions = config.bindingDescriptions;
-		auto& attributeDescriptions = config.attributeDescriptions;
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-		vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+			.vertexBindingDescriptionCount = static_cast<uint32_t>(config.bindingDescriptions.size()),
+			.pVertexBindingDescriptions = config.bindingDescriptions.data(),
+			.vertexAttributeDescriptionCount = static_cast<uint32_t>(config.attributeDescriptions.size()),
+			.pVertexAttributeDescriptions = config.attributeDescriptions.data(),
+		};
 
-		VkGraphicsPipelineCreateInfo pipelineInfo{};
-		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.pNext = &config.renderingInfo;
-		pipelineInfo.stageCount = static_cast<uint32_t>(config.shaderStges.size());
-		pipelineInfo.pStages = config.shaderStges.data();
-		pipelineInfo.pVertexInputState = &vertexInputInfo;
-		pipelineInfo.pInputAssemblyState = &config.inputAssemblyInfo;
-		pipelineInfo.pViewportState = &config.viewportInfo;
-		pipelineInfo.pRasterizationState = &config.rasterizationInfo;
-		pipelineInfo.pMultisampleState = &config.multisampleInfo;
-		pipelineInfo.pColorBlendState = &config.colorBlendInfo;
-		pipelineInfo.pDepthStencilState = &config.depthStencilInfo;
-		pipelineInfo.pDynamicState = &config.dynamicStateInfo;
-		pipelineInfo.layout = m_layout;
-		pipelineInfo.renderPass = VK_NULL_HANDLE;
-		pipelineInfo.subpass = config.subpass;
-		pipelineInfo.basePipelineIndex = -1;
-		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+		VkGraphicsPipelineCreateInfo pipelineInfo{
+			.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+			.pNext = &config.renderingInfo,
+			.stageCount = static_cast<uint32_t>(config.shaderStges.size()),
+			.pStages = config.shaderStges.data(),
+			.pVertexInputState = hasFlag(Flags::MeshShader) ? nullptr : &vertexInputInfo,
+			.pInputAssemblyState = hasFlag(Flags::MeshShader) ? nullptr : &config.inputAssemblyInfo,
+			.pTessellationState = nullptr,
+			.pViewportState = &config.viewportInfo,
+			.pRasterizationState = &config.rasterizationInfo,
+			.pMultisampleState = &config.multisampleInfo,
+			.pDepthStencilState = &config.depthStencilInfo,
+			.pColorBlendState = &config.colorBlendInfo,
+			.pDynamicState = &config.dynamicStateInfo,
+			.layout = m_layout,
+			.renderPass = VK_NULL_HANDLE,
+			.subpass = config.subpass,
+			.basePipelineHandle = VK_NULL_HANDLE,
+			.basePipelineIndex = -1,
+		};
 
 		VK_CHECK(vkCreateGraphicsPipelines(VulkanContext::device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}
@@ -344,12 +357,13 @@ namespace Aegix::Graphics
 	{
 		AGX_ASSERT_X(config.shaderStage.module != VK_NULL_HANDLE, "Cannot create pipeline: no shader provided");
 
-		VkComputePipelineCreateInfo pipelineInfo{};
-		pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-		pipelineInfo.stage = config.shaderStage;
-		pipelineInfo.layout = m_layout;
-		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-		pipelineInfo.basePipelineIndex = -1;
+		VkComputePipelineCreateInfo pipelineInfo{
+			.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+			.stage = config.shaderStage,
+			.layout = m_layout,
+			.basePipelineHandle = VK_NULL_HANDLE,
+			.basePipelineIndex = -1,
+		};
 
 		VK_CHECK(vkCreateComputePipelines(VulkanContext::device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 	}

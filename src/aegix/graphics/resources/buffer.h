@@ -11,7 +11,12 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
+		/// @brief Factory methods for common buffer types
+		/// @note Use multiple instances only if intended to be used with dynamic offsets (accessed by multiple descriptors)
 		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
+		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
+		static auto createVertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
+		static auto createIndexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
 		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
 
 		Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
@@ -67,6 +72,12 @@ namespace Aegix::Graphics
 
 		/// @brief Copy the buffer to another buffer
 		void copyTo(Buffer& dest, VkDeviceSize size);
+
+		template<typename T>
+		void upload(const std::vector<T>& data)
+		{
+			upload(data.data(), sizeof(T) * data.size());
+		}
 
 	private:
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;

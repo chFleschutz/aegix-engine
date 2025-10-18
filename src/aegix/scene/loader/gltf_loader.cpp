@@ -1,16 +1,15 @@
 #include "pch.h"
-
 #include "gltf_loader.h"
 
 #include "engine.h"
 #include "math/math.h"
+#include "graphics/resources/mesh_preprocessor.h"
 
 #include <gltf_utils.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include <variant>
-
 
 namespace Aegix::Scene
 {
@@ -123,23 +122,15 @@ namespace Aegix::Scene
 
 		// Load mesh
 		auto& primitive = m_gltf->meshes[meshIndex].primitives[primitiveIndex];
-		Graphics::StaticMesh::MeshInfo info{};
-		GLTF::copyIndices(info.indices, primitive, *m_gltf);
-		GLTF::copyAttribute("POSITION", info.positions, primitive, *m_gltf);
-		GLTF::copyAttribute("COLOR_0", info.colors, primitive, *m_gltf);
-		GLTF::copyAttribute("NORMAL", info.normals, primitive, *m_gltf);
-		GLTF::copyAttribute("TEXCOORD_0", info.uvs, primitive, *m_gltf);
 
-		size_t vertexCount = info.positions.size();
-		if (info.colors.size() != vertexCount)
-			info.colors.resize(vertexCount, glm::vec3{ 1.0f });
+		Graphics::MeshPreprocessor::Input input{};
+		GLTF::copyAttribute("POSITION", input.positions, primitive, *m_gltf);
+		GLTF::copyAttribute("COLOR_0", input.colors, primitive, *m_gltf);
+		GLTF::copyAttribute("NORMAL", input.normals, primitive, *m_gltf);
+		GLTF::copyAttribute("TEXCOORD_0", input.uvs, primitive, *m_gltf);
+		GLTF::copyIndices(input.indices, primitive, *m_gltf);
 
-		if (info.normals.size() != vertexCount)
-			info.normals.resize(vertexCount, glm::vec3{ 0.0f, 0.0f, 1.0f });
-
-		if (info.uvs.size() != vertexCount)
-			info.uvs.resize(vertexCount, glm::vec2{ 0.0f });
-
+		auto info = Graphics::MeshPreprocessor::process(input);
 		auto mesh = std::make_shared<Graphics::StaticMesh>(info);
 		m_meshes[meshIndex].emplace_back(mesh);
 		return mesh;

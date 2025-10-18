@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "static_mesh_render_system.h"
 
 #include "graphics/resources/material_instance.h"
@@ -52,9 +53,8 @@ namespace Aegix::Graphics
 			};
 			currentMatTemplate->pushConstants(ctx.cmd, &push, sizeof(push));
 
-			// Bind and Draw Mesh
-			mesh.staticMesh->bind(ctx.cmd);
-			mesh.staticMesh->draw(ctx.cmd);
+			// Draw Mesh
+			currentMatTemplate->draw(ctx.cmd, *mesh.staticMesh);
 		}
 	}
 }

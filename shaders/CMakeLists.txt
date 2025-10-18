@@ -1,8 +1,10 @@
 # Compile glsl shader files into SPIR-V
 
+find_program(GLSLC_EXE glslc REQUIRED)
+
 set(SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-file(GLOB_RECURSE SHADER_SOURCES 
+file(GLOB_RECURSE GLSL_SOURCES 
     *.glsl 
     *.vert
     *.tesc
@@ -10,10 +12,14 @@ file(GLOB_RECURSE SHADER_SOURCES
     *.geom
     *.frag
     *.comp 
+    *.task
+    *.mesh
 )
 
 set(SPIRV_FILES "")
-foreach(GLSL ${SHADER_SOURCES})
+
+# Compile GLSL shaders
+foreach(GLSL ${GLSL_SOURCES})
     file(RELATIVE_PATH REL_PATH ${SHADERS_DIR} ${GLSL})
     set(SPIRV ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH}.spv)
     list(APPEND SPIRV_FILES ${SPIRV})
@@ -24,9 +30,9 @@ foreach(GLSL ${SHADER_SOURCES})
 
     add_custom_command(
         OUTPUT ${SPIRV}
-        COMMAND ${Vulkan_GLSLC_EXECUTABLE} ${GLSL} -o ${SPIRV}
+        COMMAND ${GLSLC_EXE} --target-env=vulkan1.3 -o ${SPIRV} ${GLSL} 
         DEPENDS ${GLSL}
-        COMMENT "Compiling Shader: ${REL_PATH}"
+        COMMENT "Compiling GLSL Shader: ${REL_PATH}"
         VERBATIM
     )
 endforeach()

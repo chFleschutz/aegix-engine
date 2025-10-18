@@ -1,64 +1,80 @@
 #pragma once
 
 #include "graphics/resources/buffer.h"
-
-#include "glm/glm.hpp"
+#include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
 {
 	class StaticMesh
 	{
 	public:
-		struct MeshInfo
+		struct Vertex
 		{
-			std::vector<glm::vec3> positions{};
-			std::vector<glm::vec3> colors{};
-			std::vector<glm::vec3> normals{};
-			std::vector<glm::vec2> uvs{};
-			std::vector<uint32_t> indices{};
-
-			void loadOBJ(const std::filesystem::path& filepath);
-			void loadGLTF(const std::filesystem::path& filepath);
+			glm::vec3 position;
+			glm::vec3 normal;
+			glm::vec2 uv;
+			glm::vec3 color;
 		};
 
-		explicit StaticMesh(const StaticMesh::MeshInfo& info);
+		struct Meshlet
+		{
+			glm::vec3 center;
+			float radius;
+			int8_t coneAxis[3];
+			int8_t coneCutoff;
+			uint32_t vertexOffset;
+			uint32_t primitiveOffset;
+			uint8_t vertexCount;
+			uint8_t primitiveCount;
+		};
+
+		struct CreateInfo
+		{
+			std::vector<Vertex> vertices;
+			std::vector<uint32_t> indices;
+			std::vector<Meshlet> meshlets;
+			std::vector<uint32_t> vertexIndices;
+			std::vector<uint8_t> primitiveIndices;
+		};
+
+		static auto bindingDescription() -> VkVertexInputBindingDescription;
+		static auto attributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>;
+		static auto meshletDescriptorSetLayout() -> DescriptorSetLayout&;
+		static auto attributeDescriptorSetLayout() -> DescriptorSetLayout&;
+
+		StaticMesh(const CreateInfo& info);
 		StaticMesh(const StaticMesh&) = delete;
+		StaticMesh(StaticMesh&&) = default;
 		~StaticMesh() = default;
 
 		auto operator=(const StaticMesh&) -> StaticMesh& = delete;
+		auto operator=(StaticMesh&&) -> StaticMesh& = default;
 
-		static auto defaultBindingDescriptions() -> std::vector<VkVertexInputBindingDescription>;
-		static auto defaultAttributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>;
-		static auto create(const std::filesystem::path& filepath) -> std::shared_ptr<StaticMesh>;
+		[[nodiscard]] auto vertexCount() const -> uint32_t { return m_vertexCount; }
+		[[nodiscard]] auto indexCount() const -> uint32_t { return m_indexCount; }
+		[[nodiscard]] auto meshletCount() const -> uint32_t { return m_meshletCount; }
+		[[nodiscard]] auto meshletDescriptorSet() const -> const DescriptorSet& { return m_meshletDescriptor; }
+		[[nodiscard]] auto attributeDescriptorSet() const -> const DescriptorSet& { return m_attributeDescriptor; }
 
-		void bind(VkCommandBuffer commandBuffer);
-		void draw(VkCommandBuffer commandBuffer);
+		void draw(VkCommandBuffer cmd) const;
+		void drawMeshlets(VkCommandBuffer cmd) const;
 
 	private:
-		template<typename T>
-		void createVertexAttributeBuffer(const std::vector<T>& attribute)
-		{
-			AGX_ASSERT_X(attribute.size() >= 3, "Vertex attribute must have at least 3 elements");
+		// Vertex and index buffers for traditional rendering
+		Buffer m_vertexBuffer;
+		Buffer m_indexBuffer;
 
-			size_t bufferSize = sizeof(T) * attribute.size();
-			auto attributeBuffer = std::make_unique<Buffer>(bufferSize, 1,
-				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-			attributeBuffer->upload(attribute.data(), bufferSize);
+		// Storage buffers for mesh shaders
+		Buffer m_meshletBuffer;
+		Buffer m_meshletIndexBuffer;
+		Buffer m_meshletPrimitiveBuffer;
+		DescriptorSet m_meshletDescriptor;
+		DescriptorSet m_attributeDescriptor;
 
-			m_vkBuffers.emplace_back(attributeBuffer->buffer());
-			m_bufferOffsets.emplace_back(0);
-			m_attributeBuffers.emplace_back(std::move(attributeBuffer));
-		}
-
-		void createIndexBuffers(const std::vector<uint32_t>& indices);
-
-		std::vector<std::unique_ptr<Buffer>> m_attributeBuffers;
-		uint32_t m_vertexCount;
-
-		std::unique_ptr<Buffer> m_indexBuffer;
-		uint32_t m_indexCount;
-
-		std::vector<VkBuffer> m_vkBuffers;
-		std::vector<VkDeviceSize> m_bufferOffsets;
+		uint32_t m_vertexCount{};
+		uint32_t m_indexCount{};
+		uint32_t m_meshletCount{};
+		uint32_t m_meshletIndexCount{};
+		uint32_t m_meshletPrimitiveCount{};
 	};
 }

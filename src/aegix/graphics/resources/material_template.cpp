@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "material_template.h"
 
 namespace Aegix::Graphics
@@ -42,25 +41,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void MaterialTemplate::bind(VkCommandBuffer cmd)
-	{
-		m_pipeline.bind(cmd);
-	}
 
-	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
-	{
-		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
-	}
-
-	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
-	{
-		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
-	}
-
-	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
-	{
-		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS, data, size, offset);
-	}
 
 	auto MaterialTemplate::hasParameter(const std::string& name) const -> bool
 	{
@@ -102,5 +83,39 @@ namespace Aegix::Graphics
 		}
 
 		m_parameters.emplace(name, std::move(param));
+	}
+
+	void MaterialTemplate::bind(VkCommandBuffer cmd)
+	{
+		m_pipeline.bind(cmd);
+	}
+
+	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
+	}
+
+	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
+	}
+
+	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
+	{
+		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, data, size, offset);
+	}
+
+	void MaterialTemplate::draw(VkCommandBuffer cmd, const StaticMesh& mesh)
+	{
+		if (m_pipeline.hasFlag(Pipeline::Flags::MeshShader))
+		{
+			m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
+			m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
+			mesh.drawMeshlets(cmd);
+		}
+		else
+		{
+			mesh.draw(cmd);
+		}
 	}
 }

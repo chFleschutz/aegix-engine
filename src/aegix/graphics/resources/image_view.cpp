@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "image_view.h"
 
 #include "graphics/resources/image.h"

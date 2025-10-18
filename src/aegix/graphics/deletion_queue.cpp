@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "deletion_queue.h"
 
 namespace Aegix::Graphics

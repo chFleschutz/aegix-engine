@@ -1,5 +1,4 @@
 #include "pch.h"
-
 #include "material_instance.h"
 
 #include "graphics/vulkan/vulkan_context.h"
