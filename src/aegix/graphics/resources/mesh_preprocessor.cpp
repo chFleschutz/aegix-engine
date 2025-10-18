@@ -5,35 +5,35 @@
 
 namespace Aegix::Graphics
 {
-	auto MeshPreprocessor::process(const Input& input) -> StaticMesh::CreateInfo
+	auto MeshPreprocessor::process(Input& input) -> StaticMesh::CreateInfo
 	{
-		std::vector<StaticMesh::Vertex> initialVertices = interleave(input);
-		size_t initialVertexCount = initialVertices.size();
-		bool hasIndices = !input.indices.empty();
-		size_t indexCount = hasIndices ? input.indices.size() : initialVertexCount;
+		std::vector<StaticMesh::Vertex> vertices = interleave(input);
+		std::vector<uint32_t> indices = std::move(input.indices);
+		size_t initialVertexCount = vertices.size();
+		bool hasIndices = !indices.empty();
+		size_t indexCount = hasIndices ? indices.size() : initialVertexCount;
 
 		// Vertex and Index remapping
 
 		std::vector<uint32_t> remap(initialVertexCount);
 		size_t vertexCount = meshopt_generateVertexRemap(
 			remap.data(),
-			hasIndices ? input.indices.data() : nullptr,
-			hasIndices ? input.indices.size() : initialVertexCount,
-			initialVertices.data(),
+			hasIndices ? indices.data() : nullptr,
+			hasIndices ? indices.size() : initialVertexCount,
+			vertices.data(),
 			initialVertexCount,
 			sizeof(StaticMesh::Vertex));
 
-		std::vector<uint32_t> indices(indexCount);
+		indices.resize(indexCount);
 		meshopt_remapIndexBuffer(
 			indices.data(),
-			hasIndices ? input.indices.data() : nullptr,
-			hasIndices ? input.indices.size() : initialVertexCount,
+			hasIndices ? indices.data() : nullptr,
+			hasIndices ? indices.size() : initialVertexCount,
 			remap.data());
 
-		std::vector<StaticMesh::Vertex> vertices(vertexCount);
 		meshopt_remapVertexBuffer(
 			vertices.data(),
-			initialVertices.data(),
+			vertices.data(),
 			initialVertexCount,
 			sizeof(StaticMesh::Vertex),
 			remap.data());

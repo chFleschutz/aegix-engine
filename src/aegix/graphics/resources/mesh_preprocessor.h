@@ -22,10 +22,9 @@ namespace Aegix::Graphics
 			float coneWeight = 0; 
 		};
 
-		static auto process(const Input& input) -> StaticMesh::CreateInfo;
+		static auto process(Input& input) -> StaticMesh::CreateInfo;
 
 	private:
 		static auto interleave(const Input& input) -> std::vector<StaticMesh::Vertex>;
-		static void deinterleave(StaticMesh::CreateInfo& info);
 	};
 }
