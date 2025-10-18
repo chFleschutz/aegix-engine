@@ -7,64 +7,110 @@ namespace Aegix::Graphics
 {
 	auto MeshPreprocessor::process(const Input& input) -> StaticMesh::CreateInfo
 	{
-		StaticMesh::CreateInfo info{};
-		auto vertices = interleave(input);
+		std::vector<StaticMesh::Vertex> initialVertices = interleave(input);
+		size_t initialVertexCount = initialVertices.size();
+		bool hasIndices = !input.indices.empty();
+		size_t indexCount = hasIndices ? input.indices.size() : initialVertexCount;
 
 		// Vertex and Index remapping
-		size_t indexCount = input.indices.size() == 0 ? vertices.size() : input.indices.size();
-		const uint32_t* indexData = input.indices.size() == 0 ? nullptr : input.indices.data();
 
-		std::vector<uint32_t> remapIndices(indexCount);
-		size_t vertexCount = meshopt_generateVertexRemap(remapIndices.data(), indexData, indexCount, vertices.data(),
-			vertices.size(), sizeof(StaticMesh::Vertex));
+		std::vector<uint32_t> remap(initialVertexCount);
+		size_t vertexCount = meshopt_generateVertexRemap(
+			remap.data(),
+			hasIndices ? input.indices.data() : nullptr,
+			hasIndices ? input.indices.size() : initialVertexCount,
+			initialVertices.data(),
+			initialVertexCount,
+			sizeof(StaticMesh::Vertex));
 
-		info.indices.resize(indexCount);
-		info.vertices.resize(vertexCount);
-		info.indexCount = static_cast<uint32_t>(indexCount);
-		info.vertexCount = static_cast<uint32_t>(vertexCount);
+		std::vector<uint32_t> indices(indexCount);
+		meshopt_remapIndexBuffer(
+			indices.data(),
+			hasIndices ? input.indices.data() : nullptr,
+			hasIndices ? input.indices.size() : initialVertexCount,
+			remap.data());
 
-		meshopt_remapIndexBuffer(info.indices.data(), input.indices.data(), indexCount, remapIndices.data());
-		meshopt_remapVertexBuffer(info.vertices.data(), vertices.data(), vertices.size(), sizeof(StaticMesh::Vertex),
-			remapIndices.data());
+		std::vector<StaticMesh::Vertex> vertices(vertexCount);
+		meshopt_remapVertexBuffer(
+			vertices.data(),
+			initialVertices.data(),
+			initialVertexCount,
+			sizeof(StaticMesh::Vertex),
+			remap.data());
 
+		// Optimizations
 
-		// Vertex optimizations
+		meshopt_optimizeVertexCache(
+			indices.data(),
+			indices.data(),
+			indices.size(),
+			vertices.size());
 
-		meshopt_optimizeVertexCache(info.indices.data(), info.indices.data(), indexCount, vertexCount);
-		meshopt_optimizeOverdraw(info.indices.data(), info.indices.data(), indexCount, &(info.vertices[0].position.x),
-			vertexCount, sizeof(StaticMesh::Vertex), input.overdrawThreshold);
-		meshopt_optimizeVertexFetch(info.vertices.data(), info.indices.data(), indexCount, info.vertices.data(),
-			vertexCount, sizeof(StaticMesh::Vertex));
+		meshopt_optimizeOverdraw(
+			indices.data(),
+			indices.data(),
+			indices.size(),
+			&vertices[0].position.x,
+			vertices.size(),
+			sizeof(StaticMesh::Vertex),
+			input.overdrawThreshold);
 
+		meshopt_optimizeVertexFetch(
+			vertices.data(),
+			indices.data(),
+			indices.size(),
+			vertices.data(),
+			vertices.size(),
+			sizeof(StaticMesh::Vertex));
 
 		// Meshlet generation
 
-		size_t maxMeshlets = meshopt_buildMeshletsBound(indexCount, input.maxVerticesPerMeshlet,
+		size_t maxMeshlets = meshopt_buildMeshletsBound(
+			indices.size(),
+			input.maxVerticesPerMeshlet,
 			input.maxTrianglesPerMeshlet);
 
-		std::vector<meshopt_Meshlet> meshlets(maxMeshlets);
-		info.meshletIndices.resize(info.indexCount);
-		info.meshletPrimitives.resize(info.indexCount);
-		info.meshletCount = meshopt_buildMeshlets(meshlets.data(), info.meshletIndices.data(),
-			info.meshletPrimitives.data(), info.indices.data(), info.indexCount, &(info.vertices[0].position.x),
-			info.vertices.size(), sizeof(StaticMesh::Vertex), input.maxVerticesPerMeshlet, input.maxTrianglesPerMeshlet, 
+		std::vector<meshopt_Meshlet> meshoptMeshlets(maxMeshlets);
+		std::vector<uint32_t> meshletVertices(indexCount);
+		std::vector<uint8_t> meshletPrimitives(indexCount);
+
+		size_t meshletCount = meshopt_buildMeshlets(
+			meshoptMeshlets.data(),
+			meshletVertices.data(),
+			meshletPrimitives.data(),
+			indices.data(),
+			indices.size(),
+			&vertices[0].position.x,
+			vertices.size(),
+			sizeof(StaticMesh::Vertex),
+			input.maxVerticesPerMeshlet,
+			input.maxTrianglesPerMeshlet,
 			input.coneWeight);
 
-		const auto& lastMeshlet = meshlets[info.meshletCount - 1];
-		info.meshletIndexCount = lastMeshlet.triangle_offset + lastMeshlet.triangle_count;
-		info.meshletPrimitiveCount = lastMeshlet.triangle_offset + lastMeshlet.triangle_count * 3;
-		info.meshletIndices.resize(info.meshletIndexCount);
-		info.meshletPrimitives.resize(info.meshletPrimitiveCount);
-		meshlets.resize(info.meshletCount);
+		const auto& lastMeshlet = meshoptMeshlets[meshletCount - 1];
+		meshoptMeshlets.resize(meshletCount);
+		meshletVertices.resize(lastMeshlet.vertex_offset + lastMeshlet.vertex_count);
+		meshletPrimitives.resize(lastMeshlet.triangle_offset + lastMeshlet.triangle_count * 3);
 
-		info.meshlets.reserve(info.meshletCount);
-		for (auto& meshlet : meshlets)
+		std::vector<StaticMesh::Meshlet> meshlets;
+		meshlets.reserve(meshletCount);
+		for (auto& meshlet : meshoptMeshlets)
 		{
-			meshopt_Bounds bounds = meshopt_computeMeshletBounds(&info.meshletIndices[meshlet.vertex_offset],
-				&info.meshletPrimitives[meshlet.triangle_offset], meshlet.triangle_count, &(info.vertices[0].position.x),
-				info.vertexCount, sizeof(StaticMesh::Vertex));
+			meshopt_optimizeMeshlet(
+				&meshletVertices[meshlet.vertex_offset],
+				&meshletPrimitives[meshlet.triangle_offset],
+				meshlet.triangle_count,
+				meshlet.vertex_count);
 
-			info.meshlets.emplace_back(StaticMesh::Meshlet{
+			meshopt_Bounds bounds = meshopt_computeMeshletBounds(
+				&meshletVertices[meshlet.vertex_offset],
+				&meshletPrimitives[meshlet.triangle_offset],
+				meshlet.triangle_count,
+				&vertices[0].position.x,
+				vertices.size(),
+				sizeof(StaticMesh::Vertex));
+
+			meshlets.emplace_back(StaticMesh::Meshlet{
 				.vertexOffset = meshlet.vertex_offset,
 				.vertexCount = meshlet.vertex_count,
 				.primitiveOffset = meshlet.triangle_offset,
@@ -76,6 +122,21 @@ namespace Aegix::Graphics
 				});
 		}
 
+		// Fill CreateInfo
+
+		StaticMesh::CreateInfo info{
+			.vertexCount = static_cast<uint32_t>(vertices.size()),
+			.indexCount = static_cast<uint32_t>(indices.size()),
+			.meshletCount = static_cast<uint32_t>(meshlets.size()),
+			.vertexIndexCount = static_cast<uint32_t>(meshletVertices.size()),
+			.primitiveIndexCount = static_cast<uint32_t>(meshletPrimitives.size())
+		};
+
+		info.vertices = std::move(vertices);
+		info.indices = std::move(indices);
+		info.meshlets = std::move(meshlets);
+		info.vertexIndices = std::move(meshletVertices);
+		info.primitiveIndices = std::move(meshletPrimitives);
 		deinterleave(info);
 		return info;
 	}

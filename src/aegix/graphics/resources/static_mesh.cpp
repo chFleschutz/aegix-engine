@@ -71,8 +71,8 @@ namespace Aegix::Graphics
 		m_vertexBuffer{ Buffer::createVertexBuffer(sizeof(Vertex) * info.vertexCount) },
 		m_indexBuffer{ Buffer::createIndexBuffer(sizeof(uint32_t) * info.indexCount) },
 		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshletCount) },
-		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.meshletIndexCount) },
-		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.meshletPrimitiveCount) },
+		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.vertexIndexCount) },
+		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.primitiveIndexCount) },
 		m_positonBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::position) * info.vertexCount) },
 		m_normalBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::normal) * info.vertexCount) },
 		m_uvBuffer{ Buffer::createStorageBuffer(sizeof(Vertex::uv) * info.vertexCount) },
@@ -82,14 +82,14 @@ namespace Aegix::Graphics
 		m_vertexCount{ info.vertexCount },
 		m_indexCount{ info.indexCount },
 		m_meshletCount{ info.meshletCount },
-		m_meshletIndexCount{ info.meshletIndexCount },
-		m_meshletPrimitiveCount{ info.meshletPrimitiveCount }
+		m_meshletIndexCount{ info.vertexIndexCount },
+		m_meshletPrimitiveCount{ info.primitiveIndexCount }
 	{
 		AGX_ASSERT_X(info.vertices.size() == info.vertexCount, "Vertex count does not match size of vertex array");
 		AGX_ASSERT_X(info.indices.size() == info.indexCount, "Index count does not match size of index array");
 		AGX_ASSERT_X(info.meshlets.size() == info.meshletCount, "Meshlet count does not match size of meshlet array");
-		AGX_ASSERT_X(info.meshletIndices.size() == info.meshletIndexCount, "Meshlet index count does not match size of meshlet index array");
-		AGX_ASSERT_X(info.meshletPrimitives.size() == info.meshletPrimitiveCount, "Meshlet primitive count does not match size of meshlet primitive array");
+		AGX_ASSERT_X(info.vertexIndices.size() == info.vertexIndexCount, "Meshlet index count does not match size of meshlet index array");
+		AGX_ASSERT_X(info.primitiveIndices.size() == info.primitiveIndexCount, "Meshlet primitive count does not match size of meshlet primitive array");
 		AGX_ASSERT_X(info.positions.size() == info.vertexCount, "Vertex count does not match size of position array");
 		AGX_ASSERT_X(info.normals.size() == info.vertexCount, "Vertex count does not match size of normal array");
 		AGX_ASSERT_X(info.uvs.size() == info.vertexCount, "Vertex count does not match size of UV array");
@@ -99,8 +99,8 @@ namespace Aegix::Graphics
 		m_indexBuffer.upload(info.indices.data(), sizeof(uint32_t) * info.indexCount);
 
 		m_meshletBuffer.upload(info.meshlets.data(), sizeof(Meshlet) * info.meshletCount);
-		m_meshletIndexBuffer.upload(info.meshletIndices.data(), sizeof(uint32_t) * info.meshletIndexCount);
-		m_meshletPrimitiveBuffer.upload(info.meshletPrimitives.data(), sizeof(uint8_t) * info.meshletPrimitiveCount);
+		m_meshletIndexBuffer.upload(info.vertexIndices.data(), sizeof(uint32_t) * info.vertexIndexCount);
+		m_meshletPrimitiveBuffer.upload(info.primitiveIndices.data(), sizeof(uint8_t) * info.primitiveIndexCount);
 		m_positonBuffer.upload(info.positions.data(), sizeof(Vertex::position) * info.vertexCount);
 		m_normalBuffer.upload(info.normals.data(), sizeof(Vertex::normal) * info.vertexCount);
 		m_uvBuffer.upload(info.uvs.data(), sizeof(Vertex::uv) * info.vertexCount);

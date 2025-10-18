@@ -34,8 +34,8 @@ namespace Aegix::Graphics
 			std::vector<uint32_t> indices;
 
 			std::vector<Meshlet> meshlets;
-			std::vector<uint32_t> meshletIndices;
-			std::vector<uint8_t> meshletPrimitives;
+			std::vector<uint32_t> vertexIndices;
+			std::vector<uint8_t> primitiveIndices;
 			std::vector<glm::vec3> positions;
 			std::vector<glm::vec3> normals;
 			std::vector<glm::vec2> uvs;
@@ -44,8 +44,8 @@ namespace Aegix::Graphics
 			uint32_t vertexCount;
 			uint32_t indexCount;
 			uint32_t meshletCount;
-			uint32_t meshletIndexCount;
-			uint32_t meshletPrimitiveCount;
+			uint32_t vertexIndexCount;
+			uint32_t primitiveIndexCount;
 		};
 
 		static auto bindingDescription() -> VkVertexInputBindingDescription;
