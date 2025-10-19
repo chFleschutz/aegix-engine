@@ -1,3 +1,4 @@
+#language slang 2026
 
 struct Push
 {

@@ -39,8 +39,6 @@ namespace Aegix::Core
 				.addDescriptorSetLayout(globalSetLayout)
 				.addDescriptorSetLayout(materialSetLayout)
 				.addPushConstantRange(VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 128)
-				//.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "pbr/default_geometry.vert.spv")
-				//.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/default_geometry.frag.spv")
 				.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/default_geometry.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
@@ -62,14 +60,14 @@ namespace Aegix::Core
 			pbrMatTemplate->addParameter("ambientOcclusionMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
 			pbrMatTemplate->addParameter("emissiveMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
 
-			add("default/PBR_template", pbrMatTemplate);
+			add("default/PBR_templatex_vertex", pbrMatTemplate);
 
 			// Default PBR Material Instance
 
 			auto defaultPBRMaterial = Graphics::MaterialInstance::create(pbrMatTemplate);
 			defaultPBRMaterial->setParameter("albedo", glm::vec3{ 0.8f, 0.8f, 0.9f });
 
-			add("default/PBR_instance", defaultPBRMaterial);
+			add("default/PBR_instance_vertex", defaultPBRMaterial);
 		}
 
 		// Default PBR Mesh Shader Material
@@ -93,9 +91,7 @@ namespace Aegix::Core
 				.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
 				.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
 				.addPushConstantRange(VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 128)
-				//.addShaderStage(VK_SHADER_STAGE_TASK_BIT_EXT, SHADER_DIR "pbr/mesh_geometry.task.spv")
-				.addShaderStage(VK_SHADER_STAGE_MESH_BIT_EXT, SHADER_DIR "pbr/mesh_geometry.mesh.spv")
-				.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/default_geometry.frag.spv")
+				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
@@ -117,14 +113,14 @@ namespace Aegix::Core
 			pbrMeshMatTemplate->addParameter("ambientOcclusionMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
 			pbrMeshMatTemplate->addParameter("emissiveMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
 
-			add("default/PBR_template_mesh", pbrMeshMatTemplate);
+			add("default/PBR_template", pbrMeshMatTemplate);
 
 			// Default PBR Material Instance
 			auto pbrMeshMat = Graphics::MaterialInstance::create(pbrMeshMatTemplate);
 			pbrMeshMat->setParameter("albedo", glm::vec3{ 0.1f, 0.8f, 0.9f });
 			pbrMeshMat->setParameter("metallic", 1.0f);
 
-			add("default/PBR_instance_mesh", pbrMeshMat);
+			add("default/PBR_instance", pbrMeshMat);
 		}
 	}
 }
