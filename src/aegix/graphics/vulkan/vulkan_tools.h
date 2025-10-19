@@ -31,7 +31,8 @@ namespace Aegix::Tools
 	auto createShaderModule(VkDevice device, const std::vector<char>& code) -> VkShaderModule;
 	auto createShaderModule(VkDevice device, const std::filesystem::path& path) -> VkShaderModule;
 
-	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module) -> VkPipelineShaderStageCreateInfo;
+	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char* entryPoint = "main")
+		-> VkPipelineShaderStageCreateInfo;
 
 	namespace vk
 	{

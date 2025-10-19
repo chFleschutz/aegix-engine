@@ -227,13 +227,13 @@ namespace Aegix::Tools
 		return createShaderModule(device, code);
 	}
 
-	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module) -> VkPipelineShaderStageCreateInfo
+	auto createShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char* entryPoint) -> VkPipelineShaderStageCreateInfo
 	{
 		VkPipelineShaderStageCreateInfo shaderStage{};
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.stage = stage;
 		shaderStage.module = module;
-		shaderStage.pName = "main";
+		shaderStage.pName = entryPoint;
 		shaderStage.flags = 0;
 		shaderStage.pNext = nullptr;
 		shaderStage.pSpecializationInfo = nullptr;

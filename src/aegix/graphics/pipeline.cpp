@@ -16,9 +16,9 @@ namespace Aegix::Graphics
 
 	Pipeline::GraphicsBuilder::~GraphicsBuilder()
 	{
-		for (auto& shaderStage : m_graphicsConfig.shaderStges)
+		for (const auto& module : m_shaderModules)
 		{
-			vkDestroyShaderModule(VulkanContext::device(), shaderStage.module, nullptr);
+			vkDestroyShaderModule(VulkanContext::device(), module, nullptr);
 		}
 	}
 
@@ -41,8 +41,32 @@ namespace Aegix::Graphics
 	auto Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath) -> Pipeline::GraphicsBuilder&
 	{
 		VkShaderModule shaderModule = Tools::createShaderModule(VulkanContext::device(), shaderPath);
-		m_graphicsConfig.shaderStges.emplace_back(Tools::createShaderStage(stage, shaderModule));
+		m_shaderModules.emplace_back(shaderModule);
+		addShaderStage(stage, shaderModule, "main");
+		return *this;
+	}
 
+	auto Pipeline::GraphicsBuilder::addShaderStages(VkShaderStageFlags stages, const std::filesystem::path& shaderPath) -> GraphicsBuilder&
+	{
+		VkShaderModule shaderModule = Tools::createShaderModule(VulkanContext::device(), shaderPath);
+		m_shaderModules.emplace_back(shaderModule);
+
+		if (stages & VK_SHADER_STAGE_VERTEX_BIT)
+			addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, shaderModule, "vertexMain");
+		if (stages & VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT)
+			addShaderStage(VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, shaderModule, "tessControlMain");
+		if (stages & VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
+			addShaderStage(VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, shaderModule, "tessEvalMain");
+		if (stages & VK_SHADER_STAGE_GEOMETRY_BIT)
+			addShaderStage(VK_SHADER_STAGE_GEOMETRY_BIT, shaderModule, "geometryMain");
+		if (stages & VK_SHADER_STAGE_FRAGMENT_BIT)
+			addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, shaderModule, "fragmentMain");
+		if (stages & VK_SHADER_STAGE_COMPUTE_BIT)
+			addShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule, "computeMain");
+		if (stages & VK_SHADER_STAGE_TASK_BIT_EXT)
+			addShaderStage(VK_SHADER_STAGE_TASK_BIT_EXT, shaderModule, "taskMain");
+		if (stages & VK_SHADER_STAGE_MESH_BIT_EXT)
+			addShaderStage(VK_SHADER_STAGE_MESH_BIT_EXT, shaderModule, "meshMain");
 		return *this;
 	}
 
@@ -132,6 +156,17 @@ namespace Aegix::Graphics
 	{
 		return Pipeline{ m_layoutConfig, m_graphicsConfig };
 	}
+
+	void Pipeline::GraphicsBuilder::addShaderStage(VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char* entryPoint)
+	{
+		m_graphicsConfig.shaderStges.emplace_back(VkPipelineShaderStageCreateInfo{
+			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+			.stage = stage,
+			.module = shaderModule,
+			.pName = entryPoint,
+			});
+	}
+
 
 	// ComputeBuilder ------------------------------------------------------------
 
