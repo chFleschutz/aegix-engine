@@ -14,11 +14,11 @@ namespace Aegix::Graphics
 	{
 		m_gbufferSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.buildUnique();
@@ -34,7 +34,7 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(*m_gbufferSetLayout)
 			.addDescriptorSetLayout(*m_iblSetLayout)
-			.setShaderStage(SHADER_DIR "pbr/lighting.comp.spv")
+			.setShaderStage(SHADER_DIR "pbr/pbr_lighting.slang.spv", "computeMain")
 			.buildUnique();
 	}
 
@@ -42,23 +42,23 @@ namespace Aegix::Graphics
 	{
 		m_position = builder.add({ "Position",
 			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
+			FrameGraphResourceUsage::Sampled
 			});
 		m_normal = builder.add({ "Normal",
 			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
+			FrameGraphResourceUsage::Sampled
 			});
 		m_albedo = builder.add({ "Albedo",
 			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
+			FrameGraphResourceUsage::Sampled
 			});
 		m_arm = builder.add({ "ARM",
 			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
+			FrameGraphResourceUsage::Sampled
 			});
 		m_emissive = builder.add({ "Emissive",
 			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
+			FrameGraphResourceUsage::Sampled
 			});
 		m_ssao = builder.add({ "SSAO",
 			FrameGraphResourceType::Reference,

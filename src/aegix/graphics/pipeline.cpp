@@ -196,10 +196,10 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	auto Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath) -> Pipeline::ComputeBuilder&
+	auto Pipeline::ComputeBuilder::setShaderStage(const std::filesystem::path& shaderPath, const char* entry) -> Pipeline::ComputeBuilder&
 	{
 		VkShaderModule shaderModule = Tools::createShaderModule(VulkanContext::device(), shaderPath);
-		m_computeConfig.shaderStage = Tools::createShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule);
+		m_computeConfig.shaderStage = Tools::createShaderStage(VK_SHADER_STAGE_COMPUTE_BIT, shaderModule, entry);
 		return *this;
 	}
 

@@ -21,6 +21,7 @@ struct VSOut
 
 [vk::push_constant] ConstantBuffer<geometry::Push> push;
 [vk::binding(0, 0)] ConstantBuffer<geometry::Global> global;
+
 [vk::binding(0, 1)] ConstantBuffer<Material> material;
 [vk::binding(1, 1)] Sampler2D albedoMap;
 [vk::binding(2, 1)] Sampler2D normalMap;
