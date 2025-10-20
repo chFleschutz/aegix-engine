@@ -68,7 +68,6 @@ foreach(SLANG ${SLANG_SOURCES})
             -profile spirv_1_6 
             -o ${SLANG_SPIRV} 
             -fvk-use-entrypoint-name 
-            -I ${SHADERS_DIR}
             ${SLANG_OPT_FLAG} 
             ${SLANG_DEBUG_FLAG}
         DEPENDS ${SLANG}

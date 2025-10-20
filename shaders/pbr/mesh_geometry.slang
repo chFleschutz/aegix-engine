@@ -1,6 +1,6 @@
-import "utils/geometry";
-import "utils/constants";
-import "utils/tbn";
+import "../modules/geometry";
+import "../modules/constants";
+import "../modules/tbn";
 
 struct Material
 {
@@ -19,6 +19,10 @@ struct MSOut
     float2 uv;
 };
 
+static const uint NUM_THREADS = 32;
+static const uint MAX_VERTICES = 64;
+static const uint MAX_PRIMITIVES = 126;
+
 [vk::push_constant] ConstantBuffer<geometry::Push> push;
 [vk::binding(0, 0)] ConstantBuffer<geometry::Global> global;
 
@@ -35,13 +39,13 @@ struct MSOut
 [vk::binding(2, 3)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertices;
 
 [shader("mesh")]
-[numthreads(32, 1, 1)]
+[numthreads(NUM_THREADS, 1, 1)]
 [outputtopology("triangle")]
 func meshMain(
     uint3 groupID: SV_GroupID,
     uint3 threadID: SV_GroupThreadID,
-    out vertices MSOut meshVertices[64],
-    out indices uint3 meshPrimitives[126])
+    out vertices MSOut meshVertices[MAX_VERTICES],
+    out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
     var meshlet = meshlets[groupID.x];
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
@@ -49,7 +53,7 @@ func meshMain(
     float4x4 viewProjection = mul(global.projection, global.view);
 
     // Emit vertices
-    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += 32)
+    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += NUM_THREADS)
     {
         uint index = vertexIndices[meshlet.vertexOffset + i];
         let v = vertices[index];
@@ -62,7 +66,7 @@ func meshMain(
     }
 
     // Emit primitives
-    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += 32)
+    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += NUM_THREADS)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         meshPrimitives[i] = uint3(primitives[offset + 0], primitives[offset + 1], primitives[offset + 2]);

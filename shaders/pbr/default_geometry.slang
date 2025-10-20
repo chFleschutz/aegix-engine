@@ -1,6 +1,6 @@
-import "utils/geometry";
-import "utils/constants";
-import "utils/tbn";
+import "../modules/geometry";
+import "../modules/constants";
+import "../modules/tbn";
 
 struct Material
 {
