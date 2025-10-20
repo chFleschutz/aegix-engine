@@ -53,6 +53,7 @@ namespace Aegix::Graphics
 			auto addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset = 0) -> GraphicsBuilder&;
 
 			auto addShaderStage(VkShaderStageFlagBits stage, const std::filesystem::path& shaderPath) -> GraphicsBuilder&;
+			auto addShaderStages(VkShaderStageFlags stages, const std::filesystem::path& shaderPath) -> GraphicsBuilder&;
 			auto addColorAttachment(VkFormat colorFormat, bool alphaBlending = false) -> GraphicsBuilder&;
 			auto setDepthAttachment(VkFormat depthFormat) -> GraphicsBuilder&;
 			auto setStencilFormat(VkFormat stencilFormat) -> GraphicsBuilder&;
@@ -66,8 +67,11 @@ namespace Aegix::Graphics
 			auto build() -> Pipeline;
 
 		private:
+			void addShaderStage(VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char* entryPoint);
+
 			LayoutConfig m_layoutConfig;
 			GraphicsConfig m_graphicsConfig;
+			std::vector<VkShaderModule> m_shaderModules;
 		};
 
 		struct ComputeConfig
@@ -84,7 +88,7 @@ namespace Aegix::Graphics
 			auto addDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout) -> ComputeBuilder&;
 			auto addPushConstantRange(VkShaderStageFlags stageFlags, uint32_t size) -> ComputeBuilder&;
 
-			auto setShaderStage(const std::filesystem::path& shaderPath) -> ComputeBuilder&;
+			auto setShaderStage(const std::filesystem::path& shaderPath, const char* entry = "main") -> ComputeBuilder&;
 
 			auto buildUnique() -> std::unique_ptr<Pipeline>;
 			auto build() -> Pipeline;
