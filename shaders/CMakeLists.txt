@@ -9,7 +9,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SLANG_DEBUG_FLAG -g)
 else()
     set(SLANG_OPT_FLAG -O3)
-    set(SLANG_DEBUG )
+    set(SLANG_DEBUG_FLAG )
 endif()
 
 file(GLOB_RECURSE GLSL_SOURCES 
