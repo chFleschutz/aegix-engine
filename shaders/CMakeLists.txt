@@ -1,9 +1,16 @@
 # Compile glsl shader files into SPIR-V
 
+set(SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 find_program(GLSLC_EXE glslc REQUIRED)
 find_program(SLANGC_EXE slangc REQUIRED)
 
-set(SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(SLANG_OPT_FLAG -O0)
+    set(SLANG_DEBUG_FLAG -g)
+else()
+    set(SLANG_OPT_FLAG -O3)
+    set(SLANG_DEBUG )
+endif()
 
 file(GLOB_RECURSE GLSL_SOURCES 
     *.glsl 
@@ -54,7 +61,14 @@ foreach(SLANG ${SLANG_SOURCES})
 
     add_custom_command(
         OUTPUT ${SLANG_SPIRV}
-        COMMAND ${SLANGC_EXE} ${SLANG} -target spirv -profile spirv_1_6 -fvk-use-entrypoint-name -o ${SLANG_SPIRV} 
+        COMMAND ${SLANGC_EXE} ${SLANG} 
+            -target spirv 
+            -profile spirv_1_6 
+            -o ${SLANG_SPIRV} 
+            -fvk-use-entrypoint-name 
+            -I ${SHADERS_DIR}
+            ${SLANG_OPT_FLAG} 
+            ${SLANG_DEBUG_FLAG}
         DEPENDS ${SLANG}
         COMMENT "Compiling Slang Shader: ${REL_PATH}"
         VERBATIM
