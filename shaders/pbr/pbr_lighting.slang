@@ -1,3 +1,5 @@
+import "../modules/pbr";
+
 struct AmbientLight
 {
     float4 color;
@@ -26,9 +28,6 @@ struct Lighting
     int debugViewMode;
 };
 
-static const float PI = 3.14159265359;
-static const float EPSILON = 0.0001;
-static const float F_DIELECTRIC = 0.04;
 static const float EMISSIVE_INTENSITY = 2.0;
 static const float MAX_REFLECTION_LOD = 4.0;
 
@@ -63,64 +62,6 @@ func sampleSSAO(float2 uv)->float
     return result / 16.0;
 }
 
-func lightAttenuation(float3 lightPos, float3 fragPos) -> float
-{
-    float distance = length(lightPos - fragPos);
-    return 1.0 / max(distance * distance, EPSILON);
-}
-
-func specularReflection(float VdotH, float3 F0) -> float3
-{
-    return F0 + (float3(1.0) - F0) * pow(1.0 - VdotH, 5.0);
-}
-
-func specularReflection(float VdotH, float3 F0, float roughness) -> float3
-{
-    return F0 + (max(float3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
-}
-
-func schlickGGX(float NdotX, float alpha)->float
-{
-    // Schlick-Beckman GGX
-    float k = alpha / 2.0;
-    return NdotX / max(NdotX * (1.0 - k) + k, EPSILON);
-}
-
-func normalDistribution(float NdotH, float alpha)->float
-{
-    // Trowbridge-Reitz GGX
-    float alpha2 = alpha * alpha;
-    float denom = (NdotH * NdotH) * (alpha2 - 1.0) + 1.0;
-    return alpha2 / max(PI * denom * denom, EPSILON);
-}
-
-func geometryOcclusion(float NdotV, float NdotL, float alpha)->float
-{
-    // Smith model with Schlick-GGX
-    return schlickGGX(NdotV, alpha) * schlickGGX(NdotL, alpha);
-}
-
-func PBRLighting(float3 N, float3 V, float3 L, float3 albedo, float roughness, float metallic, float3 radiance, float3 F0) ->float3 
-{
-    float3 H = normalize(V + L);
-    float alpha = roughness * roughness;
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float NdotH = max(dot(N, H), 0.0);
-    float VdotH = max(dot(V, H), 0.0);
-
-    float D = normalDistribution(NdotH, alpha);
-    float G = geometryOcclusion(NdotV, NdotL, alpha);
-    float3 F = specularReflection(VdotH, F0);
-
-    float3 kS = F;
-    float3 kD = (1.0 - kS) * (1.0 - metallic);
-
-    float3 diffuse = kD * albedo / PI;
-    float3 specular = (D * G * F) / max(4.0 * NdotV * NdotL, EPSILON);
-    return (diffuse + specular) * radiance * NdotL;
-}
-
 [shader("compute")]
 [numthreads(16, 16, 1)]
 func computeMain(uint3 dispatchThreadID: SV_DispatchThreadID)
@@ -149,13 +90,13 @@ func computeMain(uint3 dispatchThreadID: SV_DispatchThreadID)
     float NdotV = max(dot(N, V), 0.0);
 
     // Tint reflections for metallic surfaces
-    float3 F0 = lerp(float3(F_DIELECTRIC), albedo, metallic);
+    float3 F0 = lerp(float3(PBR::F_DIELECTRIC), albedo, metallic);
 
     float3 Lo = emissive * EMISSIVE_INTENSITY;
 
     // Ambient Light
     {
-        float3 F = specularReflection(NdotV, F0, roughness);
+        float3 F = PBR::specularReflection(NdotV, F0, roughness);
         float3 kS = F;
         float3 kD = (1.0 - kS) * (1.0 - metallic);
 
@@ -172,7 +113,7 @@ func computeMain(uint3 dispatchThreadID: SV_DispatchThreadID)
     {
         float3 L = normalize(lighting.directionalLight.direction.xyz);
         float3 radiance = lighting.directionalLight.color.rgb * lighting.directionalLight.color.w;
-        Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
+        Lo += PBR::computeLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }
     // Point Lights
     for (int i = 0; i < lighting.numPointLights; i++)
@@ -180,9 +121,9 @@ func computeMain(uint3 dispatchThreadID: SV_DispatchThreadID)
         PointLight light = lighting.pointLights[i];
         float3 L = normalize(light.position.xyz - position);
 
-        float attenuation = lightAttenuation(light.position.xyz, position);
+        float attenuation = PBR::lightAttenuation(light.position.xyz, position);
         float3 radiance = light.color.rgb * light.color.w * attenuation;
-        Lo += PBRLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
+        Lo += PBR::computeLighting(N, V, L, albedo, roughness, metallic, radiance, F0);
     }
 
     Lo = max(Lo, 0.0);
