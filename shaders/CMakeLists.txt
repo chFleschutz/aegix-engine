@@ -25,7 +25,9 @@ file(GLOB_RECURSE GLSL_SOURCES
 )
 
 file(GLOB_RECURSE SLANG_SOURCES 
-    *.slang
+    "pbr/default_geometry.slang"
+    "pbr/mesh_geometry.slang"
+    "pbr/pbr_lighting.slang"
 )
 
 set(SPIRV_FILES "")
