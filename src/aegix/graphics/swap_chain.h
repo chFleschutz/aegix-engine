@@ -12,6 +12,7 @@ namespace Aegix::Graphics
 			VkFence inFlightFence;
 			VkSemaphore presentReady;
 		};
+
 		SwapChain(VkExtent2D windowExtent);
 		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
@@ -28,8 +29,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto presentReadySemaphore() const -> VkSemaphore { return m_imageSync[m_imageIndex].presentReady; }
 
 		auto acquireNextImage(VkSemaphore imageAvailable) -> VkResult;
-		auto present() -> VkResult;
 		void waitForImageInFlight(VkFence frameFence);
+		auto present() -> VkResult;
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 

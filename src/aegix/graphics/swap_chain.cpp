@@ -42,6 +42,16 @@ namespace Aegix::Graphics
 			imageAvailable, VK_NULL_HANDLE, &m_imageIndex);
 	}
 
+	void SwapChain::waitForImageInFlight(VkFence frameFence)
+	{
+		if (m_imageSync[m_imageIndex].inFlightFence != VK_NULL_HANDLE)
+		{
+			vkWaitForFences(VulkanContext::device(), 1, &m_imageSync[m_imageIndex].inFlightFence, VK_TRUE,
+				std::numeric_limits<uint64_t>::max());
+		}
+		m_imageSync[m_imageIndex].inFlightFence = frameFence;
+	}
+
 	auto SwapChain::present() -> VkResult
 	{
 		VkPresentInfoKHR presentInfo{
@@ -54,16 +64,6 @@ namespace Aegix::Graphics
 		};
 
 		return vkQueuePresentKHR(VulkanContext::device().presentQueue(), &presentInfo);
-	}
-
-	void SwapChain::waitForImageInFlight(VkFence frameFence)
-	{
-		if (m_imageSync[m_imageIndex].inFlightFence != VK_NULL_HANDLE)
-		{
-			vkWaitForFences(VulkanContext::device(), 1, &m_imageSync[m_imageIndex].inFlightFence, VK_TRUE,
-				std::numeric_limits<uint64_t>::max());
-		}
-		m_imageSync[m_imageIndex].inFlightFence = frameFence;
 	}
 
 	void SwapChain::resize(VkExtent2D extent)

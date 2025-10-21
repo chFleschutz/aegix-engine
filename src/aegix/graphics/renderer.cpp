@@ -116,6 +116,7 @@ namespace Aegix::Graphics
 		waitIdle();
 		m_swapChain.resize(extent);
 		m_frameGraph.swapChainResized(extent.width, extent.height);
+		m_window.resetResizedFlag();
 	}
 
 	void Renderer::createFrameGraph()
@@ -146,14 +147,13 @@ namespace Aegix::Graphics
 		FrameContext& frame = m_frames[m_currentFrameIndex];
 		vkWaitForFences(VulkanContext::device(), 1, &frame.inFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max());
 
-		auto result = m_swapChain.acquireNextImage(frame.imageAvailable);
+		VkResult result = m_swapChain.acquireNextImage(frame.imageAvailable);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
-			// TODO: Tidy swapchain resize handling
 			recreateSwapChain();
-			AGX_DEBUG_BREAK(); // should return here but idk why
+			result = m_swapChain.acquireNextImage(frame.imageAvailable);
 		}
-		AGX_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR && "Failed to aquire swap chain image");
+		AGX_ASSERT_X(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to aquire swap chain image");
 
 		VkCommandBufferBeginInfo beginInfo{
 			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -172,12 +172,11 @@ namespace Aegix::Graphics
 		AGX_ASSERT(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
 		m_isFrameStarted = false;
-
 		FrameContext& frame = m_frames[m_currentFrameIndex];
 		VK_CHECK(vkEndCommandBuffer(frame.commandBuffer));
 
-		//m_swapChain.waitForImageInFlight(frame.inFlightFence);
-		vkResetFences(VulkanContext::device(), 1, &frame.inFlightFence);
+		// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
+		m_swapChain.waitForImageInFlight(frame.inFlightFence);
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[] = { m_swapChain.presentReadySemaphore() };
@@ -192,18 +191,13 @@ namespace Aegix::Graphics
 			.pSignalSemaphores = signalSemaphores,
 		};
 
+		vkResetFences(VulkanContext::device(), 1, &frame.inFlightFence);
 		VK_CHECK(vkQueueSubmit(VulkanContext::device().graphicsQueue(), 1, &submitInfo, frame.inFlightFence));
 
 		auto result = m_swapChain.present();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasResized())
 		{
-			// TODO: Tidy swapchain resize handling
-			m_window.resetResizedFlag();
 			recreateSwapChain();
-		}
-		else if (result != VK_SUCCESS)
-		{
-			AGX_ASSERT(false && "Failed to present swap chain image");
 		}
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
