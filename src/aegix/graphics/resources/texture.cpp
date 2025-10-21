@@ -5,7 +5,7 @@
 #include "graphics/pipeline.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 namespace Aegix::Graphics
 {

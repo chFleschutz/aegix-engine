@@ -8,7 +8,7 @@
 #include "graphics/vulkan/vulkan_tools.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 namespace Aegix::Graphics
 {

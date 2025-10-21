@@ -1,9 +1,6 @@
 #include <aegix/engine.h>
+#include <aegix/scene/components.h>
 #include <aegix/scene/description.h>
-#include <aegix/graphics/resources/material_template.h>
-#include <aegix/graphics/resources/material_instance.h>
-#include <scene/components.h>
-
 #include <aegix/scripting/script_base.h>
 
 class ColorChanger : public Aegix::Scripting::ScriptBase
