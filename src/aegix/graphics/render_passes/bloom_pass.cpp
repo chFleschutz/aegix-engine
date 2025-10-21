@@ -8,7 +8,11 @@
 
 namespace Aegix::Graphics
 {
-	BloomPass::BloomPass()
+	BloomPass::BloomPass() : 
+		m_thresholdSetLayout{ createThresholdDescriptorSetLayout() },
+		m_downsampleSetLayout{ createDownsampleDescriptorSetLayout() },
+		m_upsampleSetLayout{ createUpsampleDescriptorSetLayout() },
+		m_thresholdSet{ m_thresholdSetLayout }
 	{
 		m_sampler.create(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false);
 
@@ -17,50 +21,34 @@ namespace Aegix::Graphics
 			m_mipViews.emplace_back();
 		}
 
-		// Threshold
-		m_thresholdSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
-
-		m_thresholdSet = std::make_unique<DescriptorSet>(*m_thresholdSetLayout);
-
+		// Descriptor sets
 		m_thresholdPipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*m_thresholdSetLayout)
+			.addDescriptorSetLayout(m_thresholdSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomThreshold))
 			.setShaderStage(SHADER_DIR "bloom/bloom_threshold.comp.spv")
 			.buildUnique();
 
 		// Downsample
-		m_downsampleSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
-
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
-			m_downsampleSets.emplace_back(std::make_unique<DescriptorSet>(*m_downsampleSetLayout));
+			m_downsampleSets.emplace_back(m_downsampleSetLayout);
 		}
 
 		m_downsamplePipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*m_downsampleSetLayout)
+			.addDescriptorSetLayout(m_downsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomDownsample))
 			.setShaderStage(SHADER_DIR "bloom/bloom_downsample.comp.spv")
 			.buildUnique();
 
 		// Upsample
-		m_upsampleSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
-			m_upsampleSets.emplace_back(std::make_unique<DescriptorSet>(*m_upsampleSetLayout));
+			m_upsampleSets.emplace_back(m_upsampleSetLayout);
 		}
 
 		m_upsamplePipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*m_upsampleSetLayout)
+			.addDescriptorSetLayout(m_upsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomUpsample))
 			.setShaderStage(SHADER_DIR "bloom/bloom_upsample.comp.spv")
 			.buildUnique();
@@ -104,22 +92,22 @@ namespace Aegix::Graphics
 			m_mipViews[i].create2D(bloom.image(), i, 1);
 		}
 
-		DescriptorWriter{ *m_thresholdSetLayout }
+		DescriptorWriter{ m_thresholdSetLayout }
 			.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, sceneColor.view(), VK_IMAGE_LAYOUT_GENERAL })
 			.writeImage(1, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[0], VK_IMAGE_LAYOUT_GENERAL })
-			.update(*m_thresholdSet);
+			.update(m_thresholdSet);
 
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS - 1; i++)
 		{
-			DescriptorWriter{ *m_upsampleSetLayout }
+			DescriptorWriter{ m_upsampleSetLayout }
 				.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[i], VK_IMAGE_LAYOUT_GENERAL })
 				.writeImage(1, VkDescriptorImageInfo{ m_sampler, m_mipViews[i + 1], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL })
-				.update(*m_upsampleSets[i]);
+				.update(m_upsampleSets[i]);
 
-			DescriptorWriter{ *m_downsampleSetLayout }
+			DescriptorWriter{ m_downsampleSetLayout }
 				.writeImage(0, VkDescriptorImageInfo{ VK_NULL_HANDLE, m_mipViews[i + 1], VK_IMAGE_LAYOUT_GENERAL })
 				.writeImage(1, VkDescriptorImageInfo{ m_sampler, m_mipViews[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL })
-				.update(*m_downsampleSets[i]);
+				.update(m_downsampleSets[i]);
 		}
 	}
 
@@ -141,10 +129,34 @@ namespace Aegix::Graphics
 		ImGui::SliderFloat("Upsample Scale", &m_upsample.filterScale, 0.0f, 2.0f);
 	}
 
+	auto BloomPass::createThresholdDescriptorSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+	}
+
+	auto BloomPass::createDownsampleDescriptorSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+	}
+
+	auto BloomPass::createUpsampleDescriptorSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+	}
+
 	void BloomPass::extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo)
 	{
 		m_thresholdPipeline->bind(cmd);
-		m_thresholdPipeline->bindDescriptorSet(cmd, 0, *m_thresholdSet);
+		m_thresholdPipeline->bindDescriptorSet(cmd, 0, m_thresholdSet);
 		m_thresholdPipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_threshold);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
@@ -186,7 +198,7 @@ namespace Aegix::Graphics
 
 			m_downsample.mipLevel = srcMip;
 			
-			m_downsamplePipeline->bindDescriptorSet(cmd, 0, *m_downsampleSets[srcMip]);
+			m_downsamplePipeline->bindDescriptorSet(cmd, 0, m_downsampleSets[srcMip]);
 			m_downsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_downsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip};
@@ -241,7 +253,7 @@ namespace Aegix::Graphics
 			);
 
 			// Upsample the mip level
-			m_upsamplePipeline->bindDescriptorSet(cmd, 0, *m_upsampleSets[dstMip]);
+			m_upsamplePipeline->bindDescriptorSet(cmd, 0, m_upsampleSets[dstMip]);
 			m_upsamplePipeline->pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_upsample);
 
 			VkExtent2D mipExtent = { bloom.image().width() >> dstMip, bloom.image().height() >> dstMip };

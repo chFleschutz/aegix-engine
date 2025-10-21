@@ -16,7 +16,7 @@ namespace Aegix
 	public:
 		Logging()
 		{
-			ALOG::init(ALOG::Severity::Trace)
+			ALOG::init<ALOG::DEFAULT_LOGGER, ALOG::NO_THREAD>(ALOG::Severity::Trace)
 				.addSink<ALOG::ConsoleSink>();
 		}
 

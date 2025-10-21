@@ -7,30 +7,30 @@ namespace Aegix::Graphics
 	class SwapChain
 	{
 	public:
+		struct ImageSync
+		{
+			VkFence inFlightFence;
+			VkSemaphore presentReady;
+		};
+
 		SwapChain(VkExtent2D windowExtent);
 		SwapChain(const SwapChain&) = delete;
 		~SwapChain();
 
 		void operator=(const SwapChain&) = delete;
 
-		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
-		[[nodiscard]] auto currentImageIndex() const -> uint32_t { return m_currentImageIndex; }
-
-		[[nodiscard]] auto currentImageView() const -> VkImageView { return m_imageViews[m_currentImageIndex]; }
-		[[nodiscrad]] auto currentImage() const -> VkImage { return m_images[m_currentImageIndex]; }
-		[[nodiscard]] auto imageView(int index) const -> VkImageView { return m_imageViews[index]; }
-		[[nodiscard]] auto image(int index) const -> VkImage { return m_images[index]; }
-
 		[[nodiscard]] auto extent() const -> VkExtent2D { return m_extent; }
 		[[nodiscard]] auto width() const -> uint32_t { return m_extent.width; }
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
 		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
-
-		[[nodiscard]] auto format() const -> VkFormat { return m_format; }
+		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
+		[[nodiscrad]] auto currentImage() const -> VkImage { return m_images[m_imageIndex]; }
 		[[nodiscard]] auto findDepthFormat() -> VkFormat;
+		[[nodiscard]] auto presentReadySemaphore() const -> VkSemaphore { return m_imageSync[m_imageIndex].presentReady; }
 
-		auto acquireNextImage() -> VkResult;
-		auto submitCommandBuffers(const VkCommandBuffer* buffers) -> VkResult;
+		auto acquireNextImage(VkSemaphore imageAvailable) -> VkResult;
+		void waitForImageInFlight(VkFence frameFence);
+		auto present() -> VkResult;
 
 		auto compareSwapFormats(const SwapChain& swapchain) const -> bool { return swapchain.m_format == m_format; }
 
@@ -39,7 +39,6 @@ namespace Aegix::Graphics
 	private:
 		void createSwapChain();
 		void createImageViews();
-		void createSyncObjects();
 		void destroyImageViews();
 		void destroySwapChain(VkSwapchainKHR swapChain);
 
@@ -51,16 +50,10 @@ namespace Aegix::Graphics
 		VkFormat m_format;
 		VkExtent2D m_extent;
 		VkExtent2D m_windowExtent;
-
-		VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
+		VkSwapchainKHR m_swapChain{ VK_NULL_HANDLE };
 		std::vector<VkImage> m_images;
 		std::vector<VkImageView> m_imageViews;
-		uint32_t m_currentImageIndex = 0;
-
-		std::vector<VkSemaphore> m_imageAvailableSemaphores;
-		std::vector<VkSemaphore> m_renderFinishedSemaphores;
-		std::vector<VkFence> m_inFlightFences;
-		std::vector<VkFence> m_imagesInFlight;
-		size_t m_currentFrame = 0;
+		std::vector<ImageSync> m_imageSync;
+		uint32_t m_imageIndex{ 0 };
 	};
 }

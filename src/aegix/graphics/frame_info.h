@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 		Scene::Scene& scene;
 		UI::UI& ui;
 		VkCommandBuffer cmd{ VK_NULL_HANDLE };
-		int frameIndex{ 0 };
+		uint32_t frameIndex{ 0 };
 		VkExtent2D swapChainExtent;
 		float aspectRatio;
 	};

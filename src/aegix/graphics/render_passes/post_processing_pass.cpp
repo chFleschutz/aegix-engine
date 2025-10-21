@@ -10,9 +10,13 @@ namespace Aegix::Graphics
 {
 	PostProcessingPass::PostProcessingPass() : 
 		m_descriptorSetLayout{ createDescriptorSetLayout() }, 
-		m_descriptorSet{ m_descriptorSetLayout },
 		m_pipeline{ createPipeline() }
 	{
+		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_descriptorSets.emplace_back(m_descriptorSetLayout);
+		}
 	}
 
 	auto PostProcessingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -58,12 +62,12 @@ namespace Aegix::Graphics
 			.writeImage(0, resources.texture(m_final))
 			.writeImage(1, resources.texture(m_sceneColor))
 			.writeImage(2, resources.texture(m_bloom))
-			.update(m_descriptorSet);
+			.update(m_descriptorSets[frameInfo.frameIndex]);
 
 		VkCommandBuffer cmd = frameInfo.cmd;
 
 		m_pipeline.bind(cmd);
-		m_pipeline.bindDescriptorSet(cmd, 0, m_descriptorSet);
+		m_pipeline.bindDescriptorSet(cmd, 0, m_descriptorSets[frameInfo.frameIndex]);
 		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_COMPUTE_BIT, m_settings);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });

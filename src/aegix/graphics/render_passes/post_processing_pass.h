@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		PostProcessingSettings m_settings;
 
 		DescriptorSetLayout m_descriptorSetLayout;
-		DescriptorSet m_descriptorSet;
+		std::vector<DescriptorSet> m_descriptorSets;
 		Pipeline m_pipeline;
 	};
 }

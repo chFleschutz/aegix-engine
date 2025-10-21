@@ -12,6 +12,13 @@ namespace Aegix::Graphics
 	class Renderer
 	{
 	public:
+		struct FrameContext
+		{
+			VkFence inFlightFence;
+			VkSemaphore imageAvailable;
+			VkCommandBuffer commandBuffer;
+		};
+
 		Renderer(Core::Window& window);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) = delete;
@@ -35,20 +42,19 @@ namespace Aegix::Graphics
 		void waitIdle();
 
 	private:
-		void createCommandBuffers();
+		void createFrameContext();
 		void recreateSwapChain();
 		void createFrameGraph();
 
-		auto beginFrame() -> VkCommandBuffer;
-		void endFrame(VkCommandBuffer commandBuffer);
+		void beginFrame();
+		void endFrame();
 
 		Core::Window& m_window;
 		
 		SwapChain m_swapChain;
-		std::array<VkCommandBuffer, MAX_FRAMES_IN_FLIGHT> m_commandBuffers;
-
-		int m_currentFrameIndex = 0;
-		bool m_isFrameStarted = false;
+		std::array<FrameContext, MAX_FRAMES_IN_FLIGHT> m_frames;
+		uint32_t m_currentFrameIndex{ 0 };
+		bool m_isFrameStarted{ false };
 
 		FrameGraph m_frameGraph;
 	};

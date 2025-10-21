@@ -21,28 +21,28 @@
 namespace Aegix::Graphics
 {
 	Renderer::Renderer(Core::Window& window)
-		: m_window{ window }, m_swapChain{ window.extent()}
+		: m_window{ window }, m_swapChain{ window.extent() }
 	{
-		createCommandBuffers();
+		createFrameContext();
 		createFrameGraph();
 	}
 
 	Renderer::~Renderer()
 	{
-		vkFreeCommandBuffers(
-			VulkanContext::device(),
-			VulkanContext::device().commandPool(),
-			static_cast<uint32_t>(m_commandBuffers.size()),
-			m_commandBuffers.data()
-		);
+		for (const auto& frame : m_frames)
+		{
+			vkFreeCommandBuffers(VulkanContext::device(), VulkanContext::device().commandPool(), 1, &frame.commandBuffer);
+			vkDestroySemaphore(VulkanContext::device(), frame.imageAvailable, nullptr);
+			vkDestroyFence(VulkanContext::device(), frame.inFlightFence, nullptr);
+		}
 	}
 
 	auto Renderer::currentCommandBuffer() const -> VkCommandBuffer
 	{
 		AGX_ASSERT_X(m_isFrameStarted, "Cannot get command buffer when frame not in progress");
-		AGX_ASSERT_X(m_commandBuffers[m_currentFrameIndex] != VK_NULL_HANDLE, "Command buffer not initialized");
+		AGX_ASSERT_X(m_frames[m_currentFrameIndex].commandBuffer != VK_NULL_HANDLE, "Command buffer not initialized");
 
-		return m_commandBuffers[m_currentFrameIndex];
+		return m_frames[m_currentFrameIndex].commandBuffer;
 	}
 
 	auto Renderer::frameIndex() const -> uint32_t
@@ -55,23 +55,22 @@ namespace Aegix::Graphics
 	{
 		AGX_PROFILE_FUNCTION();
 
-		auto commandBuffer = beginFrame();
+		beginFrame();
+		{
+			AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
 
-		AGX_ASSERT_X(commandBuffer, "Failed to begin frame");
-		AGX_ASSERT_X(m_isFrameStarted, "Frame not started");
+			FrameInfo frameInfo{
+				.scene = scene,
+				.ui = ui,
+				.cmd = currentCommandBuffer(),
+				.frameIndex = m_currentFrameIndex,
+				.swapChainExtent = m_swapChain.extent(),
+				.aspectRatio = m_swapChain.aspectRatio()
+			};
 
-		FrameInfo frameInfo{
-			.scene = scene,
-			.ui = ui,
-			.cmd = commandBuffer,
-			.frameIndex = m_currentFrameIndex,
-			.swapChainExtent = m_swapChain.extent(),
-			.aspectRatio = m_swapChain.aspectRatio()
-		};
-		
-		m_frameGraph.execute(frameInfo);
-
-		endFrame(commandBuffer);
+			m_frameGraph.execute(frameInfo);
+		}
+		endFrame();
 	}
 
 	void Renderer::waitIdle()
@@ -79,15 +78,30 @@ namespace Aegix::Graphics
 		vkDeviceWaitIdle(VulkanContext::device());
 	}
 
-	void Renderer::createCommandBuffers()
+	void Renderer::createFrameContext()
 	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = VulkanContext::device().commandPool();
-		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
+		VkFenceCreateInfo fenceInfo{
+			.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+			.flags = VK_FENCE_CREATE_SIGNALED_BIT,
+		};
 
-		VK_CHECK(vkAllocateCommandBuffers(VulkanContext::device(), &allocInfo, m_commandBuffers.data()))
+		VkSemaphoreCreateInfo semaphoreInfo{
+			.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+		};
+
+		VkCommandBufferAllocateInfo cmdInfo{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+			.commandPool = VulkanContext::device().commandPool(),
+			.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+			.commandBufferCount = 1,
+		};
+
+		for (auto& frame : m_frames)
+		{
+			VK_CHECK(vkCreateFence(VulkanContext::device(), &fenceInfo, nullptr, &frame.inFlightFence));
+			VK_CHECK(vkCreateSemaphore(VulkanContext::device(), &semaphoreInfo, nullptr, &frame.imageAvailable));
+			VK_CHECK(vkAllocateCommandBuffers(VulkanContext::device(), &cmdInfo, &frame.commandBuffer));
+		}
 	}
 
 	void Renderer::recreateSwapChain()
@@ -98,10 +112,11 @@ namespace Aegix::Graphics
 			glfwWaitEvents();
 			extent = m_window.extent();
 		}
-		
+
 		waitIdle();
 		m_swapChain.resize(extent);
 		m_frameGraph.swapChainResized(extent.width, extent.height);
+		m_window.resetResizedFlag();
 	}
 
 	void Renderer::createFrameGraph()
@@ -118,59 +133,76 @@ namespace Aegix::Graphics
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
-		m_frameGraph.add<SSAOPass>();
 		m_frameGraph.add<SkyBoxPass>();
+
+		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
+		// TODO: Optimize or replace with better technique (like HBAO)
+		//m_frameGraph.add<SSAOPass>();
 
 		m_frameGraph.compile();
 	}
 
-	auto Renderer::beginFrame() -> VkCommandBuffer
+	void Renderer::beginFrame()
 	{
 		AGX_ASSERT(!m_isFrameStarted && "Cannot call beginFrame while already in progress");
 
-		auto result = m_swapChain.acquireNextImage();
+		FrameContext& frame = m_frames[m_currentFrameIndex];
+		vkWaitForFences(VulkanContext::device(), 1, &frame.inFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+		VkResult result = m_swapChain.acquireNextImage(frame.imageAvailable);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
-			return nullptr;
+			result = m_swapChain.acquireNextImage(frame.imageAvailable);
 		}
+		AGX_ASSERT_X(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to aquire swap chain image");
 
-		AGX_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR && "Failed to aquire swap chain image");
+		VkCommandBufferBeginInfo beginInfo{
+			.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+		};
 
+		VK_CHECK(vkResetCommandBuffer(frame.commandBuffer, 0));
+		VK_CHECK(vkBeginCommandBuffer(frame.commandBuffer, &beginInfo));
 		m_isFrameStarted = true;
 
-		auto commandBuffer = currentCommandBuffer();
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		VK_CHECK(vkBeginCommandBuffer(commandBuffer, &beginInfo))
-
-		return commandBuffer;
+		AGX_ASSERT_X(frame.commandBuffer != VK_NULL_HANDLE, "Failed to begin command buffer");
 	}
 
-	void Renderer::endFrame(VkCommandBuffer commandBuffer)
+	void Renderer::endFrame()
 	{
 		AGX_ASSERT(m_isFrameStarted && "Cannot call endFrame while frame is not in progress");
 
-		VK_CHECK(vkEndCommandBuffer(commandBuffer))
+		m_isFrameStarted = false;
+		FrameContext& frame = m_frames[m_currentFrameIndex];
+		VK_CHECK(vkEndCommandBuffer(frame.commandBuffer));
 
-		auto result = m_swapChain.submitCommandBuffers(&commandBuffer);
+		// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
+		m_swapChain.waitForImageInFlight(frame.inFlightFence);
+
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		VkSemaphore signalSemaphores[] = { m_swapChain.presentReadySemaphore() };
+		VkSubmitInfo submitInfo{
+			.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+			.waitSemaphoreCount = 1,
+			.pWaitSemaphores = &frame.imageAvailable,
+			.pWaitDstStageMask = waitStages,
+			.commandBufferCount = 1,
+			.pCommandBuffers = &frame.commandBuffer,
+			.signalSemaphoreCount = 1,
+			.pSignalSemaphores = signalSemaphores,
+		};
+
+		vkResetFences(VulkanContext::device(), 1, &frame.inFlightFence);
+		VK_CHECK(vkQueueSubmit(VulkanContext::device().graphicsQueue(), 1, &submitInfo, frame.inFlightFence));
+
+		auto result = m_swapChain.present();
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasResized())
 		{
-			m_window.resetResizedFlag();
 			recreateSwapChain();
 		}
-		else if (result != VK_SUCCESS)
-		{
-			AGX_ASSERT(false && "Failed to present swap chain image");
-		}
-
-		waitIdle();
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 		VulkanContext::flushDeletionQueue(m_currentFrameIndex);
-
-		m_isFrameStarted = false;
 	}
 }
