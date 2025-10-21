@@ -53,6 +53,8 @@ namespace Aegix::Graphics
 		virtual void drawUI() override;
 
 	private:
+		auto createGBufferSetLayout() -> DescriptorSetLayout;
+		auto createIBLSetLayout() -> DescriptorSetLayout;
 		void updateLightingUBO(const FrameInfo& frameInfo);
 
 		FrameGraphResourceHandle m_sceneColor;
@@ -68,12 +70,10 @@ namespace Aegix::Graphics
 
 		std::unique_ptr<Pipeline> m_pipeline;
 
-		std::unique_ptr<DescriptorSetLayout> m_gbufferSetLayout;
-		std::unique_ptr<DescriptorSet> m_gbufferSet;
+		DescriptorSetLayout m_gbufferSetLayout;
+		DescriptorSetLayout m_iblSetLayout;
+		std::vector<DescriptorSet> m_gbufferSets;
+		std::vector<DescriptorSet> m_iblSets;
 		Buffer m_ubo;
-
-		// IBL
-		std::unique_ptr<DescriptorSetLayout> m_iblSetLayout;
-		std::unique_ptr<DescriptorSet> m_iblSet;
 	};
 }

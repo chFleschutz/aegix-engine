@@ -9,31 +9,22 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass()
-		: m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) }
+	LightingPass::LightingPass() : 
+		m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) },
+		m_gbufferSetLayout{ createGBufferSetLayout() },
+		m_iblSetLayout{ createIBLSetLayout() }
 	{
-		m_gbufferSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
-		m_gbufferSet = std::make_unique<DescriptorSet>(*m_gbufferSetLayout);
-
-		m_iblSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.buildUnique();
-		m_iblSet = std::make_unique<DescriptorSet>(*m_iblSetLayout);
+		m_gbufferSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		m_iblSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_gbufferSets.emplace_back(m_gbufferSetLayout);
+			m_iblSets.emplace_back(m_iblSetLayout);
+		}
 
 		m_pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(*m_gbufferSetLayout)
-			.addDescriptorSetLayout(*m_iblSetLayout)
+			.addDescriptorSetLayout(m_gbufferSetLayout)
+			.addDescriptorSetLayout(m_iblSetLayout)
 			.setShaderStage(SHADER_DIR "pbr/pbr_lighting.slang.spv", "computeMain")
 			.buildUnique();
 	}
@@ -60,10 +51,10 @@ namespace Aegix::Graphics
 			FrameGraphResourceType::Reference,
 			FrameGraphResourceUsage::Sampled
 			});
-		m_ssao = builder.add({ "SSAO",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
+		//m_ssao = builder.add({ "SSAO",
+		//	FrameGraphResourceType::Reference,
+		//	FrameGraphResourceUsage::Sampled
+		//	});
 
 		m_sceneColor = builder.add({ "SceneColor",
 			FrameGraphResourceType::Texture,
@@ -77,7 +68,7 @@ namespace Aegix::Graphics
 
 		return FrameGraphNodeCreateInfo{
 			.name = "Lighting",
-			.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_ssao },
+			.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive/*, m_ssao*/ },
 			.outputs = { m_sceneColor }
 		};
 	}
@@ -90,26 +81,26 @@ namespace Aegix::Graphics
 		auto& environment = frameInfo.scene.environment().get<Environment>();
 		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
-		DescriptorWriter{ *m_gbufferSetLayout }
+		DescriptorWriter{ m_gbufferSetLayout }
 			.writeImage(0, resources.texture(m_sceneColor))
 			.writeImage(1, resources.texture(m_position))
 			.writeImage(2, resources.texture(m_normal))
 			.writeImage(3, resources.texture(m_albedo))
 			.writeImage(4, resources.texture(m_arm))
 			.writeImage(5, resources.texture(m_emissive))
-			.writeImage(6, resources.texture(m_ssao))
+			//.writeImage(6, resources.texture(m_ssao))
 			.writeBuffer(7, m_ubo, frameInfo.frameIndex)
-			.update(*m_gbufferSet);
+			.update(m_gbufferSets[frameInfo.frameIndex]);
 
-		DescriptorWriter{ *m_iblSetLayout }
+		DescriptorWriter{ m_iblSetLayout }
 			.writeImage(0, *environment.irradiance)
 			.writeImage(1, *environment.prefiltered)
 			.writeImage(2, *environment.brdfLUT)
-			.update(*m_iblSet);
+			.update(m_iblSets[frameInfo.frameIndex]);
 
 		m_pipeline->bind(cmd);
-		m_pipeline->bindDescriptorSet(cmd, 0, *m_gbufferSet);
-		m_pipeline->bindDescriptorSet(cmd, 1, *m_iblSet);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_gbufferSets[frameInfo.frameIndex]);
+		m_pipeline->bindDescriptorSet(cmd, 1, m_iblSets[frameInfo.frameIndex]);
 
 		Tools::vk::cmdDispatch(cmd, frameInfo.swapChainExtent, { 16, 16 });
 	}
@@ -125,6 +116,29 @@ namespace Aegix::Graphics
 		{
 			m_viewMode = static_cast<LightingViewMode>(currentMode);
 		}
+	}
+
+	auto LightingPass::createGBufferSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+	}
+
+	auto LightingPass::createIBLSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
 	}
 
 	void LightingPass::updateLightingUBO(const FrameInfo& frameInfo)
