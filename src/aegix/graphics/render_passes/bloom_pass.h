@@ -41,6 +41,9 @@ namespace Aegix::Graphics
 		virtual void drawUI() override;
 
 	private:
+		auto createThresholdDescriptorSetLayout() -> DescriptorSetLayout;
+		auto createDownsampleDescriptorSetLayout() -> DescriptorSetLayout;
+		auto createUpsampleDescriptorSetLayout() -> DescriptorSetLayout;
 		void extractBrightRegions(VkCommandBuffer cmd, const FrameInfo& frameInfo);
 		void downSample(VkCommandBuffer cmd, Texture& bloom);
 		void upSample(VkCommandBuffer cmd, Texture& bloom);
@@ -55,16 +58,16 @@ namespace Aegix::Graphics
 		BloomDownsample m_downsample;
 		BloomUpsample m_upsample;
 
-		std::unique_ptr<DescriptorSetLayout> m_thresholdSetLayout;
-		std::unique_ptr<DescriptorSet> m_thresholdSet;
+		DescriptorSetLayout m_thresholdSetLayout;
+		DescriptorSet m_thresholdSet;
 		std::unique_ptr<Pipeline> m_thresholdPipeline;
 
+		DescriptorSetLayout m_downsampleSetLayout;
+		std::vector<DescriptorSet> m_downsampleSets;
 		std::unique_ptr<Pipeline> m_downsamplePipeline;
-		std::unique_ptr<DescriptorSetLayout> m_downsampleSetLayout;
-		std::vector<std::unique_ptr<DescriptorSet>> m_downsampleSets;
 
+		DescriptorSetLayout m_upsampleSetLayout;
+		std::vector<DescriptorSet> m_upsampleSets;
 		std::unique_ptr<Pipeline> m_upsamplePipeline;
-		std::unique_ptr<DescriptorSetLayout> m_upsampleSetLayout;
-		std::vector<std::unique_ptr<DescriptorSet>> m_upsampleSets;
 	};
 }

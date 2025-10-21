@@ -6,16 +6,17 @@
 
 namespace Aegix::Graphics
 {
-	SkyBoxPass::SkyBoxPass()
+	SkyBoxPass::SkyBoxPass() : 
+		m_descriptorSetLayout{ createDescriptorSetLayout() }
 	{
-		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.buildUnique();
-
-		m_descriptorSet = std::make_unique<DescriptorSet>(*m_descriptorSetLayout);
+		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
+		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			m_descriptorSets.emplace_back(m_descriptorSetLayout);
+		}
 
 		m_pipeline = Pipeline::GraphicsBuilder{}
-			.addDescriptorSetLayout(*m_descriptorSetLayout)
+			.addDescriptorSetLayout(m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
 			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
 			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.frag.spv")
@@ -97,9 +98,9 @@ namespace Aegix::Graphics
 
 		VkCommandBuffer cmd = frameInfo.cmd;
 
-		DescriptorWriter{ *m_descriptorSetLayout }
+		DescriptorWriter{ m_descriptorSetLayout }
 			.writeImage(0, environment.skybox->descriptorImageInfo())
-			.update(*m_descriptorSet);
+			.update(m_descriptorSets[frameInfo.frameIndex]);
 
 		auto& sceneColorTexture = resources.texture(m_sceneColor);
 		auto& depthTexture = resources.texture(m_depth);
@@ -127,7 +128,7 @@ namespace Aegix::Graphics
 		
 		m_pipeline->bind(cmd);
 		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
-		m_pipeline->bindDescriptorSet(cmd, 0, *m_descriptorSet);
+		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSets[frameInfo.frameIndex]);
 
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
@@ -136,5 +137,12 @@ namespace Aegix::Graphics
 		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);
+	}
+
+	auto SkyBoxPass::createDescriptorSetLayout() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.build();
 	}
 }

@@ -22,11 +22,13 @@ namespace Aegix::Graphics
 		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
 
 	private:
+		auto createDescriptorSetLayout() -> DescriptorSetLayout;
+
 		FrameGraphResourceHandle m_sceneColor;
 		FrameGraphResourceHandle m_depth;
 
-		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
-		std::unique_ptr<DescriptorSet> m_descriptorSet;
+		DescriptorSetLayout m_descriptorSetLayout;
+		std::vector<DescriptorSet> m_descriptorSets;
 		std::unique_ptr<Pipeline> m_pipeline;
 
 		std::unique_ptr<Buffer> m_vertexBuffer;

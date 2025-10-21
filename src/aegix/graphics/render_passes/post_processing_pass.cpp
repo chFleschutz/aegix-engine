@@ -27,11 +27,11 @@ namespace Aegix::Graphics
 			FrameGraphResourceUsage::Compute
 			});
 
-		//m_bloom = builder.add({
-		//	"Bloom",
-		//	FrameGraphResourceType::Reference,
-		//	FrameGraphResourceUsage::Compute,
-		//	});
+		m_bloom = builder.add({
+			"Bloom",
+			FrameGraphResourceType::Reference,
+			FrameGraphResourceUsage::Compute,
+			});
 
 		m_final = builder.add({
 			"Final",
@@ -46,7 +46,7 @@ namespace Aegix::Graphics
 
 		return FrameGraphNodeCreateInfo{
 			.name = "Post Processing",
-			.inputs = { m_sceneColor/*, m_bloom*/ },
+			.inputs = { m_sceneColor, m_bloom },
 			.outputs = { m_final }
 		};
 	}
@@ -61,7 +61,7 @@ namespace Aegix::Graphics
 		DescriptorWriter{ m_descriptorSetLayout }
 			.writeImage(0, resources.texture(m_final))
 			.writeImage(1, resources.texture(m_sceneColor))
-			//.writeImage(2, resources.texture(m_bloom))
+			.writeImage(2, resources.texture(m_bloom))
 			.update(m_descriptorSets[frameInfo.frameIndex]);
 
 		VkCommandBuffer cmd = frameInfo.cmd;

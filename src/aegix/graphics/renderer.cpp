@@ -124,18 +124,20 @@ namespace Aegix::Graphics
 		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
 		geoPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Opaque);
 
-		//auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
-		//transparentPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Transparent);
-		//transparentPass.addRenderSystem<PointLightRenderSystem>();
+		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
+		transparentPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Transparent);
+		transparentPass.addRenderSystem<PointLightRenderSystem>();
 
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
-
-		//m_frameGraph.add<UIPass>();
+		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
-		//m_frameGraph.add<BloomPass>();
+		m_frameGraph.add<BloomPass>();
+		m_frameGraph.add<SkyBoxPass>();
+
+		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
+		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
-		//m_frameGraph.add<SkyBoxPass>();
 
 		m_frameGraph.compile();
 	}
