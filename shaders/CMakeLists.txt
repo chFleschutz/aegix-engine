@@ -1,38 +1,43 @@
-# Compile glsl shader files into SPIR-V
+# Compile shader files into SPIR-V
 
 set(SHADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-find_program(GLSLC_EXE glslc REQUIRED)
-find_program(SLANGC_EXE slangc REQUIRED)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(SLANG_OPT_FLAG -O0)
-    set(SLANG_DEBUG_FLAG -g)
-else()
-    set(SLANG_OPT_FLAG -O3)
-    set(SLANG_DEBUG_FLAG )
+find_program(GLSLC_EXE glslc 
+    HINTS "$ENV{VULKAN_SDK}/bin" "$ENV{VULKAN_SDK}/Bin"
+    CACHE FILEPATH "Path to glslc compiler"
+    REQUIRED
+)
+if(NOT GLSLC_EXE)
+    message(FATAL_ERROR "glslc was not found. Make sure glslc is included in the Vulkan SDK")
 endif()
 
-file(GLOB_RECURSE GLSL_SOURCES 
-    *.glsl 
-    *.vert
-    *.tesc
-    *.tese
-    *.geom
-    *.frag
-    *.comp 
-    *.task
-    *.mesh
+find_program(SLANGC_EXE slangc 
+    HINTS "$ENV{VULKAN_SDK}/bin" "$ENV{VULKAN_SDK}/Bin"
+    CACHE FILEPATH "Path to slangc compiler"
+    REQUIRED
 )
+if(NOT SLANGC_EXE)
+    message(FATAL_ERROR "slangc was not found. Make sure slangc is included in the Vulkan SDK")
+endif()
 
-file(GLOB_RECURSE SLANG_SOURCES 
-    "pbr/default_geometry.slang"
-    "pbr/mesh_geometry.slang"
-    "pbr/pbr_lighting.slang"
-)
+message(STATUS "Using glslc: ${GLSLC_EXE}")
+message(STATUS "Using slangc: ${SLANGC_EXE}")
 
 set(SPIRV_FILES "")
 
 # Compile GLSL shaders
+file(GLOB_RECURSE GLSL_SOURCES CONFIGURE_DEPENDS
+    "${SHADERS_DIR}/*.glsl"
+    "${SHADERS_DIR}/*.vert"
+    "${SHADERS_DIR}/*.tesc"
+    "${SHADERS_DIR}/*.tese"
+    "${SHADERS_DIR}/*.geom"
+    "${SHADERS_DIR}/*.frag"
+    "${SHADERS_DIR}/*.comp"
+    "${SHADERS_DIR}/*.task"
+    "${SHADERS_DIR}/*.mesh"
+)
+
 foreach(GLSL ${GLSL_SOURCES})
     file(RELATIVE_PATH REL_PATH ${SHADERS_DIR} ${GLSL})
     set(SPIRV ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH}.spv)
@@ -44,14 +49,23 @@ foreach(GLSL ${GLSL_SOURCES})
 
     add_custom_command(
         OUTPUT ${SPIRV}
-        COMMAND ${GLSLC_EXE} --target-env=vulkan1.3 -o ${SPIRV} ${GLSL} 
+        COMMAND ${GLSLC_EXE} ${GLSL} 
+            --target-env=vulkan1.3 
+            -o ${SPIRV}
         DEPENDS ${GLSL}
         COMMENT "Compiling GLSL Shader: ${REL_PATH}"
         VERBATIM
+        COMMAND_EXPAND_LISTS
     )
 endforeach()
 
 # Compile Slang shaders
+file(GLOB_RECURSE SLANG_SOURCES CONFIGURE_DEPENDS
+    "${SHADERS_DIR}/*.slang"
+)
+# Modules cant be compiled directly
+list(FILTER SLANG_SOURCES EXCLUDE REGEX ".*/modules/.*")
+
 foreach(SLANG ${SLANG_SOURCES})
     file(RELATIVE_PATH REL_PATH ${SHADERS_DIR} ${SLANG})
     set(SLANG_SPIRV ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH}.spv)
@@ -68,11 +82,12 @@ foreach(SLANG ${SLANG_SOURCES})
             -profile spirv_1_6 
             -o ${SLANG_SPIRV} 
             -fvk-use-entrypoint-name 
-            ${SLANG_OPT_FLAG} 
-            ${SLANG_DEBUG_FLAG}
+            $<$<CONFIG:Debug>:-O0> $<$<CONFIG:Release>:-O3>
+            $<$<CONFIG:Debug>:-g>
         DEPENDS ${SLANG}
         COMMENT "Compiling Slang Shader: ${REL_PATH}"
         VERBATIM
+        COMMAND_EXPAND_LISTS
     )
 endforeach()
 
