@@ -8,7 +8,6 @@ add_subdirectory(aegix)
 target_include_directories(aegix-engine PUBLIC 
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/aegix
-	${CMAKE_SOURCE_DIR}/external/stb
 )
 
 target_link_libraries(aegix-engine 
@@ -21,6 +20,7 @@ target_link_libraries(aegix-engine
 		imgui
 		imguizmo
 		meshoptimizer
+		stb
 		tinyobjloader
 		GPUOpen::VulkanMemoryAllocator
 		volk::volk_headers
