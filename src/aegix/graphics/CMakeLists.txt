@@ -40,15 +40,12 @@ target_sources(aegix-engine PRIVATE
 	"resources/material_instance.h"
 	"resources/material_template.cpp"
 	"resources/material_template.h"
+	"resources/mesh_preprocessor.cpp"
+	"resources/mesh_preprocessor.h" 
 	"resources/sampler.cpp"
 	"resources/sampler.h"
 	"resources/texture.cpp"
 	"resources/texture.h"
-
-	
-	
-	"resources/mesh_preprocessor.cpp"
-	"resources/mesh_preprocessor.h" 
 	
 	"vulkan/debug_utils.h" 
 	"vulkan/debug_utils.cpp"
@@ -63,6 +60,8 @@ target_sources(aegix-engine PRIVATE
 	"deletion_queue.h"
 	"descriptors.cpp"
 	"descriptors.h"
+	"bindless_descriptor_set.cpp"
+	"bindless_descriptor_set.h" 
 	"device.cpp"
 	"device.h"
 	"frame_info.h"
@@ -76,5 +75,4 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
-
 )
