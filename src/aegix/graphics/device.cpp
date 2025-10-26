@@ -541,59 +541,72 @@ namespace Aegix::Graphics
 
 	auto VulkanDevice::checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool
 	{
-		VkPhysicalDeviceVulkan13Features vulkan13features{
-			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+		VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
 			.pNext = nullptr,
 		};
 
-		VkPhysicalDeviceVulkan12Features vulkan12features{
+		VkPhysicalDeviceVulkan13Features vulkan13Features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+			.pNext = &meshShaderFeatures,
+		};
+
+		VkPhysicalDeviceVulkan12Features vulkan12Features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
-			.pNext = &vulkan13features,
+			.pNext = &vulkan13Features,
 		};
 
-		VkPhysicalDeviceVulkan11Features vulkan11features{
+		VkPhysicalDeviceVulkan11Features vulkan11Features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
-			.pNext = &vulkan12features,
+			.pNext = &vulkan12Features,
 		};
 
-		VkPhysicalDeviceFeatures2 vulkan{
+		VkPhysicalDeviceFeatures2 vulkan10{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-			.pNext = &vulkan11features,
+			.pNext = &vulkan11Features,
 		};
 
-		vkGetPhysicalDeviceFeatures2(device, &vulkan);
+		vkGetPhysicalDeviceFeatures2(device, &vulkan10);
 
-		if (!vulkan.features.samplerAnisotropy)
+		if (!vulkan10.features.samplerAnisotropy)
 			return false;
 
 		// Bindless
-		if (!vulkan12features.descriptorIndexing ||
-			!vulkan12features.shaderSampledImageArrayNonUniformIndexing ||
-			!vulkan12features.shaderStorageBufferArrayNonUniformIndexing ||
-			!vulkan12features.shaderStorageImageArrayNonUniformIndexing ||
-			!vulkan12features.descriptorBindingSampledImageUpdateAfterBind ||
-			!vulkan12features.descriptorBindingStorageImageUpdateAfterBind ||
-			!vulkan12features.descriptorBindingStorageBufferUpdateAfterBind ||
-			!vulkan12features.descriptorBindingPartiallyBound ||
-			!vulkan12features.descriptorBindingVariableDescriptorCount ||
-			!vulkan12features.runtimeDescriptorArray)
+		if (!vulkan12Features.descriptorIndexing ||
+			!vulkan12Features.shaderSampledImageArrayNonUniformIndexing ||
+			!vulkan12Features.shaderStorageBufferArrayNonUniformIndexing ||
+			!vulkan12Features.shaderStorageImageArrayNonUniformIndexing ||
+			!vulkan12Features.descriptorBindingSampledImageUpdateAfterBind ||
+			!vulkan12Features.descriptorBindingStorageImageUpdateAfterBind ||
+			!vulkan12Features.descriptorBindingStorageBufferUpdateAfterBind ||
+			!vulkan12Features.descriptorBindingPartiallyBound ||
+			!vulkan12Features.descriptorBindingVariableDescriptorCount ||
+			!vulkan12Features.runtimeDescriptorArray)
 			return false;
 
 		// 8-bit storage
-		if (!vulkan12features.shaderInt8 ||
-			!vulkan12features.storageBuffer8BitAccess ||
-			!vulkan12features.uniformAndStorageBuffer8BitAccess ||
-			!vulkan12features.storagePushConstant8)
+		if (!vulkan12Features.shaderInt8 ||
+			!vulkan12Features.storageBuffer8BitAccess ||
+			!vulkan12Features.uniformAndStorageBuffer8BitAccess ||
+			!vulkan12Features.storagePushConstant8)
 			return false;
 
-		if (!vulkan13features.dynamicRendering ||
-			!vulkan13features.maintenance4 ||
-			!vulkan13features.shaderDemoteToHelperInvocation)
+		if (!vulkan13Features.dynamicRendering ||
+			!vulkan13Features.maintenance4 ||
+			!vulkan13Features.shaderDemoteToHelperInvocation)
 			return false;
 
 		// TODO: Add mesh shader as optional feature
-		if (!m_features.meshShaderEXT.meshShader || !m_features.meshShaderEXT.taskShader)
+		if (!meshShaderFeatures.meshShader || !meshShaderFeatures.taskShader)
 			return false;
+
+		m_features = {
+			.core = vulkan10,
+			.v11 = vulkan11Features,
+			.v12 = vulkan12Features,
+			.v13 = vulkan13Features,
+			.meshShaderEXT = meshShaderFeatures,
+		};
 
 		return true;
 	}
