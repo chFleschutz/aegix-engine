@@ -58,28 +58,23 @@ namespace Aegix::Graphics
 	class BindlessDescriptorSet
 	{
 	public:
-		BindlessDescriptorSet()
-		{
-			// Create bindless descriptor pool
-			// Create global descriptor set layout
-			// Allocate global descriptor set
-		}
+		static constexpr uint32_t MAX_TEXTURES = 16 * 1024;			// 16K textures
+		static constexpr uint32_t MAX_STORAGE_IMAGES = 1 * 1024;	// 1K storage images
+		static constexpr uint32_t MAX_STORAGE_BUFFERS = 16 * 1024;  // 16K storage buffers
 
-		~BindlessDescriptorSet()
-		{
-			// Cleanup
-		}
+		BindlessDescriptorSet();
+		~BindlessDescriptorSet();
 
 		auto allocateHandle(const Texture& texture) -> DescriptorHandle
 		{
 			// Allocate a new descriptor handle for the given texture
-			return DescriptorHandle{ 0, 0 };
+			return DescriptorHandle{ 0, DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadOnly, 0 };
 		}
 
 		auto allocateHandle(const Buffer& buffer) -> DescriptorHandle
 		{
 			// Allocate a new descriptor handle for the given buffer
-			return DescriptorHandle{ 0, 0 };
+			return DescriptorHandle{ 0, DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadOnly, 0 };
 		}
 
 		void freeHandle(DescriptorHandle handle)
@@ -88,7 +83,10 @@ namespace Aegix::Graphics
 		}
 
 	private:
-		// DescriptorPool m_globalPool;
+		auto createDescriptorPool() -> DescriptorPool;
+
+
+		DescriptorPool m_globalPool;
 		// DescriptorSetLayout m_globalSetLayout;
 		// DescriptorSet m_globalDescriptorSet;
 		// std::vector<DescriptorHandle> m_freeHandles;
