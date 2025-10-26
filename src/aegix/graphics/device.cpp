@@ -333,22 +333,36 @@ namespace Aegix::Graphics
 		VkPhysicalDeviceFeatures2 features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
 			.features = VkPhysicalDeviceFeatures{
-				.samplerAnisotropy = VK_TRUE,
+					.samplerAnisotropy = VK_TRUE,
 				},
 		};
 
 		VkPhysicalDeviceVulkan12Features vulkan12Features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+			// 8-bit storage
 			.storageBuffer8BitAccess = VK_TRUE,
 			.uniformAndStorageBuffer8BitAccess = VK_TRUE,
 			.storagePushConstant8 = VK_TRUE,
 			.shaderInt8 = VK_TRUE,
+			// Bindless descriptor sets
+			.descriptorIndexing = VK_TRUE,
+			.shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
+			.shaderStorageBufferArrayNonUniformIndexing = VK_TRUE,
+			.shaderStorageImageArrayNonUniformIndexing = VK_TRUE,
+			.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
+			.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
+			.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
+			.descriptorBindingUpdateUnusedWhilePending = VK_TRUE,
+			.descriptorBindingPartiallyBound = VK_TRUE,
+			.descriptorBindingVariableDescriptorCount = VK_TRUE,
+			.runtimeDescriptorArray = VK_TRUE,
+			// Misc
 			.scalarBlockLayout = VK_TRUE,
 		};
 
 		VkPhysicalDeviceVulkan13Features vulkan13Features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
-			.shaderDemoteToHelperInvocation = VK_TRUE,
+			.shaderDemoteToHelperInvocation = VK_TRUE, // SPIRV 1.6 requirement for using 'discard'
 			.dynamicRendering = VK_TRUE,
 			.maintenance4 = VK_TRUE,
 		};
@@ -527,12 +541,59 @@ namespace Aegix::Graphics
 
 	auto VulkanDevice::checkDeviceFeatureSupport(VkPhysicalDevice device) -> bool
 	{
-		VkPhysicalDeviceFeatures features;
-		vkGetPhysicalDeviceFeatures(device, &features);
-		if (!features.samplerAnisotropy)
+		VkPhysicalDeviceVulkan13Features vulkan13features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+			.pNext = nullptr,
+		};
+
+		VkPhysicalDeviceVulkan12Features vulkan12features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+			.pNext = &vulkan13features,
+		};
+
+		VkPhysicalDeviceVulkan11Features vulkan11features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
+			.pNext = &vulkan12features,
+		};
+
+		VkPhysicalDeviceFeatures2 vulkan{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+			.pNext = &vulkan11features,
+		};
+
+		vkGetPhysicalDeviceFeatures2(device, &vulkan);
+
+		if (!vulkan.features.samplerAnisotropy)
 			return false;
 
-		// TODO: check for more features (dynamic rendering, mesh shaders, etc.)
+		// Bindless
+		if (!vulkan12features.descriptorIndexing ||
+			!vulkan12features.shaderSampledImageArrayNonUniformIndexing ||
+			!vulkan12features.shaderStorageBufferArrayNonUniformIndexing ||
+			!vulkan12features.shaderStorageImageArrayNonUniformIndexing ||
+			!vulkan12features.descriptorBindingSampledImageUpdateAfterBind ||
+			!vulkan12features.descriptorBindingStorageImageUpdateAfterBind ||
+			!vulkan12features.descriptorBindingStorageBufferUpdateAfterBind ||
+			!vulkan12features.descriptorBindingPartiallyBound ||
+			!vulkan12features.descriptorBindingVariableDescriptorCount ||
+			!vulkan12features.runtimeDescriptorArray)
+			return false;
+
+		// 8-bit storage
+		if (!vulkan12features.shaderInt8 ||
+			!vulkan12features.storageBuffer8BitAccess ||
+			!vulkan12features.uniformAndStorageBuffer8BitAccess ||
+			!vulkan12features.storagePushConstant8)
+			return false;
+
+		if (!vulkan13features.dynamicRendering ||
+			!vulkan13features.maintenance4 ||
+			!vulkan13features.shaderDemoteToHelperInvocation)
+			return false;
+
+		// TODO: Add mesh shader as optional feature
+		if (!m_features.meshShaderEXT.meshShader || !m_features.meshShaderEXT.taskShader)
+			return false;
 
 		return true;
 	}
