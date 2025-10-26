@@ -40,10 +40,10 @@ namespace Aegix::Graphics
 			static_assert(sizeof(DescriptorHandle) == sizeof(uint32_t), "DescriptorHandle size must be 4 bytes");
 			static_assert(INDEX_BITS + TYPE_BITS + ACCESS_BITS + VERSION_BITS == 32, "DescriptorHandle bit allocation must sum to 32 bits");
 
-			AGX_ASSERT(index <= INDEX_MASK, "DescriptorHandle index out of bounds");
-			AGX_ASSERT(static_cast<uint32_t>(type) <= TYPE_MASK, "DescriptorHandle type out of bounds");
-			AGX_ASSERT(static_cast<uint32_t>(access) <= ACCESS_MASK, "DescriptorHandle access out of bounds");
-			AGX_ASSERT(version <= VERSION_MASK, "DescriptorHandle version out of bounds");
+			AGX_ASSERT_X(index <= INDEX_MASK, "DescriptorHandle index out of bounds");
+			AGX_ASSERT_X(static_cast<uint32_t>(type) <= TYPE_MASK, "DescriptorHandle type out of bounds");
+			AGX_ASSERT_X(static_cast<uint32_t>(access) <= ACCESS_MASK, "DescriptorHandle access out of bounds");
+			AGX_ASSERT_X(version <= VERSION_MASK, "DescriptorHandle version out of bounds");
 		}
 
 		[[nodiscard]] auto index() const -> uint32_t { return handle & INDEX_MASK; }
@@ -84,10 +84,10 @@ namespace Aegix::Graphics
 
 	private:
 		auto createDescriptorPool() -> DescriptorPool;
-
+		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 
 		DescriptorPool m_globalPool;
-		// DescriptorSetLayout m_globalSetLayout;
+		DescriptorSetLayout m_globalSetLayout;
 		// DescriptorSet m_globalDescriptorSet;
 		// std::vector<DescriptorHandle> m_freeHandles;
 	};
