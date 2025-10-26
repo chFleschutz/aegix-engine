@@ -65,30 +65,12 @@ namespace Aegix::Graphics
 		BindlessDescriptorSet();
 		~BindlessDescriptorSet();
 
-		auto allocateHandle(const Texture& texture) -> DescriptorHandle
-		{
-			// Allocate a new descriptor handle for the given texture
-			return DescriptorHandle{ 0, DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadOnly, 0 };
-		}
-
-		auto allocateHandle(const Buffer& buffer) -> DescriptorHandle
-		{
-			// Allocate a new descriptor handle for the given buffer
-			return DescriptorHandle{ 0, DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadOnly, 0 };
-		}
-
-		void freeHandle(DescriptorHandle handle)
-		{
-			// Free the given descriptor handle
-		}
-
 	private:
 		auto createDescriptorPool() -> DescriptorPool;
 		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 
-		DescriptorPool m_globalPool;
-		DescriptorSetLayout m_globalSetLayout;
-		// DescriptorSet m_globalDescriptorSet;
-		// std::vector<DescriptorHandle> m_freeHandles;
+		DescriptorPool m_bindlessPool;
+		DescriptorSetLayout m_bindlessSetLayout;
+		DescriptorSet m_bindlessDescriptorSet;
 	};
 }

@@ -88,7 +88,7 @@ namespace Aegix::Graphics
 		operator VkDescriptorPool() const { return m_descriptorPool; }
 		auto descriptorPool() const -> VkDescriptorPool { return m_descriptorPool; }
 
-		void allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
+		void allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet) const;
 		void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 		void resetPool();
 
@@ -151,6 +151,7 @@ namespace Aegix::Graphics
 		};
 
 		DescriptorSet(DescriptorSetLayout& setLayout);
+		DescriptorSet(DescriptorSetLayout& setLayout, DescriptorPool& pool);
 		DescriptorSet(const DescriptorSet&) = delete;
 		DescriptorSet(DescriptorSet&&) = default;
 		~DescriptorSet() = default;

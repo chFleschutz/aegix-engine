@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/window.h"
+#include "graphics/bindless_descriptor_set.h"
 #include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
@@ -56,6 +57,7 @@ namespace Aegix::Graphics
 		uint32_t m_currentFrameIndex{ 0 };
 		bool m_isFrameStarted{ false };
 
+		BindlessDescriptorSet m_bindlessDescriptorSet;
 		FrameGraph m_frameGraph;
 	};
 }

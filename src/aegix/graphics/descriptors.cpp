@@ -179,15 +179,16 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const
+	void DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet) const
 	{
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = m_descriptorPool;
-		allocInfo.pSetLayouts = &descriptorSetLayout;
-		allocInfo.descriptorSetCount = 1;
+		VkDescriptorSetAllocateInfo allocInfo{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+			.descriptorPool = m_descriptorPool,
+			.descriptorSetCount = 1,
+			.pSetLayouts = &descriptorSetLayout,
+		};
 
-		VK_CHECK(vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptor))
+		VK_CHECK(vkAllocateDescriptorSets(VulkanContext::device(), &allocInfo, &descriptorSet))
 	}
 
 	void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const
@@ -332,7 +333,12 @@ namespace Aegix::Graphics
 
 	DescriptorSet::DescriptorSet(DescriptorSetLayout& setLayout)
 	{
-		VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), m_descriptorSet);
+		VulkanContext::descriptorPool().allocateDescriptorSet(setLayout, m_descriptorSet);
+	}
+
+	DescriptorSet::DescriptorSet(DescriptorSetLayout& setLayout, DescriptorPool& pool)
+	{
+		pool.allocateDescriptorSet(setLayout, m_descriptorSet);
 	}
 
 	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,
