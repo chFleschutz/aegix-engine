@@ -10,6 +10,13 @@ namespace Aegix::Graphics
 		friend class DescriptorWriter;
 
 	public:
+		struct CreateInfo
+		{
+			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings;
+			VkDescriptorBindingFlags bindingFlags;
+			VkDescriptorSetLayoutCreateFlags flags{ 0 };
+		};
+
 		class Builder
 		{
 		public:
@@ -17,14 +24,16 @@ namespace Aegix::Graphics
 
 			auto addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
 				uint32_t count = 1) -> Builder&;
-			auto buildUnique() const -> std::unique_ptr<DescriptorSetLayout>;
-			auto build() const -> DescriptorSetLayout;
+			auto setBindingFlags(VkDescriptorBindingFlags flags) -> Builder&;
+			auto setFlags(VkDescriptorSetLayoutCreateFlags flags) -> Builder&;
+			auto buildUnique() -> std::unique_ptr<DescriptorSetLayout>;
+			auto build() -> DescriptorSetLayout;
 
 		private:
-			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings{};
+			CreateInfo m_createInfo{};
 		};
 
-		DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+		DescriptorSetLayout(CreateInfo& createInfo);
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
 		DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
 		~DescriptorSetLayout();

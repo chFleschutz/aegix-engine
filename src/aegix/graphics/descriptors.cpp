@@ -11,45 +11,68 @@ namespace Aegix::Graphics
 	auto DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType descriptorType,
 		VkShaderStageFlags stageFlags, uint32_t count) -> DescriptorSetLayout::Builder&
 	{
-		AGX_ASSERT_X(m_bindings.count(binding) == 0, "Binding already in use");
+		AGX_ASSERT_X(m_createInfo.bindings.count(binding) == 0, "Binding already in use");
 
-		VkDescriptorSetLayoutBinding layoutBinding{};
-		layoutBinding.binding = binding;
-		layoutBinding.descriptorType = descriptorType;
-		layoutBinding.descriptorCount = count;
-		layoutBinding.stageFlags = stageFlags;
-		m_bindings[binding] = layoutBinding;
-
+		VkDescriptorSetLayoutBinding layoutBinding{
+			.binding = binding,
+			.descriptorType = descriptorType,
+			.descriptorCount = count,
+			.stageFlags = stageFlags,
+		};
+		m_createInfo.bindings[binding] = layoutBinding;
 		return *this;
 	}
 
-	auto DescriptorSetLayout::Builder::buildUnique() const -> std::unique_ptr<DescriptorSetLayout>
+	auto DescriptorSetLayout::Builder::setBindingFlags(VkDescriptorBindingFlags flags) -> Builder&
 	{
-		return std::make_unique<DescriptorSetLayout>(m_bindings);
+		m_createInfo.bindingFlags = flags;
+		return *this;
 	}
 
-	auto DescriptorSetLayout::Builder::build() const -> DescriptorSetLayout
+	auto DescriptorSetLayout::Builder::setFlags(VkDescriptorSetLayoutCreateFlags flags) -> Builder&
 	{
-		return DescriptorSetLayout{ m_bindings };
+		m_createInfo.flags = flags;
+		return *this;
+	}
+
+	auto DescriptorSetLayout::Builder::buildUnique() -> std::unique_ptr<DescriptorSetLayout>
+	{
+		return std::make_unique<DescriptorSetLayout>(m_createInfo);
+	}
+
+	auto DescriptorSetLayout::Builder::build() -> DescriptorSetLayout
+	{
+		return DescriptorSetLayout{ m_createInfo };
 	}
 
 
 
 	// DescriptorSetLayout -----------------------------------------------------
 
-	DescriptorSetLayout::DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-		: m_bindings{ bindings }
+	DescriptorSetLayout::DescriptorSetLayout(CreateInfo& createInfo)
+		: m_bindings{ std::move(createInfo.bindings) }
 	{
-		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-		for (auto& kv : bindings)
+		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
+		setLayoutBindings.reserve(m_bindings.size());
+		for (const auto& [location, binding] : m_bindings)
 		{
-			setLayoutBindings.push_back(kv.second);
+			setLayoutBindings.emplace_back(binding);
 		}
 
-		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
-		descriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
-		descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
+		std::vector<VkDescriptorBindingFlags> bindingFlagsVector(setLayoutBindings.size(), createInfo.bindingFlags);
+		VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsInfo{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO,
+			.bindingCount = static_cast<uint32_t>(bindingFlagsVector.size()),
+			.pBindingFlags = bindingFlagsVector.data(),
+		};
+
+		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{
+			.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+			.pNext = (createInfo.bindingFlags != 0) ? &bindingFlagsInfo : nullptr,
+			.flags = createInfo.flags,
+			.bindingCount = static_cast<uint32_t>(setLayoutBindings.size()),
+			.pBindings = setLayoutBindings.data(),
+		};
 
 		VK_CHECK(vkCreateDescriptorSetLayout(VulkanContext::device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout))
 	}
@@ -267,7 +290,7 @@ namespace Aegix::Graphics
 	// DescriptorSet Builder -----------------------------------------------------
 
 	DescriptorSet::Builder::Builder(DescriptorSetLayout& setLayout)
-		: m_setLayout{ setLayout }, m_writer{ setLayout,  }
+		: m_setLayout{ setLayout }, m_writer{ setLayout, }
 	{
 	}
 
@@ -312,7 +335,7 @@ namespace Aegix::Graphics
 		VulkanContext::descriptorPool().allocateDescriptorSet(setLayout.descriptorSetLayout(), m_descriptorSet);
 	}
 
-	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, 
+	void DescriptorSet::bind(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout,
 		VkPipelineBindPoint bindPoint) const
 	{
 		vkCmdBindDescriptorSets(commandBuffer, bindPoint, pipelineLayout, 0, 1, &m_descriptorSet, 0, nullptr);
