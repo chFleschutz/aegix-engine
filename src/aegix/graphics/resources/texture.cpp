@@ -2,9 +2,12 @@
 #include "texture.h"
 
 #include "engine.h"
+#include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 namespace Aegix::Graphics
@@ -359,173 +362,6 @@ namespace Aegix::Graphics
 		m_sampler{ info.sampler, m_image.mipLevels() }
 	{
 	}
-
-	//auto Texture::create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>
-	//{
-	//	if (!std::filesystem::exists(texturePath))
-	//	{
-	//		ALOG::fatal("Texture file does not exist: '{}'", texturePath.string());
-	//		AGX_ASSERT_X(false, "Texture file does not exist");
-	//	}
-
-	//	if (texturePath.extension() == ".hdr")
-	//	{
-	//		auto texture = std::make_shared<Texture>();
-	//		texture->createCube(texturePath);
-	//		return texture;
-	//	}
-
-	//	return create(texturePath, VK_FORMAT_R8G8B8A8_UNORM);
-	//}
-
-	//auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
-	//{
-	//	auto texture = std::make_shared<Texture>();
-	//	texture->create2D(texturePath, format);
-	//	return texture;
-	//}
-
-	//auto Texture::create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
-	//{
-	//	auto texture = std::make_shared<Texture>();
-	//	texture->create2D(1, 1, format, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
-	//	texture->m_image.fillRGBA8(color);
-	//	return texture;
-	//}
-
-	//void Texture::create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
-	//{
-	//	m_image.create({ width, height, 1 }, format, usage, mipLevels);
-	//	m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-	//	m_sampler.create(Sampler::CreateInfo{
-	//		.magFilter = VK_FILTER_LINEAR,
-	//		.minFilter = VK_FILTER_LINEAR,
-	//		.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-	//		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-	//		.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-	//		});
-	//}
-
-	//void Texture::create2D(const Image::CreateInfo& config, const Sampler::CreateInfo& samplerConfig)
-	//{
-	//	m_image.create(config);
-	//	m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-	//	m_sampler.create(samplerConfig);
-	//}
-
-	//void Texture::create2D(const std::filesystem::path& path, VkFormat format)
-	//{
-	//	m_image.create(path, format);
-	//	m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-	//	m_sampler.create(Sampler::CreateInfo{
-	//		.magFilter = VK_FILTER_LINEAR,
-	//		.minFilter = VK_FILTER_LINEAR,
-	//		.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-	//		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-	//		.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-	//		});
-	//}
-
-	//void Texture::createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
-	//{
-	//	Image::CreateInfo imageConfig{
-	//		.format = format,
-	//		.extent = { width, height, 1 },
-	//		.mipLevels = mipLevels,
-	//		.layerCount = 6,
-	//		.usage = usage,
-	//		.imageType = VK_IMAGE_TYPE_2D,
-	//		.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
-	//	};
-	//	m_image.create(imageConfig);
-
-	//	ImageView::CreateInfo viewConfig{
-	//		.baseMipLevel = 0,
-	//		.levelCount = m_image.mipLevels(),
-	//		.baseLayer = 0,
-	//		.layerCount = m_image.layerCount(),
-	//		.viewType = VK_IMAGE_VIEW_TYPE_CUBE
-	//	};
-	//	m_view.create(m_image, viewConfig);
-
-	//	m_sampler.create(Sampler::CreateInfo{
-	//		.magFilter = VK_FILTER_LINEAR,
-	//		.minFilter = VK_FILTER_LINEAR,
-	//		.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-	//		.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-	//		.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-	//		});
-	//}
-
-	//void Texture::createCube(const std::filesystem::path& path)
-	//{
-	//	// HDR environment maps are stored as equirectangular images (longitude/latitude 2D image)
-	//	// To convert it to a cubemap, the image is sampled in a compute shader and written to the cubemap 
-
-	//	int width = 0;
-	//	int height = 0;
-	//	int channels = 0;
-	//	auto pixels = stbi_loadf(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
-	//	if (!pixels)
-	//	{
-	//		ALOG::fatal("Failed to load image: '{}'", path.string());
-	//		AGX_ASSERT_X(false, "Failed to load image");
-	//	}
-
-	//	// Upload data to staging buffer
-	//	VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
-	//	Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-	//	stagingBuffer.singleWrite(pixels);
-
-	//	stbi_image_free(pixels);
-
-	//	// Create spherical image
-	//	Texture spherialImage{};
-	//	spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), VK_FORMAT_R32G32B32A32_SFLOAT,
-	//		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
-
-	//	// Create cubemap image
-	//	uint32_t cubeSize = width / 4; // Cubemap needs 4 horizontal faces
-	//	createCube(cubeSize, cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-
-	//	// Create pipeline resources
-	//	auto descriptorSetLayout = DescriptorSetLayout::Builder{}
-	//		.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-	//		.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-	//		.build();
-
-	//	DescriptorSet descriptorSet{ descriptorSetLayout };
-
-	//	DescriptorWriter{ descriptorSetLayout }
-	//		.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-	//		.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
-	//		.update(descriptorSet);
-
-	//	auto pipeline = Pipeline::ComputeBuilder{}
-	//		.addDescriptorSetLayout(descriptorSetLayout)
-	//		.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
-	//		.build();
-
-	//	// Convert spherical image to cubemap
-	//	VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
-	//	Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
-	//	{
-	//		spherialImage.image().copyFrom(cmd, stagingBuffer);
-	//		m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-
-	//		pipeline.bind(cmd);
-	//		pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
-
-	//		constexpr uint32_t groupSize = 16;
-	//		uint32_t groupCountX = (width + groupSize - 1) / groupSize;
-	//		uint32_t groupCountY = (height + groupSize - 1) / groupSize;
-	//		vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
-
-	//		m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	//	}
-	//	Tools::vk::cmdEndDebugUtilsLabel(cmd);
-	//	VulkanContext::device().endSingleTimeCommands(cmd);
-	//}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)
 	{

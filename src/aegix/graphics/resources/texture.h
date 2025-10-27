@@ -22,10 +22,6 @@ namespace Aegix::Graphics
 			Sampler::CreateInfo sampler;
 		};
 
-		//static auto create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>;
-		//static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
-		//static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
-
 		static auto loadFromFile(const std::filesystem::path& file, VkFormat format = VK_FORMAT_R8G8B8A8_UNORM) -> std::shared_ptr<Texture>;
 		static auto loadTextur2D(const std::filesystem::path& file, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto loadCubemap(const std::filesystem::path& file) -> std::shared_ptr<Texture>;
@@ -68,13 +64,6 @@ namespace Aegix::Graphics
 				.imageLayout = layoutOverride,
 			};
 		}
-
-		//void create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS);
-		//void create2D(const Image::CreateInfo& config, const Sampler::CreateInfo& samplerConfig);
-		//void create2D(const std::filesystem::path& path, VkFormat format);
-
-		//void createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS);
-		//void createCube(const std::filesystem::path& path);
 
 		void resize(VkExtent3D newSize, VkImageUsageFlags usage);
 		

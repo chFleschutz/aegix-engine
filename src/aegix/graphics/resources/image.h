@@ -1,9 +1,7 @@
 #pragma once
 
 #include "graphics/resources/buffer.h"
-#include "graphics/vulkan/volk_include.h"
 
-#include <glm/glm.hpp>
 #include <vk_mem_alloc.h>
 
 namespace Aegix::Graphics

@@ -51,42 +51,6 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	//void Sampler::create(const CreateInfo& config)
-	//{
-	//	destroy();
-
-	//	VkSamplerCreateInfo samplerInfo{};
-	//	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	//	samplerInfo.magFilter = config.magFilter;
-	//	samplerInfo.minFilter = config.minFilter;
-	//	samplerInfo.addressModeU = config.addressMode;
-	//	samplerInfo.addressModeV = config.addressMode;
-	//	samplerInfo.addressModeW = config.addressMode;
-	//	samplerInfo.anisotropyEnable = config.anisotropy;
-	//	samplerInfo.maxAnisotropy = VulkanContext::device().properties().limits.maxSamplerAnisotropy;
-	//	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
-	//	samplerInfo.unnormalizedCoordinates = VK_FALSE;
-	//	samplerInfo.compareEnable = VK_FALSE;
-	//	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-	//	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	//	samplerInfo.mipLodBias = 0.0f;
-	//	samplerInfo.minLod = 0.0f;
-	//	samplerInfo.maxLod = config.maxLod;
-
-	//	VK_CHECK(vkCreateSampler(VulkanContext::device(), &samplerInfo, nullptr, &m_sampler));
-	//}
-
-	//void Sampler::create(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy)
-	//{
-	//	CreateInfo config{
-	//		.magFilter = magFilter,
-	//		.minFilter = minFilter,
-	//		.addressMode = addressMode,
-	//		.anisotropy = anisotropy,
-	//	};
-	//	create(config);
-	//}
-
 	void Sampler::destroy()
 	{
 		VulkanContext::destroy(m_sampler);

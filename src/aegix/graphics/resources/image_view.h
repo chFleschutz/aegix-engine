@@ -34,11 +34,6 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto imageView() const -> VkImageView { return m_imageView; }
 
-		//void create(const Image& image, const CreateInfo& config);
-		//void create(const Image& image, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseLayer, uint32_t layerCount);
-		//void create2D(const Image& image, uint32_t baseMipLevel = 0, uint32_t levelCount = 1);
-		//void createCube(const Image& image, uint32_t baseMipLevel = 0, uint32_t levelCount = 1);
-
 	private:
 		void destroy();
 

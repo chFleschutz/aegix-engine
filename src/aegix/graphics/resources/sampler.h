@@ -32,9 +32,6 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto sampler() const -> VkSampler { return m_sampler; }
 
-		//void create(const CreateInfo& config);
-		//void create(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy);
-
 	private:
 		void destroy();
 

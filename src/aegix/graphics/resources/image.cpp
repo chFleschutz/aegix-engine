@@ -1,14 +1,8 @@
 #include "pch.h"
 #include "image.h"
 
-#include "engine.h"
-#include "graphics/descriptors.h"
-#include "graphics/pipeline.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
 
 namespace Aegix::Graphics
 {
@@ -79,14 +73,6 @@ namespace Aegix::Graphics
 
 	void Image::create(const CreateInfo& config)
 	{
-		//destroy();
-
-		//m_format = config.format;
-		//m_extent = config.extent;
-		//m_mipLevels = config.mipLevels;
-		//m_layerCount = config.layerCount;
-		//m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-
 		if (config.mipLevels == CreateInfo::CALCULATE_MIP_LEVELS)
 		{
 			uint32_t maxDim = std::max(config.extent.width, std::max(config.extent.height, config.extent.depth));
@@ -119,88 +105,6 @@ namespace Aegix::Graphics
 
 		VulkanContext::device().createImage(m_image, m_allocation, imageInfo, allocInfo);
 	}
-
-	//void Image::create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels, uint32_t layerCount)
-	//{
-	//	CreateInfo config{
-	//		.format = format,
-	//		.extent = extent,
-	//		.mipLevels = mipLevels,
-	//		.layerCount = layerCount,
-	//		.usage = usage,
-	//	};
-
-	//	create(config);
-	//}
-
-	//void Image::create(const std::filesystem::path& path, VkFormat format)
-	//{
-	//	int texWidth = 0;
-	//	int texHeight = 0;
-	//	int texChannels = 0;
-	//	auto pixels = stbi_load(path.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	//	if (!pixels)
-	//	{
-	//		ALOG::fatal("Failed to load image: '{}'", path.string());
-	//		AGX_ASSERT_X(false, "Failed to load image");
-	//	}
-
-	//	m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };
-	//	VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
-	//	Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-	//	stagingBuffer.singleWrite(pixels);
-
-	//	stbi_image_free(pixels);
-
-	//	CreateInfo config{
-	//		.format = format,
-	//		.extent = m_extent,
-	//		.mipLevels = CreateInfo::CALCULATE_MIP_LEVELS,
-	//		.layerCount = 1,
-	//		.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-	//	};
-	//	create(config);
-
-	//	fill(stagingBuffer);
-	//}
-
-	//void Image::fill(const Buffer& buffer)
-	//{
-	//	VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
-
-	//	Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
-	//	Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
-	//	generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	//	VulkanContext::device().endSingleTimeCommands(cmd);
-	//}
-
-	//void Image::fill(const void* data, VkDeviceSize size)
-	//{
-	//	Buffer stagingBuffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-	//	stagingBuffer.singleWrite(data);
-
-	//	fill(stagingBuffer);
-	//}
-
-	//void Image::fillSFLOAT(const glm::vec4& color)
-	//{
-	//	auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
-	//	std::vector<glm::vec4> pixels(pixelCount, color);
-	//	fill(pixels.data(), sizeof(glm::vec4) * pixelCount);
-	//}
-
-	//void Image::fillRGBA8(const glm::vec4& color)
-	//{
-	//	auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
-	//	uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
-	//	uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
-	//	uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
-	//	uint8_t a = static_cast<uint8_t>(color.a * 255.0f);
-	//	uint32_t rgba = (a << 24) | (b << 16) | (g << 8) | r;
-	//	std::vector<uint32_t> pixels(pixelCount, rgba);
-	//	fill(pixels.data(), sizeof(uint32_t) * pixelCount);
-	//}
 
 	void Image::copyFrom(VkCommandBuffer cmd, const Buffer& src)
 	{
