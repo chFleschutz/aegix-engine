@@ -2,9 +2,9 @@
 #include "ui.h"
 
 #include "core/profiler.h"
-#include "graphics/graphics.h"
 #include "graphics/vulkan/volk_include.h"
 #include "graphics/vulkan/vulkan_context.h"
+#include "graphics/renderer.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -14,10 +14,9 @@
 
 namespace Aegix::UI
 {
-	UI::UI(Graphics::Graphics& graphics, Core::LayerStack& layerStack)
+	UI::UI(Graphics::Renderer& renderer, Core::LayerStack& layerStack)
 		: m_layerStack{ layerStack }
 	{
-		auto& renderer = graphics.renderer();
 		auto& device = Graphics::VulkanContext::device();
 		auto& window = renderer.window();
 

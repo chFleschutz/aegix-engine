@@ -2,11 +2,11 @@
 
 #include "core/window.h"
 #include "graphics/bindless_descriptor_set.h"
-#include "graphics/descriptors.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
 #include "scene/scene.h"
+#include "vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
@@ -52,6 +52,7 @@ namespace Aegix::Graphics
 		void endFrame();
 
 		Core::Window& m_window;
+		VulkanContext& m_vulkanContext;
 		
 		SwapChain m_swapChain;
 		std::array<FrameContext, MAX_FRAMES_IN_FLIGHT> m_frames;

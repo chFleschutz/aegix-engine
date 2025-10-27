@@ -2,8 +2,6 @@
 #include "renderer.h"
 
 #include "core/profiler.h"
-#include "graphics/frame_graph/frame_graph_blackboard.h"
-#include "graphics/render_context.h"
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
@@ -20,8 +18,10 @@
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Core::Window& window)
-		: m_window{ window }, m_swapChain{ window.extent() }
+	Renderer::Renderer(Core::Window& window) : 
+		m_window{ window }, 
+		m_vulkanContext{ VulkanContext::initialize(m_window) },
+		m_swapChain{ window.extent() }
 	{
 		createFrameContext();
 		createFrameGraph();
