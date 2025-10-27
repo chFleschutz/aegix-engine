@@ -257,13 +257,15 @@ namespace Aegix::Graphics
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
 			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple images to a single descriptor");
 
-			VkWriteDescriptorSet write{};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.descriptorType = bindingDesc.descriptorType;
-			write.dstBinding = binding;
-			write.pImageInfo = &info;
-			write.descriptorCount = 1;
-			write.dstSet = set;
+			VkWriteDescriptorSet write{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = set,
+				.dstBinding = binding,
+				.dstArrayElement = 0, 
+				.descriptorCount = 1,
+				.descriptorType = bindingDesc.descriptorType,
+				.pImageInfo = &info,
+			};
 			writes.emplace_back(write);
 		}
 
@@ -273,13 +275,15 @@ namespace Aegix::Graphics
 			auto& bindingDesc = m_setLayout.m_bindings[binding];
 			AGX_ASSERT_X(bindingDesc.descriptorCount == 1, "Cannot write multiple buffers to a single descriptor");
 
-			VkWriteDescriptorSet write{};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.descriptorType = bindingDesc.descriptorType;
-			write.dstBinding = binding;
-			write.pBufferInfo = &info;
-			write.descriptorCount = 1;
-			write.dstSet = set;
+			VkWriteDescriptorSet write{
+				.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+				.dstSet = set,
+				.dstBinding = binding,
+				.dstArrayElement = 0,
+				.descriptorCount = 1,
+				.descriptorType = bindingDesc.descriptorType,
+				.pBufferInfo = &info,
+			};
 			writes.emplace_back(write);
 		}
 
