@@ -27,6 +27,8 @@ namespace Aegix::Graphics
 
 	void DescriptorHandle::recycle(Type type, Access access)
 	{
+		AGX_ASSERT_X(isValid(), "Cannot recycle an invalid DescriptorHandle");
+
 		constexpr uint32_t maxVersion = VERSION_MASK + 1;
 		m_handle = createHandle(index(), type, access, (version() + 1) % maxVersion);
 	}
@@ -55,6 +57,7 @@ namespace Aegix::Graphics
 
 	void DescriptorHandleCache::free(const DescriptorHandle& handle)
 	{
+		AGX_ASSERT_X(handle.isValid(), "Cannot free an invalid DescriptorHandle!");
 		AGX_ASSERT_X(handle.index() < m_capacity, "DescriptorHandle index out of bounds!");
 		m_availableHandles.emplace_back(handle);
 	}

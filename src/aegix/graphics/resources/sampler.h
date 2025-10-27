@@ -7,17 +7,20 @@ namespace Aegix::Graphics
 	class Sampler
 	{
 	public:
-		struct Config
+		struct CreateInfo
 		{
+			static constexpr float USE_MIP_LEVELS = -1.0f;
+
 			VkFilter magFilter = VK_FILTER_LINEAR;
 			VkFilter minFilter = VK_FILTER_LINEAR;
 			VkSamplerAddressMode addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 			VkSamplerMipmapMode mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-			float maxLod = 0.0f;
+			float maxLod = USE_MIP_LEVELS;
 			bool anisotropy = true;
 		};
 
 		Sampler() = default;
+		explicit Sampler(const CreateInfo& config, uint32_t mipLevels = 1);
 		Sampler(const Sampler&) = delete;
 		Sampler(Sampler&& other) noexcept;
 		~Sampler();
@@ -29,8 +32,8 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto sampler() const -> VkSampler { return m_sampler; }
 
-		void create(const Config& config);
-		void create(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy);
+		//void create(const CreateInfo& config);
+		//void create(VkFilter magFilter, VkFilter minFilter, VkSamplerAddressMode addressMode, bool anisotropy);
 
 	private:
 		void destroy();

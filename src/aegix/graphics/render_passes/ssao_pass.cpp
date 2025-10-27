@@ -62,10 +62,11 @@ namespace Aegix::Graphics
 			n.y = dis(gen) * 2.0f - 1.0f;
 		}
 
-		m_ssaoNoise = std::make_unique<Texture>();
-		m_ssaoNoise->create2D(NOISE_SIZE, NOISE_SIZE, VK_FORMAT_R16G16_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL | VK_IMAGE_USAGE_SAMPLED_BIT);
-		m_ssaoNoise->image().fill(noise.data(), sizeof(glm::vec2) * noise.size());
-		m_ssaoNoise->image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		auto texInfo = Texture::CreateInfo::texture2D(NOISE_SIZE, NOISE_SIZE, VK_FORMAT_R16G16_UNORM);
+		texInfo.image.mipLevels = 1;
+		m_ssaoNoise = Texture{ texInfo };
+		m_ssaoNoise.image().upload(noise.data(), sizeof(glm::vec2) * noise.size());
+		m_ssaoNoise.image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	auto SSAOPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
@@ -115,7 +116,7 @@ namespace Aegix::Graphics
 			.writeImage(0, resources.texture(m_ssao))
 			.writeImage(1, resources.texture(m_position))
 			.writeImage(2, resources.texture(m_normal))
-			.writeImage(3, *m_ssaoNoise)
+			.writeImage(3, m_ssaoNoise)
 			.writeBuffer(4, m_ssaoSamples)
 			.writeBuffer(5, m_uniforms, frameInfo.frameIndex)
 			.update(*m_descriptorSet);

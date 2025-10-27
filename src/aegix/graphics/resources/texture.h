@@ -12,14 +12,33 @@ namespace Aegix::Graphics
 	class Texture : public Core::Asset
 	{
 	public:
-		static auto create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>;
-		static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
-		static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
-		static auto createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
-		static auto createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
-		static auto createBRDFLUT() -> std::shared_ptr<Texture>;
+		struct CreateInfo
+		{
+			static auto texture2D(uint32_t width, uint32_t height, VkFormat format) -> CreateInfo;
+			static auto cubeMap(uint32_t size, VkFormat format) -> CreateInfo;
+
+			Image::CreateInfo image;
+			ImageView::CreateInfo view;
+			Sampler::CreateInfo sampler;
+		};
+
+		//static auto create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>;
+		//static auto create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>;
+		//static auto create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>;
+
+		static auto loadFromFile(const std::filesystem::path& file, VkFormat format = VK_FORMAT_R8G8B8A8_UNORM) -> std::shared_ptr<Texture>;
+		static auto loadTextur2D(const std::filesystem::path& file, VkFormat format) -> std::shared_ptr<Texture>;
+		static auto loadCubemap(const std::filesystem::path& file) -> std::shared_ptr<Texture>;
+
+		static auto solidColor(glm::vec4 color) -> std::shared_ptr<Texture>;
+		static auto solidColorCube(glm::vec4 color) -> std::shared_ptr<Texture>;
+
+		static auto irradianceMap(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
+		static auto prefilteredMap(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>;
+		static auto BRDFLUT() -> std::shared_ptr<Texture>;
 
 		Texture() = default;
+		Texture(const CreateInfo& info);
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) noexcept = default;
 		~Texture() = default;
@@ -33,7 +52,6 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto view() const -> const ImageView& { return m_view; }
 		[[nodiscard]] auto sampler() -> Sampler& { return m_sampler; }
 		[[nodiscard]] auto sampler() const -> const Sampler& { return m_sampler; }
-
 		[[nodiscard]] auto extent() const -> VkExtent3D { return m_image.extent(); }
 		[[nodiscard]] auto extent2D() const -> VkExtent2D { return VkExtent2D{ m_image.width(), m_image.height() }; }
 
@@ -44,19 +62,19 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto descriptorImageInfo(VkImageLayout layoutOverride) const -> VkDescriptorImageInfo
 		{
-			VkDescriptorImageInfo info{};
-			info.sampler = m_sampler.sampler();
-			info.imageView = m_view.imageView();
-			info.imageLayout = layoutOverride;
-			return info;
+			return VkDescriptorImageInfo{
+				.sampler = m_sampler.sampler(),
+				.imageView = m_view.imageView(),
+				.imageLayout = layoutOverride,
+			};
 		}
 
-		void create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::Config::CALCULATE_MIP_LEVELS);
-		void create2D(const Image::Config& config, const Sampler::Config& samplerConfig);
-		void create2D(const std::filesystem::path& path, VkFormat format);
+		//void create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS);
+		//void create2D(const Image::CreateInfo& config, const Sampler::CreateInfo& samplerConfig);
+		//void create2D(const std::filesystem::path& path, VkFormat format);
 
-		void createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::Config::CALCULATE_MIP_LEVELS);
-		void createCube(const std::filesystem::path& path);
+		//void createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS);
+		//void createCube(const std::filesystem::path& path);
 
 		void resize(VkExtent3D newSize, VkImageUsageFlags usage);
 		

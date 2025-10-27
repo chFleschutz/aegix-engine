@@ -30,6 +30,7 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
+		[[nodiscard]] auto bindlessDescriptorSet() -> BindlessDescriptorSet& { return m_bindlessDescriptorSet; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
 		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
 		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }

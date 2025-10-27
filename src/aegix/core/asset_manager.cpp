@@ -15,10 +15,9 @@ namespace Aegix::Core
 
 		// Default Textures
 
-		add("default/texture_black", Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM));
-		add("default/texture_white", Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM));
-		add("default/texture_normal", Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM));
-
+		add("default/texture_black", Texture::solidColor(glm::vec4{ 0.0f }));
+		add("default/texture_white", Texture::solidColor(glm::vec4{ 1.0f }));
+		add("default/texture_normal", Texture::solidColor(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }));
 
 		// Default PBR Material
 		{

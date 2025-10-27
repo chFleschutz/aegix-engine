@@ -33,9 +33,9 @@ public:
 
 		// SKYBOX
 		auto& env = scene.environment().get<Environment>();
-		env.skybox = Graphics::Texture::create(ASSETS_DIR "Environments/KloppenheimSky.hdr");
-		env.irradiance = Graphics::Texture::createIrradiance(env.skybox);
-		env.prefiltered = Graphics::Texture::createPrefiltered(env.skybox);
+		env.skybox = Graphics::Texture::loadFromFile(ASSETS_DIR "Environments/KloppenheimSky.hdr");
+		env.irradiance = Graphics::Texture::irradianceMap(env.skybox);
+		env.prefiltered = Graphics::Texture::prefilteredMap(env.skybox);
 
 		// LIGHTS
 		scene.ambientLight().get<AmbientLight>().intensity = 1.0f;
