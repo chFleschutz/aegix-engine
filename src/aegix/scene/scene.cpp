@@ -93,7 +93,7 @@ namespace Aegix::Scene
 
 		m_skybox = createEntity("Skybox");
 		auto& env = m_skybox.add<Environment>();
-		env.skybox = Graphics::Texture::solidColorCube(glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f });
+		env.skybox = Engine::assets().get<Graphics::Texture>("default/cubemap_black");
 		env.irradiance = env.skybox;
 		env.prefiltered = env.skybox;
 		env.brdfLUT = Graphics::Texture::BRDFLUT();

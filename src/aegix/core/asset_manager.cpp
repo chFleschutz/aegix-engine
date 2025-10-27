@@ -19,6 +19,9 @@ namespace Aegix::Core
 		add("default/texture_white", Texture::solidColor(glm::vec4{ 1.0f }));
 		add("default/texture_normal", Texture::solidColor(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }));
 
+		add("default/cubemap_black", Texture::solidColorCube(glm::vec4{ 0.0f }));
+		add("default/cubemap_white", Texture::solidColorCube(glm::vec4{ 1.0f }));
+
 		// Default PBR Material
 		{
 			auto globalSetLayout = DescriptorSetLayout::Builder{}
