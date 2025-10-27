@@ -1,12 +1,13 @@
 #pragma once
 
 #include "graphics/globals.h"
-#include "graphics/resources/buffer.h"
-#include "graphics/resources/texture.h"
 #include "graphics/vulkan/volk_include.h"
 
 namespace Aegix::Graphics
 {
+	class Buffer;
+	class Texture;
+
 	class DescriptorSetLayout
 	{
 		friend class DescriptorWriter;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "graphics/descriptors.h"
+#include "graphics/resources/buffer.h"
+#include "graphics/resources/texture.h"
 
 namespace Aegix::Graphics
 {

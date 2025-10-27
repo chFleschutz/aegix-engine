@@ -1,8 +1,10 @@
 #include "pch.h"
 #include "descriptors.h"
 
-#include "graphics/vulkan/vulkan_tools.h"
+#include "graphics/resources/buffer.h"
+#include "graphics/resources/texture.h"
 #include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {

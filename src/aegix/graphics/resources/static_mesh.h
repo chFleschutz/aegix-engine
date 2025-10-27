@@ -3,6 +3,8 @@
 #include "graphics/resources/buffer.h"
 #include "graphics/descriptors.h"
 
+#include <glm/glm.hpp>
+
 namespace Aegix::Graphics
 {
 	class StaticMesh
