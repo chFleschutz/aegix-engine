@@ -25,11 +25,14 @@ namespace Aegix::Graphics
 		return DescriptorHandle{ m_nextIndex++, type, access };
 	}
 
-	void DescriptorHandleCache::free(const DescriptorHandle& handle)
+	void DescriptorHandleCache::free(DescriptorHandle& handle)
 	{
-		AGX_ASSERT_X(handle.isValid(), "Cannot free an invalid DescriptorHandle!");
+		if (!handle.isValid())
+			return;
+
 		AGX_ASSERT_X(handle.index() < m_capacity, "DescriptorHandle index out of bounds!");
 		m_availableHandles.emplace_back(handle);
+		handle.invalidate();
 	}
 
 
@@ -103,7 +106,7 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	void BindlessDescriptorSet::freeHandle(const DescriptorHandle& handle)
+	void BindlessDescriptorSet::freeHandle(DescriptorHandle& handle)
 	{
 		switch (handle.type())
 		{

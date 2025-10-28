@@ -13,7 +13,7 @@ namespace Aegix::Graphics
 		DescriptorHandleCache(uint32_t capacity);
 
 		auto fetch(DescriptorHandle::Type type, DescriptorHandle::Access access) -> DescriptorHandle;
-		void free(const DescriptorHandle& handle);
+		void free(DescriptorHandle& handle);
 
 	private:
 		uint32_t m_capacity;
@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 		auto addStorageImage(const Texture& texture) -> DescriptorHandle;
 		auto addStorageBuffer(const Buffer& buffer) -> DescriptorHandle;
 
-		void freeHandle(const DescriptorHandle& handle);
+		void freeHandle(DescriptorHandle& handle);
 
 	private:
 		auto createDescriptorPool() -> DescriptorPool;

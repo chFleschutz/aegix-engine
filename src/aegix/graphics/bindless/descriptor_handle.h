@@ -41,6 +41,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto version() const -> uint32_t { return (m_handle >> (INDEX_BITS + TYPE_BITS + ACCESS_BITS)) & VERSION_MASK; }
 		[[nodiscard]] auto isValid() const -> bool { return m_handle != INVALID_HANDLE; }
 
+		void invalidate() { m_handle = INVALID_HANDLE; }
+
 	private:
 		DescriptorHandle(uint32_t index, Type type, Access access);
 
