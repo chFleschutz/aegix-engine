@@ -1,4 +1,9 @@
 target_sources(aegix-engine PRIVATE
+	"bindless/bindless_descriptor_set.cpp"
+	"bindless/bindless_descriptor_set.h" 
+	"bindless/descriptor_handle.h" 
+	"bindless/descriptor_handle.cpp"
+
 	"frame_graph/frame_graph.cpp"
 	"frame_graph/frame_graph.h"
 	"frame_graph/frame_graph_blackboard.h"
@@ -60,8 +65,6 @@ target_sources(aegix-engine PRIVATE
 	"deletion_queue.h"
 	"descriptors.cpp"
 	"descriptors.h"
-	"bindless_descriptor_set.cpp"
-	"bindless_descriptor_set.h" 
 	"device.cpp"
 	"device.h"
 	"frame_info.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/window.h"
-#include "graphics/bindless_descriptor_set.h"
+#include "graphics/bindless/bindless_descriptor_set.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
