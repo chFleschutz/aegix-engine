@@ -37,9 +37,9 @@ namespace Aegix::Graphics
 		BindlessDescriptorSet();
 		~BindlessDescriptorSet();
 
-		auto addSampledImage(const Texture& texture) -> DescriptorHandle;
-		auto addStorageImage(const Texture& texture) -> DescriptorHandle;
-		auto addStorageBuffer(const Buffer& buffer) -> DescriptorHandle;
+		auto allocateSampledImage(const Texture& texture) -> DescriptorHandle;
+		auto allocateStorageImage(const Texture& texture) -> DescriptorHandle;
+		auto allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle;
 
 		void freeHandle(DescriptorHandle& handle);
 

@@ -49,10 +49,10 @@ namespace Aegix::Graphics
 	{
 	}
 
-	auto BindlessDescriptorSet::addSampledImage(const Texture& texture) -> DescriptorHandle
+	auto BindlessDescriptorSet::allocateSampledImage(const Texture& texture) -> DescriptorHandle
 	{
 		auto handle = m_sampledImageCache.fetch(DescriptorHandle::Type::Texture, DescriptorHandle::Access::ReadOnly);
-		auto textureInfo = texture.descriptorImageInfo();
+		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		VkWriteDescriptorSet write{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -68,10 +68,10 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	auto BindlessDescriptorSet::addStorageImage(const Texture& texture) -> DescriptorHandle
+	auto BindlessDescriptorSet::allocateStorageImage(const Texture& texture) -> DescriptorHandle
 	{
 		auto handle = m_storageImageCache.fetch(DescriptorHandle::Type::RWTexture, DescriptorHandle::Access::ReadWrite);
-		auto textureInfo = texture.descriptorImageInfo();
+		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL);
 
 		VkWriteDescriptorSet write{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -87,7 +87,7 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	auto BindlessDescriptorSet::addStorageBuffer(const Buffer& buffer) -> DescriptorHandle
+	auto BindlessDescriptorSet::allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle
 	{
 		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadWrite);
 		auto bufferInfo = buffer.descriptorInfo();
@@ -108,6 +108,9 @@ namespace Aegix::Graphics
 
 	void BindlessDescriptorSet::freeHandle(DescriptorHandle& handle)
 	{
+		if (!handle.isValid())
+			return;
+
 		switch (handle.type())
 		{
 		case DescriptorHandle::Type::Texture:

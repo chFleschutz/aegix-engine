@@ -361,6 +361,18 @@ namespace Aegix::Graphics
 		m_view{ info.view, m_image },
 		m_sampler{ info.sampler, m_image.mipLevels() }
 	{
+		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+		if (info.image.usage & VK_IMAGE_USAGE_SAMPLED_BIT)
+			m_sampledHandle = bindlessSet.allocateSampledImage(*this);
+
+		if (info.image.usage & VK_IMAGE_USAGE_STORAGE_BIT)
+			m_storageHandle = bindlessSet.allocateStorageImage(*this);
+	}
+
+	Texture::~Texture()
+	{
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_storageHandle);
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_sampledHandle);
 	}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)

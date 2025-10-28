@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/asset.h"
+#include "graphics/bindless/descriptor_handle.h"
 #include "graphics/resources/image.h"
 #include "graphics/resources/image_view.h"
 #include "graphics/resources/sampler.h"
@@ -37,7 +38,7 @@ namespace Aegix::Graphics
 		Texture(const CreateInfo& info);
 		Texture(const Texture&) = delete;
 		Texture(Texture&&) noexcept = default;
-		~Texture() = default;
+		~Texture();
 
 		auto operator=(const Texture&) -> Texture& = delete;
 		auto operator=(Texture&&) noexcept -> Texture& = default;
@@ -50,6 +51,8 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto sampler() const -> const Sampler& { return m_sampler; }
 		[[nodiscard]] auto extent() const -> VkExtent3D { return m_image.extent(); }
 		[[nodiscard]] auto extent2D() const -> VkExtent2D { return VkExtent2D{ m_image.width(), m_image.height() }; }
+		[[nodiscard]] auto sampledDescriptorHandle() const -> DescriptorHandle { return m_sampledHandle; }
+		[[nodiscard]] auto storageDescriptorHandle() const -> DescriptorHandle { return m_storageHandle; }
 
 		[[nodiscard]] auto descriptorImageInfo() const -> VkDescriptorImageInfo
 		{
@@ -71,5 +74,7 @@ namespace Aegix::Graphics
 		Image m_image;
 		ImageView m_view;
 		Sampler m_sampler;
+		DescriptorHandle m_sampledHandle;
+		DescriptorHandle m_storageHandle;
 	};
 }
