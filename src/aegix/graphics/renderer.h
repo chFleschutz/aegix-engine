@@ -37,6 +37,10 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
 		[[nodiscard]] auto frameIndex() const -> uint32_t;
 
+		/// @brief Builds the frame graph and all required resources
+		/// @note This has to be AFTER the engine is fully initialized
+		void compileFrameGraph() { m_frameGraph.compile(); }
+
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);
 

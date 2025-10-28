@@ -138,8 +138,6 @@ namespace Aegix::Graphics
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
-
-		m_frameGraph.compile();
 	}
 
 	void Renderer::beginFrame()

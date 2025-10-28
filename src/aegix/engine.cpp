@@ -9,24 +9,27 @@ namespace Aegix
 {
 	Engine::Engine()
 	{
+		AGX_ASSERT_X(!s_instance, "Only one instance of Engine is allowed");
+		s_instance = this;
+
 		m_assets.loadDefaultAssets();
+		m_renderer.compileFrameGraph();
 		m_layerStack.push<Core::EditorLayer>();
-		
+
 		ALOG::info("Engine Initialized!");
 		Logging::logo();
 	}
 
-	Engine& Engine::instance()
+	auto Engine::instance() -> Engine&
 	{
-		static Engine instance;
-		return instance;
+		AGX_ASSERT_X(s_instance, "Engine instance not created yet");
+		return *s_instance;
 	}
 
 	void Engine::run()
 	{
-		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
-
 		// Main Update loop
+		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
 		while (!m_window.shouldClose())
 		{
 			AGX_PROFILE_SCOPE("Frame Time");
