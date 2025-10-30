@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/bindless/descriptor_handle.h"
 #include "graphics/globals.h"
 #include "graphics/vulkan/volk_include.h"
 
@@ -103,5 +104,6 @@ namespace Aegix::Graphics
 		uint32_t m_instanceCount{ 0 };
 		VkBufferUsageFlags m_usage{ 0 };
 		void* m_mapped{ nullptr};
+		DescriptorHandle m_descriptorHandle;
 	};
 }

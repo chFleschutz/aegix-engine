@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "buffer.h"
 
+#include "engine.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
@@ -87,6 +88,12 @@ namespace Aegix::Graphics
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(VulkanContext::device().allocator(), m_allocation, &allocInfo);
 		m_mapped = allocInfo.pMappedData;
+
+		if (m_usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+		{
+			auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+			m_descriptorHandle = bindlessSet.allocateStorageBuffer(*this);
+		}
 	}
 
 	Buffer::Buffer(Buffer&& other) noexcept
@@ -111,7 +118,7 @@ namespace Aegix::Graphics
 
 	auto Buffer::descriptorBufferInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
 	{
-		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
 			"Requested descriptor buffer info exceeds buffer size");
 		return VkDescriptorBufferInfo{ m_buffer, offset, size };
 	}
@@ -183,7 +190,7 @@ namespace Aegix::Graphics
 	void Buffer::singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
 		AGX_ASSERT_X(data, "Data pointer is null");
-		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
 			"Single write exceeds buffer size");
 		VK_CHECK(vmaCopyMemoryToAllocation(VulkanContext::device().allocator(), data, m_allocation, offset, size));
 	}
@@ -191,7 +198,7 @@ namespace Aegix::Graphics
 	void Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
 		AGX_ASSERT_X(m_mapped, "Called flush on buffer before map");
-		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
 			"Flush range exceeds buffer size");
 		VK_CHECK(vmaFlushAllocation(VulkanContext::device().allocator(), m_allocation, offset, size));
 	}
@@ -212,7 +219,7 @@ namespace Aegix::Graphics
 
 	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
 	{
-		AGX_ASSERT_X((size == VK_WHOLE_SIZE) || (size <= m_bufferSize && size <= dest.m_bufferSize), 
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE) || (size <= m_bufferSize && size <= dest.m_bufferSize),
 			"Copy size exceeds source or destination buffer size");
 		VulkanContext::device().copyBuffer(m_buffer, dest.m_buffer, size);
 	}
@@ -230,6 +237,11 @@ namespace Aegix::Graphics
 		VulkanContext::destroy(m_buffer, m_allocation);
 		m_buffer = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
+
+		if (m_descriptorHandle.isValid())
+		{
+			Engine::renderer().bindlessDescriptorSet().freeHandle(m_descriptorHandle);
+		}
 	}
 
 	void Buffer::moveFrom(Buffer&& other)
