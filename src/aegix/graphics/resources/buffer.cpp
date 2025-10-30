@@ -102,16 +102,20 @@ namespace Aegix::Graphics
 
 	auto Buffer::descriptorBufferInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
 	{
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+			"Requested descriptor buffer info exceeds buffer size");
 		return VkDescriptorBufferInfo{ m_buffer, offset, size };
 	}
 
-	auto Buffer::descriptorBufferInfoFor(int index) const -> VkDescriptorBufferInfo
+	auto Buffer::descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo
 	{
+		AGX_ASSERT_X(index < m_instanceCount, "Requested descriptor buffer info index exceeds instance count");
 		return descriptorBufferInfo(m_alignmentSize, index * m_alignmentSize);
 	}
 
 	void Buffer::map()
 	{
+		AGX_ASSERT_X(!m_mapped, "Buffer is already mapped");
 		VK_CHECK(vmaMapMemory(VulkanContext::device().allocator(), m_allocation, &m_mapped));
 	}
 
@@ -131,15 +135,18 @@ namespace Aegix::Graphics
 
 	void Buffer::write(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + offset, data, size);
 		flush(size, offset);
 	}
 
-	void Buffer::writeToIndex(const void* data, int index)
+	void Buffer::writeToIndex(const void* data, uint32_t index)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
+		AGX_ASSERT_X(index < m_instanceCount, "Requested write index exceeds instance count");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + (index * m_alignmentSize), data, m_instanceSize);
 		flushIndex(index);
@@ -147,6 +154,7 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		if (m_instanceCount == 1)
 		{
 			singleWrite(data, m_instanceSize, 0);
@@ -165,16 +173,23 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+			"Single write exceeds buffer size");
 		VK_CHECK(vmaCopyMemoryToAllocation(VulkanContext::device().allocator(), data, m_allocation, offset, size));
 	}
 
 	void Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(m_mapped, "Called flush on buffer before map");
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize), 
+			"Flush range exceeds buffer size");
 		VK_CHECK(vmaFlushAllocation(VulkanContext::device().allocator(), m_allocation, offset, size));
 	}
 
-	void Buffer::flushIndex(int index)
+	void Buffer::flushIndex(uint32_t index)
 	{
+		AGX_ASSERT_X(index < m_instanceCount, "Requested flush index exceeds instance count");
 		flush(m_alignmentSize, index * m_alignmentSize);
 	}
 
@@ -187,15 +202,15 @@ namespace Aegix::Graphics
 
 	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
 	{
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE) || (size <= m_bufferSize && size <= dest.m_bufferSize), 
+			"Copy size exceeds source or destination buffer size");
 		VulkanContext::device().copyBuffer(m_buffer, dest.m_buffer, size);
 	}
 
 	auto Buffer::computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize
 	{
 		if (minOffsetAlignment > 0)
-		{
 			return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);
-		}
 
 		return instanceSize;
 	}

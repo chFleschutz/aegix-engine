@@ -47,7 +47,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto usage() const -> VkBufferUsageFlags { return m_usage; }
 
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
-		[[nodiscard]] auto descriptorBufferInfoFor(int index) const -> VkDescriptorBufferInfo;
+		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
 
 		/// @brief Map the buffer memory to allow writing to it
 		void map();
@@ -62,7 +62,7 @@ namespace Aegix::Graphics
 
 		/// @brief Writes data of 'instanceSize' to the buffer at an offset of 'index * alignmentSize'
 		/// @note Buffer MUST be mapped before calling
-		void writeToIndex(const void* data, int index);
+		void writeToIndex(const void* data, uint32_t index);
 		void writeToAll(const void* data);
 
 		/// @brief Maps, writes data, then unmaps the buffer
@@ -74,7 +74,7 @@ namespace Aegix::Graphics
 		void flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 		/// @brief Flush the memory range at 'index * alignmentSize'
-		void flushIndex(int index);
+		void flushIndex(uint32_t index);
 
 		/// @brief Uploads data to the buffer using a staging buffer (Used for device local memory)
 		void upload(const void* data, VkDeviceSize size);
