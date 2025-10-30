@@ -45,7 +45,6 @@ namespace Aegix::Graphics
 			return;
 
 		// Update uniform buffer
-		m_uniformBuffer.map();
 		for (const auto& [name, info] : m_template->parameters())
 		{
 			auto it = m_overrides.find(name);
@@ -60,7 +59,6 @@ namespace Aegix::Graphics
 				m_uniformBuffer.write(&defaultValue, info.size, info.offset);
 			}
 		}
-		m_uniformBuffer.unmap();
 		
 		// Update descriptor set (Textures may have changed)
 		DescriptorWriter writer{ m_template->materialSetLayout() };
