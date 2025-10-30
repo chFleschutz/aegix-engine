@@ -8,6 +8,8 @@ namespace Aegix::Graphics
 {
 	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
+		AGX_ASSERT_X(size > 0, "Cannot create uniform buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create uniform buffer with 0 instances");
 		Buffer::CreateInfo info{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
@@ -20,6 +22,8 @@ namespace Aegix::Graphics
 
 	auto Buffer::createStorageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
+		AGX_ASSERT_X(size > 0, "Cannot create storage buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create storage buffer with 0 instances");
 		Buffer::CreateInfo info{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
@@ -32,6 +36,8 @@ namespace Aegix::Graphics
 
 	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer
 	{
+		AGX_ASSERT_X(size > 0, "Cannot create vertex buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create vertex buffer with 0 instances");
 		Buffer::CreateInfo info{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
@@ -44,6 +50,8 @@ namespace Aegix::Graphics
 
 	auto Buffer::createIndexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
+		AGX_ASSERT_X(size > 0, "Cannot create index buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create index buffer with 0 instances");
 		Buffer::CreateInfo info{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
@@ -55,6 +63,7 @@ namespace Aegix::Graphics
 
 	auto Buffer::createStagingBuffer(VkDeviceSize size) -> Buffer
 	{
+		AGX_ASSERT_X(size > 0, "Cannot create staging buffer of size 0");
 		Buffer::CreateInfo info{
 			.instanceSize = size,
 			.instanceCount = 1,
@@ -195,6 +204,7 @@ namespace Aegix::Graphics
 
 	void Buffer::upload(const void* data, VkDeviceSize size)
 	{
+		// TODO: Use a global shared staging buffer (creating a new one for each upload is inefficient)
 		Buffer stagingBuffer = Buffer::createStagingBuffer(size);
 		stagingBuffer.singleWrite(data, size, 0);
 		stagingBuffer.copyTo(*this, size);

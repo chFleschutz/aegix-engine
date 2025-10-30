@@ -42,10 +42,10 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto buffer() const -> VkBuffer { return m_buffer; }
 		[[nodiscard]] auto bufferSize() const -> VkDeviceSize { return m_bufferSize; }
 		[[nodiscard]] auto instanceSize() const -> VkDeviceSize { return m_instanceSize; }
-		[[nodiscard]] auto alignmentSize() const -> VkDeviceSize { return m_instanceSize; }
+		[[nodiscard]] auto alignmentSize() const -> VkDeviceSize { return m_alignmentSize; }
 		[[nodiscard]] auto instanceCount() const -> uint32_t { return m_instanceCount; }
 		[[nodiscard]] auto usage() const -> VkBufferUsageFlags { return m_usage; }
-
+		[[nodiscard]] auto isMapped() const -> bool { return m_mapped != nullptr; }
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
 		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
 
@@ -63,7 +63,6 @@ namespace Aegix::Graphics
 		/// @brief Writes data of 'instanceSize' to the buffer at an offset of 'index * alignmentSize'
 		/// @note Buffer MUST be mapped before calling
 		void writeToIndex(const void* data, uint32_t index);
-		void writeToAll(const void* data);
 
 		/// @brief Maps, writes data, then unmaps the buffer
 		void singleWrite(const void* data);
@@ -85,6 +84,8 @@ namespace Aegix::Graphics
 		template<typename T>
 		void upload(const std::vector<T>& data)
 		{
+			AGX_ASSERT_X(!data.empty(), "Data vector is empty");
+			AGX_ASSERT_X(sizeof(T) * data.size() <= m_bufferSize, "Data size exceeds buffer size");
 			upload(data.data(), sizeof(T) * data.size());
 		}
 
