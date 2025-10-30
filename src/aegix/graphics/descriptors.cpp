@@ -232,13 +232,13 @@ namespace Aegix::Graphics
 
 	auto DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer) -> DescriptorWriter&
 	{
-		m_bufferInfos.emplace_back(binding, buffer.descriptorInfo());
+		m_bufferInfos.emplace_back(binding, buffer.descriptorBufferInfo());
 		return *this;
 	}
 
 	auto DescriptorWriter::writeBuffer(uint32_t binding, const Buffer& buffer, uint32_t index) -> DescriptorWriter&
 	{
-		m_bufferInfos.emplace_back(binding, buffer.descriptorInfoForIndex(index));
+		m_bufferInfos.emplace_back(binding, buffer.descriptorBufferInfoFor(index));
 		return *this;
 	}
 

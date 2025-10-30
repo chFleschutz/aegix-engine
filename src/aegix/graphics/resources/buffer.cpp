@@ -8,43 +8,72 @@ namespace Aegix::Graphics
 {
 	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
-		auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
+		Buffer::CreateInfo info{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+			.minOffsetAlignment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment
+		};
+		return Buffer{ info };
 	}
 
 	auto Buffer::createStorageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
-		auto aligment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment;
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
+		Buffer::CreateInfo info{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
+		};
+		return Buffer{ info };
 	}
 
-	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer
 	{
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+		Buffer::CreateInfo info{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
+		};
+		info.usage |= otherUsage;
+		return Buffer{ info };
 	}
 
 	auto Buffer::createIndexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
 	{
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+		Buffer::CreateInfo info{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
+		};
+		return Buffer{ info };
 	}
 
 	auto Buffer::createStagingBuffer(VkDeviceSize size) -> Buffer
 	{
-		return Buffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		Buffer::CreateInfo info{
+			.instanceSize = size,
+			.instanceCount = 1,
+			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
+		};
+		return Buffer{ info };
 	}
 
 
 
-	Buffer::Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
-		VmaAllocationCreateFlags allocFlags, VkDeviceSize minOffsetAlignment)
-		: m_instanceSize{ instanceSize }, m_instanceCount{ instanceCount }, m_usage{ bufferUsage }
+	Buffer::Buffer(const CreateInfo& info) :
+		m_instanceSize{ info.instanceSize },
+		m_instanceCount{ info.instanceCount },
+		m_usage{ info.usage }
 	{
-		m_alignmentSize = computeAlignment(instanceSize, minOffsetAlignment);
-		m_bufferSize = m_alignmentSize * instanceCount;
-
-		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, bufferUsage, allocFlags, VMA_MEMORY_USAGE_AUTO);
+		m_alignmentSize = computeAlignment(info.instanceSize, info.minOffsetAlignment);
+		m_bufferSize = m_alignmentSize * m_instanceCount;
+		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, m_usage, info.allocFlags, VMA_MEMORY_USAGE_AUTO);
 
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(VulkanContext::device().allocator(), m_allocation, &allocInfo);
@@ -52,18 +81,8 @@ namespace Aegix::Graphics
 	}
 
 	Buffer::Buffer(Buffer&& other) noexcept
-		: m_buffer{ other.m_buffer }, m_allocation{ other.m_allocation },
-		m_bufferSize{ other.m_bufferSize }, m_instanceSize{ other.m_instanceSize }, m_alignmentSize{ other.m_alignmentSize },
-		m_instanceCount{ other.m_instanceCount }, m_usage{ other.m_usage }, m_mapped{ other.m_mapped }
 	{
-		other.m_buffer = VK_NULL_HANDLE;
-		other.m_allocation = VK_NULL_HANDLE;
-		other.m_bufferSize = 0;
-		other.m_instanceSize = 0;
-		other.m_alignmentSize = 0;
-		other.m_instanceCount = 0;
-		other.m_usage = 0;
-		other.m_mapped = nullptr;
+		moveFrom(std::move(other));
 	}
 
 	Buffer::~Buffer()
@@ -74,39 +93,21 @@ namespace Aegix::Graphics
 	auto Buffer::operator=(Buffer&& other) noexcept -> Buffer&
 	{
 		if (this != &other)
-			return *this;
-
-		destroy();
-
-		m_buffer = other.m_buffer;
-		m_allocation = other.m_allocation;
-		m_bufferSize = other.m_bufferSize;
-		m_instanceSize = other.m_instanceSize;
-		m_alignmentSize = other.m_alignmentSize;
-		m_instanceCount = other.m_instanceCount;
-		m_usage = other.m_usage;
-		m_mapped = other.m_mapped;
-
-		other.m_buffer = VK_NULL_HANDLE;
-		other.m_allocation = VK_NULL_HANDLE;
-		other.m_bufferSize = 0;
-		other.m_instanceSize = 0;
-		other.m_alignmentSize = 0;
-		other.m_instanceCount = 0;
-		other.m_usage = 0;
-		other.m_mapped = nullptr;
-
+		{
+			destroy();
+			moveFrom(std::move(other));
+		}
 		return *this;
 	}
 
-	auto Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
+	auto Buffer::descriptorBufferInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
 	{
 		return VkDescriptorBufferInfo{ m_buffer, offset, size };
 	}
 
-	auto Buffer::descriptorInfoForIndex(int index) const -> VkDescriptorBufferInfo
+	auto Buffer::descriptorBufferInfoFor(int index) const -> VkDescriptorBufferInfo
 	{
-		return descriptorInfo(m_alignmentSize, index * m_alignmentSize);
+		return descriptorBufferInfo(m_alignmentSize, index * m_alignmentSize);
 	}
 
 	void Buffer::map()
@@ -204,5 +205,17 @@ namespace Aegix::Graphics
 		VulkanContext::destroy(m_buffer, m_allocation);
 		m_buffer = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
+	}
+
+	void Buffer::moveFrom(Buffer&& other)
+	{
+		m_buffer = std::exchange(other.m_buffer, VK_NULL_HANDLE);
+		m_allocation = std::exchange(other.m_allocation, VK_NULL_HANDLE);
+		m_bufferSize = std::exchange(other.m_bufferSize, 0);
+		m_instanceSize = std::exchange(other.m_instanceSize, 0);
+		m_alignmentSize = std::exchange(other.m_alignmentSize, 0);
+		m_instanceCount = std::exchange(other.m_instanceCount, 0);
+		m_usage = std::exchange(other.m_usage, 0);
+		m_mapped = std::exchange(other.m_mapped, nullptr);
 	}
 }

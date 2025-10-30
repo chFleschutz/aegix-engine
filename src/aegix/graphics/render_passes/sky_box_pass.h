@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 		std::vector<DescriptorSet> m_descriptorSets;
 		std::unique_ptr<Pipeline> m_pipeline;
 
-		std::unique_ptr<Buffer> m_vertexBuffer;
-		std::unique_ptr<Buffer> m_indexBuffer;
+		Buffer m_vertexBuffer;
+		Buffer m_indexBuffer;
 	};
 }

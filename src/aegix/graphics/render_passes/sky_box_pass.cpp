@@ -41,10 +41,8 @@ namespace Aegix::Graphics
 				{-1.0f,  1.0f,  1.0f}
 			};
 
-			VkDeviceSize vertexBufferSize = sizeof(glm::vec3) * vertices.size();
-			m_vertexBuffer = std::make_unique<Buffer>(vertexBufferSize, 1,
-				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			m_vertexBuffer->upload(vertices.data(), vertexBufferSize);
+			m_vertexBuffer = Buffer::createVertexBuffer(sizeof(glm::vec3) * vertices.size());
+			m_vertexBuffer.upload(vertices);
 		}
 
 		// Create index buffer
@@ -58,10 +56,8 @@ namespace Aegix::Graphics
 				5, 4, 0, 0, 1, 5,
 			};
 
-			VkDeviceSize indexBufferSize = sizeof(uint32_t) * indices.size();
-			m_indexBuffer = std::make_unique<Buffer>(indexBufferSize, 1,
-				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-			m_indexBuffer->upload(indices.data(), indexBufferSize);
+			m_indexBuffer = Buffer::createIndexBuffer(sizeof(uint32_t) * indices.size());
+			m_indexBuffer.upload(indices);
 		}
 	}
 
@@ -130,10 +126,10 @@ namespace Aegix::Graphics
 		m_pipeline->pushConstants(cmd, VK_SHADER_STAGE_VERTEX_BIT, uniforms);
 		m_pipeline->bindDescriptorSet(cmd, 0, m_descriptorSets[frameInfo.frameIndex]);
 
-		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
+		VkBuffer vertexBuffers[] = { m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(cmd, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(cmd, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(cmd, 36, 1, 0, 0, 0);
 
 		vkCmdEndRendering(cmd);

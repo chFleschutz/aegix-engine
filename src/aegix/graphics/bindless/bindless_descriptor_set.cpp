@@ -90,7 +90,7 @@ namespace Aegix::Graphics
 	auto BindlessDescriptorSet::allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle
 	{
 		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadWrite);
-		auto bufferInfo = buffer.descriptorInfo();
+		auto bufferInfo = buffer.descriptorBufferInfo();
 
 		VkWriteDescriptorSet write{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
