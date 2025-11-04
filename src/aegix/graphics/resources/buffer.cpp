@@ -254,5 +254,6 @@ namespace Aegix::Graphics
 		m_instanceCount = std::exchange(other.m_instanceCount, 0);
 		m_usage = std::exchange(other.m_usage, 0);
 		m_mapped = std::exchange(other.m_mapped, nullptr);
+		m_descriptorHandle = std::exchange(other.m_descriptorHandle, DescriptorHandle{});
 	}
 }

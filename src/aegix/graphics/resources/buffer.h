@@ -49,6 +49,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto isMapped() const -> bool { return m_mapped != nullptr; }
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
 		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
+		[[nodiscard]] auto handle() const -> DescriptorHandle { return m_descriptorHandle; }
 
 		/// @brief Map the buffer memory to allow writing to it
 		void map();
