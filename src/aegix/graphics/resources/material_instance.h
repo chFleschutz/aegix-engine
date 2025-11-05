@@ -24,6 +24,7 @@ namespace Aegix::Graphics
 	
 		[[nodiscard]] auto materialTemplate() const -> std::shared_ptr<MaterialTemplate> { return m_template; }
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParamValue;
+		[[nodiscard]] auto buffer() const -> const Buffer& { return m_uniformBuffer; }
 
 		template<typename T>
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> T

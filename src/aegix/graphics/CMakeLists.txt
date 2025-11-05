@@ -29,6 +29,8 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/transparent_pass.h"
 	"render_passes/transparent_pass.cpp" 
 
+	"render_systems/bindless_static_mesh_render_system.h"
+	"render_systems/bindless_static_mesh_render_system.cpp"
 	"render_systems/point_light_render_system.cpp" 
 	"render_systems/point_light_render_system.h" 
 	"render_systems/render_system.h"

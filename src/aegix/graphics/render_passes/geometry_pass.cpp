@@ -140,7 +140,8 @@ namespace Aegix::Graphics
 				.ui = frameInfo.ui,
 				.frameIndex = frameInfo.frameIndex,
 				.cmd = cmd,
-				.globalSet = m_globalSets[frameInfo.frameIndex]
+				.globalSet = m_globalSets[frameInfo.frameIndex],
+				.globalHandle = m_globalUbo.handle()
 			};
 
 			for (const auto& system : m_renderSystems)

@@ -70,6 +70,7 @@ namespace Aegix::Graphics
 		m_meshletBuffer{ Buffer::createStorageBuffer(sizeof(Meshlet) * info.meshlets.size()) },
 		m_meshletIndexBuffer{ Buffer::createStorageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
 		m_meshletPrimitiveBuffer{ Buffer::createStorageBuffer(sizeof(uint8_t) * info.primitiveIndices.size()) },
+		m_meshDataBuffer{ Buffer::createStorageBuffer(sizeof(MeshData)) },
 		m_meshletDescriptor{ meshletDescriptorSetLayout() },
 		m_attributeDescriptor{ attributeDescriptorSetLayout() },
 		m_vertexCount{ static_cast<uint32_t>(info.vertices.size()) },
@@ -83,6 +84,14 @@ namespace Aegix::Graphics
 		m_meshletBuffer.upload(info.meshlets);
 		m_meshletIndexBuffer.upload(info.vertexIndices);
 		m_meshletPrimitiveBuffer.upload(info.primitiveIndices);
+
+		MeshData meshData{
+			.vertexBufferHandle = m_vertexBuffer.handle().gpuHandle(),
+			.meshletBufferHandle = m_meshletBuffer.handle().gpuHandle(),
+			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle().gpuHandle(),
+			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle().gpuHandle()
+		};
+		//m_meshDataBuffer.singleWrite(&meshData);
 
 		DescriptorWriter{ meshletDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletBuffer)

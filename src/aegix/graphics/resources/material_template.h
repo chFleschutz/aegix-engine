@@ -66,6 +66,7 @@ namespace Aegix::Graphics
 		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
+		void bindBindlessSet(VkCommandBuffer cmd);
 		void bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);

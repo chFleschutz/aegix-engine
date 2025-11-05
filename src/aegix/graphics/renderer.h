@@ -39,7 +39,7 @@ namespace Aegix::Graphics
 
 		/// @brief Builds the frame graph and all required resources
 		/// @note This has to be AFTER the engine is fully initialized
-		void compileFrameGraph() { m_frameGraph.compile(); }
+		void compileFrameGraph() { createFrameGraph(); }
 
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);

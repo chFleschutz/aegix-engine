@@ -79,7 +79,7 @@ foreach(SLANG ${SLANG_SOURCES})
         OUTPUT ${SLANG_SPIRV}
         COMMAND ${SLANGC_EXE} ${SLANG} 
             -target spirv 
-            -profile spirv_1_6 
+            -profile spirv_1_6+spvMeshShadingEXT+spvRayTracingKHR
             -o ${SLANG_SPIRV} 
             -fvk-use-entrypoint-name 
             $<$<CONFIG:Debug>:-O0> $<$<CONFIG:Release>:-O3>

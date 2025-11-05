@@ -12,7 +12,7 @@
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
 #include "graphics/render_systems/point_light_render_system.h"
-#include "graphics/render_systems/static_mesh_render_system.h"
+#include "graphics/render_systems/bindless_static_mesh_render_system.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "scene/scene.h"
 
@@ -24,7 +24,6 @@ namespace Aegix::Graphics
 		m_swapChain{ window.extent() }
 	{
 		createFrameContext();
-		createFrameGraph();
 	}
 
 	Renderer::~Renderer()
@@ -122,10 +121,10 @@ namespace Aegix::Graphics
 	void Renderer::createFrameGraph()
 	{
 		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
-		geoPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Opaque);
+		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
 
 		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
-		transparentPass.addRenderSystem<StaticMeshRenderSystem>(MaterialType::Transparent);
+		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
 
 		m_frameGraph.add<LightingPass>();
@@ -138,6 +137,8 @@ namespace Aegix::Graphics
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
+
+		m_frameGraph.compile();
 	}
 
 	void Renderer::beginFrame()

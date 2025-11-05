@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "material_template.h"
 
+#include "engine.h"
+
 namespace Aegix::Graphics
 {
 	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
@@ -90,27 +92,35 @@ namespace Aegix::Graphics
 		m_pipeline.bind(cmd);
 	}
 
+	void MaterialTemplate::bindBindlessSet(VkCommandBuffer cmd)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 0, Engine::renderer().bindlessDescriptorSet().descriptorSet());
+	}
+
 	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
 	{
+		// TODO: Remove (Replaced by bindless descriptor set)
 		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
 	}
 
 	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
 	{
+		// TODO: Remove (Replaced by bindless descriptor set)
 		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
 	}
 
 	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
 	{
-		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, data, size, offset);
+		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL, data, size, offset);
 	}
 
 	void MaterialTemplate::draw(VkCommandBuffer cmd, const StaticMesh& mesh)
 	{
 		if (m_pipeline.hasFlag(Pipeline::Flags::MeshShader))
 		{
-			m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
-			m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
+			// TODO: Remove (Replaced by bindless descriptor set)
+			//m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
+			//m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
 			mesh.drawMeshlets(cmd);
 		}
 		else

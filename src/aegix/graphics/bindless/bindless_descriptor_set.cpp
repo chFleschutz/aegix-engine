@@ -60,7 +60,8 @@ namespace Aegix::Graphics
 			.dstBinding = SAMPLED_IMAGE_BINDING,
 			.dstArrayElement = handle.index(),
 			.descriptorCount = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			//.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			.pImageInfo = &textureInfo,
 		};
 		vkUpdateDescriptorSets(VulkanContext::device(), 1, &write, 0, nullptr);
@@ -132,7 +133,7 @@ namespace Aegix::Graphics
 	{
 		const auto& limits = VulkanContext::device().properties().limits;
 		return DescriptorPool::Builder()
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, std::min(MAX_SAMPLED_IMAGES, limits.maxDescriptorSetSampledImages))
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, std::min(MAX_SAMPLED_IMAGES, limits.maxDescriptorSetSampledImages))
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, std::min(MAX_STORAGE_IMAGES, limits.maxDescriptorSetStorageImages))
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, std::min(MAX_STORAGE_BUFFERS, limits.maxDescriptorSetStorageBuffers))
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT)
@@ -144,7 +145,7 @@ namespace Aegix::Graphics
 	{
 		const auto& limits = VulkanContext::device().properties().limits;
 		return DescriptorSetLayout::Builder()
-			.addBinding(SAMPLED_IMAGE_BINDING, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL,
+			.addBinding(SAMPLED_IMAGE_BINDING, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_ALL,
 				std::min(MAX_SAMPLED_IMAGES, limits.maxDescriptorSetSampledImages))
 			.addBinding(STORAGE_IMAGE_BINDING, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_ALL,
 				std::min(MAX_STORAGE_IMAGES, limits.maxDescriptorSetStorageImages))

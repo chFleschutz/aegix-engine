@@ -41,6 +41,9 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto version() const -> uint32_t { return (m_handle >> (INDEX_BITS + TYPE_BITS + ACCESS_BITS)) & VERSION_MASK; }
 		[[nodiscard]] auto isValid() const -> bool { return m_handle != INVALID_HANDLE; }
 
+		// TODO: this is a workaround while gpu does not validate the handle, use this class directly to copy to gpu later
+		[[nodiscard]] auto gpuHandle() const -> uint64_t { return static_cast<uint64_t>(index()); }
+ 
 		void invalidate() { m_handle = INVALID_HANDLE; }
 
 	private:

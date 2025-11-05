@@ -30,6 +30,14 @@ namespace Aegix::Graphics
 			uint8_t primitiveCount;
 		};
 
+		struct MeshData
+		{
+			uint64_t vertexBufferHandle;
+			uint64_t meshletBufferHandle;
+			uint64_t meshletIndexBufferHandle;
+			uint64_t meshletPrimitiveBufferHandle;
+		};
+
 		struct CreateInfo
 		{
 			std::vector<Vertex> vertices;
@@ -57,6 +65,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto meshletCount() const -> uint32_t { return m_meshletCount; }
 		[[nodiscard]] auto meshletDescriptorSet() const -> const DescriptorSet& { return m_meshletDescriptor; }
 		[[nodiscard]] auto attributeDescriptorSet() const -> const DescriptorSet& { return m_attributeDescriptor; }
+		[[nodiscard]] auto meshDataBuffer() const -> const Buffer& { return m_meshDataBuffer; }
 
 		void draw(VkCommandBuffer cmd) const;
 		void drawMeshlets(VkCommandBuffer cmd) const;
@@ -70,6 +79,7 @@ namespace Aegix::Graphics
 		Buffer m_meshletBuffer;
 		Buffer m_meshletIndexBuffer;
 		Buffer m_meshletPrimitiveBuffer;
+		Buffer m_meshDataBuffer;
 		DescriptorSet m_meshletDescriptor;
 		DescriptorSet m_attributeDescriptor;
 

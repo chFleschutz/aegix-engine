@@ -30,12 +30,15 @@ namespace Aegix::Graphics
 		static constexpr uint32_t MAX_STORAGE_IMAGES = 1 * 1024;	// 1K  storage images
 		static constexpr uint32_t MAX_STORAGE_BUFFERS = 16 * 1024;  // 16K storage buffers
 
-		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 0;
-		static constexpr uint32_t STORAGE_IMAGE_BINDING = 1;
-		static constexpr uint32_t STORAGE_BUFFER_BINDING = 2;
+		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 1;
+		static constexpr uint32_t STORAGE_IMAGE_BINDING = 3;
+		static constexpr uint32_t STORAGE_BUFFER_BINDING = 6;
 
 		BindlessDescriptorSet();
 		~BindlessDescriptorSet();
+
+		[[nodiscard]] auto descriptorSet() const -> const DescriptorSet& { return m_bindlessDescriptorSet; }
+		[[nodiscard]] auto layout() const -> const DescriptorSetLayout& { return m_bindlessSetLayout; }
 
 		auto allocateSampledImage(const Texture& texture) -> DescriptorHandle;
 		auto allocateStorageImage(const Texture& texture) -> DescriptorHandle;
