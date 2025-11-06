@@ -9,9 +9,10 @@ namespace Aegix::Graphics
 	public:
 		enum class Type : uint8_t
 		{
-			Buffer = 0,
-			Texture = 1,
-			RWTexture = 2
+			SampledTexture = 0,
+			StorageTexture = 1,
+			StorageBuffer = 2,
+			UniformBuffer = 3,
 		};
 
 		enum class Access : uint8_t
@@ -20,39 +21,27 @@ namespace Aegix::Graphics
 			ReadWrite = 1
 		};
 
-		static constexpr uint32_t INDEX_BITS = 23;
-		static constexpr uint32_t TYPE_BITS = 2;
-		static constexpr uint32_t ACCESS_BITS = 1;
-		static constexpr uint32_t VERSION_BITS = 6;
-
-		static constexpr uint32_t INDEX_MASK = (1u << INDEX_BITS) - 1;
-		static constexpr uint32_t TYPE_MASK = (1u << TYPE_BITS) - 1;
-		static constexpr uint32_t ACCESS_MASK = (1u << ACCESS_BITS) - 1;
-		static constexpr uint32_t VERSION_MASK = (1u << VERSION_BITS) - 1;
-
-		static constexpr uint32_t INVALID_HANDLE = std::numeric_limits<uint32_t>::max();
+		static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
 
 		DescriptorHandle() = default;
 		~DescriptorHandle() = default;
 
-		[[nodiscard]] auto index() const -> uint32_t { return m_handle & INDEX_MASK; }
-		[[nodiscard]] auto type() const -> Type { return static_cast<Type>((m_handle >> INDEX_BITS) & TYPE_MASK); }
-		[[nodiscard]] auto access() const -> Access { return static_cast<Access>((m_handle >> (INDEX_BITS + TYPE_BITS)) & ACCESS_MASK); }
-		[[nodiscard]] auto version() const -> uint32_t { return (m_handle >> (INDEX_BITS + TYPE_BITS + ACCESS_BITS)) & VERSION_MASK; }
-		[[nodiscard]] auto isValid() const -> bool { return m_handle != INVALID_HANDLE; }
+		[[nodiscard]] auto index() const -> uint32_t { return m_index; }
+		[[nodiscard]] auto version() const -> uint32_t { return static_cast<uint32_t>(m_version); }
+		[[nodiscard]] auto type() const -> Type { return static_cast<Type>(m_type); }
+		[[nodiscard]] auto access() const -> Access { return static_cast<Access>(m_access); }
+		[[nodiscard]] auto isValid() const -> bool { return m_index != INVALID_INDEX; }
 
-		// TODO: this is a workaround while gpu does not validate the handle, use this class directly to copy to gpu later
-		[[nodiscard]] auto gpuHandle() const -> uint64_t { return static_cast<uint64_t>(index()); }
- 
-		void invalidate() { m_handle = INVALID_HANDLE; }
+		void invalidate() { m_index = INVALID_INDEX; }
 
 	private:
 		DescriptorHandle(uint32_t index, Type type, Access access);
 
-		auto createHandle(uint32_t index, Type type, Access access, uint32_t version) -> uint32_t;
 		void recycle(Type type, Access access);
 
-		// Packed as: | 6 bits version | 1 bit access | 2 bits type | 23 bits index |
-		uint32_t m_handle{ INVALID_HANDLE };
+		uint32_t m_index{ INVALID_INDEX };
+		uint16_t m_version{ 0 };
+		uint8_t m_type{ 0 };
+		uint8_t m_access{ 0 };
 	};
 }
