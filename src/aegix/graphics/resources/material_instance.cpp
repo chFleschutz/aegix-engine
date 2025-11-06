@@ -7,7 +7,7 @@ namespace Aegix::Graphics
 {
 	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate) : 
 		m_template(std::move(materialTemplate)), 
-		m_uniformBuffer{ Buffer::createUniformBuffer(m_template->parameterSize(), MAX_FRAMES_IN_FLIGHT) } 
+		m_uniformBuffer{ Buffer::uniformBuffer(m_template->parameterSize(), MAX_FRAMES_IN_FLIGHT) } 
 	{
 		AGX_ASSERT_X(m_template, "Material template cannot be null");
 
@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 		{
 			m_descriptorSets.emplace_back(m_template->materialSetLayout());
 			DescriptorWriter{ m_template->materialSetLayout() }
-				.writeBuffer(0, m_uniformBuffer, i)
+				.writeBuffer(0, m_uniformBuffer.buffer(), i)
 				.update(m_descriptorSets[i]);
 		}
 
@@ -50,19 +50,17 @@ namespace Aegix::Graphics
 			auto it = m_overrides.find(name);
 			if (it != m_overrides.end())
 			{
-				const auto& value = it->second;
-				m_uniformBuffer.write(&value, info.size, info.offset);
+				m_uniformBuffer.write(&it->second, info.size, info.offset, index);
 			}
 			else
 			{
-				const auto& defaultValue = info.defaultValue;
-				m_uniformBuffer.write(&defaultValue, info.size, info.offset);
+				m_uniformBuffer.write(&info.defaultValue, info.size, info.offset, index);
 			}
 		}
 		
 		// Update descriptor set (Textures may have changed)
 		DescriptorWriter writer{ m_template->materialSetLayout() };
-		writer.writeBuffer(0, m_uniformBuffer);
+		writer.writeBuffer(0, m_uniformBuffer.buffer());
 		for (const auto& [name, info] : m_template->parameters())
 		{
 			if (info.type != MaterialParamType::Texture2D)

@@ -100,7 +100,7 @@ namespace Aegix::Graphics
 
 		// Upload data to staging buffer
 		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(stbWidth) * static_cast<VkDeviceSize>(stbHeight);
-		Buffer stagingBuffer = Buffer::createStagingBuffer(imageSize);
+		Buffer stagingBuffer{ Buffer::stagingBuffer(imageSize) };
 		stagingBuffer.singleWrite(pixels);
 
 		stbi_image_free(pixels);

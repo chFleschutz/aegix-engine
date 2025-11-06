@@ -10,7 +10,7 @@
 namespace Aegix::Graphics
 {
 	LightingPass::LightingPass() : 
-		m_ubo{ Buffer::createUniformBuffer(sizeof(LightingUniforms)) },
+		m_ubo{ Buffer::uniformBuffer(sizeof(LightingUniforms)) },
 		m_gbufferSetLayout{ createGBufferSetLayout() },
 		m_iblSetLayout{ createIBLSetLayout() }
 	{

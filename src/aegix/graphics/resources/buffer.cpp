@@ -7,71 +7,65 @@
 
 namespace Aegix::Graphics
 {
-	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::uniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create uniform buffer of size 0");
 		AGX_ASSERT_X(instanceCount > 0, "Cannot create uniform buffer with 0 instances");
-		Buffer::CreateInfo info{
+		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			.minOffsetAlignment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment
 		};
-		return Buffer{ info };
 	}
 
-	auto Buffer::createStorageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::storageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create storage buffer of size 0");
 		AGX_ASSERT_X(instanceCount > 0, "Cannot create storage buffer with 0 instances");
-		Buffer::CreateInfo info{
+		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
 		};
-		return Buffer{ info };
 	}
 
-	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer
+	auto Buffer::vertexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create vertex buffer of size 0");
 		AGX_ASSERT_X(instanceCount > 0, "Cannot create vertex buffer with 0 instances");
-		Buffer::CreateInfo info{
+		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
-			.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.usage = otherUsage | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
 		};
-		info.usage |= otherUsage;
-		return Buffer{ info };
 	}
 
-	auto Buffer::createIndexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::indexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create index buffer of size 0");
 		AGX_ASSERT_X(instanceCount > 0, "Cannot create index buffer with 0 instances");
-		Buffer::CreateInfo info{
+		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
 		};
-		return Buffer{ info };
 	}
 
-	auto Buffer::createStagingBuffer(VkDeviceSize size) -> Buffer
+	auto Buffer::stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create staging buffer of size 0");
-		Buffer::CreateInfo info{
+		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = 1,
 			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
 		};
-		return Buffer{ info };
 	}
 
 
@@ -88,12 +82,6 @@ namespace Aegix::Graphics
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(VulkanContext::device().allocator(), m_allocation, &allocInfo);
 		m_mapped = allocInfo.pMappedData;
-
-		if (m_usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
-		{
-			auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
-			m_descriptorHandle = bindlessSet.allocateStorageBuffer(*this);
-		}
 	}
 
 	Buffer::Buffer(Buffer&& other) noexcept
@@ -212,7 +200,7 @@ namespace Aegix::Graphics
 	void Buffer::upload(const void* data, VkDeviceSize size)
 	{
 		// TODO: Use a global shared staging buffer (creating a new one for each upload is inefficient)
-		Buffer stagingBuffer = Buffer::createStagingBuffer(size);
+		Buffer stagingBuffer{ Buffer::stagingBuffer(size) };
 		stagingBuffer.singleWrite(data, size, 0);
 		stagingBuffer.copyTo(*this, size);
 	}
@@ -237,11 +225,6 @@ namespace Aegix::Graphics
 		VulkanContext::destroy(m_buffer, m_allocation);
 		m_buffer = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
-
-		if (m_descriptorHandle.isValid())
-		{
-			Engine::renderer().bindlessDescriptorSet().freeHandle(m_descriptorHandle);
-		}
 	}
 
 	void Buffer::moveFrom(Buffer&& other)
@@ -254,6 +237,5 @@ namespace Aegix::Graphics
 		m_instanceCount = std::exchange(other.m_instanceCount, 0);
 		m_usage = std::exchange(other.m_usage, 0);
 		m_mapped = std::exchange(other.m_mapped, nullptr);
-		m_descriptorHandle = std::exchange(other.m_descriptorHandle, DescriptorHandle{});
 	}
 }

@@ -8,7 +8,7 @@
 namespace Aegix::Graphics
 {
 	GeometryPass::GeometryPass(FrameGraph& framegraph)
-		: m_globalUbo{ Buffer::createUniformBuffer(sizeof(GBufferUbo)) },
+		: m_globalUbo{ Buffer::uniformBuffer(sizeof(GBufferUbo)) },
 		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
 		m_globalSets.reserve(MAX_FRAMES_IN_FLIGHT);
@@ -16,7 +16,7 @@ namespace Aegix::Graphics
 		{
 			m_globalSets.emplace_back(m_globalSetLayout);
 			DescriptorWriter{ m_globalSetLayout }
-				.writeBuffer(0, m_globalUbo, i)
+				.writeBuffer(0, m_globalUbo.buffer(), i)
 				.update(m_globalSets[i]);
 		}
 	}
@@ -141,7 +141,7 @@ namespace Aegix::Graphics
 				.frameIndex = frameInfo.frameIndex,
 				.cmd = cmd,
 				.globalSet = m_globalSets[frameInfo.frameIndex],
-				.globalHandle = m_globalUbo.handle()
+				.globalHandle = m_globalUbo.handle(frameInfo.frameIndex)
 			};
 
 			for (const auto& system : m_renderSystems)
@@ -176,6 +176,6 @@ namespace Aegix::Graphics
 			.inverseView = camera.inverseViewMatrix
 		};
 
-		m_globalUbo.writeToIndex(&ubo, frameInfo.frameIndex);
+		m_globalUbo.buffer().writeToIndex(&ubo, frameInfo.frameIndex);
 	}
 }

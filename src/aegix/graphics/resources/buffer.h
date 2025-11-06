@@ -23,11 +23,11 @@ namespace Aegix::Graphics
 
 		/// @brief Factory methods for common buffer types
 		/// @note Use multiple instances only if intended to be used with dynamic offsets (accessed by multiple descriptors)
-		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
-		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createVertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer;
-		static auto createIndexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
+		static auto uniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer::CreateInfo;
+		static auto storageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
+		static auto vertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
+		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
+		static auto stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo;
 
 		Buffer() = default;
 		explicit Buffer(const CreateInfo& info);
@@ -49,7 +49,6 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto isMapped() const -> bool { return m_mapped != nullptr; }
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
 		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
-		[[nodiscard]] auto handle() const -> DescriptorHandle { return m_descriptorHandle; }
 
 		/// @brief Map the buffer memory to allow writing to it
 		void map();
@@ -105,6 +104,5 @@ namespace Aegix::Graphics
 		uint32_t m_instanceCount{ 0 };
 		VkBufferUsageFlags m_usage{ 0 };
 		void* m_mapped{ nullptr};
-		DescriptorHandle m_descriptorHandle;
 	};
 }

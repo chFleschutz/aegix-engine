@@ -8,7 +8,7 @@ namespace Aegix::Graphics
 {
 	BindlessStaticMeshRenderSystem::BindlessStaticMeshRenderSystem(MaterialType type) : 
 		m_type(type),
-		m_objectBuffer{ Buffer::createStorageBuffer(sizeof(ObjectData), MAX_OBJECT_COUNT) }
+		m_objectBuffer{ Buffer::storageBuffer(sizeof(ObjectData) * MAX_OBJECT_COUNT, MAX_FRAMES_IN_FLIGHT) }
 	{
 	}
 
@@ -50,15 +50,15 @@ namespace Aegix::Graphics
 				.modelMatrix = transform.matrix(),
 				.normalMatrix = Math::normalMatrix(transform.rotation, transform.scale),
 				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
-				.materialHandle = material.instance->buffer().handle()
+				.materialHandle = material.instance->buffer().handle(ctx.frameIndex)
 			};
 			AGX_ASSERT_X(objData.meshHandle.isValid(), "Invalid mesh handle in BindlessStaticMeshRenderSystem!");
 			AGX_ASSERT_X(objData.materialHandle.isValid(), "Invalid material handle in BindlessStaticMeshRenderSystem!");
-			m_objectBuffer.singleWrite(&objData, sizeof(ObjectData), objectIndex * sizeof(ObjectData));
+			m_objectBuffer.buffer().singleWrite(&objData, sizeof(ObjectData), objectIndex * sizeof(ObjectData));
 
 			PushConstantData push{
 				.globalBuffer = ctx.globalHandle,
-				.objectBuffer = m_objectBuffer.handle(),
+				.objectBuffer = m_objectBuffer.handle(ctx.frameIndex),
 				.objectIndex = objectIndex++,
 				.frameIndex = ctx.frameIndex
 			};

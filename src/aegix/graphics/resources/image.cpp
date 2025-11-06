@@ -66,7 +66,7 @@ namespace Aegix::Graphics
 
 	void Image::upload(const void* data, VkDeviceSize size)
 	{
-		Buffer stagingBuffer = Buffer::createStagingBuffer(size);
+		Buffer stagingBuffer{ Buffer::stagingBuffer(size) };
 		stagingBuffer.singleWrite(data);
 		upload(stagingBuffer);
 	}

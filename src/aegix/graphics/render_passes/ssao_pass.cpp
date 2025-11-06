@@ -12,8 +12,8 @@
 namespace Aegix::Graphics
 {
 	SSAOPass::SSAOPass()
-		: m_uniforms{ Buffer::createUniformBuffer(sizeof(SSAOUniforms)) },
-		m_ssaoSamples{ Buffer::createUniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
+		: m_uniforms{ Buffer::uniformBuffer(sizeof(SSAOUniforms)) },
+		m_ssaoSamples{ Buffer::uniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
 		m_descriptorSetLayout = DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)

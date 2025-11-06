@@ -41,7 +41,7 @@ namespace Aegix::Graphics
 				{-1.0f,  1.0f,  1.0f}
 			};
 
-			m_vertexBuffer = Buffer::createVertexBuffer(sizeof(glm::vec3) * vertices.size());
+			m_vertexBuffer = Buffer{ Buffer::vertexBuffer(sizeof(glm::vec3) * vertices.size()) };
 			m_vertexBuffer.upload(vertices);
 		}
 
@@ -56,7 +56,7 @@ namespace Aegix::Graphics
 				5, 4, 0, 0, 1, 5,
 			};
 
-			m_indexBuffer = Buffer::createIndexBuffer(sizeof(uint32_t) * indices.size());
+			m_indexBuffer = Buffer{ Buffer::indexBuffer(sizeof(uint32_t) * indices.size()) };
 			m_indexBuffer.upload(indices);
 		}
 	}

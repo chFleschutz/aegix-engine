@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/bindless/bindless_buffer.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/render_systems/render_system.h"
@@ -43,7 +44,7 @@ namespace Aegix::Graphics
 
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 
-		Buffer m_globalUbo;
+		BindlessFrameBuffer m_globalUbo;
 		DescriptorSetLayout m_globalSetLayout;
 		std::vector<DescriptorSet> m_globalSets;
 	};

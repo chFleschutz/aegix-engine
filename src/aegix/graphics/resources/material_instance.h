@@ -3,6 +3,7 @@
 #include "core/asset.h"
 #include "graphics/descriptors.h"
 #include "graphics/resources/material_template.h"
+#include "graphics/bindless/bindless_buffer.h"
 
 namespace Aegix::Graphics
 {
@@ -24,7 +25,7 @@ namespace Aegix::Graphics
 	
 		[[nodiscard]] auto materialTemplate() const -> std::shared_ptr<MaterialTemplate> { return m_template; }
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParamValue;
-		[[nodiscard]] auto buffer() const -> const Buffer& { return m_uniformBuffer; }
+		[[nodiscard]] auto buffer() const -> const BindlessFrameBuffer& { return m_uniformBuffer; }
 
 		template<typename T>
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> T
@@ -42,7 +43,7 @@ namespace Aegix::Graphics
 		std::unordered_map<std::string, MaterialParamValue> m_overrides;
 
 		std::vector<DescriptorSet> m_descriptorSets;
-		Buffer m_uniformBuffer;
+		BindlessFrameBuffer m_uniformBuffer;
 
 		std::array<bool, MAX_FRAMES_IN_FLIGHT> m_dirtyFlags;
 	};
