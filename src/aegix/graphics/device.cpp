@@ -330,6 +330,9 @@ namespace Aegix::Graphics
 
 	void VulkanDevice::createLogicalDevice()
 	{
+		// IMPORTANT NOTE
+		// When enabling new features, make sure to check for their support in checkDeviceFeatureSupport()
+
 		VkPhysicalDeviceFeatures2 features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
 			.features = VkPhysicalDeviceFeatures{
@@ -346,9 +349,11 @@ namespace Aegix::Graphics
 			.shaderInt8 = VK_TRUE,
 			// Bindless descriptor sets
 			.descriptorIndexing = VK_TRUE,
+			.shaderUniformBufferArrayNonUniformIndexing = VK_TRUE,
 			.shaderSampledImageArrayNonUniformIndexing = VK_TRUE,
 			.shaderStorageBufferArrayNonUniformIndexing = VK_TRUE,
 			.shaderStorageImageArrayNonUniformIndexing = VK_TRUE,
+			.descriptorBindingUniformBufferUpdateAfterBind = VK_TRUE,
 			.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE,
 			.descriptorBindingStorageImageUpdateAfterBind = VK_TRUE,
 			.descriptorBindingStorageBufferUpdateAfterBind = VK_TRUE,
@@ -573,9 +578,11 @@ namespace Aegix::Graphics
 
 		// Bindless
 		if (!vulkan12Features.descriptorIndexing ||
+			!vulkan12Features.shaderUniformBufferArrayNonUniformIndexing ||
 			!vulkan12Features.shaderSampledImageArrayNonUniformIndexing ||
 			!vulkan12Features.shaderStorageBufferArrayNonUniformIndexing ||
 			!vulkan12Features.shaderStorageImageArrayNonUniformIndexing ||
+			!vulkan12Features.descriptorBindingUniformBufferUpdateAfterBind ||
 			!vulkan12Features.descriptorBindingSampledImageUpdateAfterBind ||
 			!vulkan12Features.descriptorBindingStorageImageUpdateAfterBind ||
 			!vulkan12Features.descriptorBindingStorageBufferUpdateAfterBind ||
