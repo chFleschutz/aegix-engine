@@ -9,8 +9,8 @@ namespace Aegix::Graphics
 	public:
 		enum class Type : uint8_t
 		{
-			SampledTexture = 0,
-			StorageTexture = 1,
+			SampledImage = 0,
+			StorageImage = 1,
 			StorageBuffer = 2,
 			UniformBuffer = 3,
 		};

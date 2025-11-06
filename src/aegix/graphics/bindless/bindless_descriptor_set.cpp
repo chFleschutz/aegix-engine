@@ -51,60 +51,50 @@ namespace Aegix::Graphics
 
 	auto BindlessDescriptorSet::allocateSampledImage(const Texture& texture) -> DescriptorHandle
 	{
-		auto handle = m_sampledImageCache.fetch(DescriptorHandle::Type::Texture, DescriptorHandle::Access::ReadOnly);
+		auto handle = m_sampledImageCache.fetch(DescriptorHandle::Type::SampledImage, DescriptorHandle::Access::ReadOnly);
 		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-		VkWriteDescriptorSet write{
-			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-			.dstSet = m_bindlessDescriptorSet,
-			.dstBinding = SAMPLED_IMAGE_BINDING,
-			.dstArrayElement = handle.index(),
-			.descriptorCount = 1,
-			//.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-			.pImageInfo = &textureInfo,
-		};
-		vkUpdateDescriptorSets(VulkanContext::device(), 1, &write, 0, nullptr);
-
+		writeSet(SAMPLED_IMAGE_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &textureInfo, nullptr);
 		return handle;
 	}
 
 	auto BindlessDescriptorSet::allocateStorageImage(const Texture& texture) -> DescriptorHandle
 	{
-		auto handle = m_storageImageCache.fetch(DescriptorHandle::Type::RWTexture, DescriptorHandle::Access::ReadWrite);
+		auto handle = m_storageImageCache.fetch(DescriptorHandle::Type::StorageImage, DescriptorHandle::Access::ReadWrite);
 		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL);
-
-		VkWriteDescriptorSet write{
-			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-			.dstSet = m_bindlessDescriptorSet,
-			.dstBinding = STORAGE_IMAGE_BINDING,
-			.dstArrayElement = handle.index(),
-			.descriptorCount = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-			.pImageInfo = &textureInfo,
-		};
-		vkUpdateDescriptorSets(VulkanContext::device(), 1, &write, 0, nullptr);
-
+		writeSet(STORAGE_IMAGE_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, &textureInfo, nullptr);
 		return handle;
 	}
 
 	auto BindlessDescriptorSet::allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle
 	{
-		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::Buffer, DescriptorHandle::Access::ReadWrite);
+		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::StorageBuffer, DescriptorHandle::Access::ReadWrite);
 		auto bufferInfo = buffer.descriptorBufferInfo();
+		writeSet(STORAGE_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &bufferInfo);
+		return handle;
+	}
 
+	auto BindlessDescriptorSet::allocateUniformBuffer(const Buffer& buffer) -> DescriptorHandle
+	{
+		auto handle = m_uniformBufferCache.fetch(DescriptorHandle::Type::UniformBuffer, DescriptorHandle::Access::ReadOnly);
+		auto bufferInfo = buffer.descriptorBufferInfo();
+		writeSet(UNIFORM_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &bufferInfo);
+		return handle;
+	}
+
+	void BindlessDescriptorSet::writeSet(uint32_t binding, uint32_t index, VkDescriptorType type, 
+		const VkDescriptorImageInfo* imageInfo, const VkDescriptorBufferInfo* bufferInfo)
+	{
 		VkWriteDescriptorSet write{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = m_bindlessDescriptorSet,
-			.dstBinding = STORAGE_BUFFER_BINDING,
-			.dstArrayElement = handle.index(),
+			.dstBinding = binding,
+			.dstArrayElement = index,
 			.descriptorCount = 1,
-			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-			.pBufferInfo = &bufferInfo,
+			.descriptorType = type,
+			.pImageInfo = imageInfo,
+			.pBufferInfo = bufferInfo,
 		};
 		vkUpdateDescriptorSets(VulkanContext::device(), 1, &write, 0, nullptr);
-
-		return handle;
 	}
 
 	void BindlessDescriptorSet::freeHandle(DescriptorHandle& handle)
@@ -114,14 +104,17 @@ namespace Aegix::Graphics
 
 		switch (handle.type())
 		{
-		case DescriptorHandle::Type::Texture:
+		case DescriptorHandle::Type::SampledImage:
 			m_sampledImageCache.free(handle);
 			break;
-		case DescriptorHandle::Type::RWTexture:
+		case DescriptorHandle::Type::StorageImage:
 			m_storageImageCache.free(handle);
 			break;
-		case DescriptorHandle::Type::Buffer:
+		case DescriptorHandle::Type::StorageBuffer:
 			m_storageBufferCache.free(handle);
+			break;
+		case DescriptorHandle::Type::UniformBuffer:
+			m_uniformBufferCache.free(handle);
 			break;
 		default:
 			AGX_ASSERT_X(false, "Unknown DescriptorHandle type!");
@@ -136,6 +129,7 @@ namespace Aegix::Graphics
 			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, std::min(MAX_SAMPLED_IMAGES, limits.maxDescriptorSetSampledImages))
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, std::min(MAX_STORAGE_IMAGES, limits.maxDescriptorSetStorageImages))
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, std::min(MAX_STORAGE_BUFFERS, limits.maxDescriptorSetStorageBuffers))
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, std::min(MAX_UNIFORM_BUFFERS, limits.maxDescriptorSetUniformBuffers))
 			.setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT)
 			.setMaxSets(1)
 			.build();
@@ -151,6 +145,8 @@ namespace Aegix::Graphics
 				std::min(MAX_STORAGE_IMAGES, limits.maxDescriptorSetStorageImages))
 			.addBinding(STORAGE_BUFFER_BINDING, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL,
 				std::min(MAX_STORAGE_BUFFERS, limits.maxDescriptorSetStorageBuffers))
+			.addBinding(UNIFORM_BUFFER_BINDING, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL,
+				std::min(MAX_UNIFORM_BUFFERS, limits.maxDescriptorSetUniformBuffers))
 			.setBindingFlags(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
 			.setFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
 			.build();
