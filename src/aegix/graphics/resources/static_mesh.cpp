@@ -86,12 +86,16 @@ namespace Aegix::Graphics
 		m_meshletPrimitiveBuffer.upload(info.primitiveIndices);
 
 		MeshData meshData{
-			.vertexBufferHandle = m_vertexBuffer.handle().gpuHandle(),
-			.meshletBufferHandle = m_meshletBuffer.handle().gpuHandle(),
-			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle().gpuHandle(),
-			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle().gpuHandle()
+			.vertexBufferHandle = m_vertexBuffer.handle(),
+			.meshletBufferHandle = m_meshletBuffer.handle(),
+			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle(),
+			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle()
 		};
-		//m_meshDataBuffer.singleWrite(&meshData);
+		AGX_ASSERT_X(meshData.vertexBufferHandle.isValid(), "Invalid vertex buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletIndexBufferHandle.isValid(), "Invalid meshlet index buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletPrimitiveBufferHandle.isValid(), "Invalid meshlet primitive buffer handle in StaticMesh!");
+		m_meshDataBuffer.singleWrite(&meshData);
 
 		DescriptorWriter{ meshletDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletBuffer)

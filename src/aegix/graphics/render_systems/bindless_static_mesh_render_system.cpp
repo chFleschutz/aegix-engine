@@ -49,17 +49,21 @@ namespace Aegix::Graphics
 			ObjectData objData{
 				.modelMatrix = transform.matrix(),
 				.normalMatrix = Math::normalMatrix(transform.rotation, transform.scale),
-				.meshHandle = mesh.staticMesh->meshDataBuffer().handle().gpuHandle(),
-				.materialHandle = material.instance->buffer().handle().gpuHandle()
+				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
+				.materialHandle = material.instance->buffer().handle()
 			};
+			AGX_ASSERT_X(objData.meshHandle.isValid(), "Invalid mesh handle in BindlessStaticMeshRenderSystem!");
+			AGX_ASSERT_X(objData.materialHandle.isValid(), "Invalid material handle in BindlessStaticMeshRenderSystem!");
 			m_objectBuffer.singleWrite(&objData, sizeof(ObjectData), objectIndex * sizeof(ObjectData));
 
 			PushConstantData push{
-				.globalBuffer = ctx.globalHandle.gpuHandle(),
-				.objectBuffer = m_objectBuffer.handle().gpuHandle(),
+				.globalBuffer = ctx.globalHandle,
+				.objectBuffer = m_objectBuffer.handle(),
 				.objectIndex = objectIndex++,
 				.frameIndex = ctx.frameIndex
 			};
+			AGX_ASSERT_X(push.globalBuffer.isValid(), "Invalid global buffer handle in BindlessStaticMeshRenderSystem!");
+			AGX_ASSERT_X(push.objectBuffer.isValid(), "Invalid object buffer handle in BindlessStaticMeshRenderSystem!");
 			currentMatTemplate->pushConstants(ctx.cmd, &push, sizeof(push));
 			currentMatTemplate->draw(ctx.cmd, *mesh.staticMesh);
 		}

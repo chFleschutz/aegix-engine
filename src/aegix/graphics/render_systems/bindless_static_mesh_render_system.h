@@ -12,8 +12,8 @@ namespace Aegix::Graphics
 
 		struct PushConstantData
 		{
-			uint64_t globalBuffer{ 0 };
-			uint64_t objectBuffer{ 0 };
+			DescriptorHandle globalBuffer;
+			DescriptorHandle objectBuffer;
 			uint32_t objectIndex{ 0 };
 			uint32_t frameIndex{ 0 };
 		};
@@ -22,8 +22,8 @@ namespace Aegix::Graphics
 		{
 			glm::mat4 modelMatrix{ 1.0f };
 			glm::mat4 normalMatrix{ 1.0f };
-			uint64_t meshHandle{ 0 };
-			uint64_t materialHandle{ 0 };
+			DescriptorHandle meshHandle;
+			DescriptorHandle materialHandle;
 		};
 
 		BindlessStaticMeshRenderSystem(MaterialType type = MaterialType::Opaque);
