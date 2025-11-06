@@ -65,18 +65,16 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	auto BindlessDescriptorSet::allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle
+	auto BindlessDescriptorSet::allocateStorageBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle
 	{
 		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::StorageBuffer, DescriptorHandle::Access::ReadWrite);
-		auto bufferInfo = buffer.descriptorBufferInfo();
 		writeSet(STORAGE_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &bufferInfo);
 		return handle;
 	}
 
-	auto BindlessDescriptorSet::allocateUniformBuffer(const Buffer& buffer) -> DescriptorHandle
+	auto BindlessDescriptorSet::allocateUniformBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle
 	{
 		auto handle = m_uniformBufferCache.fetch(DescriptorHandle::Type::UniformBuffer, DescriptorHandle::Access::ReadOnly);
-		auto bufferInfo = buffer.descriptorBufferInfo();
 		writeSet(UNIFORM_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &bufferInfo);
 		return handle;
 	}

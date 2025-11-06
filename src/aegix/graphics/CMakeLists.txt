@@ -1,4 +1,6 @@
 target_sources(aegix-engine PRIVATE
+	"bindless/bindless_buffer.h" 
+	"bindless/bindless_buffer.cpp"
 	"bindless/bindless_descriptor_set.cpp"
 	"bindless/bindless_descriptor_set.h" 
 	"bindless/descriptor_handle.h" 

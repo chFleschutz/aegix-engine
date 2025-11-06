@@ -44,8 +44,8 @@ namespace Aegix::Graphics
 
 		auto allocateSampledImage(const Texture& texture) -> DescriptorHandle;
 		auto allocateStorageImage(const Texture& texture) -> DescriptorHandle;
-		auto allocateStorageBuffer(const Buffer& buffer) -> DescriptorHandle;
-		auto allocateUniformBuffer(const Buffer& buffer) -> DescriptorHandle;
+		auto allocateStorageBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle;
+		auto allocateUniformBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle;
 
 		void freeHandle(DescriptorHandle& handle);
 
