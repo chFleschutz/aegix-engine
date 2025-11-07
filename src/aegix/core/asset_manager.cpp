@@ -96,7 +96,7 @@ namespace Aegix::Core
 				//.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
 				//.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
 				.addDescriptorSetLayout(bindless.layout())
-				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128)
+				.addPushConstantRange(VK_SHADER_STAGE_ALL, 256) // TODO: Reduce push constant size to safe 128 bytes limit
 				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry_bindless.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)

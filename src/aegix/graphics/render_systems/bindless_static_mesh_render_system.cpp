@@ -7,8 +7,7 @@
 namespace Aegix::Graphics
 {
 	BindlessStaticMeshRenderSystem::BindlessStaticMeshRenderSystem(MaterialType type) : 
-		m_type(type),
-		m_objectBuffer{ Buffer::storageBuffer(sizeof(ObjectData) * MAX_OBJECT_COUNT, MAX_FRAMES_IN_FLIGHT) }
+		m_type(type)
 	{
 	}
 
@@ -46,24 +45,18 @@ namespace Aegix::Graphics
 				lastMatInstance = material.instance.get();
 			}
 
-			ObjectData objData{
-				.modelMatrix = transform.matrix(),
-				.normalMatrix = Math::normalMatrix(transform.rotation, transform.scale),
-				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
-				.materialHandle = material.instance->buffer().handle(ctx.frameIndex)
-			};
-			AGX_ASSERT_X(objData.meshHandle.isValid(), "Invalid mesh handle in BindlessStaticMeshRenderSystem!");
-			AGX_ASSERT_X(objData.materialHandle.isValid(), "Invalid material handle in BindlessStaticMeshRenderSystem!");
-			m_objectBuffer.buffer().singleWrite(&objData, sizeof(ObjectData), objectIndex * sizeof(ObjectData));
-
+			// Push Constants
 			PushConstantData push{
+				.modelMatrix = transform.matrix(),
+				.normalMatrix = glm::transpose(glm::inverse(transform.matrix())),
 				.globalBuffer = ctx.globalHandle,
-				.objectBuffer = m_objectBuffer.handle(ctx.frameIndex),
-				.objectIndex = objectIndex++,
-				.frameIndex = ctx.frameIndex
+				.meshBuffer = mesh.staticMesh->meshDataBuffer().handle(),
+				.materialBuffer = material.instance->buffer().handle(ctx.frameIndex)
 			};
-			AGX_ASSERT_X(push.globalBuffer.isValid(), "Invalid global buffer handle in BindlessStaticMeshRenderSystem!");
-			AGX_ASSERT_X(push.objectBuffer.isValid(), "Invalid object buffer handle in BindlessStaticMeshRenderSystem!");
+			AGX_ASSERT_X(push.globalBuffer.isValid(), "Global buffer handle is invalid");
+			AGX_ASSERT_X(push.meshBuffer.isValid(), "Mesh buffer handle is invalid");
+			AGX_ASSERT_X(push.materialBuffer.isValid(), "Material buffer handle is invalid");
+
 			currentMatTemplate->pushConstants(ctx.cmd, &push, sizeof(push));
 			currentMatTemplate->draw(ctx.cmd, *mesh.staticMesh);
 		}
