@@ -1,37 +1,11 @@
 import "../modules/geometry";
 import "../modules/constants";
 import "../modules/tbn";
+import "../modules/bindless";
 
-static const uint SAMPLED_IMAGE_BINDING = 1;
-static const uint STORAGE_IMAGE_BINDING = 3;
-static const uint STORAGE_BUFFER_BINDING = 6;
-static const uint UNIFORM_BUFFER_BINDING = 8;
-
-[vk::binding(SAMPLED_IMAGE_BINDING)] Sampler2D sampledImages[];
-[vk::binding(STORAGE_IMAGE_BINDING)] RWTexture2D storageImages[];
-
-[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<geometry::Meshlet> meshlets[];
-[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<uint> vertexIndices[];
-[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<uint8_t, ScalarDataLayout> primitives[];
-[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertices[];
-
-[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Global, Std430DataLayout> global[];
-[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Material, Std430DataLayout> material[];
-[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Mesh, Std430DataLayout> mesh[];
-
-struct BindlessHandle
-{
-    uint index;
-    uint8_t version;
-    uint8_t _;
-    uint8_t type;
-    uint8_t access;
-
-    func Sample(float2 uv) -> float4
-    {
-        return sampledImages[index].Sample(uv);
-    }
-};
+static const uint NUM_THREADS = 32;
+static const uint MAX_VERTICES = 64;
+static const uint MAX_PRIMITIVES = 126;
 
 struct MSOut
 {
@@ -55,35 +29,42 @@ struct Material
     float metallic;
     float roughness;
     float ao;
-    BindlessHandle albedoMap;
-    BindlessHandle normalMap;
-    BindlessHandle metalRoughnessMap;
-    BindlessHandle aoMap;
-    BindlessHandle emissiveMap;
+    bindless::Handle albedoMap;
+    bindless::Handle normalMap;
+    bindless::Handle metalRoughnessMap;
+    bindless::Handle aoMap;
+    bindless::Handle emissiveMap;
 };
 
 struct Mesh
 {
-    BindlessHandle vertexBuffer;
-    BindlessHandle meshletBuffer;
-    BindlessHandle meshletIndexBuffer;
-    BindlessHandle meshletPrimitiveBuffer;
+    bindless::Handle vertex;
+    bindless::Handle meshlet;
+    bindless::Handle meshletIndex;
+    bindless::Handle meshletPrimitive;
 };
 
 struct Push
 {
     float4x4 model;
     float4x4 normal;
-    BindlessHandle global;
-    BindlessHandle mesh;
-    BindlessHandle material;
+    bindless::Handle global;
+    bindless::Handle mesh;
+    bindless::Handle material;
 };
 
 [vk::push_constant] ConstantBuffer<Push> push;
 
-static const uint NUM_THREADS = 32;
-static const uint MAX_VERTICES = 64;
-static const uint MAX_PRIMITIVES = 126;
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Meshlet> meshletBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint> indexBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint8_t, ScalarDataLayout> primitiveBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertexBuffer[];
+
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Global, Std430DataLayout> globalBuffer[];
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
+
+// Mesh Shader --------------------
 
 [shader("mesh")]
 [numthreads(NUM_THREADS, 1, 1)]
@@ -94,9 +75,9 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    Global global = global[push.global.index];
-    Mesh mesh = mesh[push.mesh.index];
-    geometry::Meshlet meshlet = meshlets[mesh.meshletBuffer.index][groupID.x];
+    Global global = push.global.get(globalBuffer);
+    Mesh mesh = push.mesh.get(meshBuffer);
+    geometry::Meshlet meshlet = mesh.meshlet.get(meshletBuffer)[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 
@@ -105,8 +86,8 @@ func meshMain(
     // Emit vertices
     for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += NUM_THREADS)
     {
-        uint index = vertexIndices[mesh.meshletIndexBuffer.index][meshlet.vertexOffset + i];
-        let v = vertices[mesh.vertexBuffer.index][index];
+        uint index = mesh.meshletIndex.get(indexBuffer)[meshlet.vertexOffset + i];
+        let v = mesh.vertex.get(vertexBuffer)[index];
 
         float4 worldPos = mul(push.model, float4(v.position, 1.0));
         meshVertices[i].position = mul(viewProjection, worldPos);
@@ -120,16 +101,18 @@ func meshMain(
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         meshPrimitives[i] = uint3(
-            primitives[mesh.meshletPrimitiveBuffer.index][offset + 0], 
-            primitives[mesh.meshletPrimitiveBuffer.index][offset + 1],
-            primitives[mesh.meshletPrimitiveBuffer.index][offset + 2]);
+            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 0], 
+            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 1],
+            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 2]);
     }
 }
+
+// Fragment Shader --------------------
 
 [shader("fragment")]
 func fragmentMain(MSOut input, out geometry::GBuffer output)
 {
-    let mat = material[push.material.index];
+    let mat = push.material.get(materialBuffer);
 
     float3 albedo = mat.albedoMap.Sample(input.uv).rgb * mat.albedo;
     float3 normal = mat.normalMap.Sample(input.uv).rgb * 2.0 - 1.0;
