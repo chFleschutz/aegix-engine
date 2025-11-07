@@ -26,7 +26,7 @@ namespace Aegix::Graphics
 		static auto uniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer::CreateInfo;
 		static auto storageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
 		static auto vertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
-		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
+		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
 		static auto stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo;
 
 		Buffer() = default;
@@ -55,6 +55,13 @@ namespace Aegix::Graphics
 
 		/// @brief Unmap the buffer memory
 		void unmap();
+
+		// TODO: Rework these write functions to have:
+		// Better naming (pretty inconsistent right now)
+		// Unified behavior (some map/unmap internally, some don't)
+		// Too many overloads (some with size/offset, some without)
+		// Better utilize templates for type safety
+		// Maybe offer casted pointer to data for easier writing?
 
 		/// @brief Only writes data to the buffer
 		/// @note Buffer MUST be mapped before calling

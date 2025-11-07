@@ -45,14 +45,14 @@ namespace Aegix::Graphics
 		};
 	}
 
-	auto Buffer::indexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
+	auto Buffer::indexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create index buffer of size 0");
 		AGX_ASSERT_X(instanceCount > 0, "Cannot create index buffer with 0 instances");
 		return Buffer::CreateInfo{
 			.instanceSize = size,
 			.instanceCount = instanceCount,
-			.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.usage = otherUsage | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
 		};
 	}
