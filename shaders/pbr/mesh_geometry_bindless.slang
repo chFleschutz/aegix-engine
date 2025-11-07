@@ -2,10 +2,36 @@ import "../modules/geometry";
 import "../modules/constants";
 import "../modules/tbn";
 
-export func getDescriptorFromHandle<T>(DescriptorHandle<T> handle) -> T where T : IOpaqueDescriptor
+static const uint SAMPLED_IMAGE_BINDING = 1;
+static const uint STORAGE_IMAGE_BINDING = 3;
+static const uint STORAGE_BUFFER_BINDING = 6;
+static const uint UNIFORM_BUFFER_BINDING = 8;
+
+[vk::binding(SAMPLED_IMAGE_BINDING)] Sampler2D sampledImages[];
+[vk::binding(STORAGE_IMAGE_BINDING)] RWTexture2D storageImages[];
+
+[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<geometry::Meshlet> meshlets[];
+[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<uint> vertexIndices[];
+[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<uint8_t, ScalarDataLayout> primitives[];
+[vk::binding(STORAGE_BUFFER_BINDING)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertices[];
+
+[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Global, Std430DataLayout> global[];
+[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Material, Std430DataLayout> material[];
+[vk::binding(UNIFORM_BUFFER_BINDING)] ConstantBuffer<Mesh, Std430DataLayout> mesh[];
+
+struct BindlessHandle
 {
-    return defaultGetDescriptorFromHandle(handle, BindlessDescriptorOptions::None);
-}
+    uint index;
+    uint8_t version;
+    uint8_t _;
+    uint8_t type;
+    uint8_t access;
+
+    func Sample(float2 uv) -> float4
+    {
+        return sampledImages[index].Sample(uv);
+    }
+};
 
 struct MSOut
 {
@@ -29,35 +55,28 @@ struct Material
     float metallic;
     float roughness;
     float ao;
-    DescriptorHandle<Sampler2D> albedoMap;
-    DescriptorHandle<Sampler2D> normalMap;
-    DescriptorHandle<Sampler2D> metalRoughnessMap;
-    DescriptorHandle<Sampler2D> aoMap;
-    DescriptorHandle<Sampler2D> emissiveMap;
+    BindlessHandle albedoMap;
+    BindlessHandle normalMap;
+    BindlessHandle metalRoughnessMap;
+    BindlessHandle aoMap;
+    BindlessHandle emissiveMap;
 };
 
-struct MeshletMesh
+struct Mesh
 {
-    DescriptorHandle<StructuredBuffer<geometry::Meshlet>> meshlets;
-    DescriptorHandle<StructuredBuffer<uint>> vertexIndices;
-    DescriptorHandle<StructuredBuffer<uint8_t, ScalarDataLayout>> primitives;
-    DescriptorHandle<StructuredBuffer<geometry::Vertex, ScalarDataLayout>> vertices;
-};
-
-struct Object
-{
-    float4x4 model;
-    float4x4 normal;
-    DescriptorHandle<StructuredBuffer<MeshletMesh>> mesh;
-    DescriptorHandle<StructuredBuffer<Material>> material;
+    BindlessHandle vertexBuffer;
+    BindlessHandle meshletBuffer;
+    BindlessHandle meshletIndexBuffer;
+    BindlessHandle meshletPrimitiveBuffer;
 };
 
 struct Push
 {
-    DescriptorHandle<StructuredBuffer<Global>> global;
-    DescriptorHandle<StructuredBuffer<Object>> object;
-    uint objectIndex;
-    uint frameIndex;
+    float4x4 model;
+    float4x4 normal;
+    BindlessHandle global;
+    BindlessHandle mesh;
+    BindlessHandle material;
 };
 
 [vk::push_constant] ConstantBuffer<Push> push;
@@ -75,10 +94,10 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    var global = push.global[push.frameIndex];
-    var obj = push.object[push.objectIndex];
-    var mesh = obj.mesh[0];
-    var meshlet = mesh.meshlets[groupID.x];
+    Global global = global[push.global.index];
+    Mesh mesh = mesh[push.mesh.index];
+    geometry::Meshlet meshlet = meshlets[mesh.meshletBuffer.index][groupID.x];
+
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 
     float4x4 viewProjection = mul(global.projection, global.view);
@@ -86,13 +105,13 @@ func meshMain(
     // Emit vertices
     for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += NUM_THREADS)
     {
-        uint index = mesh.vertexIndices[meshlet.vertexOffset + i];
-        let v = mesh.vertices[index];
+        uint index = vertexIndices[mesh.meshletIndexBuffer.index][meshlet.vertexOffset + i];
+        let v = vertices[mesh.vertexBuffer.index][index];
 
-        float4 worldPos = mul(obj.model, float4(v.position, 1.0));
+        float4 worldPos = mul(push.model, float4(v.position, 1.0));
         meshVertices[i].position = mul(viewProjection, worldPos);
         meshVertices[i].worldPosition = worldPos.xyz;
-        meshVertices[i].worldNormal = normalize(mul(float3x3(obj.normal), v.normal));
+        meshVertices[i].worldNormal = normalize(mul(float3x3(push.normal), v.normal));
         meshVertices[i].uv = v.uv;
     }
 
@@ -100,15 +119,17 @@ func meshMain(
     for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += NUM_THREADS)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
-        meshPrimitives[i] = uint3(mesh.primitives[offset + 0], mesh.primitives[offset + 1], mesh.primitives[offset + 2]);
+        meshPrimitives[i] = uint3(
+            primitives[mesh.meshletPrimitiveBuffer.index][offset + 0], 
+            primitives[mesh.meshletPrimitiveBuffer.index][offset + 1],
+            primitives[mesh.meshletPrimitiveBuffer.index][offset + 2]);
     }
 }
 
 [shader("fragment")]
 func fragmentMain(MSOut input, out geometry::GBuffer output)
 {
-    let obj = push.object[0];
-    let mat = obj.material[0];
+    let mat = material[push.material.index];
 
     float3 albedo = mat.albedoMap.Sample(input.uv).rgb * mat.albedo;
     float3 normal = mat.normalMap.Sample(input.uv).rgb * 2.0 - 1.0;
