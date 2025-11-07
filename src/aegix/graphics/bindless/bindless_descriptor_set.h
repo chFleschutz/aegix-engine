@@ -31,10 +31,10 @@ namespace Aegix::Graphics
 		static constexpr uint32_t MAX_STORAGE_BUFFERS = 16 * 1024;  // 16K storage buffers
 		static constexpr uint32_t MAX_UNIFORM_BUFFERS = 16 * 1024;  // 16K uniform buffers
 
-		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 1;
-		static constexpr uint32_t STORAGE_IMAGE_BINDING = 3;
-		static constexpr uint32_t STORAGE_BUFFER_BINDING = 6;
-		static constexpr uint32_t UNIFORM_BUFFER_BINDING = 8;
+		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 0;
+		static constexpr uint32_t STORAGE_IMAGE_BINDING = 1;
+		static constexpr uint32_t STORAGE_BUFFER_BINDING = 2;
+		static constexpr uint32_t UNIFORM_BUFFER_BINDING = 3;
 
 		BindlessDescriptorSet();
 		~BindlessDescriptorSet();

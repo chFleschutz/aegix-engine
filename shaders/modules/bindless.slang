@@ -2,10 +2,10 @@ module bindless;
 
 namespace bindless
 {
-    public static const uint SAMPLED_IMAGE = 1;
-    public static const uint STORAGE_IMAGE = 3;
-    public static const uint STORAGE_BUFFER = 6;
-    public static const uint UNIFORM_BUFFER = 8;
+    public static const uint SAMPLED_IMAGE = 0;
+    public static const uint STORAGE_IMAGE = 1;
+    public static const uint STORAGE_BUFFER = 2;
+    public static const uint UNIFORM_BUFFER = 3;
 
     [vk::binding(SAMPLED_IMAGE)] Sampler2D sampledImages[];
     [vk::binding(STORAGE_IMAGE)] RWTexture2D storageImages[];
