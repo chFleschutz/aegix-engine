@@ -23,9 +23,28 @@ namespace Aegix::Graphics
 		}
 	}
 
+	BindlessBuffer::BindlessBuffer(BindlessBuffer&& other) noexcept : 
+		m_buffer{ std::move(other.m_buffer) },
+		m_handle{ other.m_handle }
+	{
+		other.m_handle.invalidate();
+	}
+
 	BindlessBuffer::~BindlessBuffer()
 	{
 		Engine::renderer().bindlessDescriptorSet().freeHandle(m_handle);
+	}
+
+	auto BindlessBuffer::operator=(BindlessBuffer&& other) noexcept -> BindlessBuffer&
+	{
+		if (this != &other)
+		{
+			Engine::renderer().bindlessDescriptorSet().freeHandle(m_handle);
+			m_buffer = std::move(other.m_buffer);
+			m_handle = other.m_handle;
+			other.m_handle.invalidate();
+		}
+		return *this;
 	}
 
 	BindlessFrameBuffer::BindlessFrameBuffer(const Buffer::CreateInfo& bufferInfo) :

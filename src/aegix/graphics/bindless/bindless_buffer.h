@@ -12,8 +12,11 @@ namespace Aegix::Graphics
 		BindlessBuffer() = default;
 		explicit BindlessBuffer(const Buffer::CreateInfo& bufferInfo);
 		BindlessBuffer(const BindlessBuffer&) = delete;
-		BindlessBuffer(BindlessBuffer&&) = default;
+		BindlessBuffer(BindlessBuffer&& other) noexcept;
 		~BindlessBuffer();
+
+		auto operator=(const BindlessBuffer&) -> BindlessBuffer& = delete;
+		auto operator=(BindlessBuffer&& other) noexcept -> BindlessBuffer&;
 
 		operator Buffer& () { return m_buffer; }
 		operator const Buffer& () const { return m_buffer; }
