@@ -66,11 +66,11 @@ namespace Aegix::Graphics
 
 	StaticMesh::StaticMesh(const CreateInfo& info) :
 		m_vertexBuffer{ Buffer::vertexBuffer(sizeof(Vertex) * info.vertices.size(), 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) },
-		m_indexBuffer{ Buffer::indexBuffer(sizeof(uint32_t) * info.indices.size()) },
+		m_indexBuffer{ Buffer::indexBuffer(sizeof(uint32_t) * info.indices.size(), 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) },
 		m_meshletBuffer{ Buffer::storageBuffer(sizeof(Meshlet) * info.meshlets.size()) },
 		m_meshletIndexBuffer{ Buffer::storageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
 		m_meshletPrimitiveBuffer{ Buffer::storageBuffer(sizeof(uint8_t) * info.primitiveIndices.size()) },
-		m_meshDataBuffer{ Buffer::storageBuffer(sizeof(MeshData)) },
+		m_meshDataBuffer{ Buffer::uniformBuffer(sizeof(MeshData)) },
 		m_meshletDescriptor{ meshletDescriptorSetLayout() },
 		m_attributeDescriptor{ attributeDescriptorSetLayout() },
 		m_vertexCount{ static_cast<uint32_t>(info.vertices.size()) },
@@ -95,7 +95,7 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
 		AGX_ASSERT_X(meshData.meshletIndexBufferHandle.isValid(), "Invalid meshlet index buffer handle in StaticMesh!");
 		AGX_ASSERT_X(meshData.meshletPrimitiveBufferHandle.isValid(), "Invalid meshlet primitive buffer handle in StaticMesh!");
-		m_meshDataBuffer.buffer().singleWrite(&meshData);
+		m_meshDataBuffer.buffer().singleWrite(&meshData, sizeof(MeshData), 0);
 
 		DescriptorWriter{ meshletDescriptorSetLayout() }
 			.writeBuffer(0, m_meshletBuffer)
