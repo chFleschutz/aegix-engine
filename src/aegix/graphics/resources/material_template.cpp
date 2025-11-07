@@ -26,6 +26,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Vec2: return 8;
 		case MaterialParamType::Vec3: return 16;
 		case MaterialParamType::Vec4: return 16;
+		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
 		default: return 16;
 		}
 	}
@@ -39,6 +40,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Vec2: return 8;
 		case MaterialParamType::Vec3: return 12;
 		case MaterialParamType::Vec4: return 16;
+		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
 		default: return 16;
 		}
 	}
@@ -66,9 +68,8 @@ namespace Aegix::Graphics
 
 		MaterialParameter param{
 			.type = type,
-			.binding = 0,
-			.offset = 0,
-			.size = 0,
+			.offset = alignTo(m_parameterSize, std140Alignment(type)),
+			.size = std140Size(type),
 			.defaultValue = defaultValue,
 		};
 
@@ -77,13 +78,8 @@ namespace Aegix::Graphics
 			m_textureCount++;
 			param.binding = m_textureCount;
 		}
-		else
-		{
-			param.size = std140Size(type);
-			param.offset = alignTo(m_parameterSize, std140Alignment(type));
-			m_parameterSize = param.offset + param.size;
-		}
 
+		m_parameterSize = param.offset + param.size;
 		m_parameters.emplace(name, std::move(param));
 	}
 
@@ -126,6 +122,22 @@ namespace Aegix::Graphics
 		else
 		{
 			mesh.draw(cmd);
+		}
+	}
+
+	void MaterialTemplate::printInfo() const
+	{
+		ALOG::info("Material Template Info:");
+		ALOG::info("  Parameter Size: {} bytes", m_parameterSize);
+		ALOG::info("  Parameters:");
+		for (const auto& [name, param] : m_parameters)
+		{
+			ALOG::info("    Name: {}, Type: {}, Binding: {}, Offset: {}, Size: {}",
+				name,
+				static_cast<int>(param.type),
+				param.binding,
+				param.offset,
+				param.size);
 		}
 	}
 }

@@ -47,14 +47,23 @@ namespace Aegix::Graphics
 		// Update uniform buffer
 		for (const auto& [name, info] : m_template->parameters())
 		{
+			const MaterialParamValue* valuePtr = &info.defaultValue;
 			auto it = m_overrides.find(name);
 			if (it != m_overrides.end())
 			{
-				m_uniformBuffer.write(&it->second, info.size, info.offset, index);
+				valuePtr = &it->second;
+			}
+
+			if (info.type == MaterialParamType::Texture2D)
+			{
+				const auto& texture = std::get<std::shared_ptr<Texture>>(*valuePtr);
+				auto handle = texture->sampledDescriptorHandle();
+				AGX_ASSERT_X(handle.isValid(), "Invalid texture descriptor handle in MaterialInstance!");
+				m_uniformBuffer.write(&handle, info.size, info.offset, index);
 			}
 			else
 			{
-				m_uniformBuffer.write(&info.defaultValue, info.size, info.offset, index);
+				m_uniformBuffer.write(valuePtr, info.size, info.offset, index);
 			}
 		}
 		

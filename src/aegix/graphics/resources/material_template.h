@@ -11,6 +11,8 @@
 
 namespace Aegix::Graphics
 {
+	// TODO: Look at better packing strategies (variant cost additional 8 bytes because of alignment)
+	// TODO: Maybe use a union with a type enum instead
 	using MaterialParamValue = std::variant<
 		int, 
 		float, 
@@ -71,6 +73,8 @@ namespace Aegix::Graphics
 		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 		void draw(VkCommandBuffer cmd, const StaticMesh& mesh);
+
+		void printInfo() const;
 
 	private:
 		// TODO: Store multiple pipelines for different render passes

@@ -41,10 +41,8 @@ namespace Aegix::Graphics
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;
 		std::unordered_map<std::string, MaterialParamValue> m_overrides;
-
 		std::vector<DescriptorSet> m_descriptorSets;
 		BindlessFrameBuffer m_uniformBuffer;
-
 		std::array<bool, MAX_FRAMES_IN_FLIGHT> m_dirtyFlags;
 	};
 }
