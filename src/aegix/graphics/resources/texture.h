@@ -37,11 +37,11 @@ namespace Aegix::Graphics
 		Texture() = default;
 		Texture(const CreateInfo& info);
 		Texture(const Texture&) = delete;
-		Texture(Texture&&) noexcept = default;
+		Texture(Texture&& other) noexcept;
 		~Texture();
 
 		auto operator=(const Texture&) -> Texture& = delete;
-		auto operator=(Texture&&) noexcept -> Texture& = default;
+		auto operator=(Texture&& other) noexcept -> Texture&;
 		
 		[[nodiscard]] auto image() -> Image& { return m_image; }
 		[[nodiscard]] auto image() const -> const Image& { return m_image; }
@@ -71,6 +71,8 @@ namespace Aegix::Graphics
 		void resize(VkExtent3D newSize, VkImageUsageFlags usage);
 		
 	private:
+		void destroy();
+
 		Image m_image;
 		ImageView m_view;
 		Sampler m_sampler;

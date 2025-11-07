@@ -369,10 +369,36 @@ namespace Aegix::Graphics
 			m_storageHandle = bindlessSet.allocateStorageImage(*this);
 	}
 
+	Texture::Texture(Texture&& other) noexcept : 
+		m_image{ std::move(other.m_image) },
+		m_view{ std::move(other.m_view) },
+		m_sampler{ std::move(other.m_sampler) },
+		m_storageHandle{ other.m_storageHandle },
+		m_sampledHandle{ other.m_sampledHandle }
+	{
+		other.m_storageHandle.invalidate();
+		other.m_sampledHandle.invalidate();
+	}
+
 	Texture::~Texture()
 	{
-		Engine::renderer().bindlessDescriptorSet().freeHandle(m_storageHandle);
-		Engine::renderer().bindlessDescriptorSet().freeHandle(m_sampledHandle);
+		destroy();
+	}
+
+	auto Texture::operator=(Texture&& other) noexcept -> Texture&
+	{
+		if (this != &other)
+		{
+			destroy();
+			m_image = std::move(other.m_image);
+			m_view = std::move(other.m_view);
+			m_sampler = std::move(other.m_sampler);
+			m_storageHandle = other.m_storageHandle;
+			m_sampledHandle = other.m_sampledHandle;
+			other.m_storageHandle.invalidate();
+			other.m_sampledHandle.invalidate();
+		}
+		return *this;
 	}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)
@@ -389,5 +415,11 @@ namespace Aegix::Graphics
 			.viewType = VK_IMAGE_VIEW_TYPE_2D,
 		};
 		m_view = ImageView{ viewInfo, m_image };
+	}
+
+	void Texture::destroy()
+	{
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_storageHandle);
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_sampledHandle);
 	}
 }
