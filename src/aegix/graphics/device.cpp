@@ -333,6 +333,8 @@ namespace Aegix::Graphics
 		// IMPORTANT NOTE
 		// When enabling new features, make sure to check for their support in checkDeviceFeatureSupport()
 
+		// TODO: Make feature enabling more easy to configure
+
 		VkPhysicalDeviceFeatures2 features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
 			.features = VkPhysicalDeviceFeatures{
@@ -363,6 +365,7 @@ namespace Aegix::Graphics
 			.runtimeDescriptorArray = VK_TRUE,
 			// Misc
 			.scalarBlockLayout = VK_TRUE,
+			.uniformBufferStandardLayout = VK_TRUE,
 		};
 
 		VkPhysicalDeviceVulkan13Features vulkan13Features{
@@ -589,6 +592,11 @@ namespace Aegix::Graphics
 			!vulkan12Features.descriptorBindingPartiallyBound ||
 			!vulkan12Features.descriptorBindingVariableDescriptorCount ||
 			!vulkan12Features.runtimeDescriptorArray)
+			return false;
+
+		// Buffer layouts 
+		if (!vulkan12Features.uniformBufferStandardLayout ||
+			!vulkan12Features.scalarBlockLayout)
 			return false;
 
 		// 8-bit storage
