@@ -1,4 +1,4 @@
-import "../modules/pbr";
+import "modules/pbr";
 
 struct AmbientLight
 {

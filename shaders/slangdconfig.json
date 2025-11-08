@@ -1,0 +1,8 @@
+{
+  "slang.predefinedMacros": [
+    "GPU_VALIDATION=1"
+  ],
+  "slang.additionalSearchPaths": [
+    "."
+  ]
+}

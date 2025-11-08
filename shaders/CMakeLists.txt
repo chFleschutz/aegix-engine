@@ -82,6 +82,7 @@ foreach(SLANG ${SLANG_SOURCES})
             -profile spirv_1_6+spvMeshShadingEXT+spvRayTracingKHR
             -o ${SLANG_SPIRV} 
             -fvk-use-entrypoint-name 
+            -I ${SHADERS_DIR}
             -warnings-disable 39001
             $<$<CONFIG:Debug>:-O0> $<$<CONFIG:Release>:-O3>
             $<$<CONFIG:Debug>:-g>

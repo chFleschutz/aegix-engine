@@ -1,7 +1,7 @@
-import "../modules/geometry";
-import "../modules/constants";
-import "../modules/tbn";
-import "../modules/bindless";
+import "modules/geometry";
+import "modules/constants";
+import "modules/tbn";
+import "modules/bindless";
 
 static const uint NUM_THREADS = 32;
 static const uint MAX_VERTICES = 64;
