@@ -11,18 +11,18 @@ namespace Aegix::Graphics
 	{
 	}
 
-	auto DescriptorHandleCache::fetch(DescriptorHandle::Type type, DescriptorHandle::Access access) -> DescriptorHandle
+	auto DescriptorHandleCache::fetch(DescriptorHandle::Type type) -> DescriptorHandle
 	{
 		if (!m_availableHandles.empty())
 		{
 			DescriptorHandle handle = m_availableHandles.back();
 			m_availableHandles.pop_back();
-			handle.recycle(type, access);
+			handle.recycle(type);
 			return handle;
 		}
 
 		AGX_ASSERT_X(m_nextIndex < m_capacity, "DescriptorHandleCache capacity exceeded!");
-		return DescriptorHandle{ m_nextIndex++, type, access };
+		return DescriptorHandle{ m_nextIndex++, type };
 	}
 
 	void DescriptorHandleCache::free(DescriptorHandle& handle)
@@ -51,7 +51,7 @@ namespace Aegix::Graphics
 
 	auto BindlessDescriptorSet::allocateSampledImage(const Texture& texture) -> DescriptorHandle
 	{
-		auto handle = m_sampledImageCache.fetch(DescriptorHandle::Type::SampledImage, DescriptorHandle::Access::ReadOnly);
+		auto handle = m_sampledImageCache.fetch(DescriptorHandle::Type::SampledImage);
 		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		writeSet(SAMPLED_IMAGE_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &textureInfo, nullptr);
 		return handle;
@@ -59,7 +59,7 @@ namespace Aegix::Graphics
 
 	auto BindlessDescriptorSet::allocateStorageImage(const Texture& texture) -> DescriptorHandle
 	{
-		auto handle = m_storageImageCache.fetch(DescriptorHandle::Type::StorageImage, DescriptorHandle::Access::ReadWrite);
+		auto handle = m_storageImageCache.fetch(DescriptorHandle::Type::StorageImage);
 		auto textureInfo = texture.descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL);
 		writeSet(STORAGE_IMAGE_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, &textureInfo, nullptr);
 		return handle;
@@ -67,14 +67,14 @@ namespace Aegix::Graphics
 
 	auto BindlessDescriptorSet::allocateStorageBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle
 	{
-		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::StorageBuffer, DescriptorHandle::Access::ReadWrite);
+		auto handle = m_storageBufferCache.fetch(DescriptorHandle::Type::StorageBuffer);
 		writeSet(STORAGE_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, nullptr, &bufferInfo);
 		return handle;
 	}
 
 	auto BindlessDescriptorSet::allocateUniformBuffer(const VkDescriptorBufferInfo& bufferInfo) -> DescriptorHandle
 	{
-		auto handle = m_uniformBufferCache.fetch(DescriptorHandle::Type::UniformBuffer, DescriptorHandle::Access::ReadOnly);
+		auto handle = m_uniformBufferCache.fetch(DescriptorHandle::Type::UniformBuffer);
 		writeSet(UNIFORM_BUFFER_BINDING, handle.index(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, nullptr, &bufferInfo);
 		return handle;
 	}

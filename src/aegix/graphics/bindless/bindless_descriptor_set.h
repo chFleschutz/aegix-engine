@@ -12,7 +12,7 @@ namespace Aegix::Graphics
 	public:
 		DescriptorHandleCache(uint32_t capacity);
 
-		auto fetch(DescriptorHandle::Type type, DescriptorHandle::Access access) -> DescriptorHandle;
+		auto fetch(DescriptorHandle::Type type) -> DescriptorHandle;
 		void free(DescriptorHandle& handle);
 
 	private:

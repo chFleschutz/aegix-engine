@@ -2,6 +2,8 @@
 
 namespace Aegix::Graphics
 {
+	/// @note This has to match the bindless::Handle struct on the slang side
+	/// @see shaders/modules/bindless.slang
 	class DescriptorHandle
 	{
 		friend class DescriptorHandleCache;
@@ -15,33 +17,33 @@ namespace Aegix::Graphics
 			UniformBuffer = 3,
 		};
 
-		enum class Access : uint8_t
-		{
-			ReadOnly = 0,
-			ReadWrite = 1
-		};
+		static constexpr uint32_t INVALID_HANDLE = std::numeric_limits<uint32_t>::max();
 
-		static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
+		static constexpr uint32_t INDEX_BITS = 24;
+		static constexpr uint32_t VERSION_BITS = 6;
+		static constexpr uint32_t TYPE_BITS = 2;
+
+		static constexpr uint32_t INDEX_MASK = (1 << INDEX_BITS) - 1;
+		static constexpr uint32_t VERSION_MASK = (1 << VERSION_BITS) - 1;
+		static constexpr uint32_t TYPE_MASK = (1 << TYPE_BITS) - 1;
 
 		DescriptorHandle() = default;
 		~DescriptorHandle() = default;
 
-		[[nodiscard]] auto index() const -> uint32_t { return m_index; }
-		[[nodiscard]] auto version() const -> uint32_t { return static_cast<uint32_t>(m_version); }
-		[[nodiscard]] auto type() const -> Type { return static_cast<Type>(m_type); }
-		[[nodiscard]] auto access() const -> Access { return static_cast<Access>(m_access); }
-		[[nodiscard]] auto isValid() const -> bool { return m_index != INVALID_INDEX; }
+		[[nodiscard]] auto index() const -> uint32_t { return m_handle & INDEX_MASK; }
+		[[nodiscard]] auto version() const -> uint32_t { return (m_handle >> INDEX_BITS) & VERSION_MASK; }
+		[[nodiscard]] auto type() const -> Type { return static_cast<Type>((m_handle >> (INDEX_BITS + VERSION_BITS)) & TYPE_MASK); }
+		[[nodiscard]] auto isValid() const -> bool { return m_handle != INVALID_HANDLE; }
 
-		void invalidate() { m_index = INVALID_INDEX; }
+		void invalidate() { m_handle = INVALID_HANDLE; }
 
 	private:
-		DescriptorHandle(uint32_t index, Type type, Access access);
+		DescriptorHandle(uint32_t index, Type type);
 
-		void recycle(Type type, Access access);
+		auto pack(uint32_t index, uint32_t version, Type type) -> uint32_t;
+		void recycle(Type type);
 
-		uint32_t m_index{ INVALID_INDEX };
-		uint16_t m_version{ 0 };
-		uint8_t m_type{ 0 };
-		uint8_t m_access{ 0 };
+		// Packed as: | 2 bits type | 6 bits version | 24 bits index |
+		uint32_t m_handle{ INVALID_HANDLE };
 	};
 }
