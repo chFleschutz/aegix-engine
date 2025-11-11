@@ -9,17 +9,10 @@ static const uint MAX_PRIMITIVES = 126;
 
 struct MSOut
 {
-    float4 position : SV_Position;
+    float4 position: SV_Position;
     float3 worldPosition;
     float3 worldNormal;
     float2 uv;
-};
-
-struct Global
-{
-    float4x4 projection;
-    float4x4 view;
-    float4x4 inverseView;
 };
 
 struct Material
@@ -60,7 +53,7 @@ struct Push
 [vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint8_t, ScalarDataLayout> primitiveBuffer[];
 [vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertexBuffer[];
 
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Global, Std430DataLayout> globalBuffer[];
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<geometry::Global, Std430DataLayout> globalBuffer[];
 [vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
 [vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
 
@@ -75,9 +68,9 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    Global global = push.global.get(globalBuffer);
-    Mesh mesh = push.mesh.get(meshBuffer);
-    geometry::Meshlet meshlet = mesh.meshlet.get(meshletBuffer)[groupID.x];
+    let global = push.global.get(globalBuffer);
+    let mesh = push.mesh.get(meshBuffer);
+    let meshlet = mesh.meshlet.get(meshletBuffer)[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 

@@ -2,6 +2,7 @@ module bindless;
 
 namespace bindless
 {
+    // Binding slots for different descriptor types
     public static const uint SAMPLED_IMAGE = 0;
     public static const uint STORAGE_IMAGE = 1;
     public static const uint STORAGE_BUFFER = 2;
