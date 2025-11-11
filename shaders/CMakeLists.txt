@@ -79,9 +79,12 @@ foreach(SLANG ${SLANG_SOURCES})
         OUTPUT ${SLANG_SPIRV}
         COMMAND ${SLANGC_EXE} ${SLANG} 
             -target spirv 
-            -profile spirv_1_6 
+            -profile spirv_1_6+spvMeshShadingEXT+spvRayTracingKHR
             -o ${SLANG_SPIRV} 
+            -I ${SHADERS_DIR}
             -fvk-use-entrypoint-name 
+            -matrix-layout-row-major
+            -warnings-disable 39001
             $<$<CONFIG:Debug>:-O0> $<$<CONFIG:Release>:-O3>
             $<$<CONFIG:Debug>:-g>
         DEPENDS ${SLANG}

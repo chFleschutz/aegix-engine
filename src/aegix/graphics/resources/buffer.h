@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/bindless/descriptor_handle.h"
 #include "graphics/globals.h"
 #include "graphics/vulkan/volk_include.h"
 
@@ -11,16 +12,25 @@ namespace Aegix::Graphics
 	class Buffer
 	{
 	public:
+		struct CreateInfo
+		{
+			VkDeviceSize instanceSize{ 0 };
+			uint32_t instanceCount{ 1 };
+			VkBufferUsageFlags usage{ 0 };
+			VmaAllocationCreateFlags allocFlags{ 0 };
+			VkDeviceSize minOffsetAlignment{ 0 };
+		};
+
 		/// @brief Factory methods for common buffer types
 		/// @note Use multiple instances only if intended to be used with dynamic offsets (accessed by multiple descriptors)
-		static auto createUniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer;
-		static auto createStorageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createVertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createIndexBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer;
-		static auto createStagingBuffer(VkDeviceSize size) -> Buffer;
+		static auto uniformBuffer(VkDeviceSize size, uint32_t instanceCount = MAX_FRAMES_IN_FLIGHT) -> Buffer::CreateInfo;
+		static auto storageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
+		static auto vertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
+		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
+		static auto stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo;
 
-		Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
-			VmaAllocationCreateFlags allocFlags = 0, VkDeviceSize minOffsetAlignment = 0);
+		Buffer() = default;
+		explicit Buffer(const CreateInfo& info);
 		Buffer(const Buffer&) = delete;
 		Buffer(Buffer&& other) noexcept;
 		~Buffer();
@@ -33,18 +43,25 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto buffer() const -> VkBuffer { return m_buffer; }
 		[[nodiscard]] auto bufferSize() const -> VkDeviceSize { return m_bufferSize; }
 		[[nodiscard]] auto instanceSize() const -> VkDeviceSize { return m_instanceSize; }
-		[[nodiscard]] auto alignmentSize() const -> VkDeviceSize { return m_instanceSize; }
+		[[nodiscard]] auto alignmentSize() const -> VkDeviceSize { return m_alignmentSize; }
 		[[nodiscard]] auto instanceCount() const -> uint32_t { return m_instanceCount; }
 		[[nodiscard]] auto usage() const -> VkBufferUsageFlags { return m_usage; }
-
-		[[nodiscard]] auto descriptorInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
-		[[nodiscard]] auto descriptorInfoForIndex(int index) const -> VkDescriptorBufferInfo;
+		[[nodiscard]] auto isMapped() const -> bool { return m_mapped != nullptr; }
+		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
+		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
 
 		/// @brief Map the buffer memory to allow writing to it
 		void map();
 
 		/// @brief Unmap the buffer memory
 		void unmap();
+
+		// TODO: Rework these write functions to have:
+		// Better naming (pretty inconsistent right now)
+		// Unified behavior (some map/unmap internally, some don't)
+		// Too many overloads (some with size/offset, some without)
+		// Better utilize templates for type safety
+		// Maybe offer casted pointer to data for easier writing?
 
 		/// @brief Only writes data to the buffer
 		/// @note Buffer MUST be mapped before calling
@@ -53,8 +70,7 @@ namespace Aegix::Graphics
 
 		/// @brief Writes data of 'instanceSize' to the buffer at an offset of 'index * alignmentSize'
 		/// @note Buffer MUST be mapped before calling
-		void writeToIndex(const void* data, int index);
-		void writeToAll(const void* data);
+		void writeToIndex(const void* data, uint32_t index);
 
 		/// @brief Maps, writes data, then unmaps the buffer
 		void singleWrite(const void* data);
@@ -65,7 +81,7 @@ namespace Aegix::Graphics
 		void flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 
 		/// @brief Flush the memory range at 'index * alignmentSize'
-		void flushIndex(int index);
+		void flushIndex(uint32_t index);
 
 		/// @brief Uploads data to the buffer using a staging buffer (Used for device local memory)
 		void upload(const void* data, VkDeviceSize size);
@@ -76,6 +92,8 @@ namespace Aegix::Graphics
 		template<typename T>
 		void upload(const std::vector<T>& data)
 		{
+			AGX_ASSERT_X(!data.empty(), "Data vector is empty");
+			AGX_ASSERT_X(sizeof(T) * data.size() <= m_bufferSize, "Data size exceeds buffer size");
 			upload(data.data(), sizeof(T) * data.size());
 		}
 
@@ -83,14 +101,15 @@ namespace Aegix::Graphics
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 
 		void destroy();
+		void moveFrom(Buffer&& other);
 
-		VkBuffer m_buffer = VK_NULL_HANDLE;
-		VmaAllocation m_allocation = VK_NULL_HANDLE;
-		VkDeviceSize m_bufferSize = 0;
-		VkDeviceSize m_instanceSize = 0;
-		VkDeviceSize m_alignmentSize = 0;
-		uint32_t m_instanceCount = 0;
-		VkBufferUsageFlags m_usage = 0;
-		void* m_mapped = nullptr;
+		VkBuffer m_buffer{ VK_NULL_HANDLE };
+		VmaAllocation m_allocation{ VK_NULL_HANDLE };
+		VkDeviceSize m_bufferSize{ 0 };
+		VkDeviceSize m_alignmentSize{ 0 };
+		VkDeviceSize m_instanceSize{ 0 };
+		uint32_t m_instanceCount{ 0 };
+		VkBufferUsageFlags m_usage{ 0 };
+		void* m_mapped{ nullptr};
 	};
 }

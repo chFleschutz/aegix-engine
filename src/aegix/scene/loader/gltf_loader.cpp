@@ -194,7 +194,7 @@ namespace Aegix::Scene
 				using T = std::decay_t<decltype(val)>;
 				if constexpr (std::is_same_v<T, GLTF::Image::UriData>)
 				{
-					texture = Graphics::Texture::create(m_gltf->basePath / val.uri, format);
+					texture = Graphics::Texture::loadFromFile(m_gltf->basePath / val.uri, format);
 				}
 				else if constexpr (std::is_same_v<T, GLTF::Image::BufferViewData>)
 				{

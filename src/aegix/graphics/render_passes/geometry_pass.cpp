@@ -5,10 +5,12 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 namespace Aegix::Graphics
 {
 	GeometryPass::GeometryPass(FrameGraph& framegraph)
-		: m_globalUbo{ Buffer::createUniformBuffer(sizeof(GBufferUbo)) },
+		: m_globalUbo{ Buffer::uniformBuffer(sizeof(GBufferUbo)) },
 		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
 		m_globalSets.reserve(MAX_FRAMES_IN_FLIGHT);
@@ -16,7 +18,7 @@ namespace Aegix::Graphics
 		{
 			m_globalSets.emplace_back(m_globalSetLayout);
 			DescriptorWriter{ m_globalSetLayout }
-				.writeBuffer(0, m_globalUbo, i)
+				.writeBuffer(0, m_globalUbo.buffer(), i)
 				.update(m_globalSets[i]);
 		}
 	}
@@ -140,7 +142,8 @@ namespace Aegix::Graphics
 				.ui = frameInfo.ui,
 				.frameIndex = frameInfo.frameIndex,
 				.cmd = cmd,
-				.globalSet = m_globalSets[frameInfo.frameIndex]
+				.globalSet = m_globalSets[frameInfo.frameIndex],
+				.globalHandle = m_globalUbo.handle(frameInfo.frameIndex)
 			};
 
 			for (const auto& system : m_renderSystems)
@@ -170,11 +173,11 @@ namespace Aegix::Graphics
 		camera.aspect = frameInfo.aspectRatio;
 
 		GBufferUbo ubo{
-			.projection = camera.projectionMatrix,
-			.view = camera.viewMatrix,
-			.inverseView = camera.inverseViewMatrix
+			.projection = glm::rowMajor4(camera.projectionMatrix),
+			.view = glm::rowMajor4(camera.viewMatrix),
+			.inverseView = glm::rowMajor4(camera.inverseViewMatrix)
 		};
 
-		m_globalUbo.writeToIndex(&ubo, frameInfo.frameIndex);
+		m_globalUbo.buffer().writeToIndex(&ubo, frameInfo.frameIndex);
 	}
 }

@@ -1,50 +1,83 @@
 #include "pch.h"
 #include "buffer.h"
 
+#include "engine.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
-	auto Buffer::createUniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::uniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{
-		auto aligment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
+		AGX_ASSERT_X(size > 0, "Cannot create uniform buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create uniform buffer with 0 instances");
+		return Buffer::CreateInfo{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+			.minOffsetAlignment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment
+		};
 	}
 
-	auto Buffer::createStorageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::storageBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{
-		auto aligment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment;
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, aligment };
+		AGX_ASSERT_X(size > 0, "Cannot create storage buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create storage buffer with 0 instances");
+		return Buffer::CreateInfo{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
+		};
 	}
 
-	auto Buffer::createVertexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::vertexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer::CreateInfo
 	{
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+		AGX_ASSERT_X(size > 0, "Cannot create vertex buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create vertex buffer with 0 instances");
+		return Buffer::CreateInfo{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = otherUsage | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
+		};
 	}
 
-	auto Buffer::createIndexBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer
+	auto Buffer::indexBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer::CreateInfo
 	{
-		return Buffer{ size, instanceCount, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT };
+		AGX_ASSERT_X(size > 0, "Cannot create index buffer of size 0");
+		AGX_ASSERT_X(instanceCount > 0, "Cannot create index buffer with 0 instances");
+		return Buffer::CreateInfo{
+			.instanceSize = size,
+			.instanceCount = instanceCount,
+			.usage = otherUsage | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
+		};
 	}
 
-	auto Buffer::createStagingBuffer(VkDeviceSize size) -> Buffer
+	auto Buffer::stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo
 	{
-		return Buffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
+		AGX_ASSERT_X(size > 0, "Cannot create staging buffer of size 0");
+		return Buffer::CreateInfo{
+			.instanceSize = size,
+			.instanceCount = 1,
+			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
+		};
 	}
 
 
 
-	Buffer::Buffer(VkDeviceSize instanceSize, uint32_t instanceCount, VkBufferUsageFlags bufferUsage,
-		VmaAllocationCreateFlags allocFlags, VkDeviceSize minOffsetAlignment)
-		: m_instanceSize{ instanceSize }, m_instanceCount{ instanceCount }, m_usage{ bufferUsage }
+	Buffer::Buffer(const CreateInfo& info) :
+		m_instanceSize{ info.instanceSize },
+		m_instanceCount{ info.instanceCount },
+		m_usage{ info.usage }
 	{
-		m_alignmentSize = computeAlignment(instanceSize, minOffsetAlignment);
-		m_bufferSize = m_alignmentSize * instanceCount;
-
-		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, bufferUsage, allocFlags, VMA_MEMORY_USAGE_AUTO);
+		m_alignmentSize = computeAlignment(info.instanceSize, info.minOffsetAlignment);
+		m_bufferSize = m_alignmentSize * m_instanceCount;
+		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, m_usage, info.allocFlags, VMA_MEMORY_USAGE_AUTO);
 
 		VmaAllocationInfo allocInfo;
 		vmaGetAllocationInfo(VulkanContext::device().allocator(), m_allocation, &allocInfo);
@@ -52,18 +85,8 @@ namespace Aegix::Graphics
 	}
 
 	Buffer::Buffer(Buffer&& other) noexcept
-		: m_buffer{ other.m_buffer }, m_allocation{ other.m_allocation },
-		m_bufferSize{ other.m_bufferSize }, m_instanceSize{ other.m_instanceSize }, m_alignmentSize{ other.m_alignmentSize },
-		m_instanceCount{ other.m_instanceCount }, m_usage{ other.m_usage }, m_mapped{ other.m_mapped }
 	{
-		other.m_buffer = VK_NULL_HANDLE;
-		other.m_allocation = VK_NULL_HANDLE;
-		other.m_bufferSize = 0;
-		other.m_instanceSize = 0;
-		other.m_alignmentSize = 0;
-		other.m_instanceCount = 0;
-		other.m_usage = 0;
-		other.m_mapped = nullptr;
+		moveFrom(std::move(other));
 	}
 
 	Buffer::~Buffer()
@@ -74,43 +97,29 @@ namespace Aegix::Graphics
 	auto Buffer::operator=(Buffer&& other) noexcept -> Buffer&
 	{
 		if (this != &other)
-			return *this;
-
-		destroy();
-
-		m_buffer = other.m_buffer;
-		m_allocation = other.m_allocation;
-		m_bufferSize = other.m_bufferSize;
-		m_instanceSize = other.m_instanceSize;
-		m_alignmentSize = other.m_alignmentSize;
-		m_instanceCount = other.m_instanceCount;
-		m_usage = other.m_usage;
-		m_mapped = other.m_mapped;
-
-		other.m_buffer = VK_NULL_HANDLE;
-		other.m_allocation = VK_NULL_HANDLE;
-		other.m_bufferSize = 0;
-		other.m_instanceSize = 0;
-		other.m_alignmentSize = 0;
-		other.m_instanceCount = 0;
-		other.m_usage = 0;
-		other.m_mapped = nullptr;
-
+		{
+			destroy();
+			moveFrom(std::move(other));
+		}
 		return *this;
 	}
 
-	auto Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
+	auto Buffer::descriptorBufferInfo(VkDeviceSize size, VkDeviceSize offset) const -> VkDescriptorBufferInfo
 	{
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
+			"Requested descriptor buffer info exceeds buffer size");
 		return VkDescriptorBufferInfo{ m_buffer, offset, size };
 	}
 
-	auto Buffer::descriptorInfoForIndex(int index) const -> VkDescriptorBufferInfo
+	auto Buffer::descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo
 	{
-		return descriptorInfo(m_alignmentSize, index * m_alignmentSize);
+		AGX_ASSERT_X(index < m_instanceCount, "Requested descriptor buffer info index exceeds instance count");
+		return descriptorBufferInfo(m_alignmentSize, index * m_alignmentSize);
 	}
 
 	void Buffer::map()
 	{
+		AGX_ASSERT_X(!m_mapped, "Buffer is already mapped");
 		VK_CHECK(vmaMapMemory(VulkanContext::device().allocator(), m_allocation, &m_mapped));
 	}
 
@@ -130,15 +139,18 @@ namespace Aegix::Graphics
 
 	void Buffer::write(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + offset, data, size);
 		flush(size, offset);
 	}
 
-	void Buffer::writeToIndex(const void* data, int index)
+	void Buffer::writeToIndex(const void* data, uint32_t index)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		AGX_ASSERT_X(m_mapped, "Called write on buffer before map");
+		AGX_ASSERT_X(index < m_instanceCount, "Requested write index exceeds instance count");
 
 		memcpy(static_cast<uint8_t*>(m_mapped) + (index * m_alignmentSize), data, m_instanceSize);
 		flushIndex(index);
@@ -146,6 +158,7 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
 		if (m_instanceCount == 1)
 		{
 			singleWrite(data, m_instanceSize, 0);
@@ -164,37 +177,45 @@ namespace Aegix::Graphics
 
 	void Buffer::singleWrite(const void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(data, "Data pointer is null");
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
+			"Single write exceeds buffer size");
 		VK_CHECK(vmaCopyMemoryToAllocation(VulkanContext::device().allocator(), data, m_allocation, offset, size));
 	}
 
 	void Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
+		AGX_ASSERT_X(m_mapped, "Called flush on buffer before map");
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
+			"Flush range exceeds buffer size");
 		VK_CHECK(vmaFlushAllocation(VulkanContext::device().allocator(), m_allocation, offset, size));
 	}
 
-	void Buffer::flushIndex(int index)
+	void Buffer::flushIndex(uint32_t index)
 	{
+		AGX_ASSERT_X(index < m_instanceCount, "Requested flush index exceeds instance count");
 		flush(m_alignmentSize, index * m_alignmentSize);
 	}
 
 	void Buffer::upload(const void* data, VkDeviceSize size)
 	{
-		Buffer stagingBuffer = Buffer::createStagingBuffer(size);
+		// TODO: Use a global shared staging buffer (creating a new one for each upload is inefficient)
+		Buffer stagingBuffer{ Buffer::stagingBuffer(size) };
 		stagingBuffer.singleWrite(data, size, 0);
 		stagingBuffer.copyTo(*this, size);
 	}
 
 	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
 	{
+		AGX_ASSERT_X((size == VK_WHOLE_SIZE) || (size <= m_bufferSize && size <= dest.m_bufferSize),
+			"Copy size exceeds source or destination buffer size");
 		VulkanContext::device().copyBuffer(m_buffer, dest.m_buffer, size);
 	}
 
 	auto Buffer::computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize
 	{
 		if (minOffsetAlignment > 0)
-		{
 			return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);
-		}
 
 		return instanceSize;
 	}
@@ -204,5 +225,17 @@ namespace Aegix::Graphics
 		VulkanContext::destroy(m_buffer, m_allocation);
 		m_buffer = VK_NULL_HANDLE;
 		m_allocation = VK_NULL_HANDLE;
+	}
+
+	void Buffer::moveFrom(Buffer&& other)
+	{
+		m_buffer = std::exchange(other.m_buffer, VK_NULL_HANDLE);
+		m_allocation = std::exchange(other.m_allocation, VK_NULL_HANDLE);
+		m_bufferSize = std::exchange(other.m_bufferSize, 0);
+		m_instanceSize = std::exchange(other.m_instanceSize, 0);
+		m_alignmentSize = std::exchange(other.m_alignmentSize, 0);
+		m_instanceCount = std::exchange(other.m_instanceCount, 0);
+		m_usage = std::exchange(other.m_usage, 0);
+		m_mapped = std::exchange(other.m_mapped, nullptr);
 	}
 }

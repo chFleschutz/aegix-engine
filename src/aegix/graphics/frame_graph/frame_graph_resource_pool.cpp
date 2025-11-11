@@ -224,8 +224,10 @@ namespace Aegix::Graphics
 			info.extent = { Core::DEFAULT_WIDTH, Core::DEFAULT_HEIGHT };
 		}
 
-		auto& texture = m_textures.emplace_back();
-		texture.create2D(info.extent.width, info.extent.height, info.format, info.usage, info.mipLevels);
+		auto textureInfo = Texture::CreateInfo::texture2D(info.extent.width, info.extent.height, info.format);
+		textureInfo.image.usage = info.usage;
+		textureInfo.image.mipLevels = info.mipLevels;
+		m_textures.emplace_back(textureInfo);
 
 		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}

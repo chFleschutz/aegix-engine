@@ -2,14 +2,48 @@
 #include "texture.h"
 
 #include "engine.h"
+#include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 namespace Aegix::Graphics
 {
-	auto Texture::create(const std::filesystem::path& texturePath) -> std::shared_ptr<Texture>
+	auto Texture::CreateInfo::texture2D(uint32_t width, uint32_t height, VkFormat format) -> CreateInfo
+	{
+		return CreateInfo{
+			.image = Image::CreateInfo{
+				.format = format,
+				.extent = VkExtent3D{ width, height, 1 },
+				.mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS,
+			},
+		};
+	}
+
+	auto Texture::CreateInfo::cubeMap(uint32_t size, VkFormat format) -> CreateInfo
+	{
+		return CreateInfo{
+			.image = Image::CreateInfo{
+				.format = format,
+				.extent = VkExtent3D{ size, size, 1 },
+				.mipLevels = Image::CreateInfo::CALCULATE_MIP_LEVELS,
+				.layerCount = 6,
+				.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+				.imageType = VK_IMAGE_TYPE_2D,
+				.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+			},
+			.view = ImageView::CreateInfo{
+				.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+			},
+		};
+	}
+
+
+
+	auto Texture::loadFromFile(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
 	{
 		if (!std::filesystem::exists(texturePath))
 		{
@@ -19,36 +53,138 @@ namespace Aegix::Graphics
 
 		if (texturePath.extension() == ".hdr")
 		{
-			auto texture = std::make_shared<Texture>();
-			texture->createCube(texturePath);
-			return texture;
+			return Texture::loadCubemap(texturePath);
 		}
 
-		return create(texturePath, VK_FORMAT_R8G8B8A8_UNORM);
+		return Texture::loadTextur2D(texturePath, format);
 	}
 
-	auto Texture::create(const std::filesystem::path& texturePath, VkFormat format) -> std::shared_ptr<Texture>
+	auto Texture::loadTextur2D(const std::filesystem::path& file, VkFormat format) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>();
-		texture->create2D(texturePath, format);
+		int stbWidth = 0;
+		int stbHeight = 0;
+		int stbChannels = 0;
+		auto pixels = stbi_load(file.string().c_str(), &stbWidth, &stbHeight, &stbChannels, STBI_rgb_alpha);
+		if (!pixels)
+		{
+			ALOG::fatal("Failed to load image: '{}'", file.string());
+			AGX_ASSERT_X(false, "Failed to load image");
+		}
+
+		uint32_t width = static_cast<uint32_t>(stbWidth);
+		uint32_t height = static_cast<uint32_t>(stbHeight);
+		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(stbWidth) * static_cast<VkDeviceSize>(stbHeight);
+
+		Texture::CreateInfo info = Texture::CreateInfo::texture2D(width, height, format);
+		auto texture = std::make_shared<Texture>(info);
+		texture->image().upload(pixels, imageSize);
+
+		stbi_image_free(pixels);
 		return texture;
 	}
 
-	auto Texture::create(glm::vec4 color, VkFormat format) -> std::shared_ptr<Texture>
+	auto Texture::loadCubemap(const std::filesystem::path& file) -> std::shared_ptr<Texture>
 	{
-		auto texture = std::make_shared<Texture>();
-		texture->create2D(1, 1, format, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
-		texture->m_image.fillRGBA8(color);
+		// HDR environment maps are stored as equirectangular images (longitude/latitude 2D image)
+		// To convert it to a cubemap, the image is sampled in a compute shader and written to the cubemap 
+
+		int stbWidth = 0;
+		int stbHeight = 0;
+		int stbChannels = 0;
+		auto pixels = stbi_loadf(file.string().c_str(), &stbWidth, &stbHeight, &stbChannels, STBI_rgb_alpha);
+		if (!pixels)
+		{
+			ALOG::fatal("Failed to load image: '{}'", file.string());
+			AGX_ASSERT_X(false, "Failed to load image");
+		}
+
+		// Upload data to staging buffer
+		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(stbWidth) * static_cast<VkDeviceSize>(stbHeight);
+		Buffer stagingBuffer{ Buffer::stagingBuffer(imageSize) };
+		stagingBuffer.singleWrite(pixels);
+
+		stbi_image_free(pixels);
+
+		// Create spherical image
+		uint32_t width = static_cast<uint32_t>(stbWidth);
+		uint32_t height = static_cast<uint32_t>(stbHeight);
+		auto sphericalInfo = Texture::CreateInfo::texture2D(width, height, VK_FORMAT_R32G32B32A32_SFLOAT);
+		sphericalInfo.image.mipLevels = 1;
+		Texture spherialImage{ sphericalInfo };
+
+		// Create cubemap image
+		uint32_t cubeSize = width / 4; // Cubemap needs 4 horizontal faces
+		auto cubeInfo = Texture::CreateInfo::cubeMap(cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT);
+		cubeInfo.image.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		auto cubeMap = std::make_shared<Texture>(cubeInfo);
+
+		// Create pipeline resources
+		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.build();
+
+		DescriptorSet descriptorSet{ descriptorSetLayout };
+
+		DescriptorWriter{ descriptorSetLayout }
+			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
+			.writeImage(1, cubeMap->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.update(descriptorSet);
+
+		auto pipeline = Pipeline::ComputeBuilder{}
+			.addDescriptorSetLayout(descriptorSetLayout)
+			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
+			.build();
+
+		// Convert spherical image to cubemap
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
+		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
+		{
+			spherialImage.image().copyFrom(cmd, stagingBuffer);
+			cubeMap->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+			pipeline.bind(cmd);
+			pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
+
+			constexpr uint32_t groupSize = 16;
+			uint32_t groupCountX = (width + groupSize - 1) / groupSize;
+			uint32_t groupCountY = (height + groupSize - 1) / groupSize;
+			vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
+
+			cubeMap->image().generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+		Tools::vk::cmdEndDebugUtilsLabel(cmd);
+		VulkanContext::device().endSingleTimeCommands(cmd);
+
+		return cubeMap;
+	}
+
+	auto Texture::solidColor(glm::vec4 color) -> std::shared_ptr<Texture>
+	{
+		auto info = Texture::CreateInfo::texture2D(1, 1, VK_FORMAT_R32G32B32A32_SFLOAT);
+		auto texture = std::make_shared<Texture>(info);
+		texture->image().upload(&color, sizeof(glm::vec4));
 		return texture;
 	}
 
-	auto Texture::createIrradiance(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
+	auto Texture::solidColorCube(glm::vec4 color) -> std::shared_ptr<Texture>
+	{
+		std::array<glm::vec4, 6> colors{ color, color, color, color, color, color };
+		auto info = Texture::CreateInfo::cubeMap(1, VK_FORMAT_R32G32B32A32_SFLOAT);
+		auto texture = std::make_shared<Texture>(info);
+		texture->image().upload(&colors, sizeof(colors));
+		return texture;
+	}
+
+	auto Texture::irradianceMap(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
 		// Create irradiance map
 		constexpr uint32_t irradianceSize = 32;
-		auto irradiance = std::make_shared<Texture>();
-		irradiance->createCube(irradianceSize, irradianceSize, VK_FORMAT_R16G16B16A16_SFLOAT,
-			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
+
+		auto textureInfo = Texture::CreateInfo::cubeMap(irradianceSize, VK_FORMAT_R16G16B16A16_SFLOAT);
+		textureInfo.image.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		textureInfo.image.mipLevels = 1;
+		auto irradiance = std::make_shared<Texture>(textureInfo);
 
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
@@ -90,14 +226,16 @@ namespace Aegix::Graphics
 		return irradiance;
 	}
 
-	auto Texture::createPrefiltered(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
+	auto Texture::prefilteredMap(const std::shared_ptr<Texture>& skybox) -> std::shared_ptr<Texture>
 	{
 		// Create prefiltered map
 		constexpr uint32_t prefilteredSize = 128;
 		constexpr uint32_t mipLevelCount = 5;
-		auto prefiltered = std::make_shared<Texture>();
-		prefiltered->createCube(prefilteredSize, prefilteredSize, VK_FORMAT_R16G16B16A16_SFLOAT,
-			VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, mipLevelCount);
+
+		auto textureInfo = Texture::CreateInfo::cubeMap(prefilteredSize, VK_FORMAT_R16G16B16A16_SFLOAT);
+		textureInfo.image.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		textureInfo.image.mipLevels = mipLevelCount;
+		auto prefiltered = std::make_shared<Texture>(textureInfo);
 
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
@@ -119,18 +257,22 @@ namespace Aegix::Graphics
 			.build();
 
 		// Create image views for mip levels
-		std::vector<ImageView> mipViews(mipLevelCount);
+		std::vector<ImageView> mipViews;
+		mipViews.reserve(mipLevelCount);
+
 		std::vector<DescriptorSet> descriptorSets;
 		descriptorSets.reserve(mipLevelCount);
+
 		for (uint32_t i = 0; i < mipLevelCount; ++i)
 		{
-			mipViews[i].create(prefiltered->image(), ImageView::Config{
+			ImageView::CreateInfo viewInfo{
 				.baseMipLevel = i,
 				.levelCount = 1,
 				.baseLayer = 0,
 				.layerCount = 6,
-				.viewType = VK_IMAGE_VIEW_TYPE_CUBE
-				});
+				.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+			};
+			mipViews.emplace_back(viewInfo, prefiltered->image());
 
 			descriptorSets.emplace_back(descriptorSetLayout);
 			DescriptorWriter{ descriptorSetLayout }
@@ -146,7 +288,7 @@ namespace Aegix::Graphics
 			skybox->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			prefiltered->image().transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 			pipeline.bind(cmd);
-			
+
 			for (uint32_t mip = 0; mip < mipLevelCount; ++mip)
 			{
 				pipeline.bindDescriptorSet(cmd, 0, descriptorSets[mip]);
@@ -168,25 +310,16 @@ namespace Aegix::Graphics
 		return prefiltered;
 	}
 
-	auto Texture::createBRDFLUT() -> std::shared_ptr<Texture>
+	auto Texture::BRDFLUT() -> std::shared_ptr<Texture>
 	{
 		// Create BRDF LUT
 		constexpr uint32_t lutSize = 512;
-		Image::Config imgageConfig{
-			.format = VK_FORMAT_R16G16_SFLOAT,
-			.extent = { lutSize, lutSize, 1 },
-			.mipLevels = 1,
-			.layerCount = 1,
-			.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
-		};
-		Sampler::Config samplerConfig{
-			.magFilter = VK_FILTER_LINEAR,
-			.minFilter = VK_FILTER_LINEAR,
-			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		};
-		auto lut = std::make_shared<Texture>();
-		lut->create2D(imgageConfig, samplerConfig);
+
+		auto textureInfo = Texture::CreateInfo::texture2D(lutSize, lutSize, VK_FORMAT_R16G16_SFLOAT);
+		textureInfo.image.mipLevels = 1;
+		textureInfo.image.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		textureInfo.sampler.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		auto lut = std::make_shared<Texture>(textureInfo);
 
 		// Create pipeline resources
 		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
@@ -223,145 +356,70 @@ namespace Aegix::Graphics
 		return lut;
 	}
 
-
-
-	void Texture::create2D(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
+	Texture::Texture(const CreateInfo& info) :
+		m_image{ info.image },
+		m_view{ info.view, m_image },
+		m_sampler{ info.sampler, m_image.mipLevels() }
 	{
-		m_image.create({ width, height, 1 }, format, usage, mipLevels);
-		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-		m_sampler.create(Sampler::Config{
-			.magFilter = VK_FILTER_LINEAR,
-			.minFilter = VK_FILTER_LINEAR,
-			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-			});
+		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+		if (info.image.usage & VK_IMAGE_USAGE_SAMPLED_BIT)
+			m_sampledHandle = bindlessSet.allocateSampledImage(*this);
+
+		if (info.image.usage & VK_IMAGE_USAGE_STORAGE_BIT)
+			m_storageHandle = bindlessSet.allocateStorageImage(*this);
 	}
 
-	void Texture::create2D(const Image::Config& config, const Sampler::Config& samplerConfig)
+	Texture::Texture(Texture&& other) noexcept : 
+		m_image{ std::move(other.m_image) },
+		m_view{ std::move(other.m_view) },
+		m_sampler{ std::move(other.m_sampler) },
+		m_storageHandle{ other.m_storageHandle },
+		m_sampledHandle{ other.m_sampledHandle }
 	{
-		m_image.create(config);
-		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-		m_sampler.create(samplerConfig);
+		other.m_storageHandle.invalidate();
+		other.m_sampledHandle.invalidate();
 	}
 
-	void Texture::create2D(const std::filesystem::path& path, VkFormat format)
+	Texture::~Texture()
 	{
-		m_image.create(path, format);
-		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
-		m_sampler.create(Sampler::Config{
-			.magFilter = VK_FILTER_LINEAR,
-			.minFilter = VK_FILTER_LINEAR,
-			.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-			});
+		destroy();
 	}
 
-	void Texture::createCube(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels)
+	auto Texture::operator=(Texture&& other) noexcept -> Texture&
 	{
-		Image::Config imageConfig{
-			.format = format,
-			.extent = { width, height, 1 },
-			.mipLevels = mipLevels,
-			.layerCount = 6,
-			.usage = usage,
-			.imageType = VK_IMAGE_TYPE_2D,
-			.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
-		};
-		m_image.create(imageConfig);
-
-		ImageView::Config viewConfig{
-			.baseMipLevel = 0,
-			.levelCount = m_image.mipLevels(),
-			.baseLayer = 0,
-			.layerCount = m_image.layerCount(),
-			.viewType = VK_IMAGE_VIEW_TYPE_CUBE
-		};
-		m_view.create(m_image, viewConfig);
-
-		m_sampler.create(Sampler::Config{
-			.magFilter = VK_FILTER_LINEAR,
-			.minFilter = VK_FILTER_LINEAR,
-			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-			.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			.maxLod = static_cast<float>(m_image.mipLevels() - 1)
-			});
-	}
-
-	void Texture::createCube(const std::filesystem::path& path)
-	{
-		// HDR environment maps are stored as equirectangular images (longitude/latitude 2D image)
-		// To convert it to a cubemap, the image is sampled in a compute shader and written to the cubemap 
-
-		int width = 0;
-		int height = 0;
-		int channels = 0;
-		auto pixels = stbi_loadf(path.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		if (!pixels)
+		if (this != &other)
 		{
-			ALOG::fatal("Failed to load image: '{}'", path.string());
-			AGX_ASSERT_X(false, "Failed to load image");
+			destroy();
+			m_image = std::move(other.m_image);
+			m_view = std::move(other.m_view);
+			m_sampler = std::move(other.m_sampler);
+			m_storageHandle = other.m_storageHandle;
+			m_sampledHandle = other.m_sampledHandle;
+			other.m_storageHandle.invalidate();
+			other.m_sampledHandle.invalidate();
 		}
-
-		// Upload data to staging buffer
-		VkDeviceSize imageSize = 4 * sizeof(float) * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
-		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-		stagingBuffer.singleWrite(pixels);
-
-		stbi_image_free(pixels);
-
-		// Create spherical image
-		Texture spherialImage{};
-		spherialImage.create2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), VK_FORMAT_R32G32B32A32_SFLOAT,
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 1);
-
-		// Create cubemap image
-		uint32_t cubeSize = width / 4; // Cubemap needs 4 horizontal faces
-		createCube(cubeSize, cubeSize, VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-
-		// Create pipeline resources
-		auto descriptorSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.build();
-
-		DescriptorSet descriptorSet{ descriptorSetLayout };
-
-		DescriptorWriter{ descriptorSetLayout }
-			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-			.writeImage(1, descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
-			.update(descriptorSet);
-
-		auto pipeline = Pipeline::ComputeBuilder{}
-			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
-			.build();
-
-		// Convert spherical image to cubemap
-		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
-		Tools::vk::cmdBeginDebugUtilsLabel(cmd, "Equirectangular to Cubemap");
-		{
-			spherialImage.image().copyFrom(cmd, stagingBuffer);
-			m_image.transitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-
-			pipeline.bind(cmd);
-			pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
-
-			constexpr uint32_t groupSize = 16;
-			uint32_t groupCountX = (width + groupSize - 1) / groupSize;
-			uint32_t groupCountY = (height + groupSize - 1) / groupSize;
-			vkCmdDispatch(cmd, groupCountX, groupCountY, 6);
-
-			m_image.generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		}
-		Tools::vk::cmdEndDebugUtilsLabel(cmd);
-		VulkanContext::device().endSingleTimeCommands(cmd);
+		return *this;
 	}
 
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)
 	{
+		// TODO: Rework this, does not work for all textures (e.g. cube maps)
+
 		m_image.resize(newSize, usage);
-		m_view.create(m_image, 0, m_image.mipLevels(), 0, m_image.layerCount());
+
+		ImageView::CreateInfo viewInfo{
+			.baseMipLevel = 0,
+			.levelCount = m_image.mipLevels(),
+			.baseLayer = 0,
+			.layerCount = m_image.layerCount(),
+			.viewType = VK_IMAGE_VIEW_TYPE_2D,
+		};
+		m_view = ImageView{ viewInfo, m_image };
+	}
+
+	void Texture::destroy()
+	{
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_storageHandle);
+		Engine::renderer().bindlessDescriptorSet().freeHandle(m_sampledHandle);
 	}
 }

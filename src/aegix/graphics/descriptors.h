@@ -1,15 +1,25 @@
 #pragma once
 
 #include "graphics/globals.h"
-#include "graphics/resources/texture.h"
+#include "graphics/vulkan/volk_include.h"
 
 namespace Aegix::Graphics
 {
+	class Buffer;
+	class Texture;
+
 	class DescriptorSetLayout
 	{
 		friend class DescriptorWriter;
 
 	public:
+		struct CreateInfo
+		{
+			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings;
+			VkDescriptorBindingFlags bindingFlags;
+			VkDescriptorSetLayoutCreateFlags flags{ 0 };
+		};
+
 		class Builder
 		{
 		public:
@@ -17,14 +27,16 @@ namespace Aegix::Graphics
 
 			auto addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags,
 				uint32_t count = 1) -> Builder&;
-			auto buildUnique() const -> std::unique_ptr<DescriptorSetLayout>;
-			auto build() const -> DescriptorSetLayout;
+			auto setBindingFlags(VkDescriptorBindingFlags flags) -> Builder&;
+			auto setFlags(VkDescriptorSetLayoutCreateFlags flags) -> Builder&;
+			auto buildUnique() -> std::unique_ptr<DescriptorSetLayout>;
+			auto build() -> DescriptorSetLayout;
 
 		private:
-			std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings{};
+			CreateInfo m_createInfo{};
 		};
 
-		DescriptorSetLayout(std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+		DescriptorSetLayout(CreateInfo& createInfo);
 		DescriptorSetLayout(const DescriptorSetLayout&) = delete;
 		DescriptorSetLayout(DescriptorSetLayout&& other) noexcept;
 		~DescriptorSetLayout();
@@ -79,7 +91,7 @@ namespace Aegix::Graphics
 		operator VkDescriptorPool() const { return m_descriptorPool; }
 		auto descriptorPool() const -> VkDescriptorPool { return m_descriptorPool; }
 
-		void allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
+		void allocateDescriptorSet(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptorSet) const;
 		void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 		void resetPool();
 
@@ -142,6 +154,7 @@ namespace Aegix::Graphics
 		};
 
 		DescriptorSet(DescriptorSetLayout& setLayout);
+		DescriptorSet(DescriptorSetLayout& setLayout, DescriptorPool& pool);
 		DescriptorSet(const DescriptorSet&) = delete;
 		DescriptorSet(DescriptorSet&&) = default;
 		~DescriptorSet() = default;

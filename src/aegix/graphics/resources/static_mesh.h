@@ -1,7 +1,10 @@
 #pragma once
 
-#include "graphics/resources/buffer.h"
+#include "graphics/bindless/bindless_buffer.h"
 #include "graphics/descriptors.h"
+#include "graphics/resources/buffer.h"
+
+#include <glm/glm.hpp>
 
 namespace Aegix::Graphics
 {
@@ -26,6 +29,14 @@ namespace Aegix::Graphics
 			uint32_t primitiveOffset;
 			uint8_t vertexCount;
 			uint8_t primitiveCount;
+		};
+
+		struct MeshData
+		{
+			DescriptorHandle vertexBufferHandle;
+			DescriptorHandle meshletBufferHandle;
+			DescriptorHandle meshletIndexBufferHandle;
+			DescriptorHandle meshletPrimitiveBufferHandle;
 		};
 
 		struct CreateInfo
@@ -55,19 +66,21 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto meshletCount() const -> uint32_t { return m_meshletCount; }
 		[[nodiscard]] auto meshletDescriptorSet() const -> const DescriptorSet& { return m_meshletDescriptor; }
 		[[nodiscard]] auto attributeDescriptorSet() const -> const DescriptorSet& { return m_attributeDescriptor; }
+		[[nodiscard]] auto meshDataBuffer() const -> const BindlessBuffer& { return m_meshDataBuffer; }
 
 		void draw(VkCommandBuffer cmd) const;
 		void drawMeshlets(VkCommandBuffer cmd) const;
 
 	private:
 		// Vertex and index buffers for traditional rendering
-		Buffer m_vertexBuffer;
-		Buffer m_indexBuffer;
+		BindlessBuffer m_vertexBuffer;
+		BindlessBuffer m_indexBuffer;
 
 		// Storage buffers for mesh shaders
-		Buffer m_meshletBuffer;
-		Buffer m_meshletIndexBuffer;
-		Buffer m_meshletPrimitiveBuffer;
+		BindlessBuffer m_meshletBuffer;
+		BindlessBuffer m_meshletIndexBuffer;
+		BindlessBuffer m_meshletPrimitiveBuffer;
+		BindlessBuffer m_meshDataBuffer;
 		DescriptorSet m_meshletDescriptor;
 		DescriptorSet m_attributeDescriptor;
 

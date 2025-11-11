@@ -14,12 +14,11 @@ namespace Aegix::Graphics
 		m_upsampleSetLayout{ createUpsampleDescriptorSetLayout() },
 		m_thresholdSet{ m_thresholdSetLayout }
 	{
-		m_sampler.create(VK_FILTER_LINEAR, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, false);
-
-		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
-		{
-			m_mipViews.emplace_back();
-		}
+		auto samplerInfo = Sampler::CreateInfo{
+			.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			.anisotropy = false,
+		};
+		m_sampler = Sampler{ samplerInfo };
 
 		// Descriptor sets
 		m_thresholdPipeline = Pipeline::ComputeBuilder{}
@@ -87,9 +86,14 @@ namespace Aegix::Graphics
 		auto& bloom = resources.texture(m_bloom);
 		auto& sceneColor = resources.texture(m_sceneColor);
 
+		m_mipViews.reserve(BLOOM_MIP_LEVELS);
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 		{
-			m_mipViews[i].create2D(bloom.image(), i, 1);
+			ImageView::CreateInfo viewInfo{
+				.baseMipLevel = i,
+				.levelCount = 1,
+			};
+			m_mipViews.emplace_back(viewInfo, bloom.image());
 		}
 
 		DescriptorWriter{ m_thresholdSetLayout }

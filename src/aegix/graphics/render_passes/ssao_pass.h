@@ -39,7 +39,7 @@ namespace Aegix::Graphics
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;
 		std::unique_ptr<DescriptorSet> m_descriptorSet;
 
-		std::unique_ptr<Texture> m_ssaoNoise;
+		Texture m_ssaoNoise;
 		Buffer m_ssaoSamples;
 		Buffer m_uniforms;
 

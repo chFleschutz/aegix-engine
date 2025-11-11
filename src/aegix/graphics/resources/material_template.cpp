@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "material_template.h"
 
+#include "engine.h"
+
 namespace Aegix::Graphics
 {
 	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
@@ -24,6 +26,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Vec2: return 8;
 		case MaterialParamType::Vec3: return 16;
 		case MaterialParamType::Vec4: return 16;
+		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
 		default: return 16;
 		}
 	}
@@ -37,6 +40,7 @@ namespace Aegix::Graphics
 		case MaterialParamType::Vec2: return 8;
 		case MaterialParamType::Vec3: return 12;
 		case MaterialParamType::Vec4: return 16;
+		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
 		default: return 16;
 		}
 	}
@@ -64,9 +68,8 @@ namespace Aegix::Graphics
 
 		MaterialParameter param{
 			.type = type,
-			.binding = 0,
-			.offset = 0,
-			.size = 0,
+			.offset = alignTo(m_parameterSize, std140Alignment(type)),
+			.size = std140Size(type),
 			.defaultValue = defaultValue,
 		};
 
@@ -75,13 +78,8 @@ namespace Aegix::Graphics
 			m_textureCount++;
 			param.binding = m_textureCount;
 		}
-		else
-		{
-			param.size = std140Size(type);
-			param.offset = alignTo(m_parameterSize, std140Alignment(type));
-			m_parameterSize = param.offset + param.size;
-		}
 
+		m_parameterSize = param.offset + param.size;
 		m_parameters.emplace(name, std::move(param));
 	}
 
@@ -90,32 +88,56 @@ namespace Aegix::Graphics
 		m_pipeline.bind(cmd);
 	}
 
+	void MaterialTemplate::bindBindlessSet(VkCommandBuffer cmd)
+	{
+		m_pipeline.bindDescriptorSet(cmd, 0, Engine::renderer().bindlessDescriptorSet().descriptorSet());
+	}
+
 	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
 	{
+		// TODO: Remove (Replaced by bindless descriptor set)
 		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
 	}
 
 	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
 	{
+		// TODO: Remove (Replaced by bindless descriptor set)
 		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
 	}
 
 	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)
 	{
-		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, data, size, offset);
+		m_pipeline.pushConstants(cmd, VK_SHADER_STAGE_ALL, data, size, offset);
 	}
 
 	void MaterialTemplate::draw(VkCommandBuffer cmd, const StaticMesh& mesh)
 	{
 		if (m_pipeline.hasFlag(Pipeline::Flags::MeshShader))
 		{
-			m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
-			m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
+			// TODO: Remove (Replaced by bindless descriptor set)
+			//m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
+			//m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
 			mesh.drawMeshlets(cmd);
 		}
 		else
 		{
 			mesh.draw(cmd);
+		}
+	}
+
+	void MaterialTemplate::printInfo() const
+	{
+		ALOG::info("Material Template Info:");
+		ALOG::info("  Parameter Size: {} bytes", m_parameterSize);
+		ALOG::info("  Parameters:");
+		for (const auto& [name, param] : m_parameters)
+		{
+			ALOG::info("    Name: {}, Type: {}, Binding: {}, Offset: {}, Size: {}",
+				name,
+				static_cast<int>(param.type),
+				param.binding,
+				param.offset,
+				param.size);
 		}
 	}
 }

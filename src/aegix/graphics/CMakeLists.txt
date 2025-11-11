@@ -1,4 +1,11 @@
 target_sources(aegix-engine PRIVATE
+	"bindless/bindless_buffer.h" 
+	"bindless/bindless_buffer.cpp"
+	"bindless/bindless_descriptor_set.cpp"
+	"bindless/bindless_descriptor_set.h" 
+	"bindless/descriptor_handle.h" 
+	"bindless/descriptor_handle.cpp"
+
 	"frame_graph/frame_graph.cpp"
 	"frame_graph/frame_graph.h"
 	"frame_graph/frame_graph_blackboard.h"
@@ -24,6 +31,8 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/transparent_pass.h"
 	"render_passes/transparent_pass.cpp" 
 
+	"render_systems/bindless_static_mesh_render_system.h"
+	"render_systems/bindless_static_mesh_render_system.cpp"
 	"render_systems/point_light_render_system.cpp" 
 	"render_systems/point_light_render_system.h" 
 	"render_systems/render_system.h"
@@ -40,15 +49,12 @@ target_sources(aegix-engine PRIVATE
 	"resources/material_instance.h"
 	"resources/material_template.cpp"
 	"resources/material_template.h"
+	"resources/mesh_preprocessor.cpp"
+	"resources/mesh_preprocessor.h" 
 	"resources/sampler.cpp"
 	"resources/sampler.h"
 	"resources/texture.cpp"
 	"resources/texture.h"
-
-	
-	
-	"resources/mesh_preprocessor.cpp"
-	"resources/mesh_preprocessor.h" 
 	
 	"vulkan/debug_utils.h" 
 	"vulkan/debug_utils.cpp"
@@ -76,5 +82,4 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
-
 )

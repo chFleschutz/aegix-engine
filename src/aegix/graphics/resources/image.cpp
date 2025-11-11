@@ -1,17 +1,20 @@
 #include "pch.h"
 #include "image.h"
 
-#include "engine.h"
-#include "graphics/descriptors.h"
-#include "graphics/pipeline.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 namespace Aegix::Graphics
 {
+	Image::Image(const CreateInfo& info) :
+		m_extent{ info.extent },
+		m_format{ info.format },
+		m_mipLevels{ info.mipLevels },
+		m_layerCount{ info.layerCount }
+	{
+		create(info);
+	}
+
 	Image::Image(Image&& other) noexcept
 	{
 		m_image = other.m_image;
@@ -50,127 +53,57 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
-	void Image::create(const Config& config)
+	void Image::upload(const Buffer& buffer)
 	{
-		destroy();
+		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
+		{
+			Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
+			Tools::vk::cmdCopyBufferToImage(cmd, buffer, m_image, m_extent, m_layerCount);
+			generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+		VulkanContext::device().endSingleTimeCommands(cmd);
+	}
 
-		m_format = config.format;
-		m_extent = config.extent;
-		m_mipLevels = config.mipLevels;
-		m_layerCount = config.layerCount;
-		m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+	void Image::upload(const void* data, VkDeviceSize size)
+	{
+		Buffer stagingBuffer{ Buffer::stagingBuffer(size) };
+		stagingBuffer.singleWrite(data);
+		upload(stagingBuffer);
+	}
 
-		if (config.mipLevels == Config::CALCULATE_MIP_LEVELS)
+	void Image::create(const CreateInfo& config)
+	{
+		if (config.mipLevels == CreateInfo::CALCULATE_MIP_LEVELS)
 		{
 			uint32_t maxDim = std::max(config.extent.width, std::max(config.extent.height, config.extent.depth));
 			m_mipLevels = static_cast<uint32_t>(std::floor(std::log2(maxDim))) + 1;
 		}
 
-		VkImageCreateInfo imageInfo{};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.imageType = config.imageType;
-		imageInfo.extent = m_extent;
-		imageInfo.mipLevels = m_mipLevels;
-		imageInfo.arrayLayers = m_layerCount;
-		imageInfo.format = m_format;
-		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = config.usage;
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = config.flags;
+		VkImageCreateInfo imageInfo{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+			.flags = config.flags,
+			.imageType = config.imageType,
+			.format = m_format,
+			.extent = m_extent,
+			.mipLevels = m_mipLevels,
+			.arrayLayers = m_layerCount,
+			.samples = VK_SAMPLE_COUNT_1_BIT,
+			.tiling = VK_IMAGE_TILING_OPTIMAL,
+			.usage = config.usage,
+			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+		};
 
 		if (m_mipLevels > 1)
 		{
 			imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		}
 
-		VmaAllocationCreateInfo allocInfo{};
-		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+		VmaAllocationCreateInfo allocInfo{
+			.usage = VMA_MEMORY_USAGE_AUTO,
+		};
 
 		VulkanContext::device().createImage(m_image, m_allocation, imageInfo, allocInfo);
-	}
-
-	void Image::create(VkExtent3D extent, VkFormat format, VkImageUsageFlags usage, uint32_t mipLevels, uint32_t layerCount)
-	{
-		Config config{
-			.format = format,
-			.extent = extent,
-			.mipLevels = mipLevels,
-			.layerCount = layerCount,
-			.usage = usage,
-		};
-
-		create(config);
-	}
-
-	void Image::create(const std::filesystem::path& path, VkFormat format)
-	{
-		int texWidth = 0;
-		int texHeight = 0;
-		int texChannels = 0;
-		auto pixels = stbi_load(path.string().c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		if (!pixels)
-		{
-			ALOG::fatal("Failed to load image: '{}'", path.string());
-			AGX_ASSERT_X(false, "Failed to load image");
-		}
-
-		m_extent = { static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1 };
-		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(texWidth) * static_cast<VkDeviceSize>(texHeight);
-		Buffer stagingBuffer{ imageSize, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-		stagingBuffer.singleWrite(pixels);
-
-		stbi_image_free(pixels);
-
-		Config config{
-			.format = format,
-			.extent = m_extent,
-			.mipLevels = Config::CALCULATE_MIP_LEVELS,
-			.layerCount = 1,
-			.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		};
-		create(config);
-
-		fill(stagingBuffer);
-	}
-
-	void Image::fill(const Buffer& buffer)
-	{
-		VkCommandBuffer cmd = VulkanContext::device().beginSingleTimeCommands();
-
-		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, m_layout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, m_mipLevels, m_layerCount);
-		Tools::vk::cmdCopyBufferToImage(cmd, buffer.buffer(), m_image, m_extent, m_layerCount);
-		generateMipmaps(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-		VulkanContext::device().endSingleTimeCommands(cmd);
-	}
-
-	void Image::fill(const void* data, VkDeviceSize size)
-	{
-		Buffer stagingBuffer{ size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT };
-		stagingBuffer.singleWrite(data);
-
-		fill(stagingBuffer);
-	}
-
-	void Image::fillSFLOAT(const glm::vec4& color)
-	{
-		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
-		std::vector<glm::vec4> pixels(pixelCount, color);
-		fill(pixels.data(), sizeof(glm::vec4) * pixelCount);
-	}
-
-	void Image::fillRGBA8(const glm::vec4& color)
-	{
-		auto pixelCount = m_extent.width * m_extent.height * m_extent.depth * m_layerCount;
-		uint8_t r = static_cast<uint8_t>(color.r * 255.0f);
-		uint8_t g = static_cast<uint8_t>(color.g * 255.0f);
-		uint8_t b = static_cast<uint8_t>(color.b * 255.0f);
-		uint8_t a = static_cast<uint8_t>(color.a * 255.0f);
-		uint32_t rgba = (a << 24) | (b << 16) | (g << 8) | r;
-		std::vector<uint32_t> pixels(pixelCount, rgba);
-		fill(pixels.data(), sizeof(uint32_t) * pixelCount);
 	}
 
 	void Image::copyFrom(VkCommandBuffer cmd, const Buffer& src)
@@ -184,7 +117,7 @@ namespace Aegix::Graphics
 	{
 		destroy();
 
-		Config config{
+		CreateInfo config{
 			.format = m_format,
 			.extent = extent,
 			.mipLevels = m_mipLevels,

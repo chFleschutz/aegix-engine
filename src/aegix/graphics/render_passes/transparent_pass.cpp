@@ -7,7 +7,7 @@
 namespace Aegix::Graphics
 {
 	TransparentPass::TransparentPass(FrameGraph& framegraph) : 
-		m_globalUbo{ Buffer::createUniformBuffer(sizeof(TransparentUbo)) },
+		m_globalUbo{ Buffer::uniformBuffer(sizeof(TransparentUbo)) },
 		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
 		m_globalSets.reserve(MAX_FRAMES_IN_FLIGHT);

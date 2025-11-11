@@ -1,11 +1,12 @@
 #pragma once
 
 #include "core/window.h"
-#include "graphics/descriptors.h"
+#include "graphics/bindless/bindless_descriptor_set.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
 #include "graphics/swap_chain.h"
 #include "scene/scene.h"
+#include "vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
@@ -29,11 +30,16 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
+		[[nodiscard]] auto bindlessDescriptorSet() -> BindlessDescriptorSet& { return m_bindlessDescriptorSet; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
 		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
 		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }
 		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
 		[[nodiscard]] auto frameIndex() const -> uint32_t;
+
+		/// @brief Builds the frame graph and all required resources
+		/// @note This has to be AFTER the engine is fully initialized
+		void compileFrameGraph() { createFrameGraph(); }
 
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);
@@ -50,12 +56,14 @@ namespace Aegix::Graphics
 		void endFrame();
 
 		Core::Window& m_window;
+		VulkanContext& m_vulkanContext;
 		
 		SwapChain m_swapChain;
 		std::array<FrameContext, MAX_FRAMES_IN_FLIGHT> m_frames;
 		uint32_t m_currentFrameIndex{ 0 };
 		bool m_isFrameStarted{ false };
 
+		BindlessDescriptorSet m_bindlessDescriptorSet;
 		FrameGraph m_frameGraph;
 	};
 }

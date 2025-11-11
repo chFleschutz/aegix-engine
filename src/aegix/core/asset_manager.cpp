@@ -6,6 +6,7 @@
 #include "graphics/pipeline.h"
 #include "graphics/resources/material_instance.h"
 #include "graphics/resources/material_template.h"
+#include "engine.h"
 
 namespace Aegix::Core
 {
@@ -15,10 +16,12 @@ namespace Aegix::Core
 
 		// Default Textures
 
-		add("default/texture_black", Texture::create(glm::vec4{ 0.0f }, VK_FORMAT_R8G8B8A8_UNORM));
-		add("default/texture_white", Texture::create(glm::vec4{ 1.0f }, VK_FORMAT_R8G8B8A8_UNORM));
-		add("default/texture_normal", Texture::create(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }, VK_FORMAT_R8G8B8A8_UNORM));
+		add("default/texture_black", Texture::solidColor(glm::vec4{ 0.0f }));
+		add("default/texture_white", Texture::solidColor(glm::vec4{ 1.0f }));
+		add("default/texture_normal", Texture::solidColor(glm::vec4{ 0.5f, 0.5f, 1.0f, 0.0f }));
 
+		add("default/cubemap_black", Texture::solidColorCube(glm::vec4{ 0.0f }));
+		add("default/cubemap_white", Texture::solidColorCube(glm::vec4{ 1.0f }));
 
 		// Default PBR Material
 		{
@@ -85,13 +88,16 @@ namespace Aegix::Core
 				.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 				.build();
 
+			auto& bindless = Engine::renderer().bindlessDescriptorSet();
+
 			auto meshPipeline = Pipeline::GraphicsBuilder{}
-				.addDescriptorSetLayout(globalSetLayout)
-				.addDescriptorSetLayout(materialSetLayout)
-				.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
-				.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
-				.addPushConstantRange(VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 128)
-				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry.slang.spv")
+				//.addDescriptorSetLayout(globalSetLayout)
+				//.addDescriptorSetLayout(materialSetLayout)
+				//.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
+				//.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
+				.addDescriptorSetLayout(bindless.layout())
+				.addPushConstantRange(VK_SHADER_STAGE_ALL, 256) // TODO: Reduce push constant size to safe 128 bytes limit
+				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry_bindless.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
