@@ -5,6 +5,8 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 namespace Aegix::Graphics
 {
 	GeometryPass::GeometryPass(FrameGraph& framegraph)
@@ -171,9 +173,9 @@ namespace Aegix::Graphics
 		camera.aspect = frameInfo.aspectRatio;
 
 		GBufferUbo ubo{
-			.projection = camera.projectionMatrix,
-			.view = camera.viewMatrix,
-			.inverseView = camera.inverseViewMatrix
+			.projection = glm::rowMajor4(camera.projectionMatrix),
+			.view = glm::rowMajor4(camera.viewMatrix),
+			.inverseView = glm::rowMajor4(camera.inverseViewMatrix)
 		};
 
 		m_globalUbo.buffer().writeToIndex(&ubo, frameInfo.frameIndex);

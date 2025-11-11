@@ -37,13 +37,22 @@ struct Mesh
     bindless::Handle meshletPrimitive;
 };
 
-struct Push
+public struct Push
 {
-    float4x4 model;
-    float4x4 normal;
-    bindless::Handle global;
-    bindless::Handle mesh;
-    bindless::Handle material;
+    float3x4 modelRaw;
+    float3 normalRow0; bindless::Handle global;
+    float3 normalRow1; bindless::Handle mesh;
+    float3 normalRow2; bindless::Handle material;
+
+    property float4x4 modelMatrix
+    {
+        get { return float4x4(modelRaw, float4(0.0, 0.0, 0.0, 1.0)); }
+    }
+
+    property float3x3 normalMatrix
+    {
+        get { return float3x3(normalRow0, normalRow1, normalRow2); }
+    }
 };
 
 [vk::push_constant] ConstantBuffer<Push> push;
@@ -82,10 +91,10 @@ func meshMain(
         uint index = mesh.meshletIndex.get(indexBuffer)[meshlet.vertexOffset + i];
         let v = mesh.vertex.get(vertexBuffer)[index];
 
-        float4 worldPos = mul(push.model, float4(v.position, 1.0));
+        float4 worldPos = mul(push.modelMatrix, float4(v.position, 1.0));
         meshVertices[i].position = mul(viewProjection, worldPos);
         meshVertices[i].worldPosition = worldPos.xyz;
-        meshVertices[i].worldNormal = normalize(mul(float3x3(push.normal), v.normal));
+        meshVertices[i].worldNormal = normalize(mul(push.normalMatrix, v.normal));
         meshVertices[i].uv = v.uv;
     }
 

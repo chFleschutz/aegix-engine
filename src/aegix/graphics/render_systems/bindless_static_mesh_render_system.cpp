@@ -4,11 +4,14 @@
 #include "graphics/resources/material_instance.h"
 #include "scene/components.h"
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 namespace Aegix::Graphics
 {
-	BindlessStaticMeshRenderSystem::BindlessStaticMeshRenderSystem(MaterialType type) : 
+	BindlessStaticMeshRenderSystem::BindlessStaticMeshRenderSystem(MaterialType type) :
 		m_type(type)
 	{
+		//static_assert(sizeof(PushConstantData) <= 128, "Vulkan only guarantees a minimum of 128 bytes of push constant");
 	}
 
 	void BindlessStaticMeshRenderSystem::render(const RenderContext& ctx)
@@ -46,11 +49,15 @@ namespace Aegix::Graphics
 			}
 
 			// Push Constants
+			auto globalTransform = transform.matrix();
+			auto normalMatrix = glm::inverse(glm::mat3{ globalTransform }); // Transpose missing because of row-major storage
 			PushConstantData push{
-				.modelMatrix = transform.matrix(),
-				.normalMatrix = glm::transpose(glm::inverse(transform.matrix())),
+				.modelMatrix = glm::rowMajor4(globalTransform),
+				.normalRow0 = normalMatrix[0],
 				.globalBuffer = ctx.globalHandle,
+				.normalRow1 = normalMatrix[1],
 				.meshBuffer = mesh.staticMesh->meshDataBuffer().handle(),
+				.normalRow2 = normalMatrix[2],
 				.materialBuffer = material.instance->buffer().handle(ctx.frameIndex)
 			};
 			AGX_ASSERT_X(push.globalBuffer.isValid(), "Global buffer handle is invalid");

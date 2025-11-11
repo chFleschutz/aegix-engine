@@ -9,13 +9,12 @@ namespace Aegix::Graphics
 	class BindlessStaticMeshRenderSystem : public RenderSystem
 	{
 	public:
-		struct PushConstantData
+		struct alignas(16) PushConstantData
 		{
-			glm::mat4 modelMatrix{ 1.0f };
-			glm::mat4 normalMatrix{ 1.0f };
-			DescriptorHandle globalBuffer;
-			DescriptorHandle meshBuffer;
-			DescriptorHandle materialBuffer;
+			glm::mat3x4 modelMatrix;
+			glm::vec3 normalRow0; DescriptorHandle globalBuffer;
+			glm::vec3 normalRow1; DescriptorHandle meshBuffer;
+			glm::vec3 normalRow2; DescriptorHandle materialBuffer;
 		};
 
 		BindlessStaticMeshRenderSystem(MaterialType type = MaterialType::Opaque);
