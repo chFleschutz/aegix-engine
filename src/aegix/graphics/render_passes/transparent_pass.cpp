@@ -91,6 +91,7 @@ namespace Aegix::Graphics
 		if (!mainCamera)
 			return;
 
+		// TODO: Check if these need to be transposed for shaders (row-major layout)
 		auto& camera = mainCamera.get<Camera>();
 		TransparentUbo ubo{
 			.view = camera.viewMatrix,

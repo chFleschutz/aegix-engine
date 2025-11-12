@@ -4,6 +4,8 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 namespace Aegix::Graphics
 {
 	SkyBoxPass::SkyBoxPass() : 
@@ -18,8 +20,7 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SkyBoxUniforms))
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "sky_box.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.frag.spv")
+			.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "sky_box.slang.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.setDepthTest(true, false, VK_COMPARE_OP_LESS_OR_EQUAL)
@@ -117,9 +118,9 @@ namespace Aegix::Graphics
 		Tools::vk::cmdScissor(cmd, frameInfo.swapChainExtent);
 
 		auto& camera = frameInfo.scene.mainCamera().get<Camera>();
+		glm::mat4 viewRotOnly = glm::mat4{ glm::mat3{ camera.viewMatrix } }; // Strip translation from view matrix
 		SkyBoxUniforms uniforms{
-			.view = camera.viewMatrix,
-			.projection = camera.projectionMatrix
+			.viewProjection = glm::rowMajor4(camera.projectionMatrix * viewRotOnly),
 		};
 		
 		m_pipeline->bind(cmd);

@@ -9,8 +9,7 @@ namespace Aegix::Graphics
 {
 	struct SkyBoxUniforms
 	{
-		glm::mat4 view;
-		glm::mat4 projection;
+		glm::mat4 viewProjection;
 	};
 
 	class SkyBoxPass : public FrameGraphRenderPass
