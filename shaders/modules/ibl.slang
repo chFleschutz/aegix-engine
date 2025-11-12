@@ -2,7 +2,7 @@ module ibl;
 
 namespace ibl
 {
-    public func sampleVector(float2 uv, uint face) -> float3
+    public func cubeSampleVector(const float2 uv, uint face) -> float3
     {
         float3 dir;
         if (face == 0) dir = float3(1.0, uv.y, -uv.x);
@@ -11,7 +11,7 @@ namespace ibl
         else if (face == 3) dir = float3(uv.x, -1.0, uv.y);
         else if (face == 4) dir = float3(uv.x, uv.y, 1.0);
         else if (face == 5) dir = float3(-uv.x, uv.y, -1.0);
-        return normalize(float3(dir.x, -dir.z, dir.y)); // Y-up to Z-up conversion
+        return normalize(dir);
     }
 
     public func radicalInverse(uint bits) -> float

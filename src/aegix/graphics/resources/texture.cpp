@@ -268,7 +268,7 @@ namespace Aegix::Graphics
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.slang.spv")
 			.build();
 
 		// Create image views for mip levels
@@ -285,7 +285,7 @@ namespace Aegix::Graphics
 				.levelCount = 1,
 				.baseLayer = 0,
 				.layerCount = 6,
-				.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+				.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			};
 			mipViews.emplace_back(viewInfo, prefiltered->image());
 

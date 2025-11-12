@@ -37,10 +37,11 @@ func main(uint3 dispatchID: SV_DispatchThreadID)
 {
     uint3 imageSize;
     irradianceMap.GetDimensions(imageSize.x, imageSize.y, imageSize.z);
+
     float2 st = float2(dispatchID.xy) / float2(imageSize.xy);
     float2 uv = float2(st.x, 1.0 - st.y) * 2.0 - 1.0;
 
-    float3 N = ibl::sampleVector(uv, dispatchID.z);
+    float3 N = ibl::cubeSampleVector(uv, dispatchID.z);
     float3 S, T;
     computeBasisVectors(N, S, T);
 
