@@ -1,23 +1,9 @@
 import "modules/constants";
+import "modules/ibl";
 
 static const uint SAMPLE_COUNT = 1024;
 
 [vk::binding(0)] RWTexture2D<float2> brdfLUTMap;
-
-func radicalInverse(uint bits) -> float
-{
-    bits = (bits << 16u) | (bits >> 16u);
-    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return float(bits) * 2.3283064365386963e-10;
-}
-
-func hammersley(uint i) -> float2
-{
-    return float2(float(i) / float(SAMPLE_COUNT), radicalInverse(i));
-}
 
 func importanceSampleGGX(float2 Xi, float3 N, float roughness) -> float3
 {
@@ -68,7 +54,7 @@ func integrateBRDF(float NdotV, float roughness) -> float2
     float3 N = float3(0.0, 0.0, 1.0);
     for (uint i = 0u; i < SAMPLE_COUNT; ++i)
     {
-        float2 Xi = hammersley(i);
+        float2 Xi = ibl::hammersley(i, SAMPLE_COUNT);
         float3 H = importanceSampleGGX(Xi, N, roughness);
         float3 L = normalize(2.0 * dot(V, H) * H - V);
 

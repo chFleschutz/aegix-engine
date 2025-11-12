@@ -200,15 +200,22 @@ namespace Aegix::Graphics
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
+		ImageView arrayImageView{ ImageView::CreateInfo{.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY }, irradiance->image() };
+		VkDescriptorImageInfo cubemapImageInfo{
+			.sampler = irradiance->sampler(),
+			.imageView = arrayImageView.imageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
+
 		DescriptorSet descriptorSet{ descriptorSetLayout };
 		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.writeImage(1, cubemapImageInfo)
 			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.slang.spv")
 			.build();
 
 		// Convert skybox to irradiance map
