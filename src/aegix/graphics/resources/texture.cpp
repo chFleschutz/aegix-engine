@@ -126,14 +126,22 @@ namespace Aegix::Graphics
 
 		DescriptorSet descriptorSet{ descriptorSetLayout };
 
+		ImageView arrayImageView{ ImageView::CreateInfo{ .viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY }, cubeMap->image() };
+		VkDescriptorImageInfo cubemapImageInfo{
+			.sampler = cubeMap->sampler().sampler(),
+			.imageView = arrayImageView.imageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
+
 		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-			.writeImage(1, cubeMap->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.writeImage(1, cubemapImageInfo)
+			//.writeImage(1, cubeMap->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.slang.spv")
 			.build();
 
 		// Convert spherical image to cubemap
@@ -192,15 +200,22 @@ namespace Aegix::Graphics
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 
+		ImageView arrayImageView{ ImageView::CreateInfo{.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY }, irradiance->image() };
+		VkDescriptorImageInfo cubemapImageInfo{
+			.sampler = irradiance->sampler(),
+			.imageView = arrayImageView.imageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
+
 		DescriptorSet descriptorSet{ descriptorSetLayout };
 		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, skybox->descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-			.writeImage(1, irradiance->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.writeImage(1, cubemapImageInfo)
 			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/irradiance_convolution.slang.spv")
 			.build();
 
 		// Convert skybox to irradiance map
@@ -253,7 +268,7 @@ namespace Aegix::Graphics
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(pushConstants))
-			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/prefilter_environment.slang.spv")
 			.build();
 
 		// Create image views for mip levels
@@ -270,7 +285,7 @@ namespace Aegix::Graphics
 				.levelCount = 1,
 				.baseLayer = 0,
 				.layerCount = 6,
-				.viewType = VK_IMAGE_VIEW_TYPE_CUBE,
+				.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			};
 			mipViews.emplace_back(viewInfo, prefiltered->image());
 
@@ -333,7 +348,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/brdf_lut.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/brdf_lut.slang.spv")
 			.build();
 
 		// Convert skybox to irradiance map
