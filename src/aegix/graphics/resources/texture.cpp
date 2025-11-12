@@ -333,7 +333,7 @@ namespace Aegix::Graphics
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/brdf_lut.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/brdf_lut.slang.spv")
 			.build();
 
 		// Convert skybox to irradiance map
