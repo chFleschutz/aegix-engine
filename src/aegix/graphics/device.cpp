@@ -342,6 +342,11 @@ namespace Aegix::Graphics
 				},
 		};
 
+		VkPhysicalDeviceVulkan11Features vulkan11Features{
+			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
+			.shaderDrawParameters = VK_TRUE,
+		};
+
 		VkPhysicalDeviceVulkan12Features vulkan12Features{
 			.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
 			// 8-bit storage
@@ -382,7 +387,8 @@ namespace Aegix::Graphics
 		};
 
 		// Build the pNext chain
-		features.pNext = &vulkan12Features;
+		features.pNext = &vulkan11Features;
+		vulkan11Features.pNext = &vulkan12Features;
 		vulkan12Features.pNext = &vulkan13Features;
 		vulkan13Features.pNext = nullptr; 
 
@@ -577,6 +583,9 @@ namespace Aegix::Graphics
 		vkGetPhysicalDeviceFeatures2(device, &vulkan10);
 
 		if (!vulkan10.features.samplerAnisotropy)
+			return false;
+
+		if (!vulkan11Features.shaderDrawParameters)
 			return false;
 
 		// Bindless

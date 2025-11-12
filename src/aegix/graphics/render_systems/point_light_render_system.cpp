@@ -17,8 +17,7 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::GraphicsBuilder{}
 			.addDescriptorSetLayout(globalSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(PointLightPushConstants))
-			.addShaderStage(VK_SHADER_STAGE_VERTEX_BIT, SHADER_DIR "point_light.vert.spv")
-			.addShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.frag.spv")
+			.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "point_light.slang.spv")
 			.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, true)
 			.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 			.setDepthTest(true, false)
