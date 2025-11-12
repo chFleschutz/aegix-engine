@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 		m_thresholdPipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(m_thresholdSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomThreshold))
-			.setShaderStage(SHADER_DIR "bloom/bloom_threshold.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_threshold.slang.spv")
 			.buildUnique();
 
 		// Downsample
@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 		m_downsamplePipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(m_downsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomDownsample))
-			.setShaderStage(SHADER_DIR "bloom/bloom_downsample.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_downsample.slang.spv")
 			.buildUnique();
 
 		// Upsample
@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 		m_upsamplePipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(m_upsampleSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomUpsample))
-			.setShaderStage(SHADER_DIR "bloom/bloom_upsample.comp.spv")
+			.setShaderStage(SHADER_DIR "bloom/bloom_upsample.slang.spv")
 			.buildUnique();
 	}
 
