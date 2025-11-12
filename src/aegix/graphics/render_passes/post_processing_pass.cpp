@@ -101,7 +101,7 @@ namespace Aegix::Graphics
 		return Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(m_descriptorSetLayout)
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(PostProcessingSettings))
-			.setShaderStage(SHADER_DIR "post_process.comp.spv")
+			.setShaderStage(SHADER_DIR "post_process.slang.spv")
 			.build();
 	}
 }
