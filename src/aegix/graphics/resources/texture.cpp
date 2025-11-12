@@ -126,14 +126,22 @@ namespace Aegix::Graphics
 
 		DescriptorSet descriptorSet{ descriptorSetLayout };
 
+		ImageView arrayImageView{ ImageView::CreateInfo{ .viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY }, cubeMap->image() };
+		VkDescriptorImageInfo cubemapImageInfo{
+			.sampler = cubeMap->sampler().sampler(),
+			.imageView = arrayImageView.imageView(),
+			.imageLayout = VK_IMAGE_LAYOUT_GENERAL,
+		};
+
 		DescriptorWriter{ descriptorSetLayout }
 			.writeImage(0, spherialImage.descriptorImageInfo(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL))
-			.writeImage(1, cubeMap->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
+			.writeImage(1, cubemapImageInfo)
+			//.writeImage(1, cubeMap->descriptorImageInfo(VK_IMAGE_LAYOUT_GENERAL))
 			.update(descriptorSet);
 
 		auto pipeline = Pipeline::ComputeBuilder{}
 			.addDescriptorSetLayout(descriptorSetLayout)
-			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.comp.spv")
+			.setShaderStage(SHADER_DIR "ibl/equirect_to_cube.slang.spv")
 			.build();
 
 		// Convert spherical image to cubemap
