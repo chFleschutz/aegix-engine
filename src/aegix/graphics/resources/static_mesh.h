@@ -34,9 +34,13 @@ namespace Aegix::Graphics
 		struct MeshData
 		{
 			DescriptorHandle vertexBufferHandle;
+			DescriptorHandle indexBufferHandle;
 			DescriptorHandle meshletBufferHandle;
 			DescriptorHandle meshletIndexBufferHandle;
 			DescriptorHandle meshletPrimitiveBufferHandle;
+			uint32_t vertexCount;
+			uint32_t indexCount;
+			uint32_t meshletCount;
 		};
 
 		struct CreateInfo

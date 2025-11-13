@@ -87,9 +87,13 @@ namespace Aegix::Graphics
 
 		MeshData meshData{
 			.vertexBufferHandle = m_vertexBuffer.handle(),
+			.indexBufferHandle = m_indexBuffer.handle(),
 			.meshletBufferHandle = m_meshletBuffer.handle(),
 			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle(),
-			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle()
+			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle(),
+			.vertexCount = m_vertexCount,
+			.indexCount = m_indexCount,
+			.meshletCount = m_meshletCount
 		};
 		AGX_ASSERT_X(meshData.vertexBufferHandle.isValid(), "Invalid vertex buffer handle in StaticMesh!");
 		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
@@ -119,6 +123,6 @@ namespace Aegix::Graphics
 
 	void StaticMesh::drawMeshlets(VkCommandBuffer cmd) const
 	{
-		vkCmdDrawMeshTasksEXT(cmd, m_meshletCount, 1, 1);
+		vkCmdDrawMeshTasksEXT(cmd, 1, 1, 1);
 	}
 }

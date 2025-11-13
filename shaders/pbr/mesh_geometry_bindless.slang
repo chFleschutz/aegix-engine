@@ -7,6 +7,12 @@ static const uint NUM_THREADS = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
 
+struct TaskPayload
+{
+    // Empty for now
+    uint dummy;
+};
+
 struct MSOut
 {
     float4 position: SV_Position;
@@ -32,9 +38,13 @@ struct Material
 struct Mesh
 {
     bindless::Handle vertex;
+    bindless::Handle index;
     bindless::Handle meshlet;
     bindless::Handle meshletIndex;
     bindless::Handle meshletPrimitive;
+    uint vertexCount;
+    uint indexCount;
+    uint meshletCount;
 };
 
 public struct Push
@@ -66,6 +76,18 @@ public struct Push
 [vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
 [vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
 
+groupshared TaskPayload taskPayload;
+
+// Task Shader --------------------
+
+[shader("task")]
+[numthreads(1, 1, 1)]
+func taskMain()
+{
+    let mesh = push.mesh.get(meshBuffer);
+    DispatchMesh(mesh.meshletCount, 1, 1, taskPayload);
+}
+
 // Mesh Shader --------------------
 
 [shader("mesh")]
@@ -74,6 +96,7 @@ public struct Push
 func meshMain(
     uint3 groupID: SV_GroupID,
     uint3 threadID: SV_GroupThreadID,
+    in payload TaskPayload taskPayload,
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
