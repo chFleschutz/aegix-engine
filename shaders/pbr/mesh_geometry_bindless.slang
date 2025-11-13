@@ -7,6 +7,12 @@ static const uint NUM_THREADS = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
 
+struct TaskPayload
+{
+    // Empty for now
+    uint dummy;
+};
+
 struct MSOut
 {
     float4 position: SV_Position;
@@ -31,10 +37,14 @@ struct Material
 
 struct Mesh
 {
-    bindless::Handle<RWStorageBuffer<geometry::Vertex, ScalarDataLayout>> vertex;
-    bindless::Handle<RWStorageBuffer<geometry::Meshlet>> meshlet;
-    bindless::Handle<RWStorageBuffer<uint>> meshletIndex;
-    bindless::Handle<RWStorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
+    bindless::Handle vertex;
+    bindless::Handle index;
+    bindless::Handle meshlet;
+    bindless::Handle meshletIndex;
+    bindless::Handle meshletPrimitive;
+    uint vertexCount;
+    uint indexCount;
+    uint meshletCount;
 };
 
 public struct Push
@@ -60,6 +70,15 @@ public struct Push
 
 [vk::push_constant] Push push;
 
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Meshlet> meshletBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint> indexBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint8_t, ScalarDataLayout> primitiveBuffer[];
+[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertexBuffer[];
+
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<geometry::Global, Std430DataLayout> globalBuffer[];
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
+[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
+
 // Mesh Shader --------------------
 
 [shader("mesh")]
@@ -68,6 +87,7 @@ public struct Push
 func meshMain(
     uint3 groupID: SV_GroupID,
     uint3 threadID: SV_GroupThreadID,
+    in payload TaskPayload taskPayload,
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {

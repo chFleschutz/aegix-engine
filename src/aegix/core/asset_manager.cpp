@@ -91,13 +91,10 @@ namespace Aegix::Core
 			auto& bindless = Engine::renderer().bindlessDescriptorSet();
 
 			auto meshPipeline = Pipeline::GraphicsBuilder{}
-				//.addDescriptorSetLayout(globalSetLayout)
-				//.addDescriptorSetLayout(materialSetLayout)
-				//.addDescriptorSetLayout(StaticMesh::meshletDescriptorSetLayout())
-				//.addDescriptorSetLayout(StaticMesh::attributeDescriptorSetLayout())
 				.addDescriptorSetLayout(bindless.layout())
-				.addPushConstantRange(VK_SHADER_STAGE_ALL, 256) // TODO: Reduce push constant size to safe 128 bytes limit
-				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry_bindless.slang.spv")
+				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128) 
+				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+					SHADER_DIR "pbr/mesh_geometry_bindless.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
