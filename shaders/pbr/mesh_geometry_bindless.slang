@@ -35,25 +35,13 @@ struct Material
     bindless::Handle<SampledImage2D> emissiveMap;
 };
 
-struct Mesh
-{
-    bindless::Handle vertex;
-    bindless::Handle index;
-    bindless::Handle meshlet;
-    bindless::Handle meshletIndex;
-    bindless::Handle meshletPrimitive;
-    uint vertexCount;
-    uint indexCount;
-    uint meshletCount;
-};
-
 public struct Push
 {
     float3x4 modelRaw;
     float3 normalRow0; 
     bindless::Handle<UniformBuffer<geometry::Global>> global;
     float3 normalRow1;
-    bindless::Handle<UniformBuffer<Mesh>> mesh;
+    bindless::Handle<UniformBuffer<geometry::Mesh>> mesh;
     float3 normalRow2;
     bindless::Handle<UniformBuffer<Material>> material;
 
@@ -69,15 +57,6 @@ public struct Push
 };
 
 [vk::push_constant] Push push;
-
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Meshlet> meshletBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint> indexBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint8_t, ScalarDataLayout> primitiveBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertexBuffer[];
-
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<geometry::Global, Std430DataLayout> globalBuffer[];
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
 
 // Mesh Shader --------------------
 

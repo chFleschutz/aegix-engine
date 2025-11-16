@@ -19,11 +19,11 @@ namespace geometry
 
     public struct Mesh
     {
-        public bindless::Handle vertex;
-        public bindless::Handle index;
-        public bindless::Handle meshlet;
-        public bindless::Handle meshletIndex;
-        public bindless::Handle meshletPrimitive;
+        public bindless::Handle<StorageBuffer<geometry::Vertex, ScalarDataLayout>> vertex;
+        public bindless::Handle<StorageBuffer<uint>> index;
+        public bindless::Handle<StorageBuffer<geometry::Meshlet>> meshlet;
+        public bindless::Handle<StorageBuffer<uint>> meshletIndex;
+        public bindless::Handle<StorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
         public uint vertexCount;
         public uint indexCount;
         public uint meshletCount;

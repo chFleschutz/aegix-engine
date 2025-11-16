@@ -12,39 +12,39 @@ module bindless;
 // Samplers, Textures, Buffers, etc. So we need to define our own types wrapping the underlying
 // descriptor types with additional type information.
 
-public interface IBindlessResourceHandle
+public interface IBindlessResource
 {
     public associatedtype UnderlyingDescriptor : IOpaqueDescriptor;
     public static const bindless::DescriptorKind kind;
 }
 
-public struct SampledImage2D : IBindlessResourceHandle
+public struct SampledImage2D : IBindlessResource
 {
     public typedef Sampler2D UnderlyingDescriptor;
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.SampledImage;
 }
 
-public struct RWImage2D : IBindlessResourceHandle
+public struct RWImage2D : IBindlessResource
 {
     public typedef RWTexture2D UnderlyingDescriptor;
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.SampledImage;
 }
 
-public struct StorageBuffer<T, L = Std430DataLayout> : IBindlessResourceHandle
+public struct StorageBuffer<T, L = Std430DataLayout> : IBindlessResource
     where L : IBufferDataLayout
 {
     public typedef StructuredBuffer<T, L> UnderlyingDescriptor;
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.StorageBuffer;
 }
 
-public struct RWStorageBuffer<T, L = Std430DataLayout> : IBindlessResourceHandle
+public struct RWStorageBuffer<T, L = Std430DataLayout> : IBindlessResource
     where L : IBufferDataLayout
 {
     public typedef RWStructuredBuffer<T, L> UnderlyingDescriptor;
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.StorageBuffer;
 }
 
-public struct UniformBuffer<T, L = Std430DataLayout> : IBindlessResourceHandle
+public struct UniformBuffer<T, L = Std430DataLayout> : IBindlessResource
     where L : IBufferDataLayout
 {
     public typedef ConstantBuffer<T, L> UnderlyingDescriptor;
@@ -88,7 +88,7 @@ namespace bindless
         UniformBuffer,
     }
 
-    public struct Handle<T> where T : IBindlessResourceHandle
+    public struct Handle<T> where T : IBindlessResource
     {
         // Packed as: | 2 bits type | 6 bits version | 24 bits index |
         uint handle;
