@@ -22,27 +22,30 @@ struct Material
     float metallic;
     float roughness;
     float ao;
-    bindless::Handle albedoMap;
-    bindless::Handle normalMap;
-    bindless::Handle metalRoughnessMap;
-    bindless::Handle aoMap;
-    bindless::Handle emissiveMap;
+    bindless::Handle<SampledImage2D> albedoMap;
+    bindless::Handle<SampledImage2D> normalMap;
+    bindless::Handle<SampledImage2D> metalRoughnessMap;
+    bindless::Handle<SampledImage2D> aoMap;
+    bindless::Handle<SampledImage2D> emissiveMap;
 };
 
 struct Mesh
 {
-    bindless::Handle vertex;
-    bindless::Handle meshlet;
-    bindless::Handle meshletIndex;
-    bindless::Handle meshletPrimitive;
+    bindless::Handle<RWStorageBuffer<geometry::Vertex, ScalarDataLayout>> vertex;
+    bindless::Handle<RWStorageBuffer<geometry::Meshlet>> meshlet;
+    bindless::Handle<RWStorageBuffer<uint>> meshletIndex;
+    bindless::Handle<RWStorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
 };
 
 public struct Push
 {
     float3x4 modelRaw;
-    float3 normalRow0; bindless::Handle global;
-    float3 normalRow1; bindless::Handle mesh;
-    float3 normalRow2; bindless::Handle material;
+    float3 normalRow0; 
+    bindless::Handle<UniformBuffer<geometry::Global>> global;
+    float3 normalRow1;
+    bindless::Handle<UniformBuffer<Mesh>> mesh;
+    float3 normalRow2;
+    bindless::Handle<UniformBuffer<Material>> material;
 
     property float4x4 modelMatrix
     {
@@ -55,16 +58,7 @@ public struct Push
     }
 };
 
-[vk::push_constant] ConstantBuffer<Push> push;
-
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Meshlet> meshletBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint> indexBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<uint8_t, ScalarDataLayout> primitiveBuffer[];
-[vk::binding(bindless::STORAGE_BUFFER)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertexBuffer[];
-
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<geometry::Global, Std430DataLayout> globalBuffer[];
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Material, Std430DataLayout> materialBuffer[];
-[vk::binding(bindless::UNIFORM_BUFFER)] ConstantBuffer<Mesh, Std430DataLayout> meshBuffer[];
+[vk::push_constant] Push push;
 
 // Mesh Shader --------------------
 
@@ -77,9 +71,9 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES],
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    let global = push.global.get(globalBuffer);
-    let mesh = push.mesh.get(meshBuffer);
-    let meshlet = mesh.meshlet.get(meshletBuffer)[groupID.x];
+    let global = push.global.get();
+    let mesh = push.mesh.get();
+    let meshlet = mesh.meshlet.get()[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 
@@ -88,8 +82,8 @@ func meshMain(
     // Emit vertices
     for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += NUM_THREADS)
     {
-        uint index = mesh.meshletIndex.get(indexBuffer)[meshlet.vertexOffset + i];
-        let v = mesh.vertex.get(vertexBuffer)[index];
+        uint index = mesh.meshletIndex.get()[meshlet.vertexOffset + i];
+        let v = mesh.vertex.get()[index];
 
         float4 worldPos = mul(push.modelMatrix, float4(v.position, 1.0));
         meshVertices[i].position = mul(viewProjection, worldPos);
@@ -103,9 +97,9 @@ func meshMain(
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         meshPrimitives[i] = uint3(
-            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 0], 
-            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 1],
-            mesh.meshletPrimitive.get(primitiveBuffer)[offset + 2]);
+            mesh.meshletPrimitive.get()[offset + 0], 
+            mesh.meshletPrimitive.get()[offset + 1],
+            mesh.meshletPrimitive.get()[offset + 2]);
     }
 }
 
@@ -114,15 +108,15 @@ func meshMain(
 [shader("fragment")]
 func fragmentMain(MSOut input, out geometry::GBuffer output)
 {
-    let mat = push.material.get(materialBuffer);
+    let mat = push.material.get();
 
-    float3 albedo = mat.albedoMap.Sample(input.uv).rgb * mat.albedo;
-    float3 normal = mat.normalMap.Sample(input.uv).rgb * 2.0 - 1.0;
-    float3 emissive = mat.emissiveMap.Sample(input.uv).rgb * mat.emissive;
-    float2 metalicRoughness = mat.metalRoughnessMap.Sample(input.uv).bg;
+    float3 albedo = mat.albedoMap.get().Sample(input.uv).rgb * mat.albedo;
+    float3 normal = mat.normalMap.get().Sample(input.uv).rgb * 2.0 - 1.0;
+    float3 emissive = mat.emissiveMap.get().Sample(input.uv).rgb * mat.emissive;
+    float2 metalicRoughness = mat.metalRoughnessMap.get().Sample(input.uv).bg;
     float metallic = metalicRoughness.r * mat.metallic;
     float roughness = metalicRoughness.g * mat.roughness;
-    float ao = mat.aoMap.Sample(input.uv).r * mat.ao;
+    float ao = mat.aoMap.get().Sample(input.uv).r * mat.ao;
 
     let TBN = TBN::calcMatrix(input.worldPosition, input.worldNormal, input.uv);
     float3 N = normalize(length(normal) < 0.1 ? input.worldNormal : mul(normal, TBN));
