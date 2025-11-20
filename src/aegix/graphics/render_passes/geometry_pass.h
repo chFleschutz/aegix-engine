@@ -4,6 +4,7 @@
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/render_systems/render_system.h"
+#include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
 {

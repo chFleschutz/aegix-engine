@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/globals.h"
-#include "graphics/frame_graph/render_stage.h"
 #include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
+#include "graphics/descriptors.h"
 
 #include <variant>
 
