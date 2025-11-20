@@ -123,6 +123,6 @@ namespace Aegix::Graphics
 
 	void StaticMesh::drawMeshlets(VkCommandBuffer cmd) const
 	{
-		vkCmdDrawMeshTasksEXT(cmd, 1, 1, 1);
+		vkCmdDrawMeshTasksEXT(cmd, m_meshletCount, 1, 1);
 	}
 }
