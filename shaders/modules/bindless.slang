@@ -51,6 +51,12 @@ public struct UniformBuffer<T, L = Std430DataLayout> : IBindlessResource
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.UniformBuffer;
 }
 
+public struct Unused : IBindlessResource
+{
+    public typedef IOpaqueDescriptor UnderlyingDescriptor;
+    public static const bindless::DescriptorKind kind = bindless::DescriptorKind.Unkown;
+}
+
 namespace bindless
 {
     // Binding slots for different descriptor types
@@ -86,6 +92,7 @@ namespace bindless
         StorageImage,
         StorageBuffer,
         UniformBuffer,
+        Unkown,
     }
 
     public struct Handle<T> where T : IBindlessResource
