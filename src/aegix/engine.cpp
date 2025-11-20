@@ -13,7 +13,6 @@ namespace Aegix
 		s_instance = this;
 
 		m_assets.loadDefaultAssets();
-		m_renderer.compileFrameGraph();
 		m_layerStack.push<Core::EditorLayer>();
 
 		ALOG::info("Engine Initialized!");
@@ -28,6 +27,8 @@ namespace Aegix
 
 	void Engine::run()
 	{
+		m_renderer.compileFrameGraph();
+
 		// Main Update loop
 		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
 		while (!m_window.shouldClose())

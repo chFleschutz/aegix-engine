@@ -22,7 +22,6 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto instanceCount() const -> uint32_t { return m_totalCount; }
 
 		auto registerDrawBatch() -> const DrawBatch&;
-
 		void incrementBatchCount(uint32_t batchId);
 		void decrementBatchCount(uint32_t batchId);
 

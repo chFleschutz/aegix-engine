@@ -12,10 +12,11 @@ target_sources(aegix-engine PRIVATE
 	"frame_graph/frame_graph_render_pass.h"
 	"frame_graph/frame_graph_resource_pool.cpp"
 	"frame_graph/frame_graph_resource_pool.h"
-	"frame_graph/render_stage.h"
 
 	"render_passes/bloom_pass.cpp"
 	"render_passes/bloom_pass.h"
+	"render_passes/culling_pass.cpp"
+	"render_passes/culling_pass.h"
 	"render_passes/geometry_pass.cpp"
 	"render_passes/geometry_pass.h"
 	"render_passes/ui_pass.h"
@@ -84,4 +85,5 @@ target_sources(aegix-engine PRIVATE
 	"resources/static_mesh.h"
 	"swap_chain.cpp"
 	"swap_chain.h"
+
 )
