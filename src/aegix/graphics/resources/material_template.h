@@ -61,6 +61,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto materialSetLayout() -> DescriptorSetLayout& { return m_materialSetLayout; }
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
+		[[nodiscard]] auto drawBatch() const -> uint32_t { return m_drawBatchId; }
 		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
 
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
@@ -84,9 +85,9 @@ namespace Aegix::Graphics
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
 
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
-		size_t m_parameterSize = 0;
-		uint32_t m_textureCount = 0;
-
-		MaterialType m_materialType = MaterialType::Opaque;
+		size_t m_parameterSize{ 0 };
+		uint32_t m_textureCount{ 0 };
+		uint32_t m_drawBatchId{ 0 };
+		MaterialType m_materialType{ MaterialType::Opaque };
 	};
 }

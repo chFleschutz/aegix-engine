@@ -71,6 +71,8 @@ target_sources(aegix-engine PRIVATE
 	"descriptors.h"
 	"device.cpp"
 	"device.h"
+	"draw_batch_registry.h"
+	"draw_batch_registry.cpp"
 	"frame_info.h"
 	"globals.h"
 	"pipeline.cpp"

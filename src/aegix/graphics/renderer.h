@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/window.h"
+#include "draw_batch_registry.h"
 #include "graphics/bindless/bindless_descriptor_set.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
@@ -31,11 +32,14 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
 		[[nodiscard]] auto bindlessDescriptorSet() -> BindlessDescriptorSet& { return m_bindlessDescriptorSet; }
+		[[nodiscard]] auto drawBatchRegistry() -> DrawBatchRegistry& { return m_drawBatchRegistry; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
 		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
 		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }
 		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
 		[[nodiscard]] auto frameIndex() const -> uint32_t;
+
+		void registerCallbacks(Scene::Scene& scene);
 
 		/// @brief Builds the frame graph and all required resources
 		/// @note This has to be AFTER the engine is fully initialized
@@ -55,6 +59,9 @@ namespace Aegix::Graphics
 		void beginFrame();
 		void endFrame();
 
+		void onMaterialCreated(entt::registry& reg, entt::entity e);
+		void onMaterialDestroyed(entt::registry& reg, entt::entity e);
+
 		Core::Window& m_window;
 		VulkanContext& m_vulkanContext;
 		
@@ -64,6 +71,7 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted{ false };
 
 		BindlessDescriptorSet m_bindlessDescriptorSet;
+		DrawBatchRegistry m_drawBatchRegistry;
 		FrameGraph m_frameGraph;
 	};
 }

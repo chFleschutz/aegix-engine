@@ -8,7 +8,8 @@ namespace Aegix::Graphics
 	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
 		: m_pipeline{ std::move(pipeline) },
 		m_globalSetLayout{ std::move(globalSetLayout) },
-		m_materialSetLayout{ std::move(materialSetLayout) }
+		m_materialSetLayout{ std::move(materialSetLayout) },
+		m_drawBatchId{ Engine::renderer().drawBatchRegistry().registerDrawBatch().id }
 	{
 	}
 

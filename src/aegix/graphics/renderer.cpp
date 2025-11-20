@@ -50,6 +50,12 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
+	void Renderer::registerCallbacks(Scene::Scene& scene)
+	{
+		scene.registry().on_construct<Material>().connect<&Renderer::onMaterialCreated>(this);
+		scene.registry().on_destroy<Material>().connect<&Renderer::onMaterialDestroyed>(this);
+	}
+
 	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
 	{
 		AGX_PROFILE_FUNCTION();
@@ -203,5 +209,17 @@ namespace Aegix::Graphics
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 		VulkanContext::flushDeletionQueue(m_currentFrameIndex);
+	}
+
+	void Renderer::onMaterialCreated(entt::registry& reg, entt::entity e)
+	{
+		const auto& material = reg.get<Material>(e);
+		m_drawBatchRegistry.incrementBatchCount(material.instance->materialTemplate()->drawBatch());
+	}
+
+	void Renderer::onMaterialDestroyed(entt::registry& reg, entt::entity e)
+	{
+		const auto& material = reg.get<Material>(e);
+		m_drawBatchRegistry.decrementBatchCount(material.instance->materialTemplate()->drawBatch());
 	}
 }
