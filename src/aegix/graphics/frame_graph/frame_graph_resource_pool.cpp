@@ -100,6 +100,24 @@ namespace Aegix::Graphics
 		return m_textures[res.handle.id];
 	}
 
+	auto FrameGraphResourcePool::buffer(FrameGraphResourceHandle resourceHandle) -> Buffer&
+	{
+		auto& res = finalResource(resourceHandle);
+		AGX_ASSERT_X(res.type == FrameGraphResourceType::Buffer, "Resource is not a buffer");
+		AGX_ASSERT_X(res.handle.isValid(), "Buffer handle is invalid");
+		AGX_ASSERT_X(res.handle.id < m_buffers.size(), "Buffer handle out of range");
+		return m_buffers[res.handle.id];
+	}
+
+	auto FrameGraphResourcePool::buffer(FrameGraphResourceHandle resourceHandle) const -> const Buffer&
+	{
+		const auto& res = finalResource(resourceHandle);
+		AGX_ASSERT_X(res.type == FrameGraphResourceType::Buffer, "Resource is not a buffer");
+		AGX_ASSERT_X(res.handle.isValid(), "Buffer handle is invalid");
+		AGX_ASSERT_X(res.handle.id < m_buffers.size(), "Buffer handle out of range");
+		return m_buffers[res.handle.id];
+	}
+
 	auto FrameGraphResourcePool::addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle
 	{
 		FrameGraphNodeHandle handle{ static_cast<uint32_t>(m_nodes.size()) };

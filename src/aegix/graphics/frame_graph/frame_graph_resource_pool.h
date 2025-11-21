@@ -142,6 +142,10 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> Texture&;
 		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&;
 
+		/// @brief Returns the buffer for the given handle (must be a buffer resource)
+		[[nodiscard]] auto buffer(FrameGraphResourceHandle resourceHandle) -> Buffer&;
+		[[nodiscard]] auto buffer(FrameGraphResourceHandle resourceHandle) const -> const Buffer&;
+
 		[[nodiscard]] auto resources() -> std::vector<FrameGraphResource>& { return m_resources; }
 		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNode>& { return m_nodes; }
 
