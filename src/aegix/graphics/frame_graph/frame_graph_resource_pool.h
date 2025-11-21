@@ -15,14 +15,16 @@ namespace Aegix::Graphics
 	{
 		uint32_t id{ Core::INVALID_HANDLE };
 
-		constexpr auto operator<=>(const FrameGraphResourceHandle&) const = default;
+		[[nodiscard]] auto operator==(const FrameGraphResourceHandle& other) const -> bool { return id == other.id; }
+		[[nodiscard]] auto isValid() const -> bool { return id != Core::INVALID_HANDLE; }
 	};
 
 	struct FrameGraphNodeHandle
 	{
 		uint32_t id{ Core::INVALID_HANDLE };
 
-		constexpr auto operator<=>(const FrameGraphNodeHandle&) const = default;
+		[[nodiscard]] auto operator==(const FrameGraphNodeHandle& other) const -> bool { return id == other.id; }
+		[[nodiscard]] auto isValid() const -> bool { return id != Core::INVALID_HANDLE; }
 	};
 
 
@@ -55,7 +57,8 @@ namespace Aegix::Graphics
 
 	struct FrameGraphResourceBufferInfo
 	{
-		// TODO: Add buffer info
+		VkDeviceSize instanceSize = 0;
+		uint32_t instanceCount = 1;
 	};
 
 	struct FrameGraphResourceTextureInfo
@@ -79,8 +82,6 @@ namespace Aegix::Graphics
 
 	struct FrameGraphResource
 	{
-		static constexpr FrameGraphResourceHandle INVALID_HANDLE{ std::numeric_limits<uint32_t>::max() };
-
 		std::string name;
 		FrameGraphResourceType type;
 		FrameGraphResourceUsage usage;
@@ -101,8 +102,6 @@ namespace Aegix::Graphics
 
 	struct FrameGraphNode
 	{
-		static constexpr FrameGraphNodeHandle INVALID_HANDLE{ std::numeric_limits<uint32_t>::max() };
-
 		std::string name;
 		std::unique_ptr<FrameGraphRenderPass> pass;
 		std::vector<FrameGraphResourceHandle> inputs;

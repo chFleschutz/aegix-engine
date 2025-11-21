@@ -34,28 +34,28 @@ namespace Aegix::Graphics
 
 	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) -> FrameGraphNode&
 	{
-		AGX_ASSERT_X(handle != FrameGraphNode::INVALID_HANDLE, "Invalid node handle");
+		AGX_ASSERT_X(handle.isValid(), "Invalid node handle");
 		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
 		return m_nodes[handle.id];
 	}
 	
 	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&
 	{
-		AGX_ASSERT_X(handle != FrameGraphNode::INVALID_HANDLE, "Invalid node handle");
+		AGX_ASSERT_X(handle.isValid(), "Invalid node handle");
 		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
 		return m_nodes[handle.id];
 	}
 
 	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) -> FrameGraphResource&
 	{
-		AGX_ASSERT_X(handle != FrameGraphResource::INVALID_HANDLE, "Invalid resource handle");
+		AGX_ASSERT_X(handle.isValid(), "Invalid resource handle");
 		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
 		return m_resources[handle.id];
 	}
 	
 	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&
 	{
-		AGX_ASSERT_X(handle != FrameGraphResource::INVALID_HANDLE, "Invalid resource handle");
+		AGX_ASSERT_X(handle.isValid(), "Invalid resource handle");
 		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
 		return m_resources[handle.id];
 	}
@@ -86,7 +86,7 @@ namespace Aegix::Graphics
 	{
 		auto& res = finalResource(resourceHandle);
 		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
-		AGX_ASSERT_X(res.handle != FrameGraphResource::INVALID_HANDLE, "Texture handle is invalid");
+		AGX_ASSERT_X(res.handle.isValid(), "Texture handle is invalid");
 		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
 		return m_textures[res.handle.id];
 	}
@@ -95,7 +95,7 @@ namespace Aegix::Graphics
 	{
 		const auto& res = finalResource(resourceHandle);
 		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
-		AGX_ASSERT_X(res.handle != FrameGraphResource::INVALID_HANDLE, "Texture handle is invalid");
+		AGX_ASSERT_X(res.handle.isValid(), "Texture handle is invalid");
 		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
 		return m_textures[res.handle.id];
 	}
@@ -112,7 +112,7 @@ namespace Aegix::Graphics
 	auto FrameGraphResourcePool::addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
 	{
 		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.usage, createInfo.info, 
-			FrameGraphResource::INVALID_HANDLE, producer);
+			FrameGraphResourceHandle{}, producer);
 		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
@@ -127,7 +127,7 @@ namespace Aegix::Graphics
 
 	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
 	{
-		auto ResourceHandle = addResource(createInfo, FrameGraphNode::INVALID_HANDLE);
+		auto ResourceHandle = addResource(createInfo, FrameGraphNodeHandle{});
 		m_textures.emplace_back(std::move(texture));
 		resource(ResourceHandle).handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 		return ResourceHandle;
@@ -151,10 +151,10 @@ namespace Aegix::Graphics
 				}
 			}
 
-			if (resource.handle == FrameGraphResource::INVALID_HANDLE)
+			if (!resource.handle.isValid())
 				ALOG::fatal("Failed to resolve reference '{}'", resource.name);
 
-			AGX_ASSERT(resource.handle != FrameGraphResource::INVALID_HANDLE && "Failed to resolve reference");
+			AGX_ASSERT(resource.handle.isValid() && "Failed to resolve reference");
 		}
 	}
 
@@ -178,7 +178,7 @@ namespace Aegix::Graphics
 
 		for (auto& resource : m_resources)
 		{
-			if (resource.handle != FrameGraphResource::INVALID_HANDLE) // Already created
+			if (resource.handle.isValid()) // Already created
 				continue;
 
 			switch (resource.type)
@@ -234,6 +234,9 @@ namespace Aegix::Graphics
 
 	void FrameGraphResourcePool::createBuffer(FrameGraphResource& resource)
 	{
-		// TODO: Implement
+		auto& info = std::get<FrameGraphResourceBufferInfo>(resource.info);
+
+		m_buffers.emplace_back(Buffer::storageBuffer(info.instanceSize, info.instanceCount));
+		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
 	}
 }
