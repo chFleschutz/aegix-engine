@@ -8,7 +8,7 @@ target_sources(aegix-engine PRIVATE
 
 	"frame_graph/frame_graph.cpp"
 	"frame_graph/frame_graph.h"
-	"frame_graph/frame_graph_blackboard.h"
+	
 	"frame_graph/frame_graph_render_pass.h"
 	"frame_graph/frame_graph_resource_pool.cpp"
 	"frame_graph/frame_graph_resource_pool.h"
