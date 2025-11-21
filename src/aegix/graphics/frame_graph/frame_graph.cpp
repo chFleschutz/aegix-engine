@@ -103,14 +103,14 @@ namespace Aegix::Graphics
 	void FrameGraph::computeEdges()
 	{
 		// Cache resource outputs (Possible for one resource to be modified by multiple passes)
-		std::unordered_map<std::string, std::vector<FrameGraphNodeHandle>> resourceOutputs;
+		std::unordered_map<uint32_t, std::vector<FrameGraphNodeHandle>> resourceOutputs;
 		for (const auto& nodeHandle : m_nodeHandles)
 		{
 			const auto& node = m_resourcePool.node(nodeHandle);
 			for (const auto& outputHandle : node.outputs)
 			{
 				const auto& outputResource = m_resourcePool.resource(outputHandle);
-				resourceOutputs[outputResource.name].emplace_back(nodeHandle);
+				resourceOutputs[outputHandle.id].emplace_back(nodeHandle);
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace Aegix::Graphics
 			for (const auto& inputHandle : node.inputs)
 			{
 				const auto& inputResource = m_resourcePool.finalResource(inputHandle);
-				for (const auto& outputHandle : resourceOutputs[inputResource.name])
+				for (const auto& outputHandle : resourceOutputs[inputHandle.id])
 				{
 					if (outputHandle == nodeHandle) // Avoid self connections
 						continue;
