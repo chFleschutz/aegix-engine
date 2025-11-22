@@ -6,6 +6,8 @@
 
 namespace Aegix::Graphics
 {
+	class FGRenderPass;
+
 	/// @brief Manages renderpasses and resources for rendering a frame
 	class FrameGraph
 	{
@@ -15,20 +17,20 @@ namespace Aegix::Graphics
 		FrameGraph(FrameGraph&&) = delete;
 		~FrameGraph() = default;
 
-		FrameGraph& operator=(const FrameGraph&) = delete;
-		FrameGraph& operator=(FrameGraph&&) = delete;
+		auto operator=(const FrameGraph&) -> FrameGraph = delete;
+		auto operator=(FrameGraph&&) -> FrameGraph = delete;
 
 		template<typename T, typename... Args>
-			requires std::is_base_of_v<FrameGraphRenderPass, T> && std::is_constructible_v<T, Args...>
+			requires std::is_base_of_v<FGRenderPass, T> && std::constructible_from<T, FGResourcePool&, Args...>
 		auto add(Args&&... args) -> T&
 		{
-			auto handle = m_resourcePool.addNode(std::make_unique<T>(std::forward<Args>(args)...));
-			m_nodeHandles.emplace_back(handle);
-			return static_cast<T&>(*m_resourcePool.node(handle).pass);
+			auto handle = m_pool.addNode(std::make_unique<T>(m_pool, std::forward<Args>(args)...));
+			m_nodes.emplace_back(handle);
+			return static_cast<T&>(*m_pool.node(handle).pass);
 		}
 
-		[[nodiscard]] auto resourcePool() -> FrameGraphResourcePool& { return m_resourcePool; }
-		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNodeHandle>& { return m_nodeHandles; }
+		[[nodiscard]] auto nodes() -> std::vector<FGNodeHandle>& { return m_nodes; }
+		[[nodiscard]] auto resourcePool() -> FGResourcePool& { return m_pool; }
 
 		/// @brief Compiles the frame graph by sorting the nodes and creating resources
 		void compile();
@@ -40,11 +42,15 @@ namespace Aegix::Graphics
 		void swapChainResized(uint32_t width, uint32_t height);
 
 	private:
-		void computeEdges();
-		void sortNodes();
-		void placeBarriers(VkCommandBuffer commandBuffer, FrameGraphNode& node);
+		using DependencyGraph = std::vector<std::vector<FGNodeHandle>>;
 
-		std::vector<FrameGraphNodeHandle> m_nodeHandles; // Sorted render passes
-		FrameGraphResourcePool m_resourcePool;
+		auto buildDependencyGraph() -> DependencyGraph;
+		auto topologicalSort(const DependencyGraph& adjacency) -> std::vector<FGNodeHandle>;
+		void generateBarriers();
+		void addBarrier(FGNode& node, const FGResource& srcResource, const FGResource& dstResource,
+			const FGResource& actualResource);
+
+		std::vector<FGNodeHandle> m_nodes; // Sorted in execution order
+		FGResourcePool m_pool;
 	};
 }

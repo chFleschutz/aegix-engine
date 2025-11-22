@@ -6,12 +6,13 @@ target_sources(aegix-engine PRIVATE
 	"bindless/descriptor_handle.h" 
 	"bindless/descriptor_handle.cpp"
 
-	"frame_graph/frame_graph.cpp"
 	"frame_graph/frame_graph.h"
-	
+	"frame_graph/frame_graph.cpp"
+	"frame_graph/frame_graph_node.h"
 	"frame_graph/frame_graph_render_pass.h"
-	"frame_graph/frame_graph_resource_pool.cpp"
+	"frame_graph/frame_graph_resources.h"
 	"frame_graph/frame_graph_resource_pool.h"
+	"frame_graph/frame_graph_resource_pool.cpp"
 
 	"render_passes/bloom_pass.cpp"
 	"render_passes/bloom_pass.h"

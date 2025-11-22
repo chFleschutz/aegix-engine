@@ -1,202 +1,47 @@
 #pragma once
 
-#include "core/globals.h"
+#include "graphics/frame_graph/frame_graph_node.h"
+#include "graphics/frame_graph/frame_graph_resources.h"
 #include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
-#include "graphics/descriptors.h"
-
-#include <variant>
 
 namespace Aegix::Graphics
 {
-	class FrameGraphRenderPass;
-
-	struct FrameGraphResourceHandle
-	{
-		uint32_t id{ Core::INVALID_HANDLE };
-
-		[[nodiscard]] auto operator==(const FrameGraphResourceHandle& other) const -> bool { return id == other.id; }
-		[[nodiscard]] auto isValid() const -> bool { return id != Core::INVALID_HANDLE; }
-	};
-
-	struct FrameGraphNodeHandle
-	{
-		uint32_t id{ Core::INVALID_HANDLE };
-
-		[[nodiscard]] auto operator==(const FrameGraphNodeHandle& other) const -> bool { return id == other.id; }
-		[[nodiscard]] auto isValid() const -> bool { return id != Core::INVALID_HANDLE; }
-	};
-
-
-	// FrameGraphResource --------------------------------------------------------
-
-	enum class FrameGraphResourceType
-	{
-		Buffer,
-		Texture,
-		Reference
-	};
-
-	enum class ResizePolicy
-	{
-		Fixed,
-		SwapchainRelative
-	};
-
-	enum class FrameGraphResourceUsage
-	{
-		None,
-		Sampled,
-		ColorAttachment,
-		DepthStencilAttachment,
-		Compute,
-		TransferSrc,
-		TransferDst,
-		Present
-	};
-
-	struct FrameGraphResourceBufferInfo
-	{
-		VkDeviceSize instanceSize = 0;
-		uint32_t instanceCount = 1;
-	};
-
-	struct FrameGraphResourceTextureInfo
-	{
-		VkFormat format;
-		VkExtent2D extent;
-		ResizePolicy resizePolicy = ResizePolicy::Fixed;
-		VkImageUsageFlags usage = 0;
-		uint32_t mipLevels = 1;
-	};
-
-	using FrameGraphResourceInfo = std::variant<FrameGraphResourceBufferInfo, FrameGraphResourceTextureInfo>;
-
-	struct FrameGraphResourceCreateInfo
-	{
-		std::string name;
-		FrameGraphResourceType type;
-		FrameGraphResourceUsage usage;
-		FrameGraphResourceInfo info;
-	};
-
-	struct FrameGraphResource
-	{
-		std::string name;
-		FrameGraphResourceType type;
-		FrameGraphResourceUsage usage;
-		FrameGraphResourceInfo info;
-		FrameGraphResourceHandle handle;
-		FrameGraphNodeHandle producer;
-	};
-
-
-	// FrameGraphNode ------------------------------------------------------------
-
-	struct FrameGraphNodeCreateInfo
-	{
-		std::string name;
-		std::vector<FrameGraphResourceHandle> inputs;
-		std::vector<FrameGraphResourceHandle> outputs;
-	};
-
-	struct FrameGraphNode
-	{
-		std::string name;
-		std::unique_ptr<FrameGraphRenderPass> pass;
-		std::vector<FrameGraphResourceHandle> inputs;
-		std::vector<FrameGraphResourceHandle> outputs;
-		std::vector<FrameGraphNodeHandle> edges;
-	};
-
-
-	// FrameGraphResourcePool ----------------------------------------------------
-
 	/// @brief Holds all resources and nodes for a frame graph
-	class FrameGraphResourcePool
+	class FGResourcePool
 	{
 		friend class FrameGraph;
 
 	public:
-		FrameGraphResourcePool() = default;
-		FrameGraphResourcePool(const FrameGraphResourcePool&) = delete;
-		FrameGraphResourcePool(FrameGraphResourcePool&&) = delete;
-		~FrameGraphResourcePool() = default;
+		[[nodiscard]] auto nodes() const -> const std::vector<FGNode>& { return m_nodes; }
+		[[nodiscard]] auto resources() const -> const std::vector<FGResource>& { return m_resources; }
+		[[nodiscard]] auto buffers() const -> const std::vector<Buffer>& { return m_buffers; }
+		[[nodiscard]] auto textures() const -> const std::vector<Texture>& { return m_textures; }
 
-		FrameGraphResourcePool& operator=(const FrameGraphResourcePool&) = delete;
-		FrameGraphResourcePool& operator=(FrameGraphResourcePool&&) = delete;
+		[[nodiscard]] auto node(FGNodeHandle handle) -> FGNode&;
+		[[nodiscard]] auto resource(FGResourceHandle handle) -> FGResource&;
+		[[nodiscard]] auto actualResource(FGResourceHandle handle) -> FGResource&;
+		[[nodiscard]] auto actualHandle(FGResourceHandle handle) -> FGResourceHandle;
+		[[nodiscard]] auto buffer(FGBufferHandle handle) -> Buffer&;
+		[[nodiscard]] auto buffer(FGResourceHandle handle) -> Buffer&;
+		[[nodiscard]] auto texture(FGTextureHandle handle) -> Texture&;
+		[[nodiscard]] auto texture(FGResourceHandle handle) -> Texture&;
+
+		auto addNode(std::unique_ptr<FGRenderPass> pass) -> FGNodeHandle;
+		auto addBuffer(const std::string& name, FGResourceUsage usage, const FGBufferInfo& info) -> FGResourceHandle;
+		auto addImage(const std::string& name, FGResourceUsage usage, const FGTextureInfo& info) -> FGResourceHandle;
+		auto addReference(const std::string& name, FGResourceUsage usage) -> FGResourceHandle;
 		
-		/// @brief Returns the node for the given handle
-		[[nodiscard]] auto node(FrameGraphNodeHandle handle) -> FrameGraphNode&;
-		[[nodiscard]] auto node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&;
-
-		/// @brief Returns the resource for the given handle
-		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) -> FrameGraphResource&;
-		[[nodiscard]] auto resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
-
-		/// @brief Returns the resource for the given handle and resolves any references
-		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) -> FrameGraphResource&;
-		[[nodiscard]] auto finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&;
-
-		/// @brief Returns the texture for the given handle (must be a texture resource)
-		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) -> Texture&;
-		[[nodiscard]] auto texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&;
-
-		/// @brief Returns the buffer for the given handle (must be a buffer resource)
-		[[nodiscard]] auto buffer(FrameGraphResourceHandle resourceHandle) -> Buffer&;
-		[[nodiscard]] auto buffer(FrameGraphResourceHandle resourceHandle) const -> const Buffer&;
-
-		[[nodiscard]] auto resources() -> std::vector<FrameGraphResource>& { return m_resources; }
-		[[nodiscard]] auto nodes() -> std::vector<FrameGraphNode>& { return m_nodes; }
-
-		auto addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle;
-		auto addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
-		auto addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle;
-
-		/// @brief Adds an existing texture as a resource
-		auto addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle;
-
-		/// @brief For all reference resources, resolve the handle to the actual resource
+	private:
 		void resolveReferences();
 		void createResources();
-
+		auto createBuffer(const FGBufferInfo& info) -> FGBufferHandle;
+		auto createImage(const FGTextureInfo& info) -> FGTextureHandle;
 		void resizeImages(uint32_t width, uint32_t height);
 
-	private:
-		void createTexture(FrameGraphResource& resource);
-		void createBuffer(FrameGraphResource& resource);
-
-		std::vector<FrameGraphNode> m_nodes;
-		std::vector<FrameGraphResource> m_resources;
-		std::vector<Texture> m_textures;
+		std::vector<FGNode> m_nodes;
+		std::vector<FGResource> m_resources;
 		std::vector<Buffer> m_buffers;
-	};
-
-
-	// FrameGraphResourceBuilder ------------------------------------------------
-
-	class FrameGraphResourceBuilder
-	{
-	public:
-		FrameGraphResourceBuilder(FrameGraphResourcePool& pool, FrameGraphNodeHandle node)
-			: m_pool{ pool }, m_node{ node } {
-		}
-
-		[[nodiscard]] auto pool() -> FrameGraphResourcePool& { return m_pool; }
-		[[nodiscard]] auto node() const -> FrameGraphNodeHandle { return m_node; }
-
-		auto add(const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
-		{
-			return m_pool.addResource(createInfo, m_node);
-		}
-
-		auto add(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
-		{
-			return m_pool.addResource(std::move(texture), createInfo, m_node);
-		}
-
-	private:
-		FrameGraphResourcePool& m_pool;
-		FrameGraphNodeHandle m_node;
+		std::vector<Texture> m_textures;
 	};
 }

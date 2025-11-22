@@ -1,260 +1,187 @@
 #include "pch.h"
 #include "frame_graph_resource_pool.h"
 
-#include "core/globals.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
 namespace Aegix::Graphics
 {
-	static auto imageUsage(FrameGraphResourceUsage usage) -> VkImageUsageFlags
+	auto FGResourcePool::node(FGNodeHandle handle) -> FGNode&
 	{
-		switch (usage)
-		{
-		case FrameGraphResourceUsage::None:
-			return 0;
-		case FrameGraphResourceUsage::Sampled:
-			return VK_IMAGE_USAGE_SAMPLED_BIT;
-		case FrameGraphResourceUsage::ColorAttachment:
-			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		case FrameGraphResourceUsage::DepthStencilAttachment:
-			return VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-		case FrameGraphResourceUsage::Compute:
-			return VK_IMAGE_USAGE_STORAGE_BIT;
-		case FrameGraphResourceUsage::TransferSrc:
-			return VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-		case FrameGraphResourceUsage::TransferDst:
-			return VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		case FrameGraphResourceUsage::Present:
-			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-		default:
-			AGX_ASSERT_X(false, "Undefined FrameGraphResourceUsage");
-			return 0;
-		}
+		assert(handle.isValid());
+		assert(handle.handle < m_nodes.size());
+		return m_nodes[handle.handle];
 	}
 
-	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) -> FrameGraphNode&
+
+	auto FGResourcePool::resource(FGResourceHandle handle) -> FGResource&
 	{
-		AGX_ASSERT_X(handle.isValid(), "Invalid node handle");
-		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
-		return m_nodes[handle.id];
-	}
-	
-	auto FrameGraphResourcePool::node(FrameGraphNodeHandle handle) const -> const FrameGraphNode&
-	{
-		AGX_ASSERT_X(handle.isValid(), "Invalid node handle");
-		AGX_ASSERT_X(handle.id < m_nodes.size(), "Node handle out of range");
-		return m_nodes[handle.id];
+		assert(handle.isValid());
+		assert(handle.handle < m_resources.size());
+		return m_resources[handle.handle];
 	}
 
-	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) -> FrameGraphResource&
+	auto FGResourcePool::actualResource(FGResourceHandle handle) -> FGResource&
 	{
-		AGX_ASSERT_X(handle.isValid(), "Invalid resource handle");
-		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
-		return m_resources[handle.id];
+		return m_resources[actualHandle(handle).handle];
 	}
-	
-	auto FrameGraphResourcePool::resource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&
-	{
-		AGX_ASSERT_X(handle.isValid(), "Invalid resource handle");
-		AGX_ASSERT_X(handle.id < m_resources.size(), "Resource handle out of range");
-		return m_resources[handle.id];
-	}
-	
-	auto FrameGraphResourcePool::finalResource(FrameGraphResourceHandle handle) -> FrameGraphResource&
-	{
-		auto& res = resource(handle);
-		if (res.type != FrameGraphResourceType::Reference)
-			return res;
 
-		auto& refRes = resource(res.handle);
-		AGX_ASSERT_X(refRes.type != FrameGraphResourceType::Reference, "Reference to another reference is not allowed");
-		return refRes;
-	}
-	
-	auto FrameGraphResourcePool::finalResource(FrameGraphResourceHandle handle) const -> const FrameGraphResource&
+	auto FGResourcePool::actualHandle(FGResourceHandle handle) -> FGResourceHandle
 	{
+		assert(handle.isValid());
 		const auto& res = resource(handle);
-		if (res.type != FrameGraphResourceType::Reference)
-			return res;
-
-		const auto& refRes = resource(res.handle);
-		AGX_ASSERT_X(refRes.type != FrameGraphResourceType::Reference, "Reference to another reference is not allowed");
-		return refRes;
-	}
-	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) -> Texture&
-	{
-		auto& res = finalResource(resourceHandle);
-		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
-		AGX_ASSERT_X(res.handle.isValid(), "Texture handle is invalid");
-		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
-		return m_textures[res.handle.id];
-	}
-	
-	auto FrameGraphResourcePool::texture(FrameGraphResourceHandle resourceHandle) const -> const Texture&
-	{
-		const auto& res = finalResource(resourceHandle);
-		AGX_ASSERT_X(res.type == FrameGraphResourceType::Texture, "Resource is not a texture");
-		AGX_ASSERT_X(res.handle.isValid(), "Texture handle is invalid");
-		AGX_ASSERT_X(res.handle.id < m_textures.size(), "Texture handle out of range");
-		return m_textures[res.handle.id];
-	}
-
-	auto FrameGraphResourcePool::buffer(FrameGraphResourceHandle resourceHandle) -> Buffer&
-	{
-		auto& res = finalResource(resourceHandle);
-		AGX_ASSERT_X(res.type == FrameGraphResourceType::Buffer, "Resource is not a buffer");
-		AGX_ASSERT_X(res.handle.isValid(), "Buffer handle is invalid");
-		AGX_ASSERT_X(res.handle.id < m_buffers.size(), "Buffer handle out of range");
-		return m_buffers[res.handle.id];
-	}
-
-	auto FrameGraphResourcePool::buffer(FrameGraphResourceHandle resourceHandle) const -> const Buffer&
-	{
-		const auto& res = finalResource(resourceHandle);
-		AGX_ASSERT_X(res.type == FrameGraphResourceType::Buffer, "Resource is not a buffer");
-		AGX_ASSERT_X(res.handle.isValid(), "Buffer handle is invalid");
-		AGX_ASSERT_X(res.handle.id < m_buffers.size(), "Buffer handle out of range");
-		return m_buffers[res.handle.id];
-	}
-
-	auto FrameGraphResourcePool::addNode(std::unique_ptr<FrameGraphRenderPass> pass) -> FrameGraphNodeHandle
-	{
-		FrameGraphNodeHandle handle{ static_cast<uint32_t>(m_nodes.size()) };
-		FrameGraphResourceBuilder builder{ *this, handle };
-		auto createInfo = pass->createInfo(builder);
-		m_nodes.emplace_back(createInfo.name, std::move(pass), createInfo.inputs, createInfo.outputs);
+		if (auto info = std::get_if<FGReferenceInfo>(&res.info))
+			return info->handle;
 		return handle;
 	}
 
-	auto FrameGraphResourcePool::addResource(const FrameGraphResourceCreateInfo& createInfo, FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
+	auto FGResourcePool::buffer(FGBufferHandle handle) -> Buffer&
 	{
-		m_resources.emplace_back(createInfo.name, createInfo.type, createInfo.usage, createInfo.info, 
-			FrameGraphResourceHandle{}, producer);
-		return FrameGraphResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
+		assert(handle.isValid());
+		assert(handle.handle < m_buffers.size());
+		return m_buffers[handle.handle];
 	}
 
-	auto FrameGraphResourcePool::addResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo, 
-		FrameGraphNodeHandle producer) -> FrameGraphResourceHandle
+	auto FGResourcePool::buffer(FGResourceHandle handle) -> Buffer&
 	{
-		auto ResourceHandle = addResource(createInfo, producer);
-		m_textures.emplace_back(std::move(texture));
-		resource(ResourceHandle).handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
-		return ResourceHandle;
+		auto& res = resource(actualHandle(handle));
+		AGX_ASSERT_X(std::holds_alternative<FGBufferInfo>(res.info), "Resource is not a buffer");
+		return buffer(std::get<FGBufferInfo>(res.info).handle);
 	}
 
-	auto FrameGraphResourcePool::addExternalResource(Texture texture, const FrameGraphResourceCreateInfo& createInfo) -> FrameGraphResourceHandle
+	auto FGResourcePool::texture(FGTextureHandle handle) -> Texture&
 	{
-		auto ResourceHandle = addResource(createInfo, FrameGraphNodeHandle{});
-		m_textures.emplace_back(std::move(texture));
-		resource(ResourceHandle).handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
-		return ResourceHandle;
+		assert(handle.isValid());
+		assert(handle.handle < m_textures.size());
+		return m_textures[handle.handle];
 	}
 
-	void FrameGraphResourcePool::resolveReferences()
+	auto FGResourcePool::texture(FGResourceHandle handle) -> Texture&
+	{
+		auto& res = resource(actualHandle(handle));
+		AGX_ASSERT_X(std::holds_alternative<FGTextureInfo>(res.info), "Resource is not a texture");
+		return texture(std::get<FGTextureInfo>(res.info).handle);
+	}
+
+	auto FGResourcePool::addNode(std::unique_ptr<FGRenderPass> pass) -> FGNodeHandle
+	{
+		auto nodeInfo = pass->info();
+		m_nodes.emplace_back(nodeInfo, std::move(pass));
+		return FGNodeHandle{ static_cast<uint32_t>(m_nodes.size() - 1) };
+	}
+
+	auto FGResourcePool::addBuffer(const std::string& name, FGResourceUsage usage, const FGBufferInfo& info) -> FGResourceHandle
+	{
+		m_resources.emplace_back(name, usage, info);
+		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
+	}
+
+	auto FGResourcePool::addImage(const std::string& name, FGResourceUsage usage, const FGTextureInfo& info) -> FGResourceHandle
+	{
+		m_resources.emplace_back(name, usage, info);
+		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
+	}
+
+	auto FGResourcePool::addReference(const std::string& name, FGResourceUsage usage) -> FGResourceHandle
+	{
+		m_resources.emplace_back(name, usage, FGReferenceInfo{});
+		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
+	}
+
+	void FGResourcePool::resolveReferences()
 	{
 		for (auto& resource : m_resources)
 		{
-			if (resource.type != FrameGraphResourceType::Reference)
+			if (!std::holds_alternative<FGReferenceInfo>(resource.info))
 				continue;
 
-			// Find the resource for the reference by name
-			for (size_t i = 0; i < m_resources.size(); i++)
+			// Find the referenced resource by name
+			auto& info = std::get<FGReferenceInfo>(resource.info);
+			for (size_t i = 0; i < m_resources.size(); ++i)
 			{
-				auto& other = m_resources[i];
-				if (other.type != FrameGraphResourceType::Reference && other.name == resource.name)
+				const auto& other = m_resources[i];
+				if (std::holds_alternative<FGReferenceInfo>(other.info))
+					continue;
+
+				if (other.name == resource.name)
 				{
-					resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(i) };
+					info.handle = FGResourceHandle{ static_cast<uint32_t>(i) };
 					break;
 				}
 			}
 
-			if (!resource.handle.isValid())
-				ALOG::fatal("Failed to resolve reference '{}'", resource.name);
-
-			AGX_ASSERT(resource.handle.isValid() && "Failed to resolve reference");
+			if (!info.handle.isValid())
+			{
+				ALOG::fatal("Error: Unable to resolve reference for resource '{}'", resource.name);
+			}
 		}
 	}
 
-	void FrameGraphResourcePool::createResources()
+	void FGResourcePool::createResources()
 	{
-		// Accumulate usage flags for each resource reference
-		for (auto& initialResource : m_resources)
+		// Accumulate usage flags
+		for (const auto& res : m_resources)
 		{
-			FrameGraphResourceUsage usage = initialResource.usage;
-
-			FrameGraphResource* actualResource = &initialResource;
-			if (initialResource.type == FrameGraphResourceType::Reference)
-				actualResource = &resource(initialResource.handle);
-
-			if (actualResource->type == FrameGraphResourceType::Texture)
-			{
-				auto& info = std::get<FrameGraphResourceTextureInfo>(actualResource->info);
-				info.usage |= imageUsage(usage);
-			}
-		}
-
-		for (auto& resource : m_resources)
-		{
-			if (resource.handle.isValid()) // Already created
+			if (!std::holds_alternative<FGReferenceInfo>(res.info))
 				continue;
 
-			switch (resource.type)
+			auto& info = std::get<FGReferenceInfo>(res.info);
+			auto& actualResource = resource(info.handle);
+
+			if (std::holds_alternative<FGTextureInfo>(actualResource.info))
 			{
-			case FrameGraphResourceType::Texture:
-				createTexture(resource);
-				break;
+				auto& textureInfo = std::get<FGTextureInfo>(actualResource.info);
+				textureInfo.usage |= toImageUsage(res.usage);
+			}
+			else if (std::holds_alternative<FGBufferInfo>(actualResource.info))
+			{
+				auto& bufferInfo = std::get<FGBufferInfo>(actualResource.info);
+				bufferInfo.usage |= toBufferUsage(res.usage);
+			}
+		}
 
-			case FrameGraphResourceType::Buffer:
-				createBuffer(resource);
-				break;
-
-			case FrameGraphResourceType::Reference:
-				break;
-
-			default:
-				[[unlikely]] break;
+		// Create actual resources
+		for (auto& resource : m_resources)
+		{
+			if (std::holds_alternative<FGReferenceInfo>(resource.info))
+				continue;
+			if (std::holds_alternative<FGTextureInfo>(resource.info))
+			{
+				auto& textureInfo = std::get<FGTextureInfo>(resource.info);
+				textureInfo.handle = createImage(textureInfo);
+			}
+			else if (std::holds_alternative<FGBufferInfo>(resource.info))
+			{
+				auto& bufferInfo = std::get<FGBufferInfo>(resource.info);
+				bufferInfo.handle = createBuffer(bufferInfo);
 			}
 		}
 	}
 
-	void FrameGraphResourcePool::resizeImages(uint32_t width, uint32_t height)
+	auto FGResourcePool::createBuffer(const FGBufferInfo& info) -> FGBufferHandle
+	{
+		m_buffers.emplace_back(); // TODO: Create with info
+		return FGBufferHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
+	}
+
+	auto FGResourcePool::createImage(const FGTextureInfo& info) -> FGTextureHandle
+	{
+		m_textures.emplace_back(); // TODO: Create with info
+		return FGTextureHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
+	}
+
+	void FGResourcePool::resizeImages(uint32_t width, uint32_t height)
 	{
 		for (auto& res : m_resources)
 		{
-			if (res.type != FrameGraphResourceType::Texture)
+			if (!std::holds_alternative<FGTextureInfo>(res.info))
 				continue;
 
-			auto& info = std::get<FrameGraphResourceTextureInfo>(res.info);
-			if (info.resizePolicy == ResizePolicy::SwapchainRelative)
+			auto& info = std::get<FGTextureInfo>(res.info);
+			if (info.resizeMode == FGResizeMode::SwapChainRelative)
 			{
-				m_textures[res.handle.id].resize({ width, height, 1 }, info.usage);
+				m_textures[info.handle.handle].resize({ width, height, 1 }, info.usage);
 				info.extent = { width, height };
 			}
 		}
-	}
-
-	void FrameGraphResourcePool::createTexture(FrameGraphResource& resource)
-	{
-		auto& info = std::get<FrameGraphResourceTextureInfo>(resource.info);
-		if (info.resizePolicy == ResizePolicy::SwapchainRelative)
-		{
-			info.extent = { Core::DEFAULT_WIDTH, Core::DEFAULT_HEIGHT };
-		}
-
-		auto textureInfo = Texture::CreateInfo::texture2D(info.extent.width, info.extent.height, info.format);
-		textureInfo.image.usage = info.usage;
-		textureInfo.image.mipLevels = info.mipLevels;
-		m_textures.emplace_back(textureInfo);
-
-		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
-	}
-
-	void FrameGraphResourcePool::createBuffer(FrameGraphResource& resource)
-	{
-		auto& info = std::get<FrameGraphResourceBufferInfo>(resource.info);
-
-		m_buffers.emplace_back(Buffer::storageBuffer(info.instanceSize, info.instanceCount));
-		resource.handle = FrameGraphResourceHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
 	}
 }
