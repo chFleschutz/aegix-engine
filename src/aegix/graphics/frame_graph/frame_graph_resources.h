@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 	struct FGTextureInfo
 	{
 		VkFormat format;
-		VkExtent2D extent;
+		VkExtent2D extent{ 0, 0 };
 		FGResizeMode resizeMode{ FGResizeMode::Fixed };
 		uint32_t mipLevels{ 1 };
 		VkImageUsageFlags usage{ 0 };

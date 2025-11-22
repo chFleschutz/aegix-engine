@@ -29,7 +29,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ComputeWriteStorage,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0},
 				.resizeMode = FGResizeMode::SwapChainRelative,
 			});
 	}

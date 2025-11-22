@@ -51,7 +51,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ComputeWriteStorage,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 	}

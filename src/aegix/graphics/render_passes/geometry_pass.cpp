@@ -26,7 +26,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
@@ -34,7 +33,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
@@ -42,7 +40,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
@@ -50,7 +47,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
@@ -58,7 +54,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
@@ -66,7 +61,6 @@ namespace Aegix::Graphics
 			FGResourceUsage::DepthStencilAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_D32_SFLOAT,
-				.extent = { 0, 0 },
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 	}
