@@ -334,6 +334,20 @@ namespace Aegix::Tools
 		);
 	}
 
+	void vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, 
+		const std::vector<VkBufferMemoryBarrier>& bufferBarriers, const std::vector<VkImageMemoryBarrier>& imageBarriers)
+	{
+		if (bufferBarriers.empty() && imageBarriers.empty())
+			return;
+
+		vkCmdPipelineBarrier(commandBuffer,
+			srcStage, dstStage, 0,
+			0, nullptr,
+			static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
+			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
+		);
+	}
+
 	void vk::cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent)
 	{
 		VkRect2D scissor{};

@@ -28,16 +28,16 @@ namespace Aegix::Graphics
 
 	/// @brief Bloom post-processing effect using a threshold, downsample, and upsample pass
 	/// @note Based on: https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare/
-	class BloomPass : public FrameGraphRenderPass
+	class BloomPass : public FGRenderPass
 	{
 	public:
 		static constexpr uint32_t BLOOM_MIP_LEVELS = 6;
 
-		BloomPass();
+		BloomPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void createResources(FrameGraphResourcePool& resources) override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void createResources(FGResourcePool& resources) override;
+		virtual void execute(FGResourcePool& resources, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
@@ -48,8 +48,8 @@ namespace Aegix::Graphics
 		void downSample(VkCommandBuffer cmd, Texture& bloom);
 		void upSample(VkCommandBuffer cmd, Texture& bloom);
 
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_bloom;
+		FGResourceHandle m_sceneColor;
+		FGResourceHandle m_bloom;
 
 		std::vector<ImageView> m_mipViews;
 		Sampler m_sampler;

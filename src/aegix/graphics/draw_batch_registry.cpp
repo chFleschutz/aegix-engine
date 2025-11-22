@@ -12,7 +12,7 @@ namespace Aegix::Graphics
 
 	void DrawBatchRegistry::incrementBatchCount(uint32_t batchId)
 	{
-		AGX_ASSERT_X(isValid(batchId), "Invalid batch ID {}", batchId);
+		AGX_ASSERT_X(isValid(batchId), "Invalid batch ID");
 
 		m_batches[batchId].count++;
 		updateOffsets(batchId);

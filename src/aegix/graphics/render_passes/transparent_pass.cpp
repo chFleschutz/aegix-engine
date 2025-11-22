@@ -6,7 +6,7 @@
 
 namespace Aegix::Graphics
 {
-	TransparentPass::TransparentPass(FrameGraph& framegraph) : 
+	TransparentPass::TransparentPass(FGResourcePool& pool) :
 		m_globalUbo{ Buffer::uniformBuffer(sizeof(TransparentUbo)) },
 		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
@@ -18,32 +18,29 @@ namespace Aegix::Graphics
 				.writeBuffer(0, m_globalUbo, i)
 				.update(m_globalSets[i]);
 		}
+
+		m_sceneColor = pool.addReference("SceneColor",
+			FGResourceUsage::ColorAttachment);
+
+		m_depth = pool.addReference("Depth",
+			FGResourceUsage::DepthStencilAttachment);
 	}
 
-	auto TransparentPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+	auto TransparentPass::info() -> FGNode::Info
 	{
-		m_sceneColor = builder.add({ "SceneColor",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::ColorAttachment
-			});
-		m_depth = builder.add({ "Depth",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::DepthStencilAttachment
-			});
-
-		return FrameGraphNodeCreateInfo{
+		return FGNode::Info{
 			.name = "Transparent",
-			.inputs = { m_sceneColor, m_depth },
-			.outputs = { m_sceneColor }
+			.reads = { m_depth },
+			.writes = { m_sceneColor }
 		};
 	}
 
-	void TransparentPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void TransparentPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		updateUBO(frameInfo);
 
-		auto& sceneColor = resources.texture(m_sceneColor);
-		auto& depth = resources.texture(m_depth);
+		auto& sceneColor = pool.texture(m_sceneColor);
+		auto& depth = pool.texture(m_depth);
 		auto colorAttachment = Tools::renderingAttachmentInfo(sceneColor, VK_ATTACHMENT_LOAD_OP_LOAD, {});
 		auto depthAttachment = Tools::renderingAttachmentInfo(depth, VK_ATTACHMENT_LOAD_OP_LOAD, {});
 

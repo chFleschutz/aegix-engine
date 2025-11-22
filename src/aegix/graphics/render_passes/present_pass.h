@@ -5,33 +5,30 @@
 
 namespace Aegix::Graphics
 {
-	class PresentPass : public FrameGraphRenderPass
+	class PresentPass : public FGRenderPass
 	{
 	public:
-		PresentPass(SwapChain& swapChain)
+		PresentPass(FGResourcePool& pool, SwapChain& swapChain)
 			: m_swapChain{ swapChain }
 		{
+			m_final = pool.addReference("Final", 
+				FGResourceUsage::TransferSrc);
 		}
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
+		virtual auto info() -> FGNode::Info override
 		{
-			m_final = builder.add({ "Final",
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::TransferSrc
-				});
-
-			return FrameGraphNodeCreateInfo{
+			return FGNode::Info{
 				.name = "Present",
-				.inputs = { m_final },
-				.outputs = {}
+				.reads = { m_final },
+				.writes = {}
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override
 		{
 			VkCommandBuffer cmd = frameInfo.cmd;
 
-			auto& srcTexture = resources.texture(m_final);
+			auto& srcTexture = pool.texture(m_final);
 			AGX_ASSERT_X(m_swapChain.width() == srcTexture.image().width(), "Swapchain extent does not match source texture extent");
 			AGX_ASSERT_X(m_swapChain.height() == srcTexture.image().height(), "Swapchain extent does not match source texture extent");
 			
@@ -67,7 +64,7 @@ namespace Aegix::Graphics
 
 	private:
 		SwapChain& m_swapChain;
-		FrameGraphResourceHandle m_final;
-		FrameGraphResourceHandle m_presentImage;
+		FGResourceHandle m_final;
+		FGResourceHandle m_presentImage;
 	};
 }

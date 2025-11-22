@@ -12,13 +12,13 @@ namespace Aegix::Graphics
 		glm::mat4 projection{ 1.0f };
 	};
 
-	class TransparentPass : public FrameGraphRenderPass
+	class TransparentPass : public FGRenderPass
 	{
 	public:
-		TransparentPass(FrameGraph& framegraph);
+		TransparentPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 		template<typename T, typename... Args>
 			requires std::is_base_of_v<RenderSystem, T>&& std::is_constructible_v<T, Args...>
@@ -32,8 +32,8 @@ namespace Aegix::Graphics
 		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 		void updateUBO(const FrameInfo& frameInfo);
 
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_depth;
+		FGResourceHandle m_sceneColor;
+		FGResourceHandle m_depth;
 
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 

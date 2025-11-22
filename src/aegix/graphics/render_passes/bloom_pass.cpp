@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "bloom_pass.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/vulkan/vulkan_context.h"
 
@@ -8,7 +9,7 @@
 
 namespace Aegix::Graphics
 {
-	BloomPass::BloomPass() : 
+	BloomPass::BloomPass(FGResourcePool& pool) :
 		m_thresholdSetLayout{ createThresholdDescriptorSetLayout() },
 		m_downsampleSetLayout{ createDownsampleDescriptorSetLayout() },
 		m_upsampleSetLayout{ createUpsampleDescriptorSetLayout() },
@@ -51,40 +52,33 @@ namespace Aegix::Graphics
 			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(BloomUpsample))
 			.setShaderStage(SHADER_DIR "bloom/bloom_upsample.slang.spv")
 			.buildUnique();
-	}
 
-	auto BloomPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
-	{
-		m_sceneColor = builder.add({
-			"SceneColor",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
-			});
+		m_sceneColor = pool.addReference("SceneColor",
+			FGResourceUsage::ComputeReadStorage);
 
-		m_bloom = builder.add({
-			"Bloom",
-			FrameGraphResourceType::Texture,
-			FrameGraphResourceUsage::Compute,
-			FrameGraphResourceTextureInfo{
+		m_bloom = pool.addImage("Bloom",
+			FGResourceUsage::ComputeWriteStorage,
+			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative,
-				.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				.resizeMode = FGResizeMode::SwapChainRelative,
 				.mipLevels = BLOOM_MIP_LEVELS
-				}
 			});
+	}
 
-		return FrameGraphNodeCreateInfo{
+	auto BloomPass::info() -> FGNode::Info
+	{
+		return FGNode::Info{
 			.name = "Bloom",
-			.inputs = { m_sceneColor },
-			.outputs = { m_bloom },
+			.reads = { m_sceneColor },
+			.writes = { m_bloom },
 		};
 	}
 
-	void BloomPass::createResources(FrameGraphResourcePool& resources)
+	void BloomPass::createResources(FGResourcePool& pool)
 	{
-		auto& bloom = resources.texture(m_bloom);
-		auto& sceneColor = resources.texture(m_sceneColor);
+		auto& bloom = pool.texture(m_bloom);
+		auto& sceneColor = pool.texture(m_sceneColor);
 
 		m_mipViews.reserve(BLOOM_MIP_LEVELS);
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
@@ -115,10 +109,10 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void BloomPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void BloomPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		VkCommandBuffer cmd = frameInfo.cmd;
-		auto& bloom = resources.texture(m_bloom);
+		auto& bloom = pool.texture(m_bloom);
 
 		extractBrightRegions(cmd, frameInfo);
 		downSample(cmd, bloom);
