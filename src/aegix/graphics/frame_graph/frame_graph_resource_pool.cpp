@@ -3,6 +3,7 @@
 
 #include "core/globals.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan/vulkan_context.h"
 
 namespace Aegix::Graphics
 {
@@ -120,37 +121,45 @@ namespace Aegix::Graphics
 	void FGResourcePool::createResources()
 	{
 		// Accumulate usage flags
-		for (const auto& res : m_resources)
+		for (auto& res : m_resources)
 		{
-			if (!std::holds_alternative<FGReferenceInfo>(res.info))
-				continue;
-
-			auto& info = std::get<FGReferenceInfo>(res.info);
-			auto& actualResource = resource(info.handle);
-			if (auto textureInfo = std::get_if<FGTextureInfo>(&actualResource.info))
+			FGResource* actualRes = &res;
+			if (auto refInfo = std::get_if<FGReferenceInfo>(&res.info))
 			{
-				textureInfo->usage |= toImageUsage(res.usage);
+				actualRes = &resource(refInfo->handle);
 			}
-			else if (auto bufferInfo = std::get_if<FGBufferInfo>(&actualResource.info))
+
+			if (auto texInfo = std::get_if<FGTextureInfo>(&actualRes->info))
 			{
-				bufferInfo->usage |= toBufferUsage(res.usage);
+				texInfo->usage |= toImageUsage(res.usage);
+			}
+			else if (auto bufInfo = std::get_if<FGBufferInfo>(&actualRes->info))
+			{
+				bufInfo->usage |= toBufferUsage(res.usage);
 			}
 		}
 
 		// Create actual resources
-		for (auto& resource : m_resources)
+		auto cmd = VulkanContext::device().beginSingleTimeCommands();
+		for (auto& res : m_resources)
 		{
-			if (std::holds_alternative<FGReferenceInfo>(resource.info))
+			if (std::holds_alternative<FGReferenceInfo>(res.info))
 				continue;
-			if (auto textureInfo = std::get_if<FGTextureInfo>(&resource.info))
-			{
-				textureInfo->handle = createImage(*textureInfo);
-			}
-			else if (auto bufferInfo = std::get_if<FGBufferInfo>(&resource.info))
+
+			if (auto bufferInfo = std::get_if<FGBufferInfo>(&res.info))
 			{
 				bufferInfo->handle = createBuffer(*bufferInfo);
 			}
+			else if (auto textureInfo = std::get_if<FGTextureInfo>(&res.info))
+			{
+				textureInfo->handle = createImage(*textureInfo);
+
+				// Transition to initial layout
+				auto& tex = texture(textureInfo->handle);
+				tex.image().transitionLayout(cmd, toAccessInfo(res.usage).layout);
+			}
 		}
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	auto FGResourcePool::createBuffer(FGBufferInfo& info) -> FGBufferHandle

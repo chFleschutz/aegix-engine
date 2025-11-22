@@ -42,6 +42,7 @@ namespace Aegix::Graphics
 	struct FGBufferInfo
 	{
 		VkDeviceSize size;
+		
 		VkBufferUsageFlags usage;
 		FGBufferHandle handle;
 	};
@@ -52,6 +53,7 @@ namespace Aegix::Graphics
 		VkExtent2D extent{ 0, 0 };
 		FGResizeMode resizeMode{ FGResizeMode::Fixed };
 		uint32_t mipLevels{ 1 };
+
 		VkImageUsageFlags usage{ 0 };
 		FGTextureHandle handle;
 	};
