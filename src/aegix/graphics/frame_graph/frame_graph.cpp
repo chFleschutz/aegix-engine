@@ -217,53 +217,45 @@ namespace Aegix::Graphics
 
 	void FrameGraph::generateBarriers()
 	{
-		struct ResourceUsage
-		{
-			FGResourceHandle resource{};
-			VkImageLayout currentLayout{ VK_IMAGE_LAYOUT_UNDEFINED };
-		};
-		std::unordered_map<FGResourceHandle, ResourceUsage> resourceUsages;
+		std::unordered_map<FGResourceHandle, FGResourceHandle> lastUsage;
 
-		// Nodes are already sorted in execution order
-		for (auto& nodeHandle : m_nodes)
+		auto barrierLambda = [this, &lastUsage](FGNode& node, FGResourceHandle handle)
+		{
+			auto actualResourceHandle = m_pool.actualHandle(handle);
+			auto lastUsageHandle = lastUsage[actualResourceHandle];
+			if (lastUsageHandle.isValid())
+			{
+				addBarrier(node, lastUsageHandle, handle, actualResourceHandle);
+			}
+			lastUsage[actualResourceHandle] = handle;
+		};
+
+		for (auto nodeHandle : m_nodes)
 		{
 			auto& node = m_pool.node(nodeHandle);
+			node.imageBarriers.clear();
+			node.bufferBarriers.clear();
+			node.srcStage = 0;
+			node.dstStage = 0;
 
-			for (auto read : node.info.reads)
+			for (auto readHandle : node.info.reads)
 			{
-				const auto& actualResource = m_pool.actualResource(read);
-				const auto& lastUsage = resourceUsages[m_pool.actualHandle(read)];
-				if (lastUsage.resource.isValid())
-				{
-					const auto& srcResource = m_pool.resource(lastUsage.resource);
-					const auto& dstResource = m_pool.resource(read);
-					addBarrier(node, srcResource, dstResource, actualResource);
-				}
+				barrierLambda(node, readHandle);
 			}
 
-			for (auto write : node.info.writes)
+			for (auto writeHandle : node.info.writes)
 			{
-				auto actualResourceHandle = m_pool.actualHandle(write);
-				const auto& actualResource = m_pool.resource(actualResourceHandle);
-				const auto& lastUsage = resourceUsages[actualResourceHandle];
-				if (lastUsage.resource.isValid())
-				{
-					const auto& srcResource = m_pool.resource(lastUsage.resource);
-					const auto& dstResource = m_pool.resource(write);
-					addBarrier(node, srcResource, dstResource, actualResource);
-				}
-
-				// Update resource usage
-				resourceUsages[actualResourceHandle] = ResourceUsage{
-					.resource = write,
-					.currentLayout = node.imageBarriers.empty() ? VK_IMAGE_LAYOUT_UNDEFINED : node.imageBarriers.back().newLayout,
-				};
+				barrierLambda(node, writeHandle);
 			}
 		}
 	}
 
-	void FrameGraph::addBarrier(FGNode& node, const FGResource& srcResource, const FGResource& dstResource, const FGResource& actualResource)
+	void FrameGraph::addBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, FGResourceHandle actualHandle)
 	{
+		const auto& srcResource = m_pool.resource(srcHandle);
+		const auto& dstResource = m_pool.resource(dstHandle);
+		const auto& actualResource = m_pool.resource(actualHandle);
+
 		auto srcAccessInfo = toAccessInfo(srcResource.usage);
 		auto dstAccessInfo = toAccessInfo(dstResource.usage);
 
