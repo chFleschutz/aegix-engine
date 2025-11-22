@@ -35,8 +35,8 @@ namespace Aegix::Graphics
 	private:
 		void resolveReferences();
 		void createResources();
-		auto createBuffer(const FGBufferInfo& info) -> FGBufferHandle;
-		auto createImage(const FGTextureInfo& info) -> FGTextureHandle;
+		auto createBuffer(FGBufferInfo& info) -> FGBufferHandle;
+		auto createImage(FGTextureInfo& info) -> FGTextureHandle;
 		void resizeImages(uint32_t width, uint32_t height);
 
 		std::vector<FGNode> m_nodes;

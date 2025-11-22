@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "frame_graph_resource_pool.h"
 
+#include "core/globals.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
 namespace Aegix::Graphics
@@ -126,16 +127,13 @@ namespace Aegix::Graphics
 
 			auto& info = std::get<FGReferenceInfo>(res.info);
 			auto& actualResource = resource(info.handle);
-
-			if (std::holds_alternative<FGTextureInfo>(actualResource.info))
+			if (auto textureInfo = std::get_if<FGTextureInfo>(&actualResource.info))
 			{
-				auto& textureInfo = std::get<FGTextureInfo>(actualResource.info);
-				textureInfo.usage |= toImageUsage(res.usage);
+				textureInfo->usage |= toImageUsage(res.usage);
 			}
-			else if (std::holds_alternative<FGBufferInfo>(actualResource.info))
+			else if (auto bufferInfo = std::get_if<FGBufferInfo>(&actualResource.info))
 			{
-				auto& bufferInfo = std::get<FGBufferInfo>(actualResource.info);
-				bufferInfo.usage |= toBufferUsage(res.usage);
+				bufferInfo->usage |= toBufferUsage(res.usage);
 			}
 		}
 
@@ -144,28 +142,42 @@ namespace Aegix::Graphics
 		{
 			if (std::holds_alternative<FGReferenceInfo>(resource.info))
 				continue;
-			if (std::holds_alternative<FGTextureInfo>(resource.info))
+			if (auto textureInfo = std::get_if<FGTextureInfo>(&resource.info))
 			{
-				auto& textureInfo = std::get<FGTextureInfo>(resource.info);
-				textureInfo.handle = createImage(textureInfo);
+				textureInfo->handle = createImage(*textureInfo);
 			}
-			else if (std::holds_alternative<FGBufferInfo>(resource.info))
+			else if (auto bufferInfo = std::get_if<FGBufferInfo>(&resource.info))
 			{
-				auto& bufferInfo = std::get<FGBufferInfo>(resource.info);
-				bufferInfo.handle = createBuffer(bufferInfo);
+				bufferInfo->handle = createBuffer(*bufferInfo);
 			}
 		}
 	}
 
-	auto FGResourcePool::createBuffer(const FGBufferInfo& info) -> FGBufferHandle
+	auto FGResourcePool::createBuffer(FGBufferInfo& info) -> FGBufferHandle
 	{
-		m_buffers.emplace_back(); // TODO: Create with info
+		auto bufferCreateInfo = Buffer::CreateInfo{
+			.instanceSize = info.size,
+			.instanceCount = 1,
+			.usage = info.usage,
+		};
+		m_buffers.emplace_back(bufferCreateInfo);
 		return FGBufferHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
 	}
 
-	auto FGResourcePool::createImage(const FGTextureInfo& info) -> FGTextureHandle
+	auto FGResourcePool::createImage(FGTextureInfo& info) -> FGTextureHandle
 	{
-		m_textures.emplace_back(); // TODO: Create with info
+		if (info.resizeMode == FGResizeMode::SwapChainRelative)
+		{
+			AGX_ASSERT_X(info.extent.width == 0 && info.extent.height == 0,
+				"SwapChainRelative images must have initial extent of { 0, 0 }");
+			info.extent = { Core::DEFAULT_WIDTH, Core::DEFAULT_HEIGHT };
+		}
+
+		auto textureCreateInfo = Texture::CreateInfo::texture2D(info.extent.width, info.extent.height, info.format);
+		textureCreateInfo.image.usage = info.usage;
+		textureCreateInfo.image.mipLevels = info.mipLevels;
+		m_textures.emplace_back(textureCreateInfo);
+
 		return FGTextureHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}
 

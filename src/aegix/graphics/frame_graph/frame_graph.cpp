@@ -24,10 +24,40 @@ namespace Aegix::Graphics
 	{
 		m_pool.resolveReferences();
 
+		// Print nodes for debugging
+		std::cout << "FrameGraph Nodes:\n";
+		for (size_t i = 0; i < m_nodes.size(); ++i)
+		{
+			auto& node = m_pool.node(m_nodes[i]);
+			std::cout << "  Node [" << i << "]: " << node.info.name << "\n";
+		}
+
 		{
 			auto graph = buildDependencyGraph();
+
+			// Print dependency graph for debugging
+			std::cout << "FrameGraph Dependency Graph:\n";
+			for (size_t i = 0; i < graph.size(); ++i)
+			{
+				std::cout << "  Node [" << i << "] -> ";
+				for (const auto& neighbor : graph[i])
+				{
+					std::cout << neighbor.handle << " ";
+				}
+				std::cout << "\n";
+			}
+
 			m_nodes = topologicalSort(graph);
 		}
+
+		// Print sorted nodes for debugging
+		std::cout << "FrameGraph Sorted Nodes:\n";
+		for (size_t i = 0; i < m_nodes.size(); ++i)
+		{
+			auto& node = m_pool.node(m_nodes[i]);
+			std::cout << "  Node [" << i << "]: " << node.info.name << "\n";
+		}
+
 
 		// TODO: Compute resource lifetimes for aliasing
 
