@@ -9,7 +9,7 @@
 
 namespace Aegix::Graphics
 {
-	GeometryPass::GeometryPass(FrameGraph& framegraph)
+	GeometryPass::GeometryPass(FGResourcePool& pool)
 		: m_globalUbo{ Buffer::uniformBuffer(sizeof(GBufferUbo)) },
 		m_globalSetLayout{ createDescriptorSetLayout() }
 	{
@@ -21,93 +21,69 @@ namespace Aegix::Graphics
 				.writeBuffer(0, m_globalUbo.buffer(), i)
 				.update(m_globalSets[i]);
 		}
-	}
 
-	auto GeometryPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
-	{
-		m_position = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Position",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_position = pool.addImage("Position",
+			FGResource::Usage::ColorAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
-		m_normal = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Normal",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_normal = pool.addImage("Normal",
+			FGResource::Usage::ColorAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
-		m_albedo = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Albedo",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_albedo = pool.addImage("Albedo",
+			FGResource::Usage::ColorAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
-		m_arm = builder.add(FrameGraphResourceCreateInfo{
-			.name = "ARM",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_arm = pool.addImage("ARM",
+			FGResource::Usage::ColorAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
-		m_emissive = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Emissive",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_emissive = pool.addImage("Emissive",
+			FGResource::Usage::ColorAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
-		m_depth = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Depth",
-			.type = FrameGraphResourceType::Texture,
-			.usage = FrameGraphResourceUsage::DepthStencilAttachment,
-			.info = FrameGraphResourceTextureInfo{
+		m_depth = pool.addImage("Depth",
+			FGResource::Usage::DepthStencilAttachment,
+			FGTextureInfo{
 				.format = VK_FORMAT_D32_SFLOAT,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative,
-				}
+				.resizeMode = FGResizeMode::SwapChainRelative
 			});
-
-		FrameGraphNodeCreateInfo info{};
-		info.name = "Geometry";
-		info.inputs = {};
-		info.outputs = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth };
-		return info;
 	}
 
-	void GeometryPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	auto GeometryPass::info() -> FGNode::Info
+	{
+		return FGNode::Info{
+			.name = "Geometry",
+			.reads = {},
+			.writes = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth }
+		};
+	}
+
+	void GeometryPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		updateUBO(frameInfo);
 
-		auto& position = resources.texture(m_position);
-		auto& normal = resources.texture(m_normal);
-		auto& albedo = resources.texture(m_albedo);
-		auto& arm = resources.texture(m_arm);
-		auto& emissive = resources.texture(m_emissive);
-		auto& depth = resources.texture(m_depth);
+		auto& position = pool.texture(m_position);
+		auto& normal = pool.texture(m_normal);
+		auto& albedo = pool.texture(m_albedo);
+		auto& arm = pool.texture(m_arm);
+		auto& emissive = pool.texture(m_emissive);
+		auto& depth = pool.texture(m_depth);
 
 		VkExtent2D extent = albedo.extent2D();
 

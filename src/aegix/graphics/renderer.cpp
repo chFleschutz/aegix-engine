@@ -126,10 +126,12 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
+		auto& geoPass = m_frameGraph.add<GeometryPass>();
 		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
 
-		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
+		m_frameGraph.add<SkyBoxPass>();
+
+		auto& transparentPass = m_frameGraph.add<TransparentPass>();
 		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
 
@@ -138,7 +140,6 @@ namespace Aegix::Graphics
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
-		m_frameGraph.add<SkyBoxPass>();
 
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)

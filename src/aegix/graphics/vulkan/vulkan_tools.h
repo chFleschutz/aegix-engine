@@ -48,6 +48,9 @@ namespace Aegix::Tools
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
 
+		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+			const std::vector<VkBufferMemoryBarrier>& bufferBarriers, const std::vector<VkImageMemoryBarrier>& imageBarriers);
+
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
 		void cmdTransitionImageLayout(VkCommandBuffer cmd, VkImage image, VkFormat format, VkImageLayout oldLayout,

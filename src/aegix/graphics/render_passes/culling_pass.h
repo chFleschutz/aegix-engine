@@ -6,7 +6,7 @@
 
 namespace Aegix::Graphics
 {
-	class CullingPass : public FrameGraphRenderPass
+	class CullingPass : public FGRenderPass
 	{
 	public:
 		static constexpr float INSTANCE_OVERALLOCATION = 1.5f;
@@ -16,14 +16,14 @@ namespace Aegix::Graphics
 			// TODO: Add push constant members
 		};
 
-		CullingPass(DrawBatchRegistry& batcher);
+		CullingPass(FGResourcePool& pool, DrawBatchRegistry& batcher);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
 		DrawBatchRegistry& m_drawBatcher;
-		FrameGraphResourceHandle m_visibleDrawSet;
+		FGResourceHandle m_visibleDrawSet;
 		Pipeline m_pipeline;
 	};
 }

@@ -10,19 +10,15 @@
 
 namespace Aegix::UI
 {
-	static auto toString(Graphics::FrameGraphResourceType type) -> const char*
+	static auto toTypeString(Graphics::FGResource::Info type) -> const char*
 	{
-		switch (type)
-		{
-		case Graphics::FrameGraphResourceType::Buffer:
+		if (std::holds_alternative<Graphics::FGBufferInfo>(type))
 			return "Buffer";
-		case Graphics::FrameGraphResourceType::Texture:
+		if (std::holds_alternative<Graphics::FGTextureInfo>(type))
 			return "Texture";
-		case Graphics::FrameGraphResourceType::Reference:
+		if (std::holds_alternative<Graphics::FGReferenceInfo>(type))
 			return "Reference";
-		default:
-			return "Unknown";
-		}
+		return "Unknown";
 	}
 
 	static auto toString(VkFormat format) -> const char*
@@ -81,13 +77,13 @@ namespace Aegix::UI
 			ImGui::PushID(i);
 
 			auto& node = resourcePool.node(nodeHandle);
-			if (ImGui::CollapsingHeader(node.name.c_str(), ImGuiTreeNodeFlags_None))
+			if (ImGui::CollapsingHeader(node.info.name.c_str(), ImGuiTreeNodeFlags_None))
 			{
 				node.pass->drawUI();
 
-				if (!node.inputs.empty() && ImGui::TreeNode("Inputs"))
+				if (!node.info.reads.empty() && ImGui::TreeNode("Reads"))
 				{
-					for (const auto& inputHandle : node.inputs)
+					for (const auto& inputHandle : node.info.reads)
 					{
 						auto& input = resourcePool.resource(inputHandle);
 						ImGui::BulletText("%s", input.name.c_str());
@@ -95,9 +91,9 @@ namespace Aegix::UI
 					ImGui::TreePop();
 				}
 
-				if (!node.outputs.empty() && ImGui::TreeNode("Outputs"))
+				if (!node.info.writes.empty() && ImGui::TreeNode("Writes"))
 				{
-					for (const auto& outputHandle : node.outputs)
+					for (const auto& outputHandle : node.info.writes)
 					{
 						auto& input = resourcePool.resource(outputHandle);
 						ImGui::BulletText("%s", input.name.c_str());
@@ -116,7 +112,7 @@ namespace Aegix::UI
 		// Frame graph resources
 		const ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH;
 		const ImVec2 outer_size = ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 10);
-		if (ImGui::BeginTable("Resources", 5, flags, outer_size))
+		if (ImGui::BeginTable("Resources", 4, flags, outer_size))
 		{
 			ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
 			ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed);
@@ -126,23 +122,22 @@ namespace Aegix::UI
 			ImGui::TableSetupColumn("Producer", ImGuiTableColumnFlags_WidthFixed);
 			ImGui::TableHeadersRow();
 
-			for (const auto& res : resourcePool.resources())
+			const auto& resources = resourcePool.resources();
+			for (size_t i = 0; i < resources.size(); i++)
 			{
+				const auto& res = resources[i];
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("%d", res.handle.id);
+				ImGui::Text("%d", i);
 				ImGui::TableSetColumnIndex(1);
 				ImGui::Text("%s", res.name.c_str());
 				ImGui::TableSetColumnIndex(2);
-				ImGui::Text("%s", toString(res.type));
+				ImGui::Text("%s", toTypeString(res.info));
 				ImGui::TableSetColumnIndex(3);
-				if (res.type == Graphics::FrameGraphResourceType::Texture)
+				if (auto info = std::get_if<Graphics::FGTextureInfo>(&res.info))
 				{
-					auto& info = std::get<Graphics::FrameGraphResourceTextureInfo>(res.info);
-					ImGui::Text("%s", toString(info.format));
+					ImGui::Text("%s", toString(info->format));
 				}
-				ImGui::TableSetColumnIndex(4);
-				ImGui::Text("%s", resourcePool.node(res.producer).name.c_str());
 			}
 
 			ImGui::EndTable();

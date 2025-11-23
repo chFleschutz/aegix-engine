@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ssao_pass.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 #include "math/interpolation.h"
@@ -11,7 +12,7 @@
 
 namespace Aegix::Graphics
 {
-	SSAOPass::SSAOPass()
+	SSAOPass::SSAOPass(FGResourcePool& pool)
 		: m_uniforms{ Buffer::uniformBuffer(sizeof(SSAOUniforms)) },
 		m_ssaoSamples{ Buffer::uniformBuffer(sizeof(glm::vec4) * SAMPLE_COUNT, 1) }
 	{
@@ -67,41 +68,32 @@ namespace Aegix::Graphics
 		m_ssaoNoise = Texture{ texInfo };
 		m_ssaoNoise.image().upload(noise.data(), sizeof(glm::vec2) * noise.size());
 		m_ssaoNoise.image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		m_position = pool.addReference("Position",
+			FGResource::Usage::ComputeReadSampled);
+
+		m_normal = pool.addReference("Normal",
+			FGResource::Usage::ComputeReadSampled);
+
+		m_ssao = pool.addImage("SSAO",
+			FGResource::Usage::ComputeWriteStorage,
+			FGTextureInfo{
+				.format = VK_FORMAT_R8_UNORM,
+				.extent = { 0, 0 },
+				.resizeMode = FGResizeMode::SwapChainRelative
+			});
 	}
 
-	auto SSAOPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+	auto SSAOPass::info() -> FGNode::Info
 	{
-		m_position = builder.add(FrameGraphResourceCreateInfo{
-				.name = "Position",
-				.type = FrameGraphResourceType::Reference,
-				.usage = FrameGraphResourceUsage::Sampled
-			});
-
-		m_normal = builder.add(FrameGraphResourceCreateInfo{
-				.name = "Normal",
-				.type = FrameGraphResourceType::Reference,
-				.usage = FrameGraphResourceUsage::Sampled
-			});
-
-		m_ssao = builder.add(FrameGraphResourceCreateInfo{
-				.name = "SSAO",
-				.type = FrameGraphResourceType::Texture,
-				.usage = FrameGraphResourceUsage::Compute,
-				.info = FrameGraphResourceTextureInfo{
-					.format = VK_FORMAT_R8_UNORM,
-					.extent = { 0, 0 },
-					.resizePolicy = ResizePolicy::SwapchainRelative
-				}
-			});
-
-		return FrameGraphNodeCreateInfo{
+		return FGNode::Info{
 			.name = "SSAO",
-			.inputs = { m_position, m_normal },
-			.outputs = { m_ssao }
+			.reads = { m_position, m_normal },
+			.writes = { m_ssao }
 		};
 	}
 
-	void SSAOPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void SSAOPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		VkCommandBuffer cmd = frameInfo.cmd;
 
@@ -113,9 +105,9 @@ namespace Aegix::Graphics
 		m_uniforms.writeToIndex(&m_uniformData, frameInfo.frameIndex);
 
 		DescriptorWriter{ *m_descriptorSetLayout }
-			.writeImage(0, resources.texture(m_ssao))
-			.writeImage(1, resources.texture(m_position))
-			.writeImage(2, resources.texture(m_normal))
+			.writeImage(0, pool.texture(m_ssao))
+			.writeImage(1, pool.texture(m_position))
+			.writeImage(2, pool.texture(m_normal))
 			.writeImage(3, m_ssaoNoise)
 			.writeBuffer(4, m_ssaoSamples)
 			.writeBuffer(5, m_uniforms, frameInfo.frameIndex)

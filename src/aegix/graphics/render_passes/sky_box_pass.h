@@ -12,19 +12,19 @@ namespace Aegix::Graphics
 		glm::mat4 viewProjection;
 	};
 
-	class SkyBoxPass : public FrameGraphRenderPass
+	class SkyBoxPass : public FGRenderPass
 	{
 	public:
-		SkyBoxPass();
+		SkyBoxPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
 		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_depth;
+		FGResourceHandle m_sceneColor;
+		FGResourceHandle m_depth;
 
 		DescriptorSetLayout m_descriptorSetLayout;
 		std::vector<DescriptorSet> m_descriptorSets;
