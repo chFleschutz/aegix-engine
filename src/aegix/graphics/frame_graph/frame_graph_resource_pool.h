@@ -13,6 +13,14 @@ namespace Aegix::Graphics
 		friend class FrameGraph;
 
 	public:
+		FGResourcePool() = default;
+		FGResourcePool(const FGResourcePool&) = delete;
+		FGResourcePool(FGResourcePool&&) = delete;
+		~FGResourcePool() = default;
+
+		auto operator=(const FGResourcePool&) -> FGResourcePool& = delete;
+		auto operator=(FGResourcePool&&) -> FGResourcePool& = delete;
+
 		[[nodiscard]] auto nodes() const -> const std::vector<FGNode>& { return m_nodes; }
 		[[nodiscard]] auto resources() const -> const std::vector<FGResource>& { return m_resources; }
 		[[nodiscard]] auto buffers() const -> const std::vector<Buffer>& { return m_buffers; }

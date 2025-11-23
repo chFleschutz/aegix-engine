@@ -9,16 +9,15 @@ namespace Aegix::Graphics
 {
 	auto FGResourcePool::node(FGNodeHandle handle) -> FGNode&
 	{
-		assert(handle.isValid());
-		assert(handle.handle < m_nodes.size());
+		AGX_ASSERT(handle.isValid());
+		AGX_ASSERT(handle.handle < m_nodes.size());
 		return m_nodes[handle.handle];
 	}
 
-
 	auto FGResourcePool::resource(FGResourceHandle handle) -> FGResource&
 	{
-		assert(handle.isValid());
-		assert(handle.handle < m_resources.size());
+		AGX_ASSERT(handle.isValid());
+		AGX_ASSERT(handle.handle < m_resources.size());
 		return m_resources[handle.handle];
 	}
 
@@ -29,7 +28,7 @@ namespace Aegix::Graphics
 
 	auto FGResourcePool::actualHandle(FGResourceHandle handle) -> FGResourceHandle
 	{
-		assert(handle.isValid());
+		AGX_ASSERT(handle.isValid());
 		const auto& res = resource(handle);
 		if (auto info = std::get_if<FGReferenceInfo>(&res.info))
 			return info->handle;
@@ -38,8 +37,8 @@ namespace Aegix::Graphics
 
 	auto FGResourcePool::buffer(FGBufferHandle handle) -> Buffer&
 	{
-		assert(handle.isValid());
-		assert(handle.handle < m_buffers.size());
+		AGX_ASSERT(handle.isValid());
+		AGX_ASSERT(handle.handle < m_buffers.size());
 		return m_buffers[handle.handle];
 	}
 
@@ -52,8 +51,8 @@ namespace Aegix::Graphics
 
 	auto FGResourcePool::texture(FGTextureHandle handle) -> Texture&
 	{
-		assert(handle.isValid());
-		assert(handle.handle < m_textures.size());
+		AGX_ASSERT(handle.isValid());
+		AGX_ASSERT(handle.handle < m_textures.size());
 		return m_textures[handle.handle];
 	}
 

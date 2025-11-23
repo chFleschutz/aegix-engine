@@ -6,9 +6,12 @@ namespace Aegix::Graphics
 {
 	struct FGHandle
 	{
-		uint32_t handle{ std::numeric_limits<uint32_t>::max() };
-		[[nodiscard]] auto isValid() const -> bool { return handle != std::numeric_limits<uint32_t>::max(); }
+		static constexpr uint32_t INVALID_HANDLE = std::numeric_limits<uint32_t>::max();
+
+		uint32_t handle{ INVALID_HANDLE };
+
 		[[nodiscard]] auto operator==(const FGHandle& other) const -> bool { return handle == other.handle; }
+		[[nodiscard]] auto isValid() const -> bool { return handle != INVALID_HANDLE; }
 	};
 
 	struct FGNodeHandle : FGHandle {};
