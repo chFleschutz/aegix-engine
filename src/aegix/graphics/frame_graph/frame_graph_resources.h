@@ -19,15 +19,12 @@ namespace Aegix::Graphics
 	enum class FGResourceUsage
 	{
 		None,
-
 		ColorAttachment,
 		DepthStencilAttachment,
 		FragmentReadSampled,
-
 		ComputeReadStorage,
 		ComputeWriteStorage,
 		ComputeReadSampled,
-
 		TransferSrc,
 		TransferDst,
 		Present,

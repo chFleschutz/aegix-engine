@@ -61,7 +61,8 @@ namespace Aegix::Graphics
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative,
-				.mipLevels = BLOOM_MIP_LEVELS
+				.mipLevels = BLOOM_MIP_LEVELS,
+				.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			});
 	}
 

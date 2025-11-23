@@ -46,6 +46,7 @@ namespace Aegix::Graphics
 
 		auto buildDependencyGraph() -> DependencyGraph;
 		auto topologicalSort(const DependencyGraph& adjacency) -> std::vector<FGNodeHandle>;
+		void createResources();
 		void generateBarriers();
 		void generateBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, 
 			FGResourceHandle actualHandle);

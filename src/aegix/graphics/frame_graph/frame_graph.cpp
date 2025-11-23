@@ -64,8 +64,7 @@ namespace Aegix::Graphics
 
 		// TODO: Compute resource lifetimes for aliasing
 
-		m_pool.createResources();
-
+		createResources();
 
 		// TODO: Debug
 		// Print resources for debugging
@@ -237,6 +236,16 @@ namespace Aegix::Graphics
 		// reverse to get correct order
 		std::reverse(sortedNodes.begin(), sortedNodes.end());
 		return sortedNodes;
+	}
+
+	void FrameGraph::createResources()
+	{
+		m_pool.createResources();
+		for (const auto& nodeHandle : m_nodes)
+		{
+			auto& node = m_pool.node(nodeHandle);
+			node.pass->createResources(m_pool);
+		}
 	}
 
 	void FrameGraph::generateBarriers()
