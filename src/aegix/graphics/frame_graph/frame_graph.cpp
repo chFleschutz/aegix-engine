@@ -2,8 +2,9 @@
 #include "frame_graph.h"
 
 #include "core/profiler.h"
-#include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 // Hash function for ResourceHandle to be used in unordered_map
 namespace std
@@ -86,7 +87,7 @@ namespace Aegix::Graphics
 		for (size_t i = 0; i < m_nodes.size(); i++)
 		{
 			auto& node = m_pool.node(m_nodes[i]);
-			std::cout << "  Node [" << i << "]: Buffer: " << node.bufferBarriers.size() << 
+			std::cout << "  Node [" << i << "]: Buffer: " << node.bufferBarriers.size() <<
 				" - Image: " << node.imageBarriers.size() << "\n";
 		}
 	}
@@ -250,19 +251,31 @@ namespace Aegix::Graphics
 
 	void FrameGraph::generateBarriers()
 	{
-		std::unordered_map<FGResourceHandle, FGResourceHandle> lastUsage;
-
-		auto barrierLambda = [this, &lastUsage](FGNode& node, FGResourceHandle handle)
+		struct UsageInfo
 		{
-			auto actualResourceHandle = m_pool.actualHandle(handle);
-			auto lastUsageHandle = lastUsage[actualResourceHandle];
-			if (lastUsageHandle.isValid())
-			{
-				generateBarrier(node, lastUsageHandle, handle, actualResourceHandle);
-			}
-			lastUsage[actualResourceHandle] = handle;
+			FGNodeHandle producer;
+			FGResourceHandle firstUse;
+			FGResourceHandle lastUse;
 		};
+		std::unordered_map<FGResourceHandle, UsageInfo> usages;
 
+		auto barrierLambda = [this, &usages](FGNodeHandle nodeHandle, FGNode& node, FGResourceHandle handle)
+			{
+				auto actualResourceHandle = m_pool.actualHandle(handle);
+				auto& [producer, firstUse, lastUse] = usages[actualResourceHandle];
+				if (lastUse.isValid())
+				{
+					generateBarrier(node, lastUse, handle, actualResourceHandle);
+				}
+				else
+				{
+					producer = nodeHandle;
+					firstUse = handle;
+				}
+				lastUse = handle;
+			};
+
+		// Generate barriers for all resources between their uses
 		for (auto nodeHandle : m_nodes)
 		{
 			auto& node = m_pool.node(nodeHandle);
@@ -273,17 +286,39 @@ namespace Aegix::Graphics
 
 			for (auto readHandle : node.info.reads)
 			{
-				barrierLambda(node, readHandle);
+				barrierLambda(nodeHandle, node, readHandle);
 			}
 
 			for (auto writeHandle : node.info.writes)
 			{
-				barrierLambda(node, writeHandle);
+				barrierLambda(nodeHandle, node, writeHandle);
 			}
 		}
+
+		// Transition images to the correct layout
+		auto cmd = VulkanContext::device().beginSingleTimeCommands();
+		for (auto& [resourceHandle, usage] : usages)
+		{
+			auto& res = m_pool.resource(resourceHandle);
+			if (!std::holds_alternative<FGTextureInfo>(res.info))
+				continue;
+
+			// Transition image layout between frames (last use frame N -> first use frame N + 1)
+			auto& node = m_pool.node(usage.producer);
+			auto interFrameBarrier = generateBarrier(node, usage.lastUse, usage.firstUse, resourceHandle);
+			
+			// Transition initial image layout (for correct use on the first frame)
+			auto& texInfo = std::get<FGTextureInfo>(res.info);
+			auto& texture = m_pool.texture(texInfo.handle);
+			VkImageLayout requiredLayout = interFrameBarrier 
+				? node.imageBarriers.back().oldLayout
+				: toAccessInfo(m_pool.resource(usage.firstUse).usage).layout;
+			texture.image().transitionLayout(cmd, requiredLayout);
+		}
+		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
-	void FrameGraph::generateBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, FGResourceHandle actualHandle)
+	auto FrameGraph::generateBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, FGResourceHandle actualHandle) -> bool
 	{
 		const auto& srcResource = m_pool.resource(srcHandle);
 		const auto& dstResource = m_pool.resource(dstHandle);
@@ -291,6 +326,8 @@ namespace Aegix::Graphics
 
 		auto srcAccessInfo = toAccessInfo(srcResource.usage);
 		auto dstAccessInfo = toAccessInfo(dstResource.usage);
+
+		// TODO: Avoid redundant barriers (like read -> read)
 
 		node.srcStage |= srcAccessInfo.stage;
 		node.dstStage |= dstAccessInfo.stage;
@@ -335,6 +372,7 @@ namespace Aegix::Graphics
 			node.imageBarriers.emplace_back(barrier);
 			node.accessedTextures.emplace_back(textureInfo.handle);
 		}
+		return true;
 	}
 
 	void FrameGraph::placeBarriers(VkCommandBuffer cmd, const FGNode& node)

@@ -140,7 +140,6 @@ namespace Aegix::Graphics
 		}
 
 		// Create actual resources
-		auto cmd = VulkanContext::device().beginSingleTimeCommands();
 		for (auto& res : m_resources)
 		{
 			if (std::holds_alternative<FGReferenceInfo>(res.info))
@@ -153,13 +152,8 @@ namespace Aegix::Graphics
 			else if (auto textureInfo = std::get_if<FGTextureInfo>(&res.info))
 			{
 				textureInfo->handle = createImage(*textureInfo);
-
-				// Transition to initial layout
-				auto& tex = texture(textureInfo->handle);
-				tex.image().transitionLayout(cmd, toAccessInfo(res.usage).layout);
 			}
 		}
-		VulkanContext::device().endSingleTimeCommands(cmd);
 	}
 
 	auto FGResourcePool::createBuffer(FGBufferInfo& info) -> FGBufferHandle
