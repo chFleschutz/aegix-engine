@@ -59,6 +59,9 @@ namespace Aegix::Graphics
 		void transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout);
 		auto transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier;
 
+		/// @brief Sets the current image layout WITHOUT any doing any transitions
+		void setLayout(VkImageLayout layout) { m_layout = layout; }
+
 		void generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout);
 
 	private:

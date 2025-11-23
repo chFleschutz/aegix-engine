@@ -17,9 +17,10 @@ namespace Aegix::Graphics
 
 		Info info;
 		std::unique_ptr<FGRenderPass> pass;
-		std::vector<VkImageMemoryBarrier> imageBarriers;
-		std::vector<VkBufferMemoryBarrier> bufferBarriers;
 		VkPipelineStageFlags srcStage{ 0 };
 		VkPipelineStageFlags dstStage{ 0 };
+		std::vector<VkBufferMemoryBarrier> bufferBarriers;
+		std::vector<VkImageMemoryBarrier> imageBarriers;
+		std::vector<FGTextureHandle> accessedTextures;
 	};
 }

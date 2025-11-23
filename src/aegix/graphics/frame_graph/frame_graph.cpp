@@ -24,6 +24,7 @@ namespace Aegix::Graphics
 	{
 		m_pool.resolveReferences();
 
+		// TODO: Debug
 		// Print nodes for debugging
 		std::cout << "FrameGraph Nodes:\n";
 		for (size_t i = 0; i < m_nodes.size(); ++i)
@@ -35,6 +36,7 @@ namespace Aegix::Graphics
 		{
 			auto graph = buildDependencyGraph();
 
+			// TODO: Debug
 			// Print dependency graph for debugging
 			std::cout << "FrameGraph Dependency Graph:\n";
 			for (size_t i = 0; i < graph.size(); ++i)
@@ -50,9 +52,10 @@ namespace Aegix::Graphics
 			m_nodes = topologicalSort(graph);
 		}
 
+		// TODO: Debug
 		// Print sorted nodes for debugging
 		std::cout << "FrameGraph Sorted Nodes:\n";
-		for (size_t i = 0; i < m_nodes.size(); ++i)
+		for (size_t i = 0; i < m_nodes.size(); i++)
 		{
 			auto& node = m_pool.node(m_nodes[i]);
 			std::cout << "  Node [" << i << "]: " << node.info.name << "\n";
@@ -63,7 +66,30 @@ namespace Aegix::Graphics
 
 		m_pool.createResources();
 
+
+		// TODO: Debug
+		// Print resources for debugging
+		std::cout << "FrameGraph Resources:\n";
+		for (size_t i = 0; i < m_pool.resources().size(); i++)
+		{
+			auto& resource = m_pool.resources()[i];
+			std::cout << "  Resource [" << i << "]: " << resource.name;
+			if (std::holds_alternative<FGReferenceInfo>(resource.info))
+				std::cout << " (Reference)";
+			std::cout << "\n";
+		}
+
 		generateBarriers();
+
+		// TODO: Debug
+		// Print barriers for debugging
+		std::cout << "FrameGraph Barriers:\n";
+		for (size_t i = 0; i < m_nodes.size(); i++)
+		{
+			auto& node = m_pool.node(m_nodes[i]);
+			std::cout << "  Node [" << i << "]: Buffer: " << node.bufferBarriers.size() << 
+				" - Image: " << node.imageBarriers.size() << "\n";
+		}
 	}
 
 	void FrameGraph::execute(const FrameInfo& frameInfo)
@@ -76,9 +102,7 @@ namespace Aegix::Graphics
 
 			Tools::vk::cmdBeginDebugUtilsLabel(frameInfo.cmd, node.info.name.c_str());
 			{
-				Tools::vk::cmdPipelineBarrier(frameInfo.cmd, node.srcStage, node.dstStage,
-					node.bufferBarriers, node.imageBarriers);
-
+				placeBarriers(frameInfo.cmd, node);
 				node.pass->execute(m_pool, frameInfo);
 			}
 			Tools::vk::cmdEndDebugUtilsLabel(frameInfo.cmd);
@@ -225,7 +249,7 @@ namespace Aegix::Graphics
 			auto lastUsageHandle = lastUsage[actualResourceHandle];
 			if (lastUsageHandle.isValid())
 			{
-				addBarrier(node, lastUsageHandle, handle, actualResourceHandle);
+				generateBarrier(node, lastUsageHandle, handle, actualResourceHandle);
 			}
 			lastUsage[actualResourceHandle] = handle;
 		};
@@ -250,7 +274,7 @@ namespace Aegix::Graphics
 		}
 	}
 
-	void FrameGraph::addBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, FGResourceHandle actualHandle)
+	void FrameGraph::generateBarrier(FGNode& node, FGResourceHandle srcHandle, FGResourceHandle dstHandle, FGResourceHandle actualHandle)
 	{
 		const auto& srcResource = m_pool.resource(srcHandle);
 		const auto& dstResource = m_pool.resource(dstHandle);
@@ -300,6 +324,20 @@ namespace Aegix::Graphics
 				}
 			};
 			node.imageBarriers.emplace_back(barrier);
+			node.accessedTextures.emplace_back(textureInfo.handle);
+		}
+	}
+
+	void FrameGraph::placeBarriers(VkCommandBuffer cmd, const FGNode& node)
+	{
+		Tools::vk::cmdPipelineBarrier(cmd, node.srcStage, node.dstStage,
+			node.bufferBarriers, node.imageBarriers);
+
+		// Images track their layout internally, so update it after the barrier
+		for (size_t i = 0; i < node.accessedTextures.size(); i++)
+		{
+			auto& texture = m_pool.texture(node.accessedTextures[i]);
+			texture.image().setLayout(node.imageBarriers[i].newLayout);
 		}
 	}
 }
