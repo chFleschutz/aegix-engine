@@ -25,70 +25,22 @@ namespace Aegix::Graphics
 	{
 		m_pool.resolveReferences();
 
-		// TODO: Debug
-		// Print nodes for debugging
-		std::cout << "FrameGraph Nodes:\n";
-		for (size_t i = 0; i < m_nodes.size(); ++i)
-		{
-			auto& node = m_pool.node(m_nodes[i]);
-			std::cout << "  Node [" << i << "]: " << node.info.name << "\n";
-		}
-
 		{
 			auto graph = buildDependencyGraph();
-
-			// TODO: Debug
-			// Print dependency graph for debugging
-			std::cout << "FrameGraph Dependency Graph:\n";
-			for (size_t i = 0; i < graph.size(); ++i)
-			{
-				std::cout << "  Node [" << i << "] -> ";
-				for (const auto& neighbor : graph[i])
-				{
-					std::cout << neighbor.handle << " ";
-				}
-				std::cout << "\n";
-			}
-
 			m_nodes = topologicalSort(graph);
 		}
-
-		// TODO: Debug
-		// Print sorted nodes for debugging
-		std::cout << "FrameGraph Sorted Nodes:\n";
-		for (size_t i = 0; i < m_nodes.size(); i++)
-		{
-			auto& node = m_pool.node(m_nodes[i]);
-			std::cout << "  Node [" << i << "]: " << node.info.name << "\n";
-		}
-
 
 		// TODO: Compute resource lifetimes for aliasing
 
 		createResources();
-
-		// TODO: Debug
-		// Print resources for debugging
-		std::cout << "FrameGraph Resources:\n";
-		for (size_t i = 0; i < m_pool.resources().size(); i++)
-		{
-			auto& resource = m_pool.resources()[i];
-			std::cout << "  Resource [" << i << "]: " << resource.name;
-			if (std::holds_alternative<FGReferenceInfo>(resource.info))
-				std::cout << " (Reference)";
-			std::cout << "\n";
-		}
-
 		generateBarriers();
 
-		// TODO: Debug
-		// Print barriers for debugging
-		std::cout << "FrameGraph Barriers:\n";
+		// Print info
+		ALOG::info("FrameGraph compiled with {} passes", m_nodes.size());
 		for (size_t i = 0; i < m_nodes.size(); i++)
 		{
 			auto& node = m_pool.node(m_nodes[i]);
-			std::cout << "  Node [" << i << "]: Buffer: " << node.bufferBarriers.size() <<
-				" - Image: " << node.imageBarriers.size() << "\n";
+			ALOG::info("  [{}] {}", i, node.info.name);
 		}
 	}
 
