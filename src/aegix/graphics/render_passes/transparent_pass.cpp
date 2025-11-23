@@ -20,10 +20,10 @@ namespace Aegix::Graphics
 		}
 
 		m_sceneColor = pool.addReference("SceneColor",
-			FGResourceUsage::ColorAttachment);
+			FGResource::Usage::ColorAttachment);
 
 		m_depth = pool.addReference("Depth",
-			FGResourceUsage::DepthStencilAttachment);
+			FGResource::Usage::DepthStencilAttachment);
 	}
 
 	auto TransparentPass::info() -> FGNode::Info

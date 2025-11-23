@@ -70,13 +70,13 @@ namespace Aegix::Graphics
 		m_ssaoNoise.image().transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		m_position = pool.addReference("Position",
-			FGResourceUsage::ComputeReadSampled);
+			FGResource::Usage::ComputeReadSampled);
 
 		m_normal = pool.addReference("Normal",
-			FGResourceUsage::ComputeReadSampled);
+			FGResource::Usage::ComputeReadSampled);
 
 		m_ssao = pool.addImage("SSAO",
-			FGResourceUsage::ComputeWriteStorage,
+			FGResource::Usage::ComputeWriteStorage,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8_UNORM,
 				.extent = { 0, 0 },

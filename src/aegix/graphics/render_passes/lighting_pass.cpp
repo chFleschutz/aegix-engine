@@ -30,25 +30,25 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		m_position = pool.addReference("Position",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		m_normal = pool.addReference("Normal",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		m_albedo = pool.addReference("Albedo",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		m_arm = pool.addReference("ARM",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		m_emissive = pool.addReference("Emissive",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		//m_ssao = pool.addReference("SSAO",
-		//	FGResourceUsage::ComputeReadStorage);
+		//	FGResource::Usage::ComputeReadStorage);
 
 		m_sceneColor = pool.addImage("SceneColor",
-			FGResourceUsage::ComputeWriteStorage,
+			FGResource::Usage::ComputeWriteStorage,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative

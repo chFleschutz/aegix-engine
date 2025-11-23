@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 		UIPass(FGResourcePool& pool)
 		{
 			m_final = pool.addReference("Final",
-				FGResourceUsage::ColorAttachment);
+				FGResource::Usage::ColorAttachment);
 		}
 
 		virtual auto info() -> FGNode::Info override

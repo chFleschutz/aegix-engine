@@ -10,7 +10,7 @@
 
 namespace Aegix::UI
 {
-	static auto toTypeString(Graphics::FGResourceInfo type) -> const char*
+	static auto toTypeString(Graphics::FGResource::Info type) -> const char*
 	{
 		if (std::holds_alternative<Graphics::FGBufferInfo>(type))
 			return "Buffer";

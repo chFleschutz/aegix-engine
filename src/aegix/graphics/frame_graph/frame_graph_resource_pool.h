@@ -28,9 +28,9 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto texture(FGResourceHandle handle) -> Texture&;
 
 		auto addNode(std::unique_ptr<FGRenderPass> pass) -> FGNodeHandle;
-		auto addBuffer(const std::string& name, FGResourceUsage usage, const FGBufferInfo& info) -> FGResourceHandle;
-		auto addImage(const std::string& name, FGResourceUsage usage, const FGTextureInfo& info) -> FGResourceHandle;
-		auto addReference(const std::string& name, FGResourceUsage usage) -> FGResourceHandle;
+		auto addBuffer(const std::string& name, FGResource::Usage usage, const FGBufferInfo& info) -> FGResourceHandle;
+		auto addImage(const std::string& name, FGResource::Usage usage, const FGTextureInfo& info) -> FGResourceHandle;
+		auto addReference(const std::string& name, FGResource::Usage usage) -> FGResourceHandle;
 		
 	private:
 		void resolveReferences();

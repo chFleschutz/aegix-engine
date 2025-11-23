@@ -1,13 +1,12 @@
 #pragma once
 
+#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/frame_info.h"
 #include "graphics/render_context.h"
 
 namespace Aegix::Graphics
 {
-	class FGRenderPass;
-
 	/// @brief Manages renderpasses and resources for rendering a frame
 	class FrameGraph
 	{
@@ -20,6 +19,9 @@ namespace Aegix::Graphics
 		auto operator=(const FrameGraph&) -> FrameGraph = delete;
 		auto operator=(FrameGraph&&) -> FrameGraph = delete;
 
+		[[nodiscard]] auto nodes() -> std::vector<FGNodeHandle>& { return m_nodes; }
+		[[nodiscard]] auto resourcePool() -> FGResourcePool& { return m_pool; }
+
 		template<typename T, typename... Args>
 			requires std::is_base_of_v<FGRenderPass, T> && std::constructible_from<T, FGResourcePool&, Args...>
 		auto add(Args&&... args) -> T&
@@ -28,9 +30,6 @@ namespace Aegix::Graphics
 			m_nodes.emplace_back(handle);
 			return static_cast<T&>(*m_pool.node(handle).pass);
 		}
-
-		[[nodiscard]] auto nodes() -> std::vector<FGNodeHandle>& { return m_nodes; }
-		[[nodiscard]] auto resourcePool() -> FGResourcePool& { return m_pool; }
 
 		/// @brief Compiles the frame graph by sorting the nodes and creating resources
 		void compile();

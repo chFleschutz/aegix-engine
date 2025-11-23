@@ -12,7 +12,7 @@ namespace Aegix::Graphics
 			: m_swapChain{ swapChain }
 		{
 			m_final = pool.addReference("Final", 
-				FGResourceUsage::TransferSrc);
+				FGResource::Usage::TransferSrc);
 		}
 
 		virtual auto info() -> FGNode::Info override

@@ -17,7 +17,7 @@ namespace Aegix::Graphics
 			.build();
 
 		m_visibleDrawSet = pool.addBuffer("Visible Draw Set",
-			FGResourceUsage::ComputeWriteStorage,
+			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
 				.size = sizeof(uint32_t) * static_cast<size_t>(m_drawBatcher.instanceCount() * INSTANCE_OVERALLOCATION)
 			});

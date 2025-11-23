@@ -54,10 +54,10 @@ namespace Aegix::Graphics
 			.buildUnique();
 
 		m_sceneColor = pool.addReference("SceneColor",
-			FGResourceUsage::ComputeReadStorage);
+			FGResource::Usage::ComputeReadStorage);
 
 		m_bloom = pool.addImage("Bloom",
-			FGResourceUsage::ComputeWriteStorage,
+			FGResource::Usage::ComputeWriteStorage,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative,

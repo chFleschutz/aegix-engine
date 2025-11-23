@@ -23,42 +23,42 @@ namespace Aegix::Graphics
 		}
 
 		m_position = pool.addImage("Position",
-			FGResourceUsage::ColorAttachment,
+			FGResource::Usage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
 		m_normal = pool.addImage("Normal",
-			FGResourceUsage::ColorAttachment,
+			FGResource::Usage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
 		m_albedo = pool.addImage("Albedo",
-			FGResourceUsage::ColorAttachment,
+			FGResource::Usage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
 		m_arm = pool.addImage("ARM",
-			FGResourceUsage::ColorAttachment,
+			FGResource::Usage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
 		m_emissive = pool.addImage("Emissive",
-			FGResourceUsage::ColorAttachment,
+			FGResource::Usage::ColorAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_R8G8B8A8_UNORM,
 				.resizeMode = FGResizeMode::SwapChainRelative
 			});
 
 		m_depth = pool.addImage("Depth",
-			FGResourceUsage::DepthStencilAttachment,
+			FGResource::Usage::DepthStencilAttachment,
 			FGTextureInfo{
 				.format = VK_FORMAT_D32_SFLOAT,
 				.resizeMode = FGResizeMode::SwapChainRelative

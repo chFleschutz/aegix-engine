@@ -312,7 +312,7 @@ namespace Aegix::Graphics
 			auto& texture = m_pool.texture(texInfo.handle);
 			VkImageLayout requiredLayout = interFrameBarrier 
 				? node.imageBarriers.back().oldLayout
-				: toAccessInfo(m_pool.resource(usage.firstUse).usage).layout;
+				: FGResource::toAccessInfo(m_pool.resource(usage.firstUse).usage).layout;
 			texture.image().transitionLayout(cmd, requiredLayout);
 		}
 		VulkanContext::device().endSingleTimeCommands(cmd);
@@ -324,8 +324,8 @@ namespace Aegix::Graphics
 		const auto& dstResource = m_pool.resource(dstHandle);
 		const auto& actualResource = m_pool.resource(actualHandle);
 
-		auto srcAccessInfo = toAccessInfo(srcResource.usage);
-		auto dstAccessInfo = toAccessInfo(dstResource.usage);
+		auto srcAccessInfo = FGResource::toAccessInfo(srcResource.usage);
+		auto dstAccessInfo = FGResource::toAccessInfo(dstResource.usage);
 
 		// TODO: Avoid redundant barriers (like read -> read)
 

@@ -71,19 +71,19 @@ namespace Aegix::Graphics
 		return FGNodeHandle{ static_cast<uint32_t>(m_nodes.size() - 1) };
 	}
 
-	auto FGResourcePool::addBuffer(const std::string& name, FGResourceUsage usage, const FGBufferInfo& info) -> FGResourceHandle
+	auto FGResourcePool::addBuffer(const std::string& name, FGResource::Usage usage, const FGBufferInfo& info) -> FGResourceHandle
 	{
 		m_resources.emplace_back(name, usage, info);
 		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
-	auto FGResourcePool::addImage(const std::string& name, FGResourceUsage usage, const FGTextureInfo& info) -> FGResourceHandle
+	auto FGResourcePool::addImage(const std::string& name, FGResource::Usage usage, const FGTextureInfo& info) -> FGResourceHandle
 	{
 		m_resources.emplace_back(name, usage, info);
 		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
 	}
 
-	auto FGResourcePool::addReference(const std::string& name, FGResourceUsage usage) -> FGResourceHandle
+	auto FGResourcePool::addReference(const std::string& name, FGResource::Usage usage) -> FGResourceHandle
 	{
 		m_resources.emplace_back(name, usage, FGReferenceInfo{});
 		return FGResourceHandle{ static_cast<uint32_t>(m_resources.size() - 1) };
@@ -131,11 +131,11 @@ namespace Aegix::Graphics
 
 			if (auto texInfo = std::get_if<FGTextureInfo>(&actualRes->info))
 			{
-				texInfo->usage |= toImageUsage(res.usage);
+				texInfo->usage |= FGResource::toImageUsage(res.usage);
 			}
 			else if (auto bufInfo = std::get_if<FGBufferInfo>(&actualRes->info))
 			{
-				bufInfo->usage |= toBufferUsage(res.usage);
+				bufInfo->usage |= FGResource::toBufferUsage(res.usage);
 			}
 		}
 
