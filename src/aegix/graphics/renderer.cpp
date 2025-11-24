@@ -52,10 +52,16 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
-	void Renderer::registerCallbacks(Scene::Scene& scene)
+	void Renderer::sceneChanged(Scene::Scene& scene)
 	{
 		scene.registry().on_construct<Material>().connect<&Renderer::onMaterialCreated>(this);
 		scene.registry().on_destroy<Material>().connect<&Renderer::onMaterialDestroyed>(this);
+	}
+
+	void Renderer::sceneInitialized(Scene::Scene& scene)
+	{
+		createFrameGraph();
+		m_frameGraph.compile();
 	}
 
 	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
@@ -149,8 +155,6 @@ namespace Aegix::Graphics
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
-
-		m_frameGraph.compile();
 	}
 
 	void Renderer::beginFrame()

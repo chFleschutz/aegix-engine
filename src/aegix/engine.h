@@ -39,9 +39,10 @@ namespace Aegix
 		void loadScene()
 		{
 			m_scene.reset();
-			m_renderer.registerCallbacks(m_scene);
+			m_renderer.sceneChanged(m_scene);
 			T description{};
 			description.initialize(m_scene);
+			m_renderer.sceneInitialized(m_scene);
 		}
 
 	private:

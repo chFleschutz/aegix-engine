@@ -39,11 +39,11 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
 		[[nodiscard]] auto frameIndex() const -> uint32_t;
 
-		void registerCallbacks(Scene::Scene& scene);
+		/// @brief Called when the scene has changed and BEFORE it is initialized
+		void sceneChanged(Scene::Scene& scene);
 
-		/// @brief Builds the frame graph and all required resources
-		/// @note This has to be AFTER the engine is fully initialized
-		void compileFrameGraph() { createFrameGraph(); }
+		/// @brief Called when the scene has changed and AFTER it is initialized
+		void sceneInitialized(Scene::Scene& scene);
 
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);

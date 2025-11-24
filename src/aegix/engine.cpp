@@ -27,8 +27,6 @@ namespace Aegix
 
 	void Engine::run()
 	{
-		m_renderer.compileFrameGraph();
-
 		// Main Update loop
 		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
 		while (!m_window.shouldClose())
