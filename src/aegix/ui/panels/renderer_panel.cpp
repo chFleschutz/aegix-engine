@@ -119,7 +119,6 @@ namespace Aegix::UI
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
 			ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
 			ImGui::TableSetupColumn("Format", ImGuiTableColumnFlags_WidthFixed);
-			ImGui::TableSetupColumn("Producer", ImGuiTableColumnFlags_WidthFixed);
 			ImGui::TableHeadersRow();
 
 			const auto& resources = resourcePool.resources();
