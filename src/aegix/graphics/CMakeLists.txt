@@ -21,6 +21,8 @@ target_sources(aegix-engine PRIVATE
 	"render_passes/culling_pass.h"
 	"render_passes/geometry_pass.cpp"
 	"render_passes/geometry_pass.h"
+	"render_passes/instance_update_pass.h"
+	"render_passes/instance_update_pass.cpp"
 	"render_passes/ui_pass.h"
 	"render_passes/lighting_pass.cpp"
 	"render_passes/lighting_pass.h"
