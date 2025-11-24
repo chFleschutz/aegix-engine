@@ -36,6 +36,8 @@ namespace Aegix::Graphics
 
 	void CullingPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
+		return; //TODO: Temporarily disable culling pass
+
 		CullingPushConstants push{
 			// TODO: Fill in push constants
 		};

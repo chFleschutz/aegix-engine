@@ -3,6 +3,7 @@
 
 #include "core/profiler.h"
 #include "graphics/render_passes/bloom_pass.h"
+#include "graphics/render_passes/culling_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
@@ -11,8 +12,8 @@
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
-#include "graphics/render_systems/point_light_render_system.h"
 #include "graphics/render_systems/bindless_static_mesh_render_system.h"
+#include "graphics/render_systems/point_light_render_system.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "scene/scene.h"
 
@@ -130,7 +131,7 @@ namespace Aegix::Graphics
 		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
 
 		m_frameGraph.add<SkyBoxPass>();
-
+		
 		auto& transparentPass = m_frameGraph.add<TransparentPass>();
 		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
@@ -140,6 +141,8 @@ namespace Aegix::Graphics
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
+
+		m_frameGraph.add<CullingPass>(m_drawBatchRegistry);
 
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)

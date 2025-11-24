@@ -78,23 +78,24 @@ func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
     let instance = push.instance.get()[instanceID];
     let mesh = instance.mesh.get();
     let meshlets = mesh.meshlet.get();
-    
+
     taskPayload.instanceID = instanceID;
+    DispatchMesh(mesh.meshletCount, 1, 1, taskPayload);
 
-    // Meshlet culling
-    uint visibleCount = 0;
-    for (uint i = 0; i < mesh.meshletCount; i++)
-    {
-        // TODO: Do meshlet culling here
-        // Assume everything is visible for now
+    // TODO: Meshlet culling
+    //uint visibleCount = 0;
+    //for (uint i = 0; i < mesh.meshletCount; i++)
+    //{
+    //    // TODO: Do meshlet culling here
+    //    // Assume everything is visible for now
 
-        taskPayload.meshletIDs[visibleCount++] = i;
-    }
+    //    taskPayload.meshletIDs[visibleCount++] = i;
+    //}
 
-    if (visibleCount > 0)
-    {
-        DispatchMesh(visibleCount, 1, 1, taskPayload);
-    }
+    //if (visibleCount > 0)
+    //{
+    //    DispatchMesh(visibleCount, 1, 1, taskPayload);
+    //}
 }
 
 // Mesh Shader --------------------

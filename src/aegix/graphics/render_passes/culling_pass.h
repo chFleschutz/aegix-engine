@@ -13,7 +13,10 @@ namespace Aegix::Graphics
 
 		struct CullingPushConstants
 		{
-			// TODO: Add push constant members
+			uint32_t visibilityBufferHandle;
+			uint32_t visibleCountBufferHandle;
+			uint32_t instanceBufferHandle;
+			uint32_t instanceCount;
 		};
 
 		CullingPass(FGResourcePool& pool, DrawBatchRegistry& batcher);
