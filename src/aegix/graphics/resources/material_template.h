@@ -14,7 +14,8 @@ namespace Aegix::Graphics
 	// TODO: Look at better packing strategies (variant cost additional 8 bytes because of alignment)
 	// TODO: Maybe use a union with a type enum instead
 	using MaterialParamValue = std::variant<
-		int, 
+		int32_t, 
+		uint32_t,
 		float, 
 		glm::vec2, 
 		glm::vec3, 
