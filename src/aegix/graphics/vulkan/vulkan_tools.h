@@ -39,8 +39,9 @@ namespace Aegix::Tools
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount);
 
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, uint32_t minThreads, uint32_t groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D minThreads, VkExtent2D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D minThreads, VkExtent3D groupSize);
 
 		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 			VkImageAspectFlags aspectMask);

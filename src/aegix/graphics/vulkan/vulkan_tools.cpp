@@ -278,18 +278,24 @@ namespace Aegix::Tools
 			1, &region);
 	}
 
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	void vk::cmdDispatch(VkCommandBuffer cmd, uint32_t minThreads, uint32_t groupSize)
 	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountX = (minThreads + groupSize - 1) / groupSize;
+		vkCmdDispatch(cmd, groupCountX, 1, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D minThreads, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (minThreads.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (minThreads.height + groupSize.height - 1) / groupSize.height;
 		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
 	}
 
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D minThreads, VkExtent3D groupSize)
 	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		uint32_t groupCountX = (minThreads.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (minThreads.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (minThreads.depth + groupSize.depth - 1) / groupSize.depth;
 		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 
