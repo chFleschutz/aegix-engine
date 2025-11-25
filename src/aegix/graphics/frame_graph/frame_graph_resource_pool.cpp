@@ -35,14 +35,14 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	auto FGResourcePool::buffer(FGBufferHandle handle) -> Buffer&
+	auto FGResourcePool::buffer(FGBufferHandle handle) -> BindlessBuffer&
 	{
 		AGX_ASSERT(handle.isValid());
 		AGX_ASSERT(handle.handle < m_buffers.size());
 		return m_buffers[handle.handle];
 	}
 
-	auto FGResourcePool::buffer(FGResourceHandle handle) -> Buffer&
+	auto FGResourcePool::buffer(FGResourceHandle handle) -> BindlessBuffer&
 	{
 		auto& res = resource(actualHandle(handle));
 		AGX_ASSERT_X(std::holds_alternative<FGBufferInfo>(res.info), "Resource is not a buffer");
@@ -113,6 +113,7 @@ namespace Aegix::Graphics
 			if (!info.handle.isValid())
 			{
 				ALOG::fatal("Error: Unable to resolve reference for resource '{}'", resource.name);
+				AGX_ASSERT_X(info.handle.isValid(), "Failed to resolve resource reference");
 			}
 		}
 	}

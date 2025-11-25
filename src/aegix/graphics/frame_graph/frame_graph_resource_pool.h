@@ -2,7 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_resources.h"
-#include "graphics/resources/buffer.h"
+#include "graphics/bindless/bindless_buffer.h"
 #include "graphics/resources/texture.h"
 
 namespace Aegix::Graphics
@@ -23,15 +23,15 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto nodes() const -> const std::vector<FGNode>& { return m_nodes; }
 		[[nodiscard]] auto resources() const -> const std::vector<FGResource>& { return m_resources; }
-		[[nodiscard]] auto buffers() const -> const std::vector<Buffer>& { return m_buffers; }
+		[[nodiscard]] auto buffers() const -> const std::vector<BindlessBuffer>& { return m_buffers; }
 		[[nodiscard]] auto textures() const -> const std::vector<Texture>& { return m_textures; }
 
 		[[nodiscard]] auto node(FGNodeHandle handle) -> FGNode&;
 		[[nodiscard]] auto resource(FGResourceHandle handle) -> FGResource&;
 		[[nodiscard]] auto actualResource(FGResourceHandle handle) -> FGResource&;
 		[[nodiscard]] auto actualHandle(FGResourceHandle handle) -> FGResourceHandle;
-		[[nodiscard]] auto buffer(FGBufferHandle handle) -> Buffer&;
-		[[nodiscard]] auto buffer(FGResourceHandle handle) -> Buffer&;
+		[[nodiscard]] auto buffer(FGBufferHandle handle) -> BindlessBuffer&;
+		[[nodiscard]] auto buffer(FGResourceHandle handle) -> BindlessBuffer&;
 		[[nodiscard]] auto texture(FGTextureHandle handle) -> Texture&;
 		[[nodiscard]] auto texture(FGResourceHandle handle) -> Texture&;
 
@@ -49,7 +49,7 @@ namespace Aegix::Graphics
 
 		std::vector<FGNode> m_nodes;
 		std::vector<FGResource> m_resources;
-		std::vector<Buffer> m_buffers;
+		std::vector<BindlessBuffer> m_buffers;
 		std::vector<Texture> m_textures;
 	};
 }
