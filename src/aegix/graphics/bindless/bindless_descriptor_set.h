@@ -39,6 +39,8 @@ namespace Aegix::Graphics
 		BindlessDescriptorSet();
 		~BindlessDescriptorSet();
 
+		operator VkDescriptorSet() const { return m_bindlessDescriptorSet.descriptorSet(); }
+
 		[[nodiscard]] auto descriptorSet() const -> const DescriptorSet& { return m_bindlessDescriptorSet; }
 		[[nodiscard]] auto layout() const -> const DescriptorSetLayout& { return m_bindlessSetLayout; }
 
