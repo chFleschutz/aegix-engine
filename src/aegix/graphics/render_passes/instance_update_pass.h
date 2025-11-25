@@ -27,6 +27,5 @@ namespace Aegix::Graphics
 
 	private:
 		FGResourceHandle m_instanceBuffer;
-		entt::scoped_connection m_transformUpdateCon;
 	};
 }

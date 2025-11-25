@@ -97,6 +97,13 @@ namespace Aegix::Graphics
 			upload(data.data(), sizeof(T) * data.size());
 		}
 
+		template<typename T>
+		auto mappedAs() -> T*
+		{
+			AGX_ASSERT_X(m_mapped, "Called mappedAs on buffer before map");
+			return reinterpret_cast<T*>(m_mapped);
+		}
+
 	private:
 		static auto computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize;
 
