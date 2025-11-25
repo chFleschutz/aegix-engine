@@ -3,18 +3,28 @@
 
 #include "scene/components.h"
 #include "graphics/vulkan/vulkan_tools.h"
+#include "graphics/draw_batch_registry.h"
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
 namespace Aegix::Graphics
 {
 	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool) : 
-		m_updateBuffer{ Buffer::stagingBuffer(sizeof(InstanceData) * MAX_INSTANCES, MAX_FRAMES_IN_FLIGHT) }
+		m_instanceUpdateBuffer{ Buffer::stagingBuffer(sizeof(InstanceData) * MAX_INSTANCES, MAX_FRAMES_IN_FLIGHT) },
+		m_drawBatchUpdateBuffer{ Buffer::stagingBuffer(sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES, MAX_FRAMES_IN_FLIGHT) }
 	{
 		m_instanceBuffer = pool.addBuffer("InstanceBuffer",
 			FGResource::Usage::TransferDst,
 			FGBufferInfo{
 				.size = sizeof(InstanceData) * MAX_INSTANCES,
+				.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+			});
+
+		m_drawBatchBuffer = pool.addBuffer("DrawBatchBuffer",
+			FGResource::Usage::TransferDst,
+			FGBufferInfo{
+				.size = sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES,
+				.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 			});
 	}
 
@@ -29,6 +39,8 @@ namespace Aegix::Graphics
 
 	void InstanceUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
+		// TODO: Update instance data on demand only (when scene changes)
+
 		uint32_t instanceID = 0;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, Material>();
 		for (const auto& [entity, transform, mesh, material] : view.each())
@@ -49,7 +61,7 @@ namespace Aegix::Graphics
 			glm::mat4 modelMatrix = glm::rowMajor4(transform.matrix());
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
 
-			auto data = m_updateBuffer.mappedAs<InstanceData>(frameInfo.frameIndex);
+			auto data = m_instanceUpdateBuffer.mappedAs<InstanceData>(frameInfo.frameIndex);
 			data[instanceID] = InstanceData{
 				.modelMatrix = modelMatrix,
 				.normalRow0 = normalMatrix[0],
@@ -63,10 +75,22 @@ namespace Aegix::Graphics
 
 			instanceID++;
 		}
-
-		// Copy updated instance data to the GPU instance buffer
 		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
-		m_updateBuffer.flush();
-		m_updateBuffer.copyTo(frameInfo.cmd, instanceBuffer, frameInfo.frameIndex, 0);
+		m_instanceUpdateBuffer.flush();
+		m_instanceUpdateBuffer.copyTo(frameInfo.cmd, instanceBuffer, frameInfo.frameIndex, 0);
+
+		// Update draw batch info
+		const auto& drawBatches = frameInfo.drawBatcher.batches();
+		auto drawBatchData = m_drawBatchUpdateBuffer.mappedAs<DrawBatchData>(frameInfo.frameIndex);
+		for (size_t i = 0; i < drawBatches.size(); i++)
+		{
+			drawBatchData[i] = DrawBatchData{
+				.instanceOffset = drawBatches[i].offset,
+				.instanceCount = drawBatches[i].count,
+			};
+		}
+		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
+		m_drawBatchUpdateBuffer.flush();
+		m_drawBatchUpdateBuffer.copyTo(frameInfo.cmd, drawBatchBuffer, frameInfo.frameIndex, 0);
 	}
 }

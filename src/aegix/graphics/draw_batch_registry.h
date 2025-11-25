@@ -12,6 +12,8 @@ namespace Aegix::Graphics
 	class DrawBatchRegistry
 	{
 	public:
+		static constexpr uint32_t MAX_DRAW_BATCHES = 256;
+
 		DrawBatchRegistry() = default;
 		~DrawBatchRegistry() = default;
 

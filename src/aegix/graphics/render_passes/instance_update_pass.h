@@ -17,6 +17,12 @@ namespace Aegix::Graphics
 		uint32_t drawBatchID;
 	};
 
+	struct DrawBatchData
+	{
+		uint32_t instanceOffset;
+		uint32_t instanceCount;
+	};
+
 	class InstanceUpdatePass : public FGRenderPass
 	{
 	public:
@@ -28,7 +34,10 @@ namespace Aegix::Graphics
 
 	private:
 		FGResourceHandle m_instanceBuffer;
+		FGResourceHandle m_drawBatchBuffer;
 
-		Buffer m_updateBuffer;
+		// TODO: Find better solution for this
+		Buffer m_instanceUpdateBuffer;
+		Buffer m_drawBatchUpdateBuffer;
 	};
 }

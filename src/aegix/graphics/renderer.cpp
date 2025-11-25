@@ -75,6 +75,7 @@ namespace Aegix::Graphics
 			FrameInfo frameInfo{
 				.scene = scene,
 				.ui = ui,
+				.drawBatcher = m_drawBatchRegistry,
 				.cmd = currentCommandBuffer(),
 				.frameIndex = m_currentFrameIndex,
 				.swapChainExtent = m_swapChain.extent(),
