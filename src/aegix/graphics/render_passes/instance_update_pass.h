@@ -8,12 +8,13 @@ namespace Aegix::Graphics
 	// TODO: Maybe use SoA for better cache use (instead of packed AoS)
 	struct alignas(16) InstanceData
 	{
-		glm::mat4x3 modelMatrix;
+		glm::mat3x4 modelMatrix;
 		glm::vec3 normalRow0;
 		DescriptorHandle meshHandle;
 		glm::vec3 normalRow1;
 		DescriptorHandle materialHandle;
 		glm::vec3 normalRow2;
+		uint32_t id;
 	};
 
 	class InstanceUpdatePass : public FGRenderPass
@@ -27,5 +28,7 @@ namespace Aegix::Graphics
 
 	private:
 		FGResourceHandle m_instanceBuffer;
+
+		Buffer m_updateBuffer;
 	};
 }

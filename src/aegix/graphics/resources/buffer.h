@@ -90,6 +90,7 @@ namespace Aegix::Graphics
 
 		/// @brief Copy the buffer to another buffer
 		void copyTo(Buffer& dest, VkDeviceSize size);
+		void copyTo(VkCommandBuffer cmd, Buffer& dest, uint32_t srcIndex, uint32_t destIndex) const;
 
 		template<typename T>
 		void upload(const std::vector<T>& data)
@@ -100,10 +101,12 @@ namespace Aegix::Graphics
 		}
 
 		template<typename T>
-		auto mappedAs() -> T*
+		auto mappedAs(uint32_t index = 0) -> T*
 		{
 			AGX_ASSERT_X(m_mapped, "Called mappedAs on buffer before map");
-			return reinterpret_cast<T*>(m_mapped);
+			AGX_ASSERT_X(sizeof(T) <= m_instanceSize, "Mapped type size exceeds instance size");
+			AGX_ASSERT_X(index < m_instanceCount, "Mapped index exceeds instance count");
+			return reinterpret_cast<T*>(static_cast<uint8_t*>(m_mapped) + index * m_alignmentSize);
 		}
 
 	private:

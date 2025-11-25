@@ -210,6 +210,19 @@ namespace Aegix::Graphics
 		VulkanContext::device().copyBuffer(m_buffer, dest.m_buffer, size);
 	}
 
+	void Buffer::copyTo(VkCommandBuffer cmd, Buffer& dest, uint32_t srcIndex, uint32_t destIndex) const
+	{
+		AGX_ASSERT_X(srcIndex < m_instanceCount, "Source index exceeds instance count");
+		AGX_ASSERT_X(destIndex < dest.m_instanceCount, "Destination index exceeds instance count");
+
+		VkBufferCopy copy{
+			.srcOffset = srcIndex * m_alignmentSize,
+			.dstOffset = destIndex * dest.m_alignmentSize,
+			.size = m_instanceSize
+		};
+		vkCmdCopyBuffer(cmd, m_buffer, dest.m_buffer, 1, &copy);
+	}
+
 	auto Buffer::computeAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) -> VkDeviceSize
 	{
 		if (minOffsetAlignment > 0)

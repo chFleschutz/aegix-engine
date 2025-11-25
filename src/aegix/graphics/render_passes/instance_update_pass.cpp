@@ -2,12 +2,14 @@
 #include "instance_update_pass.h"
 
 #include "scene/components.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
 namespace Aegix::Graphics
 {
-	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool)
+	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool) : 
+		m_updateBuffer{ Buffer::stagingBuffer(sizeof(InstanceData) * MAX_INSTANCES, MAX_FRAMES_IN_FLIGHT) }
 	{
 		m_instanceBuffer = pool.addBuffer("InstanceBuffer",
 			FGResource::Usage::TransferDst,
@@ -27,34 +29,41 @@ namespace Aegix::Graphics
 
 	void InstanceUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
-		instanceBuffer.map();
-
+		uint32_t instanceID = 0;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, Material>();
 		for (const auto& [entity, transform, mesh, material] : view.each())
 		{
+			if (instanceID >= MAX_INSTANCES)
+			{
+				ALOG::warn("Instance Update: Reached maximum instance count of {}", MAX_INSTANCES);
+				break;
+			}
+
 			if (!mesh.staticMesh || !material.instance || !material.instance->materialTemplate())
 				continue;
 
-			// TODO: use proper mapping
-			uint32_t instanceID = static_cast<uint32_t>(entity);
+			// Shader needs both in row major (better packing)
+			glm::mat4 modelMatrix = glm::rowMajor4(transform.matrix());
+			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
 
-			// Both in row major
-			auto modelMatrix = glm::rowMajor4(transform.matrix());
-			auto normalMatrix = glm::mat3(glm::inverse(modelMatrix));
-
-			auto data = instanceBuffer.mappedAs<InstanceData>();
+			auto data = m_updateBuffer.mappedAs<InstanceData>(frameInfo.frameIndex);
 			data[instanceID] = InstanceData{
-				.modelMatrix = glm::mat4x3(modelMatrix),
+				.modelMatrix = modelMatrix,
 				.normalRow0 = normalMatrix[0],
 				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
 				.normalRow1 = normalMatrix[1],
-				//.materialHandle = material.instance->materialTemplate()->handle(),
+				// TODO: Find solution to avoid per-frame handle retrieval (this needs to be static)
+				.materialHandle = material.instance->buffer().handle(frameInfo.frameIndex), 
 				.normalRow2 = normalMatrix[2],
+				.id = instanceID
 			};
+
+			instanceID++;
 		}
 
-		instanceBuffer.flush();
-		instanceBuffer.unmap();
+		// Copy updated instance data to the GPU instance buffer
+		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
+		m_updateBuffer.flush();
+		m_updateBuffer.copyTo(frameInfo.cmd, instanceBuffer, frameInfo.frameIndex, 0);
 	}
 }
