@@ -12,43 +12,57 @@ namespace Aegix::Graphics
 		m_pipeline = Pipeline::ComputeBuilder{}
 			// TODO: Maybe add convienience method to add bindless layout
 			.addDescriptorSetLayout(Engine::renderer().bindlessDescriptorSet().layout())
-			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(CullingPushConstants)) 
+			.addPushConstantRange(VK_SHADER_STAGE_COMPUTE_BIT, sizeof(CullingPushConstants))
 			.setShaderStage(SHADER_DIR "culling.slang.spv")
 			.build();
 
-		m_visibleDrawSet = pool.addBuffer("Visible Draw Set",
+		m_instanceBuffer = pool.addReference("InstanceBuffer",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_drawBatchBuffer = pool.addReference("DrawBatchBuffer",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_visibleIndices = pool.addBuffer("VisibleInstanceIndices",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
 				.size = sizeof(uint32_t) * static_cast<size_t>(m_drawBatcher.instanceCount() * INSTANCE_OVERALLOCATION)
 			});
 
-		// TODO: Need to declare more resources here (instance buffer, draw batche list, indirect draw buffer, etc)
+		m_visibleCounts = pool.addBuffer("VisibleInstanceCounts",
+			FGResource::Usage::ComputeWriteStorage,
+			FGBufferInfo{
+				.size = sizeof(uint32_t) * m_drawBatcher.batchCount(),
+				.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT
+			});
 	}
 
 	auto CullingPass::info() -> FGNode::Info
 	{
 		return FGNode::Info{
 			.name = "Culling",
-			.reads = {},
-			.writes = { m_visibleDrawSet },
+			.reads = { m_instanceBuffer },
+			.writes = { m_visibleIndices, m_visibleCounts },
 		};
 	}
 
 	void CullingPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		return; //TODO: Temporarily disable culling pass
-
+		// Clear visible counts buffer
+		auto& visibleCountBuffer = pool.buffer(m_visibleCounts);
+		vkCmdFillBuffer(frameInfo.cmd, visibleCountBuffer.buffer(), 0, visibleCountBuffer.buffer().bufferSize(), 0);
+		
 		CullingPushConstants push{
-			// TODO: Fill in push constants
+			.instanceBuffer = pool.buffer(m_instanceBuffer).handle(),
+			.drawBatchBuffer = pool.buffer(m_drawBatchBuffer).handle(),
+			.visibilityBuffer = pool.buffer(m_visibleIndices).handle(),
+			.visibleCountBuffer = pool.buffer(m_visibleCounts).handle(),
+			.instanceCount = m_drawBatcher.instanceCount(),
 		};
 
 		m_pipeline.bind(frameInfo.cmd);
-		m_pipeline.bindDescriptorSet(frameInfo.cmd, 0, Engine::renderer().bindlessDescriptorSet().descriptorSet());
-		m_pipeline.pushConstants(frameInfo.cmd, VK_SHADER_STAGE_COMPUTE_BIT, &push, sizeof(CullingPushConstants));
+		m_pipeline.bindDescriptorSet(frameInfo.cmd, 0, Engine::renderer().bindlessDescriptorSet());
+		m_pipeline.pushConstants(frameInfo.cmd, VK_SHADER_STAGE_COMPUTE_BIT, push);
 
-		// TODO: Find a cleaner way here
-		constexpr uint32_t workgroupSize = 64;
-		uint32_t groupCountX = (m_drawBatcher.instanceCount() + workgroupSize - 1) / workgroupSize;
-		vkCmdDispatch(frameInfo.cmd, groupCountX, 1, 1);
+		Tools::vk::cmdDispatch(frameInfo.cmd, m_drawBatcher.instanceCount(), WORKGROUP_SIZE);
 	}
 }

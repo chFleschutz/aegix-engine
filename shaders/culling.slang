@@ -11,6 +11,7 @@ struct Instance
     float3 normalRow1;
     bindless::Handle<Unused> material;
     float3 normalRow2;
+    uint drawBatchID;
 
     property float4x4 modelMatrix
     {
@@ -21,20 +22,20 @@ struct Instance
     {
         get { return float3x3(normalRow0, normalRow1, normalRow2); }
     }
-};
+}
 
-struct IndirectMeshDrawArgs
+struct DrawBatch
 {
-    uint groupCountX;
-    uint groupCountY;
-    uint groupCountZ;
-};
+    uint offset;
+    uint count;
+}
 
 struct Push
 {
+    bindless::Handle<StorageBuffer<Instance>> instance;
+    bindless::Handle<StorageBuffer<DrawBatch>> drawBatch;
     bindless::Handle<RWStorageBuffer<uint>> visibility;
     bindless::Handle<RWStorageBuffer<uint>> visibleCount;
-    bindless::Handle<StorageBuffer<Instance>> instance;
     uint instanceCount;
 }
 
@@ -52,14 +53,11 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     // TODO: Do culling
 
-    // TODO: Get batch index
-    uint batchID = 0;
-    InterlockedAdd(push.visibleCount.get()[batchID], 1);
+    uint count;
+    InterlockedAdd(push.visibleCount.get()[instance.drawBatchID], 1, count);
 
-    // TODO: Calc offset in visibility buffer
-    uint offset = 0;
-    push.visibility.get()[offset] = instanceID;
+    let drawBatch = push.drawBatch.get()[instance.drawBatchID];
+    push.visibility.get()[drawBatch.offset + count] = instanceID;
 
     // TODO: Fill indirect draw buffer
-
 }

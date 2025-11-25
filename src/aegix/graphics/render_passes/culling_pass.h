@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/bindless/descriptor_handle.h"
 #include "graphics/draw_batch_registry.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
@@ -10,12 +11,14 @@ namespace Aegix::Graphics
 	{
 	public:
 		static constexpr float INSTANCE_OVERALLOCATION = 1.5f;
+		static constexpr uint32_t WORKGROUP_SIZE = 64;
 
 		struct CullingPushConstants
 		{
-			uint32_t visibilityBufferHandle;
-			uint32_t visibleCountBufferHandle;
-			uint32_t instanceBufferHandle;
+			DescriptorHandle instanceBuffer;
+			DescriptorHandle drawBatchBuffer;
+			DescriptorHandle visibilityBuffer;
+			DescriptorHandle visibleCountBuffer;
 			uint32_t instanceCount;
 		};
 
@@ -26,7 +29,10 @@ namespace Aegix::Graphics
 
 	private:
 		DrawBatchRegistry& m_drawBatcher;
-		FGResourceHandle m_visibleDrawSet;
+		FGResourceHandle m_instanceBuffer;
+		FGResourceHandle m_drawBatchBuffer;
+		FGResourceHandle m_visibleIndices;
+		FGResourceHandle m_visibleCounts;
 		Pipeline m_pipeline;
 	};
 }
