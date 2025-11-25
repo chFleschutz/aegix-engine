@@ -42,6 +42,9 @@ namespace Aegix::Graphics
 			if (!mesh.staticMesh || !material.instance || !material.instance->materialTemplate())
 				continue;
 
+			const auto& matInstance = material.instance;
+			const auto& matTemplate = matInstance->materialTemplate();
+
 			// Shader needs both in row major (better packing)
 			glm::mat4 modelMatrix = glm::rowMajor4(transform.matrix());
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
@@ -53,9 +56,9 @@ namespace Aegix::Graphics
 				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
 				.normalRow1 = normalMatrix[1],
 				// TODO: Find solution to avoid per-frame handle retrieval (this needs to be static)
-				.materialHandle = material.instance->buffer().handle(frameInfo.frameIndex), 
+				.materialHandle = matInstance->buffer().handle(frameInfo.frameIndex),
 				.normalRow2 = normalMatrix[2],
-				.id = instanceID
+				.drawBatchID = matTemplate->drawBatch(),
 			};
 
 			instanceID++;

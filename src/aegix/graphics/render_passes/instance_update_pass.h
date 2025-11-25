@@ -14,7 +14,7 @@ namespace Aegix::Graphics
 		glm::vec3 normalRow1;
 		DescriptorHandle materialHandle;
 		glm::vec3 normalRow2;
-		uint32_t id;
+		uint32_t drawBatchID;
 	};
 
 	class InstanceUpdatePass : public FGRenderPass
