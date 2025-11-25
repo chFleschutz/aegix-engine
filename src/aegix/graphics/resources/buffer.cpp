@@ -28,7 +28,6 @@ namespace Aegix::Graphics
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
 		};
 	}
@@ -41,7 +40,6 @@ namespace Aegix::Graphics
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = otherUsage | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
 		};
 	}
 
@@ -53,18 +51,17 @@ namespace Aegix::Graphics
 			.instanceSize = size,
 			.instanceCount = instanceCount,
 			.usage = otherUsage | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
 		};
 	}
 
-	auto Buffer::stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo
+	auto Buffer::stagingBuffer(VkDeviceSize size, uint32_t instanceCount, VkBufferUsageFlags otherUsage) -> Buffer::CreateInfo
 	{
 		AGX_ASSERT_X(size > 0, "Cannot create staging buffer of size 0");
 		return Buffer::CreateInfo{
 			.instanceSize = size,
-			.instanceCount = 1,
-			.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
+			.instanceCount = instanceCount,
+			.usage = otherUsage | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
 		};
 	}
 
@@ -185,6 +182,7 @@ namespace Aegix::Graphics
 
 	void Buffer::flush(VkDeviceSize size, VkDeviceSize offset)
 	{
+		// TODO: Avoid flushing if memory is VK_MEMORY_PROPERTY_HOST_COHERENT_BIT (redundant)
 		AGX_ASSERT_X(m_mapped, "Called flush on buffer before map");
 		AGX_ASSERT_X((size == VK_WHOLE_SIZE && offset == 0) || (offset + size <= m_bufferSize),
 			"Flush range exceeds buffer size");

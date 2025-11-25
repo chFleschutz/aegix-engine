@@ -27,7 +27,7 @@ namespace Aegix::Graphics
 		static auto storageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
 		static auto vertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
 		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
-		static auto stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo;
+		static auto stagingBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
 
 		Buffer() = default;
 		explicit Buffer(const CreateInfo& info);
@@ -50,10 +50,12 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
 		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
 
-		/// @brief Map the buffer memory to allow writing to it
+		/// @brief Map the buffer memory to allow writing to it 
+		/// @note Consider using persistent mapped memory to avoid repeated map/unmap calls
 		void map();
 
 		/// @brief Unmap the buffer memory
+		/// @note Consider using persistent mapped memory to avoid repeated map/unmap calls
 		void unmap();
 
 		// TODO: Rework these write functions to have:
