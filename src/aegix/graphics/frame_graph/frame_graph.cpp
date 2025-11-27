@@ -333,10 +333,17 @@ namespace Aegix::Graphics
 			node.bufferBarriers, node.imageBarriers);
 
 		// Images track their layout internally, so update it after the barrier
+		AGX_ASSERT_X(node.imageBarriers.size() == node.accessedTextures.size(),
+			"Mismatched image barriers and accessed textures count in FGNode");
 		for (size_t i = 0; i < node.accessedTextures.size(); i++)
 		{
 			auto& texture = m_pool.texture(node.accessedTextures[i]);
-			texture.image().setLayout(node.imageBarriers[i].newLayout);
+			auto& barrier = node.imageBarriers[i];
+
+			AGX_ASSERT_X(texture.image().image() == barrier.image, "Mismatched VkImage in barrier tracking");
+			AGX_ASSERT_X(texture.image().layout() == barrier.oldLayout, "Image layout does not match barriers expected layout");
+
+			texture.image().setLayout(barrier.newLayout);
 		}
 	}
 }

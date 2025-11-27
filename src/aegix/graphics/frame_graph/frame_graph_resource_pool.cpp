@@ -186,6 +186,8 @@ namespace Aegix::Graphics
 
 	void FGResourcePool::resizeImages(uint32_t width, uint32_t height)
 	{
+		// Resize all swapchain-relative images
+		auto cmd = VulkanContext::device().beginSingleTimeCommands();
 		for (auto& res : m_resources)
 		{
 			if (!std::holds_alternative<FGTextureInfo>(res.info))
@@ -194,8 +196,25 @@ namespace Aegix::Graphics
 			auto& info = std::get<FGTextureInfo>(res.info);
 			if (info.resizeMode == FGResizeMode::SwapChainRelative)
 			{
-				m_textures[info.handle.handle].resize({ width, height, 1 }, info.usage);
+				auto& tex = m_textures[info.handle.handle];
+				auto oldLayout = tex.image().layout();
+				tex.resize({ width, height, 1 }, info.usage);
+				tex.image().transitionLayout(cmd, oldLayout);
 				info.extent = { width, height };
+			}
+		}
+		VulkanContext::device().endSingleTimeCommands(cmd);
+
+		// Update VkImage ref in barriers to new resized images
+		for (auto& node : m_nodes)
+		{
+			AGX_ASSERT_X(node.imageBarriers.size() == node.accessedTextures.size(),
+				"Mismatched image barriers and accessed textures count in FGNode");
+			for (size_t i = 0; i < node.accessedTextures.size(); i++)
+			{
+				auto& tex = texture(node.accessedTextures[i]);
+				auto& barrier = node.imageBarriers[i];
+				barrier.image = tex.image();
 			}
 		}
 	}

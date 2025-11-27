@@ -80,14 +80,14 @@ namespace Aegix::Graphics
 		auto& bloom = pool.texture(m_bloom);
 		auto& sceneColor = pool.texture(m_sceneColor);
 
-		m_mipViews.reserve(BLOOM_MIP_LEVELS);
+		m_mipViews.resize(BLOOM_MIP_LEVELS);
 		for (uint32_t i = 0; i < BLOOM_MIP_LEVELS; i++)
 		{
 			ImageView::CreateInfo viewInfo{
 				.baseMipLevel = i,
 				.levelCount = 1,
 			};
-			m_mipViews.emplace_back(viewInfo, bloom.image());
+			m_mipViews[i] = ImageView{ viewInfo, bloom.image() };
 		}
 
 		DescriptorWriter{ m_thresholdSetLayout }
