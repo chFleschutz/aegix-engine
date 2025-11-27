@@ -13,7 +13,7 @@ namespace Aegix::Graphics
 		m_instanceUpdateBuffer{ Buffer::stagingBuffer(sizeof(InstanceData) * MAX_INSTANCES, MAX_FRAMES_IN_FLIGHT) },
 		m_drawBatchUpdateBuffer{ Buffer::stagingBuffer(sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES, MAX_FRAMES_IN_FLIGHT) }
 	{
-		m_instanceBuffer = pool.addBuffer("InstanceBuffer",
+		m_instanceBuffer = pool.addBuffer("InstanceData",
 			FGResource::Usage::TransferDst,
 			FGBufferInfo{
 				.size = sizeof(InstanceData) * MAX_INSTANCES,

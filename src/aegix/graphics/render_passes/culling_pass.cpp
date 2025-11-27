@@ -16,13 +16,13 @@ namespace Aegix::Graphics
 			.setShaderStage(SHADER_DIR "culling.slang.spv")
 			.build();
 
-		m_instanceBuffer = pool.addReference("InstanceBuffer",
+		m_instanceBuffer = pool.addReference("InstanceData",
 			FGResource::Usage::ComputeReadStorage);
 
 		m_drawBatchBuffer = pool.addReference("DrawBatchBuffer",
 			FGResource::Usage::ComputeReadStorage);
 
-		m_visibleIndices = pool.addBuffer("VisibleInstanceIndices",
+		m_visibleIndices = pool.addBuffer("VisibleInstances",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
 				.size = sizeof(uint32_t) * static_cast<size_t>(m_drawBatcher.instanceCount() * INSTANCE_OVERALLOCATION)
