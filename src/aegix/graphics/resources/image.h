@@ -53,8 +53,6 @@ namespace Aegix::Graphics
 
 		void copyFrom(VkCommandBuffer cmd, const Buffer& src);
 
-		void resize(VkExtent3D extent, VkImageUsageFlags usage);
-
 		void transitionLayout(VkImageLayout newLayout);
 		void transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout);
 		auto transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier;
