@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/resources/material_instance.h"
+#include "graphics/material/material_instance.h"
 #include "graphics/resources/static_mesh.h"
 #include "graphics/resources/texture.h"
 #include "math/math.h"

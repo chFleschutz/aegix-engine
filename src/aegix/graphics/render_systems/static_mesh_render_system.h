@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/render_systems/render_system.h"
-#include "graphics/resources/material_template.h"
+#include "graphics/material/material_template.h"
 
 namespace Aegix::Graphics
 {

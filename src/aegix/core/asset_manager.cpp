@@ -4,8 +4,8 @@
 #include "core/globals.h"
 #include "graphics/descriptors.h"
 #include "graphics/pipeline.h"
-#include "graphics/resources/material_instance.h"
-#include "graphics/resources/material_template.h"
+#include "graphics/material/material_instance.h"
+#include "graphics/material/material_template.h"
 #include "engine.h"
 
 namespace Aegix::Core

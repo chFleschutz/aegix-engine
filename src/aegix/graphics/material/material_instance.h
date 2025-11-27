@@ -2,7 +2,7 @@
 
 #include "core/asset.h"
 #include "graphics/descriptors.h"
-#include "graphics/resources/material_template.h"
+#include "graphics/material/material_template.h"
 #include "graphics/bindless/bindless_buffer.h"
 
 namespace Aegix::Graphics

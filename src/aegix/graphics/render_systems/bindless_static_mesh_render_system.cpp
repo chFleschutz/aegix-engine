@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "bindless_static_mesh_render_system.h"
 
-#include "graphics/resources/material_instance.h"
+#include "graphics/material/material_instance.h"
 #include "scene/components.h"
 
 #include <glm/gtx/matrix_major_storage.hpp>
