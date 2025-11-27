@@ -52,16 +52,16 @@ namespace Aegix::Core
 				.build();
 
 			auto pbrMatTemplate = std::make_shared<MaterialTemplate>(std::move(pipeline), std::move(globalSetLayout), std::move(materialSetLayout));
-			pbrMatTemplate->addParameter("albedo", MaterialParamType::Vec3, glm::vec3{ 1.0f, 1.0f, 1.0f });
-			pbrMatTemplate->addParameter("emissive", MaterialParamType::Vec3, glm::vec3{ 0.0f, 0.0f, 0.0f });
-			pbrMatTemplate->addParameter("metallic", MaterialParamType::Float, 0.0f);
-			pbrMatTemplate->addParameter("roughness", MaterialParamType::Float, 1.0f);
-			pbrMatTemplate->addParameter("ambientOcclusion", MaterialParamType::Float, 1.0f);
-			pbrMatTemplate->addParameter("albedoMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMatTemplate->addParameter("normalMap", MaterialParamType::Texture2D, get<Texture>("default/texture_normal"));
-			pbrMatTemplate->addParameter("metalRoughnessMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMatTemplate->addParameter("ambientOcclusionMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMatTemplate->addParameter("emissiveMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
+			pbrMatTemplate->addParameter("albedo", glm::vec3{ 1.0f, 1.0f, 1.0f });
+			pbrMatTemplate->addParameter("emissive", glm::vec3{ 0.0f, 0.0f, 0.0f });
+			pbrMatTemplate->addParameter("metallic", 0.0f);
+			pbrMatTemplate->addParameter("roughness", 1.0f);
+			pbrMatTemplate->addParameter("ambientOcclusion", 1.0f);
+			pbrMatTemplate->addParameter("albedoMap", get<Texture>("default/texture_white"));
+			pbrMatTemplate->addParameter("normalMap", get<Texture>("default/texture_normal"));
+			pbrMatTemplate->addParameter("metalRoughnessMap", get<Texture>("default/texture_white"));
+			pbrMatTemplate->addParameter("ambientOcclusionMap", get<Texture>("default/texture_white"));
+			pbrMatTemplate->addParameter("emissiveMap", get<Texture>("default/texture_white"));
 
 			add("default/PBR_templatex_vertex", pbrMatTemplate);
 
@@ -105,16 +105,16 @@ namespace Aegix::Core
 				.build();
 
 			auto pbrMeshMatTemplate = std::make_shared<MaterialTemplate>(std::move(meshPipeline), std::move(globalSetLayout), std::move(materialSetLayout));
-			pbrMeshMatTemplate->addParameter("albedo", MaterialParamType::Vec3, glm::vec3{ 1.0f, 1.0f, 1.0f });
-			pbrMeshMatTemplate->addParameter("emissive", MaterialParamType::Vec3, glm::vec3{ 0.0f, 0.0f, 0.0f });
-			pbrMeshMatTemplate->addParameter("metallic", MaterialParamType::Float, 0.0f);
-			pbrMeshMatTemplate->addParameter("roughness", MaterialParamType::Float, 1.0f);
-			pbrMeshMatTemplate->addParameter("ambientOcclusion", MaterialParamType::Float, 1.0f);
-			pbrMeshMatTemplate->addParameter("albedoMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMeshMatTemplate->addParameter("normalMap", MaterialParamType::Texture2D, get<Texture>("default/texture_normal"));
-			pbrMeshMatTemplate->addParameter("metalRoughnessMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMeshMatTemplate->addParameter("ambientOcclusionMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
-			pbrMeshMatTemplate->addParameter("emissiveMap", MaterialParamType::Texture2D, get<Texture>("default/texture_white"));
+			pbrMeshMatTemplate->addParameter("albedo", glm::vec3{ 1.0f, 1.0f, 1.0f });
+			pbrMeshMatTemplate->addParameter("emissive", glm::vec3{ 0.0f, 0.0f, 0.0f });
+			pbrMeshMatTemplate->addParameter("metallic", 0.0f);
+			pbrMeshMatTemplate->addParameter("roughness", 1.0f);
+			pbrMeshMatTemplate->addParameter("ambientOcclusion", 1.0f);
+			pbrMeshMatTemplate->addParameter("albedoMap", get<Texture>("default/texture_white"));
+			pbrMeshMatTemplate->addParameter("normalMap", get<Texture>("default/texture_normal"));
+			pbrMeshMatTemplate->addParameter("metalRoughnessMap", get<Texture>("default/texture_white"));
+			pbrMeshMatTemplate->addParameter("ambientOcclusionMap", get<Texture>("default/texture_white"));
+			pbrMeshMatTemplate->addParameter("emissiveMap", get<Texture>("default/texture_white"));
 
 			add("default/PBR_template", pbrMeshMatTemplate);
 

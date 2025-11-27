@@ -11,51 +11,39 @@
 
 namespace Aegix::Graphics
 {
-	// TODO: Look at better packing strategies (variant cost additional 8 bytes because of alignment)
-	// TODO: Maybe use a union with a type enum instead
-	using MaterialParamValue = std::variant<
-		int32_t, 
-		uint32_t,
-		float, 
-		glm::vec2, 
-		glm::vec3, 
-		glm::vec4, 
-		std::shared_ptr<Texture>
-	>;
-
-	enum class MaterialParamType
-	{
-		Int,
-		Float,
-		Vec2,
-		Vec3,
-		Vec4,
-		Texture2D
-	};
-
-	struct MaterialParameter
-	{
-		MaterialParamType type;
-		uint32_t binding = 0;
-		size_t offset = 0;
-		size_t size = 0;
-		MaterialParamValue defaultValue;
-	};
-
 	enum class MaterialType
 	{
 		Opaque,
 		Transparent
 	};
 
+	struct MaterialParameter
+	{
+		using Value = std::variant<
+			int32_t,
+			uint32_t,
+			float,
+			glm::vec2,
+			glm::vec3,
+			glm::vec4,
+			std::shared_ptr<Texture>
+		>;
+
+		uint32_t binding = 0;
+		size_t offset = 0;
+		size_t size = 0;
+		Value defaultValue;
+	};
+
 	class MaterialTemplate : public Core::Asset
 	{
 	public:
+
 		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
 
 		[[nodiscard]] static auto alignTo(size_t size, size_t alignment) -> size_t;
-		[[nodiscard]] static auto std140Alignment(MaterialParamType type) -> size_t;
-		[[nodiscard]] static auto std140Size(MaterialParamType type) -> size_t;
+		[[nodiscard]] static auto std430Alignment(const MaterialParameter::Value& val) -> size_t;
+		[[nodiscard]] static auto std430Size(const MaterialParameter::Value& val) -> size_t;
 
 		[[nodiscard]] auto pipeline() const -> const Pipeline& { return m_pipeline; }
 		[[nodiscard]] auto globalSetLayout() -> DescriptorSetLayout& { return m_globalSetLayout; }
@@ -66,8 +54,8 @@ namespace Aegix::Graphics
 		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
 
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
-		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
-		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
+		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParameter::Value;
+		void addParameter(const std::string& name, const MaterialParameter::Value& defaultValue);
 
 		void bind(VkCommandBuffer cmd);
 		void bindBindlessSet(VkCommandBuffer cmd);

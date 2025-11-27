@@ -23,7 +23,7 @@ namespace Aegix::Graphics
 		m_dirtyFlags.fill(true);
 	}
 
-	auto MaterialInstance::queryParameter(const std::string& name) const -> MaterialParamValue
+	auto MaterialInstance::queryParameter(const std::string& name) const -> MaterialParameter::Value
 	{
 		auto it = m_overrides.find(name);
 		if (it != m_overrides.end())
@@ -32,7 +32,7 @@ namespace Aegix::Graphics
 		return m_template->queryDefaultParameter(name);
 	}
 
-	void MaterialInstance::setParameter(const std::string& name, const MaterialParamValue& value)
+	void MaterialInstance::setParameter(const std::string& name, const MaterialParameter::Value& value)
 	{
 		AGX_ASSERT_X(m_template->hasParameter(name), "Material parameter not found");
 		m_overrides[name] = value;
@@ -47,17 +47,16 @@ namespace Aegix::Graphics
 		// Update uniform buffer
 		for (const auto& [name, info] : m_template->parameters())
 		{
-			const MaterialParamValue* valuePtr = &info.defaultValue;
+			const MaterialParameter::Value* valuePtr = &info.defaultValue;
 			auto it = m_overrides.find(name);
 			if (it != m_overrides.end())
 			{
 				valuePtr = &it->second;
 			}
 
-			if (info.type == MaterialParamType::Texture2D)
+			if (auto texture = std::get_if<std::shared_ptr<Texture>>(valuePtr))
 			{
-				const auto& texture = std::get<std::shared_ptr<Texture>>(*valuePtr);
-				auto handle = texture->sampledDescriptorHandle();
+				auto handle = (*texture)->sampledDescriptorHandle();
 				AGX_ASSERT_X(handle.isValid(), "Invalid texture descriptor handle in MaterialInstance!");
 				m_uniformBuffer.write(&handle, info.size, info.offset, index);
 			}
@@ -72,7 +71,7 @@ namespace Aegix::Graphics
 		writer.writeBuffer(0, m_uniformBuffer.buffer());
 		for (const auto& [name, info] : m_template->parameters())
 		{
-			if (info.type != MaterialParamType::Texture2D)
+			if (!std::holds_alternative<std::shared_ptr<Texture>>(info.defaultValue))
 				continue;
 
 			auto it = m_overrides.find(name);
