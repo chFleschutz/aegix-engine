@@ -104,19 +104,19 @@ namespace bindless
         {
             if (T.kind == DescriptorKind.SampledImage)
             {
-                return g_sampledImages[index(handle)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_sampledImages[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.StorageImage)
             {
-                return g_storageImages[index(handle)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_storageImages[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.StorageBuffer)
             {
-                return g_storageBuffers[index(handle)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_storageBuffers[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.UniformBuffer)
             {
-                return g_uniformBuffers[index(handle)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_uniformBuffers[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else
             {

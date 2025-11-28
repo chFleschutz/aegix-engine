@@ -64,7 +64,6 @@ public struct Push
     bindless::Handle<StorageBuffer<uint>> visibility;
     uint firstInstance;
     uint instanceCount;
-
 }
 [vk::push_constant] ConstantBuffer<Push> push;
 
@@ -127,10 +126,13 @@ func meshMain(
     for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += MESH_THREADS)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
-        meshPrimitives[i] = uint3(mesh.meshletPrimitive.get()[offset + 0], mesh.meshletPrimitive.get()[offset + 1],
-                                  mesh.meshletPrimitive.get()[offset + 2]);
+        meshPrimitives[i] = uint3(
+            mesh.meshletPrimitive.get()[offset + 0], 
+            mesh.meshletPrimitive.get()[offset + 1],
+            mesh.meshletPrimitive.get()[offset + 2]);
     }
 }
+
 
 // Fragment Shader --------------------
 
@@ -151,15 +153,9 @@ func fragmentMain(MSOut input, out geometry::GBuffer output)
     let TBN = TBN::calcMatrix(input.worldPosition, input.worldNormal, input.uv);
     float3 N = normalize(length(normal) < 0.1 ? input.worldNormal : mul(normal, TBN));
 
-    //output.position = float4(input.worldPosition, 1.0);
-    //output.normal = float4(N, 0.0);
-    //output.albedo = float4(albedo, 1.0);
-    //output.arm = float4(ao, roughness, metallic, 0.0);
-    //output.emissive = float4(emissive, 1.0);
-
-     output.position = float4(1.0, 0.0, 0.0, 1.0);
-     output.normal = float4(0.0, 0.0, 1.0, 1.0);
-     output.albedo = float4(0.0, 1.0, 0.0, 1.0);
-     output.arm = float4(1.0, 1.0, 1.0, 1.0);
-     output.emissive = float4(1.0, 1.0, 0.0, 1.0);
+    output.position = float4(input.worldPosition, 1.0);
+    output.normal = float4(N, 0.0);
+    output.albedo = float4(albedo, 1.0);
+    output.arm = float4(ao, roughness, metallic, 0.0);
+    output.emissive = float4(emissive, 1.0);
 }
