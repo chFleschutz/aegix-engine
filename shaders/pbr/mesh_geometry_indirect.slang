@@ -133,7 +133,6 @@ func meshMain(
     }
 }
 
-
 // Fragment Shader --------------------
 
 [shader("fragment")]

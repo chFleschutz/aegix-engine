@@ -61,12 +61,12 @@ namespace Aegix::Graphics
 			matInstance->updateParameters(frameInfo.frameIndex);
 
 			// Shader needs both in row major (better packing)
-			glm::mat4 modelMatrix = glm::rowMajor4(transform.matrix());
+			glm::mat4 modelMatrix = transform.matrix();
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
 
 			auto data = m_instanceUpdateBuffer.mappedAs<InstanceData>(frameInfo.frameIndex);
 			data[instanceID] = InstanceData{
-				.modelMatrix = modelMatrix,
+				.modelMatrix = glm::rowMajor4(modelMatrix),
 				.normalRow0 = normalMatrix[0],
 				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
 				.normalRow1 = normalMatrix[1],
