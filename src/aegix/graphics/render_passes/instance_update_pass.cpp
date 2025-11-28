@@ -57,6 +57,9 @@ namespace Aegix::Graphics
 			const auto& matInstance = material.instance;
 			const auto& matTemplate = matInstance->materialTemplate();
 
+			// Update instance data (if needed)
+			matInstance->updateParameters(frameInfo.frameIndex);
+
 			// Shader needs both in row major (better packing)
 			glm::mat4 modelMatrix = glm::rowMajor4(transform.matrix());
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
