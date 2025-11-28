@@ -5,6 +5,7 @@
 #include "graphics/render_passes/bloom_pass.h"
 #include "graphics/render_passes/culling_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
+#include "graphics/render_passes/gpu_driven_geometry.h"
 #include "graphics/render_passes/instance_update_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
@@ -135,8 +136,9 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& geoPass = m_frameGraph.add<GeometryPass>();
-		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+		//auto& geoPass = m_frameGraph.add<GeometryPass>();
+		//geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+		m_frameGraph.add<GPUDrivenGeometry>();
 
 		m_frameGraph.add<SkyBoxPass>();
 		

@@ -19,7 +19,7 @@ namespace Aegix::Graphics
 		m_instanceBuffer = pool.addReference("InstanceData",
 			FGResource::Usage::ComputeReadStorage);
 
-		m_drawBatchBuffer = pool.addReference("DrawBatchBuffer",
+		m_drawBatchBuffer = pool.addReference("DrawBatches",
 			FGResource::Usage::ComputeReadStorage);
 
 		m_visibleIndices = pool.addBuffer("VisibleInstances",

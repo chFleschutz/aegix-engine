@@ -2,10 +2,14 @@
 #include "gpu_driven_geometry.h"
 
 #include "graphics/vulkan/vulkan_tools.h"
+#include "scene/components.h"
+
+#include <glm/gtx/matrix_major_storage.hpp>
 
 namespace Aegix::Graphics
 {
-	GPUDrivenGeometry::GPUDrivenGeometry(FGResourcePool& pool)
+	GPUDrivenGeometry::GPUDrivenGeometry(FGResourcePool& pool) :
+		m_global{ Buffer::uniformBuffer(sizeof(GlobalUBO), MAX_FRAMES_IN_FLIGHT) }
 	{
 		m_position = pool.addImage("Position",
 			FGResource::Usage::ColorAttachment,
@@ -54,12 +58,15 @@ namespace Aegix::Graphics
 
 		m_instanceData = pool.addReference("InstanceData",
 			FGResource::Usage::ComputeReadStorage);
+
+		m_drawBatches = pool.addReference("DrawBatches",
+			FGResource::Usage::ComputeReadStorage);
 	}
 
 	auto GPUDrivenGeometry::info() -> FGNode::Info 
 	{
 		return FGNode::Info{
-			.name = "GPU Driven Geometry Pass",
+			.name = "GPU Driven Geometry",
 			.reads = { m_instanceData, m_visibleInstances },
 			.writes = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth }
 		};
@@ -67,26 +74,21 @@ namespace Aegix::Graphics
 
 	void GPUDrivenGeometry::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		const auto& position = pool.texture(m_position);
-		const auto& normal = pool.texture(m_normal);
-		const auto& albedo = pool.texture(m_albedo);
-		const auto& arm = pool.texture(m_arm);
-		const auto& emissive = pool.texture(m_emissive);
-		const auto& depth = pool.texture(m_depth);
+		updateUBO(frameInfo);
 
 		VkRect2D renderArea{
 			.offset = { 0, 0 },
-			.extent = albedo.extent2D()
+			.extent = frameInfo.swapChainExtent
 		};
 
 		auto colorAttachments = std::array{
-			Tools::renderingAttachmentInfo(position, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-			Tools::renderingAttachmentInfo(normal, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-			Tools::renderingAttachmentInfo(albedo, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-			Tools::renderingAttachmentInfo(arm, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f }),
-			Tools::renderingAttachmentInfo(emissive, VK_ATTACHMENT_LOAD_OP_CLEAR, { 0.0f, 0.0f, 0.0f, 0.0f })
+			Tools::renderingAttachmentInfo(pool.texture(m_position), VK_ATTACHMENT_LOAD_OP_CLEAR),
+			Tools::renderingAttachmentInfo(pool.texture(m_normal), VK_ATTACHMENT_LOAD_OP_CLEAR),
+			Tools::renderingAttachmentInfo(pool.texture(m_albedo), VK_ATTACHMENT_LOAD_OP_CLEAR),
+			Tools::renderingAttachmentInfo(pool.texture(m_arm), VK_ATTACHMENT_LOAD_OP_CLEAR),
+			Tools::renderingAttachmentInfo(pool.texture(m_emissive), VK_ATTACHMENT_LOAD_OP_CLEAR)
 		};
-		auto depthAttachment = Tools::renderingAttachmentInfo(depth, VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
+		auto depthAttachment = Tools::renderingAttachmentInfo(pool.texture(m_depth), VK_ATTACHMENT_LOAD_OP_CLEAR, { 1.0f, 0 });
 
 		VkRenderingInfo renderInfo{
 			.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
@@ -105,7 +107,11 @@ namespace Aegix::Graphics
 			for (const auto& batch : frameInfo.drawBatcher.batches())
 			{
 				PushConstants pushConstants{
-					.test = 42
+					.global = m_global.handle(frameInfo.frameIndex),
+					.instance = pool.buffer(m_instanceData).handle(),
+					.visibility = pool.buffer(m_visibleInstances).handle(),
+					.firstInstance = batch.firstInstance,
+					.instanceCount = batch.instanceCount,
 				};
 
 				batch.materialTemplate->bind(frameInfo.cmd);
@@ -115,5 +121,21 @@ namespace Aegix::Graphics
 			}
 		}
 		vkCmdEndRendering(frameInfo.cmd);
+	}
+
+	void GPUDrivenGeometry::updateUBO(const FrameInfo& frameInfo)
+	{
+		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
+		if (!mainCamera)
+			return;
+
+		// TODO: Don't update this here (move to renderer or similar)
+		auto& camera = mainCamera.get<Camera>();
+		camera.aspect = frameInfo.aspectRatio;
+
+		auto data = m_global.buffer().mappedAs<GlobalUBO>(frameInfo.frameIndex);
+		data->projection = glm::rowMajor4(camera.projectionMatrix);
+		data->view = glm::rowMajor4(camera.viewMatrix);
+		data->inverseView = glm::rowMajor4(camera.inverseViewMatrix);
 	}
 }

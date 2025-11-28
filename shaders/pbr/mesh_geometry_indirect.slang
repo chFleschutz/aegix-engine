@@ -20,7 +20,7 @@ struct Material
     bindless::Handle<SampledImage2D> metalRoughnessMap;
     bindless::Handle<SampledImage2D> aoMap;
     bindless::Handle<SampledImage2D> emissiveMap;
-};
+}
 
 struct Instance
 {
@@ -30,6 +30,7 @@ struct Instance
     float3 normalRow1;
     bindless::Handle<UniformBuffer<Material>> material;
     float3 normalRow2;
+    uint drawBatchID;
 
     property float4x4 modelMatrix
     {
@@ -40,30 +41,31 @@ struct Instance
     {
         get { return float3x3(normalRow0, normalRow1, normalRow2); }
     }
-};
-
-public struct Push
-{
-    bindless::Handle<UniformBuffer<geometry::Global>> global;
-    bindless::Handle<StorageBuffer<uint>> visibility;
-    bindless::Handle<StorageBuffer<Instance>> instance;
-};
+}
 
 struct TaskPayload
 {
     uint instanceID;
-    uint meshletIDs[1024];
-};
+}
 
 struct MSOut
 {
-    float4 position: SV_Position;
+    float4 position : SV_Position;
     float3 worldPosition;
     float3 worldNormal;
     float2 uv;
     nointerpolation uint instanceID;
-};
+}
 
+public struct Push
+{
+    bindless::Handle<UniformBuffer<geometry::Global>> global;
+    bindless::Handle<StorageBuffer<Instance>> instance;
+    bindless::Handle<StorageBuffer<uint>> visibility;
+    uint firstInstance;
+    uint instanceCount;
+
+}
 [vk::push_constant] ConstantBuffer<Push> push;
 
 groupshared TaskPayload taskPayload;
@@ -74,28 +76,17 @@ groupshared TaskPayload taskPayload;
 [numthreads(TASK_THREADS, 1, 1)]
 func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
 {
-    let instanceID = push.visibility.get()[groupID.x];
+    if (groupID.x >= push.instanceCount)
+        return;
+
+    let instanceID = push.visibility.get()[push.firstInstance + groupID.x];
     let instance = push.instance.get()[instanceID];
     let mesh = instance.mesh.get();
-    let meshlets = mesh.meshlet.get();
 
     taskPayload.instanceID = instanceID;
     DispatchMesh(mesh.meshletCount, 1, 1, taskPayload);
 
     // TODO: Meshlet culling
-    //uint visibleCount = 0;
-    //for (uint i = 0; i < mesh.meshletCount; i++)
-    //{
-    //    // TODO: Do meshlet culling here
-    //    // Assume everything is visible for now
-
-    //    taskPayload.meshletIDs[visibleCount++] = i;
-    //}
-
-    //if (visibleCount > 0)
-    //{
-    //    DispatchMesh(visibleCount, 1, 1, taskPayload);
-    //}
 }
 
 // Mesh Shader --------------------
@@ -104,16 +95,15 @@ func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
 [numthreads(MESH_THREADS, 1, 1)]
 [outputtopology("triangle")]
 func meshMain(
-    uint3 groupID: SV_GroupID,
+    uint3 groupID: SV_GroupID, 
     uint3 threadID: SV_GroupThreadID,
-    out vertices MSOut meshVertices[MAX_VERTICES],
+    out vertices MSOut meshVertices[MAX_VERTICES], 
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
     let global = push.global.get();
     let instance = push.instance.get()[taskPayload.instanceID];
     let mesh = instance.mesh.get();
-    let meshletID = taskPayload.meshletIDs[groupID.x];
-    let meshlet = mesh.meshlet.get()[meshletID];
+    let meshlet = mesh.meshlet.get()[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 
@@ -137,10 +127,8 @@ func meshMain(
     for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += MESH_THREADS)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
-        meshPrimitives[i] = uint3(
-            mesh.meshletPrimitive.get()[offset + 0], 
-            mesh.meshletPrimitive.get()[offset + 1],
-            mesh.meshletPrimitive.get()[offset + 2]);
+        meshPrimitives[i] = uint3(mesh.meshletPrimitive.get()[offset + 0], mesh.meshletPrimitive.get()[offset + 1],
+                                  mesh.meshletPrimitive.get()[offset + 2]);
     }
 }
 
@@ -163,9 +151,15 @@ func fragmentMain(MSOut input, out geometry::GBuffer output)
     let TBN = TBN::calcMatrix(input.worldPosition, input.worldNormal, input.uv);
     float3 N = normalize(length(normal) < 0.1 ? input.worldNormal : mul(normal, TBN));
 
-    output.position = float4(input.worldPosition, 1.0);
-    output.normal = float4(N, 0.0);
-    output.albedo = float4(albedo, 1.0);
-    output.arm = float4(ao, roughness, metallic, 0.0);
-    output.emissive = float4(emissive, 1.0);
+    //output.position = float4(input.worldPosition, 1.0);
+    //output.normal = float4(N, 0.0);
+    //output.albedo = float4(albedo, 1.0);
+    //output.arm = float4(ao, roughness, metallic, 0.0);
+    //output.emissive = float4(emissive, 1.0);
+
+     output.position = float4(1.0, 0.0, 0.0, 1.0);
+     output.normal = float4(0.0, 0.0, 1.0, 1.0);
+     output.albedo = float4(0.0, 1.0, 0.0, 1.0);
+     output.arm = float4(1.0, 1.0, 1.0, 1.0);
+     output.emissive = float4(1.0, 1.0, 0.0, 1.0);
 }

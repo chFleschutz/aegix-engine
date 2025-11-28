@@ -20,7 +20,7 @@ namespace Aegix::Graphics
 				.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 			});
 
-		m_drawBatchBuffer = pool.addBuffer("DrawBatchBuffer",
+		m_drawBatchBuffer = pool.addBuffer("DrawBatches",
 			FGResource::Usage::TransferDst,
 			FGBufferInfo{
 				.size = sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES,
@@ -31,7 +31,7 @@ namespace Aegix::Graphics
 	auto InstanceUpdatePass::info() -> FGNode::Info 
 	{
 		return FGNode::Info{
-			.name = "Instance Update Pass",
+			.name = "Instance Update",
 			.reads = {},
 			.writes = { m_instanceBuffer },
 		};
@@ -85,8 +85,8 @@ namespace Aegix::Graphics
 		for (size_t i = 0; i < drawBatches.size(); i++)
 		{
 			drawBatchData[i] = DrawBatchData{
-				.instanceOffset = drawBatches[i].offset,
-				.instanceCount = drawBatches[i].count,
+				.instanceOffset = drawBatches[i].firstInstance,
+				.instanceCount = drawBatches[i].instanceCount,
 			};
 		}
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
