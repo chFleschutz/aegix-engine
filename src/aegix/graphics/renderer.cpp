@@ -225,12 +225,15 @@ namespace Aegix::Graphics
 	void Renderer::onMaterialCreated(entt::registry& reg, entt::entity e)
 	{
 		const auto& material = reg.get<Material>(e);
-		m_drawBatchRegistry.incrementBatchCount(material.instance->materialTemplate()->drawBatch());
+		const auto& matTemplate = material.instance->materialTemplate();
+		m_drawBatchRegistry.registerDrawBatch(matTemplate);
+		m_drawBatchRegistry.addInstance(matTemplate->drawBatch());
 	}
 
 	void Renderer::onMaterialDestroyed(entt::registry& reg, entt::entity e)
 	{
 		const auto& material = reg.get<Material>(e);
-		m_drawBatchRegistry.decrementBatchCount(material.instance->materialTemplate()->drawBatch());
+		const auto& matTemplate = material.instance->materialTemplate();
+		m_drawBatchRegistry.removeInstance(matTemplate->drawBatch());
 	}
 }

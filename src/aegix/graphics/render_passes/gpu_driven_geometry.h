@@ -7,6 +7,11 @@ namespace Aegix::Graphics
 	class GPUDrivenGeometry : public FGRenderPass
 	{
 	public:
+		struct PushConstants
+		{
+			uint32_t test;
+		};
+
 		GPUDrivenGeometry(FGResourcePool& pool);
 
 		virtual auto info() -> FGNode::Info override;

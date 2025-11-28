@@ -8,8 +8,7 @@ namespace Aegix::Graphics
 	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
 		: m_pipeline{ std::move(pipeline) },
 		m_globalSetLayout{ std::move(globalSetLayout) },
-		m_materialSetLayout{ std::move(materialSetLayout) },
-		m_drawBatchId{ Engine::renderer().drawBatchRegistry().registerDrawBatch().id }
+		m_materialSetLayout{ std::move(materialSetLayout) }
 	{
 	}
 
@@ -133,6 +132,12 @@ namespace Aegix::Graphics
 		{
 			mesh.draw(cmd);
 		}
+	}
+
+	void MaterialTemplate::drawInstanced(VkCommandBuffer cmd, uint32_t instanceCount)
+	{
+		AGX_ASSERT_X(m_pipeline.hasFlag(Pipeline::Flags::MeshShader), "Instanced draw is currently only supported for mesh shader pipelines");
+		vkCmdDrawMeshTasksEXT(cmd, instanceCount, 1, 1);
 	}
 
 	void MaterialTemplate::printInfo() const

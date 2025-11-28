@@ -104,14 +104,14 @@ namespace Aegix::Graphics
 
 			for (const auto& batch : frameInfo.drawBatcher.batches())
 			{
-				// Bind pipeline
+				PushConstants pushConstants{
+					.test = 42
+				};
 
-				// Bind bindless descriptor set
-
-				// Push constants
-
-				// Draw call
-
+				batch.materialTemplate->bind(frameInfo.cmd);
+				batch.materialTemplate->bindBindlessSet(frameInfo.cmd);
+				batch.materialTemplate->pushConstants(frameInfo.cmd, &pushConstants, sizeof(PushConstants));
+				batch.materialTemplate->drawInstanced(frameInfo.cmd, batch.instanceCount);
 			}
 		}
 		vkCmdEndRendering(frameInfo.cmd);

@@ -38,7 +38,6 @@ namespace Aegix::Graphics
 	class MaterialTemplate : public Core::Asset
 	{
 	public:
-
 		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
 
 		[[nodiscard]] static auto alignTo(size_t size, size_t alignment) -> size_t;
@@ -57,12 +56,15 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParameter::Value;
 		void addParameter(const std::string& name, const MaterialParameter::Value& defaultValue);
 
+		void setDrawBatchId(uint32_t id) { m_drawBatchId = id; }
+
 		void bind(VkCommandBuffer cmd);
 		void bindBindlessSet(VkCommandBuffer cmd);
 		void bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 		void draw(VkCommandBuffer cmd, const StaticMesh& mesh);
+		void drawInstanced(VkCommandBuffer cmd, uint32_t instanceCount);
 
 		void printInfo() const;
 
