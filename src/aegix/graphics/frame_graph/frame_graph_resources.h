@@ -2,6 +2,8 @@
 
 #include "graphics/vulkan/volk_include.h"
 
+#include <vk_mem_alloc.h>
+
 namespace Aegix::Graphics
 {
 	struct FGHandle
@@ -41,8 +43,10 @@ namespace Aegix::Graphics
 
 	struct FGBufferInfo
 	{
-		VkDeviceSize size;
-		VkBufferUsageFlags usage;
+		VkDeviceSize size;			
+		uint32_t instanceCount{ 1 };
+		VkBufferUsageFlags usage{ 0 };
+		VmaAllocationCreateFlags allocFlags{ 0 };
 		
 		FGBufferHandle handle;
 	};

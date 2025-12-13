@@ -35,14 +35,14 @@ namespace Aegix::Graphics
 		return handle;
 	}
 
-	auto FGResourcePool::buffer(FGBufferHandle handle) -> BindlessBuffer&
+	auto FGResourcePool::buffer(FGBufferHandle handle) -> BindlessMultiBuffer&
 	{
 		AGX_ASSERT(handle.isValid());
 		AGX_ASSERT(handle.handle < m_buffers.size());
 		return m_buffers[handle.handle];
 	}
 
-	auto FGResourcePool::buffer(FGResourceHandle handle) -> BindlessBuffer&
+	auto FGResourcePool::buffer(FGResourceHandle handle) -> BindlessMultiBuffer&
 	{
 		auto& res = resource(actualHandle(handle));
 		AGX_ASSERT_X(std::holds_alternative<FGBufferInfo>(res.info), "Resource is not a buffer");
@@ -160,8 +160,10 @@ namespace Aegix::Graphics
 	{
 		auto bufferCreateInfo = Buffer::CreateInfo{
 			.instanceSize = info.size,
-			.instanceCount = 1,
+			.instanceCount = info.instanceCount,
 			.usage = info.usage,
+			.allocFlags = info.allocFlags,
+			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
 		};
 		m_buffers.emplace_back(bufferCreateInfo);
 		return FGBufferHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
