@@ -35,9 +35,5 @@ namespace Aegix::Graphics
 	private:
 		FGResourceHandle m_instanceBuffer;
 		FGResourceHandle m_drawBatchBuffer;
-
-		// TODO: Find better solution for this
-		Buffer m_instanceUpdateBuffer;
-		Buffer m_drawBatchUpdateBuffer;
 	};
 }

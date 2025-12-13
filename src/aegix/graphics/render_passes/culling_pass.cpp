@@ -52,8 +52,8 @@ namespace Aegix::Graphics
 		vkCmdFillBuffer(frameInfo.cmd, visibleCountBuffer.buffer(), 0, visibleCountBuffer.buffer().bufferSize(), 0);
 		
 		CullingPushConstants push{
-			.instanceBuffer = pool.buffer(m_instanceBuffer).handle(),
-			.drawBatchBuffer = pool.buffer(m_drawBatchBuffer).handle(),
+			.instanceBuffer = pool.buffer(m_instanceBuffer).handle(frameInfo.frameIndex),
+			.drawBatchBuffer = pool.buffer(m_drawBatchBuffer).handle(frameInfo.frameIndex),
 			.visibilityBuffer = pool.buffer(m_visibleIndices).handle(),
 			.visibleCountBuffer = pool.buffer(m_visibleCounts).handle(),
 			.instanceCount = m_drawBatcher.instanceCount(),

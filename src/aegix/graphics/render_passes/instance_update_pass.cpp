@@ -9,22 +9,26 @@
 
 namespace Aegix::Graphics
 {
-	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool) : 
-		m_instanceUpdateBuffer{ Buffer::stagingBuffer(sizeof(InstanceData) * MAX_INSTANCES, MAX_FRAMES_IN_FLIGHT) },
-		m_drawBatchUpdateBuffer{ Buffer::stagingBuffer(sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES, MAX_FRAMES_IN_FLIGHT) }
+	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool)
 	{
 		m_instanceBuffer = pool.addBuffer("InstanceData",
 			FGResource::Usage::TransferDst,
 			FGBufferInfo{
 				.size = sizeof(InstanceData) * MAX_INSTANCES,
+				.instanceCount = MAX_FRAMES_IN_FLIGHT,
 				.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+							  VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			});
 
 		m_drawBatchBuffer = pool.addBuffer("DrawBatches",
 			FGResource::Usage::TransferDst,
 			FGBufferInfo{
 				.size = sizeof(DrawBatchData) * DrawBatchRegistry::MAX_DRAW_BATCHES,
+				.instanceCount = MAX_FRAMES_IN_FLIGHT,
 				.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+							  VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			});
 	}
 
@@ -40,6 +44,7 @@ namespace Aegix::Graphics
 	void InstanceUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		// TODO: Update instance data on demand only (when scene changes)
+		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
 
 		uint32_t instanceID = 0;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, Material>();
@@ -64,7 +69,7 @@ namespace Aegix::Graphics
 			glm::mat4 modelMatrix = transform.matrix();
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
 
-			auto data = m_instanceUpdateBuffer.mappedAs<InstanceData>(frameInfo.frameIndex);
+			auto data = instanceBuffer.buffer().mappedAs<InstanceData>(frameInfo.frameIndex);
 			data[instanceID] = InstanceData{
 				.modelMatrix = glm::rowMajor4(modelMatrix),
 				.normalRow0 = normalMatrix[0],
@@ -78,13 +83,11 @@ namespace Aegix::Graphics
 
 			instanceID++;
 		}
-		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
-		m_instanceUpdateBuffer.flush();
-		m_instanceUpdateBuffer.copyTo(frameInfo.cmd, instanceBuffer, frameInfo.frameIndex, 0);
 
 		// Update draw batch info
+		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
+		auto drawBatchData = drawBatchBuffer.buffer().mappedAs<DrawBatchData>(frameInfo.frameIndex);
 		const auto& drawBatches = frameInfo.drawBatcher.batches();
-		auto drawBatchData = m_drawBatchUpdateBuffer.mappedAs<DrawBatchData>(frameInfo.frameIndex);
 		for (size_t i = 0; i < drawBatches.size(); i++)
 		{
 			drawBatchData[i] = DrawBatchData{
@@ -92,8 +95,5 @@ namespace Aegix::Graphics
 				.instanceCount = drawBatches[i].instanceCount,
 			};
 		}
-		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
-		m_drawBatchUpdateBuffer.flush();
-		m_drawBatchUpdateBuffer.copyTo(frameInfo.cmd, drawBatchBuffer, frameInfo.frameIndex, 0);
 	}
 }
