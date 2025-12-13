@@ -31,6 +31,28 @@ namespace Aegix::Graphics
 	};
 
 
+	/// @brief Encapsulates a buffer with multiple descriptor handles (one per buffer instance)
+	class BindlessMultiBuffer
+	{
+	public:
+		BindlessMultiBuffer() = default;
+		explicit BindlessMultiBuffer(const Buffer::CreateInfo& bufferInfo);
+		BindlessMultiBuffer(const BindlessMultiBuffer&) = delete;
+		BindlessMultiBuffer(BindlessMultiBuffer&& other) noexcept;
+		~BindlessMultiBuffer();
+
+		auto operator=(const BindlessMultiBuffer&) -> BindlessMultiBuffer& = delete;
+		auto operator=(BindlessMultiBuffer&& other) noexcept -> BindlessMultiBuffer&;
+
+		[[nodiscard]] auto buffer() -> Buffer& { return m_buffer; }
+		[[nodiscard]] auto buffer() const -> const Buffer& { return m_buffer; }
+		[[nodiscard]] auto handle(size_t index = 0) const -> DescriptorHandle { return m_handles[index]; }
+
+	private:
+		Buffer m_buffer;
+		std::vector<DescriptorHandle> m_handles;
+	};
+
 
 	/// @brief Encapsulates a buffer with multiple descriptor handles (one per frame in flight)
 	class BindlessFrameBuffer
