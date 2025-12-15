@@ -39,10 +39,10 @@ namespace Aegix::Graphics
 	void DrawBatchRegistry::sceneChanged(Scene::Scene& scene)
 	{
 		auto& reg = scene.registry();
-		m_materialCreateCon = reg.on_construct<Material>().connect<&DrawBatchRegistry::onMaterialCreated>(this);
-		m_materialDestroyCon = reg.on_destroy<Material>().connect<&DrawBatchRegistry::onMaterialRemoved>(this);
-		m_dynamicTagCreateCon = reg.on_construct<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagCreated>(this);
-		m_dynamicTagDestroyCon = reg.on_destroy<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagRemoved>(this);
+		reg.on_construct<Material>().connect<&DrawBatchRegistry::onMaterialCreated>(this);
+		reg.on_destroy<Material>().connect<&DrawBatchRegistry::onMaterialRemoved>(this);
+		reg.on_construct<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagCreated>(this);
+		reg.on_destroy<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagRemoved>(this);
 	}
 
 	void DrawBatchRegistry::updateOffsets(uint32_t startBatchId)

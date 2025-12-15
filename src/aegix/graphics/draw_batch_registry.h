@@ -48,9 +48,5 @@ namespace Aegix::Graphics
 		uint32_t m_staticCount{ 0 };
 		uint32_t m_dynamicCount{ 0 };
 		uint32_t m_totalCount{ 0 };
-		entt::scoped_connection m_materialCreateCon;
-		entt::scoped_connection m_materialDestroyCon;
-		entt::scoped_connection m_dynamicTagCreateCon;
-		entt::scoped_connection m_dynamicTagDestroyCon;
 	};
 }
