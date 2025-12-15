@@ -21,8 +21,8 @@
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Core::Window& window) : 
-		m_window{ window }, 
+	Renderer::Renderer(Core::Window& window) :
+		m_window{ window },
 		m_vulkanContext{ VulkanContext::initialize(m_window) },
 		m_swapChain{ window.extent() }
 	{
@@ -141,7 +141,7 @@ namespace Aegix::Graphics
 		m_frameGraph.add<GPUDrivenGeometry>();
 
 		m_frameGraph.add<SkyBoxPass>();
-		
+
 		auto& transparentPass = m_frameGraph.add<TransparentPass>();
 		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
@@ -195,8 +195,12 @@ namespace Aegix::Graphics
 		FrameContext& frame = m_frames[m_currentFrameIndex];
 		VK_CHECK(vkEndCommandBuffer(frame.commandBuffer));
 
-		// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
-		m_swapChain.waitForImageInFlight(frame.inFlightFence);
+		{
+			AGX_PROFILE_SCOPE("GPU Sync");
+
+			// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
+			m_swapChain.waitForImageInFlight(frame.inFlightFence);
+		}
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[] = { m_swapChain.presentReadySemaphore() };
