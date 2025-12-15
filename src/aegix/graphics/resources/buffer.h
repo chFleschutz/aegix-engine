@@ -100,8 +100,8 @@ namespace Aegix::Graphics
 			upload(data.data(), sizeof(T) * data.size());
 		}
 
-		template<typename T>
-		auto mappedAs(uint32_t index = 0) -> T*
+		template<typename T = void>
+		auto data(uint32_t index = 0) -> T*
 		{
 			AGX_ASSERT_X(m_mapped, "Called mappedAs on buffer before map");
 			AGX_ASSERT_X(sizeof(T) <= m_instanceSize, "Mapped type size exceeds instance size");

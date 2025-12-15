@@ -133,7 +133,7 @@ namespace Aegix::Graphics
 		auto& camera = mainCamera.get<Camera>();
 		camera.aspect = frameInfo.aspectRatio;
 
-		auto data = m_global.buffer().mappedAs<GlobalUBO>(frameInfo.frameIndex);
+		auto data = m_global.buffer().data<GlobalUBO>(frameInfo.frameIndex);
 		data->projection = glm::rowMajor4(camera.projectionMatrix);
 		data->view = glm::rowMajor4(camera.viewMatrix);
 		data->inverseView = glm::rowMajor4(camera.inverseViewMatrix);

@@ -4,6 +4,7 @@
 #include "scene/components.h"
 #include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/draw_batch_registry.h"
+#include "core/profiler.h"
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
@@ -43,8 +44,13 @@ namespace Aegix::Graphics
 
 	void InstanceUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
+		AGX_PROFILE_FUNCTION();
+
 		// TODO: Update instance data on demand only (when scene changes)
 		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
+
+		std::vector<InstanceData> instances;
+		instances.reserve(frameInfo.drawBatcher.instanceCount());
 
 		uint32_t instanceID = 0;
 		auto view = frameInfo.scene.registry().view<GlobalTransform, Mesh, Material>();
@@ -69,31 +75,24 @@ namespace Aegix::Graphics
 			glm::mat4 modelMatrix = transform.matrix();
 			glm::mat3 normalMatrix = glm::inverse(modelMatrix);
 
-			auto data = instanceBuffer.buffer().mappedAs<InstanceData>(frameInfo.frameIndex);
-			data[instanceID] = InstanceData{
-				.modelMatrix = glm::rowMajor4(modelMatrix),
-				.normalRow0 = normalMatrix[0],
-				.meshHandle = mesh.staticMesh->meshDataBuffer().handle(),
-				.normalRow1 = normalMatrix[1],
-				// TODO: Find solution to avoid per-frame handle retrieval (this needs to be static)
-				.materialHandle = matInstance->buffer().handle(frameInfo.frameIndex),
-				.normalRow2 = normalMatrix[2],
-				.drawBatchID = matTemplate->drawBatch(),
-			};
+			instances.emplace_back(glm::rowMajor4(modelMatrix),
+				normalMatrix[0], mesh.staticMesh->meshDataBuffer().handle(),
+				normalMatrix[1], matInstance->buffer().handle(frameInfo.frameIndex),
+				normalMatrix[2], matTemplate->drawBatch());
 
 			instanceID++;
 		}
 
+		// Copy instance data to mapped buffer
+		{
+			auto gpuData = instanceBuffer.buffer().data<InstanceData>(frameInfo.frameIndex);
+			memcpy(gpuData, instances.data(), sizeof(InstanceData) * instances.size());
+		}
+
 		// Update draw batch info
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
-		auto drawBatchData = drawBatchBuffer.buffer().mappedAs<DrawBatchData>(frameInfo.frameIndex);
-		const auto& drawBatches = frameInfo.drawBatcher.batches();
-		for (size_t i = 0; i < drawBatches.size(); i++)
-		{
-			drawBatchData[i] = DrawBatchData{
-				.instanceOffset = drawBatches[i].firstInstance,
-				.instanceCount = drawBatches[i].instanceCount,
-			};
-		}
+		auto drawBatchData = drawBatchBuffer.buffer().data<DrawBatchData>(frameInfo.frameIndex);
+		auto& drawBatches = frameInfo.drawBatcher.batches();
+		memcpy(drawBatchData, drawBatches.data(), sizeof(DrawBatchData) * drawBatches.size());
 	}
 }
