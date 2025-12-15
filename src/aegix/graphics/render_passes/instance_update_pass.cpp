@@ -47,7 +47,6 @@ namespace Aegix::Graphics
 		AGX_PROFILE_FUNCTION();
 
 		// TODO: Update instance data on demand only (when scene changes)
-		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
 
 		std::vector<InstanceData> instances;
 		instances.reserve(frameInfo.drawBatcher.instanceCount());
@@ -84,15 +83,11 @@ namespace Aegix::Graphics
 		}
 
 		// Copy instance data to mapped buffer
-		{
-			auto gpuData = instanceBuffer.buffer().data<InstanceData>(frameInfo.frameIndex);
-			memcpy(gpuData, instances.data(), sizeof(InstanceData) * instances.size());
-		}
+		auto& instanceBuffer = pool.buffer(m_instanceBuffer);
+		instanceBuffer.buffer().copy(instances, frameInfo.frameIndex);
 
 		// Update draw batch info
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
-		auto drawBatchData = drawBatchBuffer.buffer().data<DrawBatchData>(frameInfo.frameIndex);
-		auto& drawBatches = frameInfo.drawBatcher.batches();
-		memcpy(drawBatchData, drawBatches.data(), sizeof(DrawBatchData) * drawBatches.size());
+		drawBatchBuffer.buffer().copy(frameInfo.drawBatcher.batches(), frameInfo.frameIndex);
 	}
 }

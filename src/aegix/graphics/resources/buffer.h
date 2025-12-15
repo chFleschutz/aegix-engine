@@ -88,6 +88,9 @@ namespace Aegix::Graphics
 		/// @brief Uploads data to the buffer using a staging buffer (Used for device local memory)
 		void upload(const void* data, VkDeviceSize size);
 
+		/// @brief Copy data into the mapped buffer at an offset of 'index * alignmentSize'
+		void copy(const void* data, VkDeviceSize size, uint32_t index = 0);
+
 		/// @brief Copy the buffer to another buffer
 		void copyTo(Buffer& dest, VkDeviceSize size);
 		void copyTo(VkCommandBuffer cmd, Buffer& dest, uint32_t srcIndex, uint32_t destIndex) const;
@@ -98,6 +101,14 @@ namespace Aegix::Graphics
 			AGX_ASSERT_X(!data.empty(), "Data vector is empty");
 			AGX_ASSERT_X(sizeof(T) * data.size() <= m_bufferSize, "Data size exceeds buffer size");
 			upload(data.data(), sizeof(T) * data.size());
+		}
+
+		template<typename T>
+		void copy(const std::vector<T>& src, uint32_t index = 0)
+		{
+			AGX_ASSERT_X(!src.empty(), "Source vector is empty");
+			AGX_ASSERT_X(sizeof(T) * src.size() <= m_instanceSize, "Source data size exceeds buffer size");
+			copy(src.data(), sizeof(T) * src.size(), index);
 		}
 
 		template<typename T = void>

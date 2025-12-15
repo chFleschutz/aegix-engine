@@ -203,6 +203,16 @@ namespace Aegix::Graphics
 		stagingBuffer.copyTo(*this, size);
 	}
 
+	void Buffer::copy(const void* data, VkDeviceSize size, uint32_t index)
+	{
+		AGX_ASSERT_X(data, "Data pointer is null");
+		AGX_ASSERT_X(m_mapped, "Called copy on buffer before map");
+		AGX_ASSERT_X(size <= m_bufferSize, "Copy size exceeds buffer size");
+		AGX_ASSERT_X(index < m_instanceCount, "Requested copy index exceeds instance count");
+		VK_CHECK(vmaCopyMemoryToAllocation(VulkanContext::device().allocator(), data, m_allocation,
+			index * m_alignmentSize, size));
+	}
+
 	void Buffer::copyTo(Buffer& dest, VkDeviceSize size)
 	{
 		AGX_ASSERT_X((size == VK_WHOLE_SIZE) || (size <= m_bufferSize && size <= dest.m_bufferSize),
