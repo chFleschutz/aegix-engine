@@ -31,7 +31,15 @@ namespace Aegix::Graphics
 				.size = sizeof(uint32_t) * static_cast<size_t>(m_drawBatcher.instanceCount() * INSTANCE_OVERALLOCATION)
 			});
 
-		m_visibleCounts = pool.addBuffer("VisibleInstanceCounts",
+		m_indirectDrawCommands = pool.addBuffer("IndirectDrawCommands",
+			FGResource::Usage::ComputeWriteStorage,
+			FGBufferInfo{
+				.size = sizeof(VkDrawMeshTasksIndirectCommandEXT) * m_drawBatcher.instanceCount(),
+				// TODO: remove usage here
+				.usage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+			});
+
+		m_indirectDrawCounts = pool.addBuffer("IndirectDrawCounts",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
 				.size = sizeof(uint32_t) * m_drawBatcher.batchCount(),
@@ -44,22 +52,23 @@ namespace Aegix::Graphics
 		return FGNode::Info{
 			.name = "Culling",
 			.reads = { m_staticInstances, m_dynamicInstances },
-			.writes = { m_visibleIndices, m_visibleCounts },
+			.writes = { m_visibleIndices, m_indirectDrawCounts },
 		};
 	}
 
 	void CullingPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		// Clear visible counts buffer
-		auto& visibleCountBuffer = pool.buffer(m_visibleCounts);
-		vkCmdFillBuffer(frameInfo.cmd, visibleCountBuffer.buffer(), 0, visibleCountBuffer.buffer().bufferSize(), 0);
+		auto& indirectDrawCounts = pool.buffer(m_indirectDrawCounts);
+		vkCmdFillBuffer(frameInfo.cmd, indirectDrawCounts.buffer(), 0, indirectDrawCounts.buffer().bufferSize(), 0);
 		
 		CullingPushConstants push{
-			.staticInstanceBuffer = pool.buffer(m_staticInstances).handle(),
-			.dynamicInstanceBuffer = pool.buffer(m_dynamicInstances).handle(frameInfo.frameIndex),
-			.drawBatchBuffer = pool.buffer(m_drawBatchBuffer).handle(frameInfo.frameIndex),
-			.visibilityBuffer = pool.buffer(m_visibleIndices).handle(),
-			.visibleCountBuffer = pool.buffer(m_visibleCounts).handle(),
+			.staticInstances = pool.buffer(m_staticInstances).handle(),
+			.dynamicInstances = pool.buffer(m_dynamicInstances).handle(frameInfo.frameIndex),
+			.drawBatches = pool.buffer(m_drawBatchBuffer).handle(frameInfo.frameIndex),
+			.visibilityInstances = pool.buffer(m_visibleIndices).handle(),
+			.indirectDrawCommands = pool.buffer(m_indirectDrawCommands).handle(),
+			.indirectDrawCounts = pool.buffer(m_indirectDrawCounts).handle(),
 			.staticInstanceCount = m_drawBatcher.staticInstanceCount(),
 			.dynamicInstanceCount = m_drawBatcher.dynamicInstanceCount(),
 		};

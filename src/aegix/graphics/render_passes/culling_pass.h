@@ -15,11 +15,12 @@ namespace Aegix::Graphics
 
 		struct CullingPushConstants
 		{
-			DescriptorHandle staticInstanceBuffer;
-			DescriptorHandle dynamicInstanceBuffer;
-			DescriptorHandle drawBatchBuffer;
-			DescriptorHandle visibilityBuffer;
-			DescriptorHandle visibleCountBuffer;
+			DescriptorHandle staticInstances;
+			DescriptorHandle dynamicInstances;
+			DescriptorHandle drawBatches;
+			DescriptorHandle visibilityInstances;
+			DescriptorHandle indirectDrawCommands;
+			DescriptorHandle indirectDrawCounts;
 			uint32_t staticInstanceCount;
 			uint32_t dynamicInstanceCount;
 		};
@@ -35,7 +36,8 @@ namespace Aegix::Graphics
 		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;
 		FGResourceHandle m_visibleIndices;
-		FGResourceHandle m_visibleCounts;
+		FGResourceHandle m_indirectDrawCommands;
+		FGResourceHandle m_indirectDrawCounts;
 		Pipeline m_pipeline;
 	};
 }

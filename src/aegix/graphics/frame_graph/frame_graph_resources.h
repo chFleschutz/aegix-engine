@@ -83,6 +83,7 @@ namespace Aegix::Graphics
 			TransferSrc,
 			TransferDst,
 			Present,
+			IndirectBuffer,
 		};
 
 		struct AccessInfo

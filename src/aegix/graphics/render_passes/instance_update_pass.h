@@ -35,8 +35,6 @@ namespace Aegix::Graphics
 		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
-		auto computeInstances() -> std::vector<InstanceData>;
-
 		FGResourceHandle m_staticInstances;
 		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;

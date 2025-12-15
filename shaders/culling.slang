@@ -30,13 +30,21 @@ struct DrawBatch
     uint count;
 }
 
+struct DrawMeshTasksIndirectCommand
+{
+    uint groupCountX;
+    uint groupCountY;
+    uint groupCountZ;
+}
+
 struct PushConstant
 {
     bindless::Handle<StorageBuffer<Instance>> staticInstances;
     bindless::Handle<StorageBuffer<Instance>> dynamicInstances;
-    bindless::Handle<StorageBuffer<DrawBatch>> drawBatch;
+    bindless::Handle<StorageBuffer<DrawBatch>> drawBatches;
     bindless::Handle<RWStorageBuffer<uint>> visibility;
-    bindless::Handle<RWStorageBuffer<uint>> visibleCount;
+    bindless::Handle<RWStorageBuffer<DrawMeshTasksIndirectCommand>> indirectDrawCommands;
+    bindless::Handle<RWStorageBuffer<uint>> indirectDrawCounts;
     uint staticCount;
     uint dynamicCount;
 }
@@ -67,11 +75,12 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     // TODO: Do culling
 
-    uint count;
-    InterlockedAdd(pc.visibleCount.get()[instance.drawBatchID], 1, count);
+    uint drawID;
+    InterlockedAdd(pc.indirectDrawCounts.get()[instance.drawBatchID], 1, drawID);
 
-    let drawBatch = pc.drawBatch.get()[instance.drawBatchID];
-    pc.visibility.get()[drawBatch.offset + count] = instanceID;
+    let drawBatch = pc.drawBatches.get()[instance.drawBatchID];
+    pc.visibility.get()[drawBatch.offset + drawID] = instanceID;
 
-    // TODO: Fill indirect draw buffer
+    let mesh = instance.mesh.get();
+    pc.indirectDrawCommands.get()[drawBatch.offset + drawID] = DrawMeshTasksIndirectCommand(1, 1, 1);
 }

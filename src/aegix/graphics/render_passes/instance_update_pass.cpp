@@ -137,7 +137,13 @@ namespace Aegix::Graphics
 		instanceBuffer.buffer().copy(dynamicInstances, frameInfo.frameIndex);
 
 		// Update draw batch info
+		std::vector<DrawBatchData> drawBatchData;
+		drawBatchData.reserve(frameInfo.drawBatcher.batchCount());
+		for (const auto& batch : frameInfo.drawBatcher.batches())
+		{
+			drawBatchData.emplace_back(batch.firstInstance, batch.instanceCount);
+		}
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
-		drawBatchBuffer.buffer().copy(frameInfo.drawBatcher.batches(), frameInfo.frameIndex);
+		drawBatchBuffer.buffer().copy(drawBatchData, frameInfo.frameIndex);
 	}
 }

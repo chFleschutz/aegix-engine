@@ -3,8 +3,8 @@ import modules.constants;
 import modules.geometry;
 import modules.tbn;
 
-static const uint TASK_THREADS = 1;
-static const uint MESH_THREADS = 32;
+static const uint TASK_GROUP_SIZE = 1;
+static const uint MESH_GROUP_SIZE = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
 
@@ -43,11 +43,6 @@ struct Instance
     }
 }
 
-struct TaskPayload
-{
-    uint instanceID;
-}
-
 struct MSOut
 {
     float4 position : SV_Position;
@@ -55,6 +50,11 @@ struct MSOut
     float3 worldNormal;
     float2 uv;
     nointerpolation uint instanceID;
+}
+
+struct TaskPayload
+{
+    uint instanceID;
 }
 
 struct PushConstant
@@ -88,13 +88,13 @@ func getInstance(uint index) -> Instance
 // Task Shader --------------------
 
 [shader("task")]
-[numthreads(TASK_THREADS, 1, 1)]
-func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
+[numthreads(TASK_GROUP_SIZE, 1, 1)]
+func taskMain(uint3 threadID: SV_GroupThreadID, uint drawID: SV_DrawIndex)
 {
-    if (groupID.x >= pc.batchSize)
+    if (drawID >= pc.batchSize)
         return;
 
-    let instanceID = pc.visibility.get()[pc.batchFirstID + groupID.x];
+    let instanceID = pc.visibility.get()[pc.batchFirstID + drawID];
     let instance = getInstance(instanceID);
     let mesh = instance.mesh.get();
 
@@ -107,7 +107,7 @@ func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
 // Mesh Shader --------------------
 
 [shader("mesh")]
-[numthreads(MESH_THREADS, 1, 1)]
+[numthreads(MESH_GROUP_SIZE, 1, 1)]
 [outputtopology("triangle")]
 func meshMain(
     uint3 groupID: SV_GroupID, 
@@ -125,7 +125,7 @@ func meshMain(
     float4x4 viewProjection = mul(global.projection, global.view);
 
     // Emit vertices
-    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += MESH_THREADS)
+    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += MESH_GROUP_SIZE)
     {
         uint index = mesh.meshletIndex.get()[meshlet.vertexOffset + i];
         let v = mesh.vertex.get()[index];
@@ -139,7 +139,7 @@ func meshMain(
     }
 
     // Emit primitives
-    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += MESH_THREADS)
+    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += MESH_GROUP_SIZE)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         meshPrimitives[i] = uint3(

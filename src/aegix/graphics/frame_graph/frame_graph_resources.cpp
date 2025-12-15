@@ -108,6 +108,8 @@ namespace Aegix::Graphics
 			return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		case Usage::TransferDst:
 			return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		case Usage::IndirectBuffer:
+			return VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
 		default:
 			return 0;
 		}

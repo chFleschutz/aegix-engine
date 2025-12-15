@@ -8,7 +8,7 @@ namespace Aegix::Graphics
 {
 	struct DrawBatch
 	{
-		uint32_t id;
+		uint32_t batchID;
 		uint32_t firstInstance;
 		uint32_t instanceCount;
 		std::shared_ptr<MaterialTemplate> materialTemplate;

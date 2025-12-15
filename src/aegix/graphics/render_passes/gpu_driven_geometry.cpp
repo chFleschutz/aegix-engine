@@ -64,6 +64,12 @@ namespace Aegix::Graphics
 
 		m_drawBatches = pool.addReference("DrawBatches",
 			FGResource::Usage::ComputeReadStorage);
+
+		m_indirectDrawCommands = pool.addReference("IndirectDrawCommands",
+			FGResource::Usage::IndirectBuffer);
+
+		m_indirectDrawCounts = pool.addReference("IndirectDrawCounts",
+			FGResource::Usage::IndirectBuffer);
 	}
 
 	auto GPUDrivenGeometry::info() -> FGNode::Info
@@ -107,6 +113,9 @@ namespace Aegix::Graphics
 			Tools::vk::cmdViewport(frameInfo.cmd, renderArea.extent);
 			Tools::vk::cmdScissor(frameInfo.cmd, renderArea.extent);
 
+			auto& indirectDrawCommands = pool.buffer(m_indirectDrawCommands);
+			auto& indirectDrawCounts = pool.buffer(m_indirectDrawCounts);
+
 			for (const auto& batch : frameInfo.drawBatcher.batches())
 			{
 				PushConstant pushConstants{
@@ -123,7 +132,15 @@ namespace Aegix::Graphics
 				batch.materialTemplate->bind(frameInfo.cmd);
 				batch.materialTemplate->bindBindlessSet(frameInfo.cmd);
 				batch.materialTemplate->pushConstants(frameInfo.cmd, &pushConstants, sizeof(PushConstant));
-				batch.materialTemplate->drawInstanced(frameInfo.cmd, batch.instanceCount);
+
+				vkCmdDrawMeshTasksIndirectCountEXT(frameInfo.cmd,
+					indirectDrawCommands.buffer(),
+					sizeof(VkDrawMeshTasksIndirectCommandEXT) * batch.firstInstance,
+					indirectDrawCounts.buffer(),
+					sizeof(uint32_t) * batch.batchID,
+					batch.instanceCount,
+					sizeof(VkDrawMeshTasksIndirectCommandEXT)
+				);
 			}
 		}
 		vkCmdEndRendering(frameInfo.cmd);

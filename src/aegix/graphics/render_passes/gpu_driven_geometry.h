@@ -44,7 +44,8 @@ namespace Aegix::Graphics
 		FGResourceHandle m_staticInstanceData;
 		FGResourceHandle m_dynamicInstanceData;
 		FGResourceHandle m_drawBatches;
-
+		FGResourceHandle m_indirectDrawCommands;
+		FGResourceHandle m_indirectDrawCounts;
 		BindlessFrameBuffer m_global;
 	};
 }
