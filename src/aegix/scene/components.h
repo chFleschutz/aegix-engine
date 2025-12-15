@@ -22,9 +22,9 @@ namespace Aegix
 	/// @brief Stores the local transformation of the entity
 	struct Transform
 	{
-		glm::vec3 location{ 0.0f };
-		glm::quat rotation{};
-		glm::vec3 scale{ 1.0f };
+		glm::vec3 location{ 0.0f, 0.0f, 0.0f };
+		glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f };
+		glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
 
 		auto forward() const -> glm::vec3 { return Math::forward(rotation); }
 		auto right() const -> glm::vec3 { return Math::right(rotation); }
@@ -35,9 +35,9 @@ namespace Aegix
 	/// @brief Transformation of the entity in world space (including parent transforms)
 	struct GlobalTransform
 	{
-		glm::vec3 location{ 0.0f };
-		glm::quat rotation{};
-		glm::vec3 scale{ 1.0f };
+		glm::vec3 location{ 0.0f, 0.0f, 0.0f };
+		glm::quat rotation{ 1.0f, 0.0f, 0.0f, 0.0f};
+		glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
 
 		auto forward() const -> glm::vec3 { return Math::forward(rotation); }
 		auto right() const -> glm::vec3 { return Math::right(rotation); }
