@@ -26,6 +26,9 @@ namespace Aegix::Graphics
 		/// @brief Called when resource should be created (at startup, window resize)
 		virtual void createResources(FGResourcePool& resources) {}
 
+		/// @brief Called when the scene has been initialized (after loading)
+		virtual void sceneInitialized(FGResourcePool& resources, Scene::Scene& scene) {}
+
 		/// @brief Execute the render pass
 		virtual void execute(FGResourcePool& resources, const FrameInfo& frameInfo) = 0;
 

@@ -34,6 +34,9 @@ namespace Aegix::Graphics
 		/// @brief Compiles the frame graph by sorting the nodes and creating resources
 		void compile();
 
+		/// @brief Notifies all render passes that the scene has been initialized
+		void sceneInitialized(Scene::Scene& scene);
+
 		/// @brief Executes the frame graph by executing each node in order
 		void execute(const FrameInfo& frameInfo);
 

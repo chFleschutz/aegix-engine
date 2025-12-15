@@ -46,7 +46,11 @@ namespace Aegix::Graphics
 
 		[[nodiscard]] auto buffer() -> Buffer& { return m_buffer; }
 		[[nodiscard]] auto buffer() const -> const Buffer& { return m_buffer; }
-		[[nodiscard]] auto handle(size_t index = 0) const -> DescriptorHandle { return m_handles[index]; }
+		[[nodiscard]] auto handle(size_t index = 0) const -> DescriptorHandle
+		{
+			AGX_ASSERT_X(index < m_handles.size(), "BindlessMultiBuffer handle index out of bounds");
+			return m_handles[index];
+		}
 
 	private:
 		Buffer m_buffer;

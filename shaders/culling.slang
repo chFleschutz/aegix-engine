@@ -30,34 +30,48 @@ struct DrawBatch
     uint count;
 }
 
-struct Push
+struct PushConstant
 {
-    bindless::Handle<StorageBuffer<Instance>> instance;
+    bindless::Handle<StorageBuffer<Instance>> staticInstances;
+    bindless::Handle<StorageBuffer<Instance>> dynamicInstances;
     bindless::Handle<StorageBuffer<DrawBatch>> drawBatch;
     bindless::Handle<RWStorageBuffer<uint>> visibility;
     bindless::Handle<RWStorageBuffer<uint>> visibleCount;
-    uint instanceCount;
+    uint staticCount;
+    uint dynamicCount;
 }
 
-[vk_push_constant] Push push;
+[vk_push_constant] PushConstant pc;
+
+func getInstance(uint index) -> Instance
+{
+    if (index < pc.staticCount)
+    {
+        return pc.staticInstances.get()[index];
+    }
+    else
+    {
+        return pc.dynamicInstances.get()[index - pc.staticCount];
+    }
+}
 
 [shader("compute")]
 [numthreads(64, 1, 1)]
 func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    if (dispatchThreadID.x >= push.instanceCount)
+    if (dispatchThreadID.x >= pc.staticCount + pc.dynamicCount)
         return;
 
     let instanceID = dispatchThreadID.x;
-    let instance = push.instance.get()[instanceID];
+    let instance = getInstance(instanceID);
 
     // TODO: Do culling
 
     uint count;
-    InterlockedAdd(push.visibleCount.get()[instance.drawBatchID], 1, count);
+    InterlockedAdd(pc.visibleCount.get()[instance.drawBatchID], 1, count);
 
-    let drawBatch = push.drawBatch.get()[instance.drawBatchID];
-    push.visibility.get()[drawBatch.offset + count] = instanceID;
+    let drawBatch = pc.drawBatch.get()[instance.drawBatchID];
+    pc.visibility.get()[drawBatch.offset + count] = instanceID;
 
     // TODO: Fill indirect draw buffer
 }

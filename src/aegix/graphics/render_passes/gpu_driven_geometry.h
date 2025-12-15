@@ -7,13 +7,16 @@ namespace Aegix::Graphics
 	class GPUDrivenGeometry : public FGRenderPass
 	{
 	public:
-		struct PushConstants
+		struct PushConstant
 		{
 			DescriptorHandle global;
-			DescriptorHandle instance;
+			DescriptorHandle staticInstances;
+			DescriptorHandle dynamicInstances;
 			DescriptorHandle visibility;
-			uint32_t firstInstance;
-			uint32_t instanceCount;
+			uint32_t batchFirstID;
+			uint32_t batchSize;
+			uint32_t staticCount;
+			uint32_t dynamicCount;
 		};
 
 		struct GlobalUBO
@@ -38,7 +41,8 @@ namespace Aegix::Graphics
 		FGResourceHandle m_emissive;
 		FGResourceHandle m_depth;
 		FGResourceHandle m_visibleInstances;
-		FGResourceHandle m_instanceData;
+		FGResourceHandle m_staticInstanceData;
+		FGResourceHandle m_dynamicInstanceData;
 		FGResourceHandle m_drawBatches;
 
 		BindlessFrameBuffer m_global;

@@ -59,9 +59,6 @@ namespace Aegix::Graphics
 		void beginFrame();
 		void endFrame();
 
-		void onMaterialCreated(entt::registry& reg, entt::entity e);
-		void onMaterialDestroyed(entt::registry& reg, entt::entity e);
-
 		Core::Window& m_window;
 		VulkanContext& m_vulkanContext;
 		

@@ -55,14 +55,14 @@ namespace Aegix::Graphics
 
 	void Renderer::sceneChanged(Scene::Scene& scene)
 	{
-		scene.registry().on_construct<Material>().connect<&Renderer::onMaterialCreated>(this);
-		scene.registry().on_destroy<Material>().connect<&Renderer::onMaterialDestroyed>(this);
+		m_drawBatchRegistry.sceneChanged(scene);
 	}
 
 	void Renderer::sceneInitialized(Scene::Scene& scene)
 	{
 		createFrameGraph();
 		m_frameGraph.compile();
+		m_frameGraph.sceneInitialized(scene);
 	}
 
 	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
@@ -226,20 +226,5 @@ namespace Aegix::Graphics
 
 		m_currentFrameIndex = (m_currentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 		VulkanContext::flushDeletionQueue(m_currentFrameIndex);
-	}
-
-	void Renderer::onMaterialCreated(entt::registry& reg, entt::entity e)
-	{
-		const auto& material = reg.get<Material>(e);
-		const auto& matTemplate = material.instance->materialTemplate();
-		m_drawBatchRegistry.registerDrawBatch(matTemplate);
-		m_drawBatchRegistry.addInstance(matTemplate->drawBatch());
-	}
-
-	void Renderer::onMaterialDestroyed(entt::registry& reg, entt::entity e)
-	{
-		const auto& material = reg.get<Material>(e);
-		const auto& matTemplate = material.instance->materialTemplate();
-		m_drawBatchRegistry.removeInstance(matTemplate->drawBatch());
 	}
 }

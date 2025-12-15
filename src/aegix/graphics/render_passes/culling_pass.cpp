@@ -16,7 +16,10 @@ namespace Aegix::Graphics
 			.setShaderStage(SHADER_DIR "culling.slang.spv")
 			.build();
 
-		m_instanceBuffer = pool.addReference("InstanceData",
+		m_staticInstances = pool.addReference("StaticInstanceData",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_dynamicInstances = pool.addReference("DynamicInstanceData",
 			FGResource::Usage::ComputeReadStorage);
 
 		m_drawBatchBuffer = pool.addReference("DrawBatches",
@@ -40,7 +43,7 @@ namespace Aegix::Graphics
 	{
 		return FGNode::Info{
 			.name = "Culling",
-			.reads = { m_instanceBuffer },
+			.reads = { m_staticInstances, m_dynamicInstances },
 			.writes = { m_visibleIndices, m_visibleCounts },
 		};
 	}
@@ -52,11 +55,13 @@ namespace Aegix::Graphics
 		vkCmdFillBuffer(frameInfo.cmd, visibleCountBuffer.buffer(), 0, visibleCountBuffer.buffer().bufferSize(), 0);
 		
 		CullingPushConstants push{
-			.instanceBuffer = pool.buffer(m_instanceBuffer).handle(frameInfo.frameIndex),
+			.staticInstanceBuffer = pool.buffer(m_staticInstances).handle(),
+			.dynamicInstanceBuffer = pool.buffer(m_dynamicInstances).handle(frameInfo.frameIndex),
 			.drawBatchBuffer = pool.buffer(m_drawBatchBuffer).handle(frameInfo.frameIndex),
 			.visibilityBuffer = pool.buffer(m_visibleIndices).handle(),
 			.visibleCountBuffer = pool.buffer(m_visibleCounts).handle(),
-			.instanceCount = m_drawBatcher.instanceCount(),
+			.staticInstanceCount = m_drawBatcher.staticInstanceCount(),
+			.dynamicInstanceCount = m_drawBatcher.dynamicInstanceCount(),
 		};
 
 		m_pipeline.bind(frameInfo.cmd);

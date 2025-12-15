@@ -56,18 +56,21 @@ namespace Aegix::Graphics
 		m_visibleInstances = pool.addReference("VisibleInstances",
 			FGResource::Usage::ComputeReadStorage);
 
-		m_instanceData = pool.addReference("InstanceData",
+		m_staticInstanceData = pool.addReference("StaticInstanceData",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_dynamicInstanceData = pool.addReference("DynamicInstanceData",
 			FGResource::Usage::ComputeReadStorage);
 
 		m_drawBatches = pool.addReference("DrawBatches",
 			FGResource::Usage::ComputeReadStorage);
 	}
 
-	auto GPUDrivenGeometry::info() -> FGNode::Info 
+	auto GPUDrivenGeometry::info() -> FGNode::Info
 	{
 		return FGNode::Info{
 			.name = "GPU Driven Geometry",
-			.reads = { m_instanceData, m_visibleInstances },
+			.reads = { m_staticInstanceData, m_dynamicInstanceData, m_visibleInstances },
 			.writes = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth }
 		};
 	}
@@ -106,17 +109,20 @@ namespace Aegix::Graphics
 
 			for (const auto& batch : frameInfo.drawBatcher.batches())
 			{
-				PushConstants pushConstants{
+				PushConstant pushConstants{
 					.global = m_global.handle(frameInfo.frameIndex),
-					.instance = pool.buffer(m_instanceData).handle(),
+					.staticInstances = pool.buffer(m_staticInstanceData).handle(),
+					.dynamicInstances = pool.buffer(m_dynamicInstanceData).handle(frameInfo.frameIndex),
 					.visibility = pool.buffer(m_visibleInstances).handle(),
-					.firstInstance = batch.firstInstance,
-					.instanceCount = batch.instanceCount,
+					.batchFirstID = batch.firstInstance,
+					.batchSize = batch.instanceCount,
+					.staticCount = frameInfo.drawBatcher.staticInstanceCount(),
+					.dynamicCount = frameInfo.drawBatcher.dynamicInstanceCount()
 				};
 
 				batch.materialTemplate->bind(frameInfo.cmd);
 				batch.materialTemplate->bindBindlessSet(frameInfo.cmd);
-				batch.materialTemplate->pushConstants(frameInfo.cmd, &pushConstants, sizeof(PushConstants));
+				batch.materialTemplate->pushConstants(frameInfo.cmd, &pushConstants, sizeof(PushConstant));
 				batch.materialTemplate->drawInstanced(frameInfo.cmd, batch.instanceCount);
 			}
 		}

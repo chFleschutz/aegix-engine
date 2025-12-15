@@ -44,6 +44,15 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void FrameGraph::sceneInitialized(Scene::Scene& scene)
+	{
+		for (const auto& nodeHandle : m_nodes)
+		{
+			auto& node = m_pool.node(nodeHandle);
+			node.pass->sceneInitialized(m_pool, scene);
+		}
+	}
+
 	void FrameGraph::execute(const FrameInfo& frameInfo)
 	{
 		AGX_PROFILE_FUNCTION();

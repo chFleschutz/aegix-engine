@@ -57,17 +57,33 @@ struct MSOut
     nointerpolation uint instanceID;
 }
 
-public struct Push
+struct PushConstant
 {
     bindless::Handle<UniformBuffer<geometry::Global>> global;
-    bindless::Handle<StorageBuffer<Instance>> instance;
+    bindless::Handle<StorageBuffer<Instance>> staticInstances;
+    bindless::Handle<StorageBuffer<Instance>> dynamicInstances;
     bindless::Handle<StorageBuffer<uint>> visibility;
-    uint firstInstance;
-    uint instanceCount;
+    uint batchFirstID;
+    uint batchSize;
+    uint staticCount;
+    uint dynamicCount;
 }
-[vk::push_constant] ConstantBuffer<Push> push;
+
+[vk::push_constant] PushConstant pc;
 
 groupshared TaskPayload taskPayload;
+
+func getInstance(uint index) -> Instance
+{
+    if (index < pc.staticCount)
+    {
+        return pc.staticInstances.get()[index];
+    }
+    else
+    {
+        return pc.dynamicInstances.get()[index - pc.staticCount];
+    }
+}
 
 // Task Shader --------------------
 
@@ -75,11 +91,11 @@ groupshared TaskPayload taskPayload;
 [numthreads(TASK_THREADS, 1, 1)]
 func taskMain(uint3 groupID: SV_GroupID, uint3 threadID: SV_GroupThreadID)
 {
-    if (groupID.x >= push.instanceCount)
+    if (groupID.x >= pc.batchSize)
         return;
 
-    let instanceID = push.visibility.get()[push.firstInstance + groupID.x];
-    let instance = push.instance.get()[instanceID];
+    let instanceID = pc.visibility.get()[pc.batchFirstID + groupID.x];
+    let instance = getInstance(instanceID);
     let mesh = instance.mesh.get();
 
     taskPayload.instanceID = instanceID;
@@ -99,8 +115,8 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES], 
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    let global = push.global.get();
-    let instance = push.instance.get()[taskPayload.instanceID];
+    let global = pc.global.get();
+    let instance = getInstance(taskPayload.instanceID);
     let mesh = instance.mesh.get();
     let meshlet = mesh.meshlet.get()[groupID.x];
 
@@ -138,7 +154,7 @@ func meshMain(
 [shader("fragment")]
 func fragmentMain(MSOut input, out geometry::GBuffer output)
 {
-    let instance = push.instance.get()[input.instanceID];
+    let instance = getInstance(input.instanceID);
     let mat = instance.material.get();
 
     float3 albedo = mat.albedoMap.get().Sample(input.uv).rgb * mat.albedo;

@@ -102,6 +102,11 @@ namespace Aegix
 		std::shared_ptr<Graphics::MaterialInstance> instance;
 	};
 
+	struct DynamicTag
+	{
+		// Used to tag an entity as dynamic (updated every frame)
+	};
+
 	struct AmbientLight
 	{
 		glm::vec3 color = { 1.0f, 1.0f, 1.0f };

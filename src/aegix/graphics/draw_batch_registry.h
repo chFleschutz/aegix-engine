@@ -2,6 +2,8 @@
 
 #include "graphics/material/material_template.h"
 
+#include "scene/scene.h"
+
 namespace Aegix::Graphics
 {
 	struct DrawBatch
@@ -25,15 +27,30 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto batch(uint32_t indexindex) const -> const DrawBatch& { return m_batches[indexindex]; }
 		[[nodiscard]] auto batchCount() const -> uint32_t { return static_cast<uint32_t>(m_batches.size()); }
 		[[nodiscard]] auto instanceCount() const -> uint32_t { return m_totalCount; }
+		[[nodiscard]] auto staticInstanceCount() const -> uint32_t { return m_staticCount; }
+		[[nodiscard]] auto dynamicInstanceCount() const -> uint32_t { return m_dynamicCount; }
 
 		auto registerDrawBatch(std::shared_ptr<MaterialTemplate> mat) -> const DrawBatch&;
 		void addInstance(uint32_t batchId);
 		void removeInstance(uint32_t batchId);
 
+		void sceneChanged(Scene::Scene& scene);
+
 	private:
 		void updateOffsets(uint32_t startBatchId = 0);
 
+		void onMaterialCreated(entt::registry& reg, entt::entity e);
+		void onMaterialRemoved(entt::registry& reg, entt::entity e);
+		void onDynamicTagCreated(entt::registry& reg, entt::entity e);
+		void onDynamicTagRemoved(entt::registry& reg, entt::entity e);
+
 		std::vector<DrawBatch> m_batches;
+		uint32_t m_staticCount{ 0 };
+		uint32_t m_dynamicCount{ 0 };
 		uint32_t m_totalCount{ 0 };
+		entt::scoped_connection m_materialCreateCon;
+		entt::scoped_connection m_materialDestroyCon;
+		entt::scoped_connection m_dynamicTagCreateCon;
+		entt::scoped_connection m_dynamicTagDestroyCon;
 	};
 }

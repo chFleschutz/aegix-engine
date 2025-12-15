@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "draw_batch_registry.h"
 
+#include "scene/components.h"
+
 namespace Aegix::Graphics
 {
 	auto DrawBatchRegistry::registerDrawBatch(std::shared_ptr<MaterialTemplate> mat) -> const DrawBatch&
@@ -34,6 +36,15 @@ namespace Aegix::Graphics
 		updateOffsets(batchId);
 	}
 
+	void DrawBatchRegistry::sceneChanged(Scene::Scene& scene)
+	{
+		auto& reg = scene.registry();
+		m_materialCreateCon = reg.on_construct<Material>().connect<&DrawBatchRegistry::onMaterialCreated>(this);
+		m_materialDestroyCon = reg.on_destroy<Material>().connect<&DrawBatchRegistry::onMaterialRemoved>(this);
+		m_dynamicTagCreateCon = reg.on_construct<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagCreated>(this);
+		m_dynamicTagDestroyCon = reg.on_destroy<DynamicTag>().connect<&DrawBatchRegistry::onDynamicTagRemoved>(this);
+	}
+
 	void DrawBatchRegistry::updateOffsets(uint32_t startBatchId)
 	{
 		if (!isValid(startBatchId))
@@ -46,5 +57,56 @@ namespace Aegix::Graphics
 			baseOffset += m_batches[i].instanceCount;
 		}
 		m_totalCount = baseOffset;
+	}
+
+	void DrawBatchRegistry::onMaterialCreated(entt::registry& reg, entt::entity e)
+	{
+		const auto& material = reg.get<Material>(e);
+		const auto& matTemplate = material.instance->materialTemplate();
+		registerDrawBatch(matTemplate);
+		addInstance(matTemplate->drawBatch());
+
+		if (reg.all_of<DynamicTag>(e))
+		{
+			m_dynamicCount++;
+		}
+		else
+		{
+			m_staticCount++;
+		}
+	}
+
+	void DrawBatchRegistry::onMaterialRemoved(entt::registry& reg, entt::entity e)
+	{
+		const auto& material = reg.get<Material>(e);
+		const auto& matTemplate = material.instance->materialTemplate();
+		removeInstance(matTemplate->drawBatch());
+
+		if (reg.all_of<DynamicTag>(e))
+		{
+			m_dynamicCount--;
+		}
+		else
+		{
+			m_staticCount--;
+		}
+	}
+
+	void DrawBatchRegistry::onDynamicTagCreated(entt::registry& reg, entt::entity e)
+	{
+		if (!reg.all_of<Material>(e))
+			return;
+
+		m_staticCount--;
+		m_dynamicCount++;
+	}
+	
+	void DrawBatchRegistry::onDynamicTagRemoved(entt::registry& reg, entt::entity e)
+	{
+		if (!reg.all_of<Material>(e))
+			return;
+
+		m_staticCount++;
+		m_dynamicCount--;
 	}
 }

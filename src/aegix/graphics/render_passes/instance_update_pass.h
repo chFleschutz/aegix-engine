@@ -26,14 +26,19 @@ namespace Aegix::Graphics
 	class InstanceUpdatePass : public FGRenderPass
 	{
 	public:
-		static constexpr size_t MAX_INSTANCES = 10'000;
+		static constexpr size_t MAX_STATIC_INSTANCES = 10'000;
+		static constexpr size_t MAX_DYNAMIC_INSTANCES = 1'000;
 
 		InstanceUpdatePass(FGResourcePool& pool);
 		auto info() -> FGNode::Info override;
-		void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
+		virtual void sceneInitialized(FGResourcePool& resources, Scene::Scene& scene) override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
-		FGResourceHandle m_instanceBuffer;
+		auto computeInstances() -> std::vector<InstanceData>;
+
+		FGResourceHandle m_staticInstances;
+		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;
 	};
 }

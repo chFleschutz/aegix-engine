@@ -15,11 +15,13 @@ namespace Aegix::Graphics
 
 		struct CullingPushConstants
 		{
-			DescriptorHandle instanceBuffer;
+			DescriptorHandle staticInstanceBuffer;
+			DescriptorHandle dynamicInstanceBuffer;
 			DescriptorHandle drawBatchBuffer;
 			DescriptorHandle visibilityBuffer;
 			DescriptorHandle visibleCountBuffer;
-			uint32_t instanceCount;
+			uint32_t staticInstanceCount;
+			uint32_t dynamicInstanceCount;
 		};
 
 		CullingPass(FGResourcePool& pool, DrawBatchRegistry& batcher);
@@ -29,7 +31,8 @@ namespace Aegix::Graphics
 
 	private:
 		DrawBatchRegistry& m_drawBatcher;
-		FGResourceHandle m_instanceBuffer;
+		FGResourceHandle m_staticInstances;
+		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;
 		FGResourceHandle m_visibleIndices;
 		FGResourceHandle m_visibleCounts;
