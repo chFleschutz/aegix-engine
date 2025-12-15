@@ -42,7 +42,7 @@ struct Push
 [vk_push_constant] Push push;
 
 [shader("compute")]
-[numthreads(16, 1, 1)]
+[numthreads(64, 1, 1)]
 func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
     if (dispatchThreadID.x >= push.instanceCount)
