@@ -76,7 +76,7 @@ public:
 		materialInstance = meshEntity.get<Material>().instance;
 		AGX_ASSERT(mesh && materialInstance);
 
-		constexpr int instanceCount = 9'000;
+		constexpr int instanceCount = 0'000;
 
 		auto dis = std::uniform_real_distribution<float>(-50.0f, 50.0f);
 		for (int i = 0; i < instanceCount; i++)

@@ -53,6 +53,8 @@ namespace Aegix::Scene
 		/// @brief Adds tracking for a script component to call its virtual functions
 		void addScript(Scripting::ScriptBase* script) { m_scriptManager.addScript(script); }
 
+		void begin();
+
 		void update(float deltaSeconds);
 
 		/// @brief Loads a scene from a file and returns the root entity

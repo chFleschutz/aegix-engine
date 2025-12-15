@@ -37,6 +37,14 @@ namespace Aegix::Scene
 		m_registry.destroy(entity);
 	}
 
+	void Scene::begin()
+	{
+		for (auto& system : m_systems)
+		{
+			system->onBegin(*this);
+		}
+	}
+
 	void Scene::update(float deltaSeconds)
 	{
 		AGX_PROFILE_FUNCTION();
