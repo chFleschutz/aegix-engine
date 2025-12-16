@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "sky_box_pass.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
@@ -8,7 +9,7 @@
 
 namespace Aegix::Graphics
 {
-	SkyBoxPass::SkyBoxPass() : 
+	SkyBoxPass::SkyBoxPass(FGResourcePool& pool) :
 		m_descriptorSetLayout{ createDescriptorSetLayout() }
 	{
 		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
@@ -60,30 +61,24 @@ namespace Aegix::Graphics
 			m_indexBuffer = Buffer{ Buffer::indexBuffer(sizeof(uint32_t) * indices.size()) };
 			m_indexBuffer.upload(indices);
 		}
+
+		m_sceneColor = pool.addReference("SceneColor",
+			FGResource::Usage::ColorAttachment);
+
+		m_depth = pool.addReference("Depth",
+			FGResource::Usage::DepthStencilAttachment);
 	}
 
-	auto SkyBoxPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+	auto SkyBoxPass::info() -> FGNode::Info
 	{
-		m_sceneColor = builder.add(FrameGraphResourceCreateInfo{
-			.name = "SceneColor",
-			.type = FrameGraphResourceType::Reference,
-			.usage = FrameGraphResourceUsage::ColorAttachment,
-			});
-
-		m_depth = builder.add(FrameGraphResourceCreateInfo{
-			.name = "Depth",
-			.type = FrameGraphResourceType::Reference,
-			.usage = FrameGraphResourceUsage::DepthStencilAttachment,
-			});
-
-		return FrameGraphNodeCreateInfo{
+		return FGNode::Info{
 			.name = "Sky Box",
-			.inputs = { m_sceneColor, m_depth },
-			.outputs = { m_sceneColor },
+			.reads = { m_depth },
+			.writes = { m_sceneColor },
 		};
 	}
 
-	void SkyBoxPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void SkyBoxPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		auto skyBoxEntity = frameInfo.scene.environment();
 		if (!skyBoxEntity || !skyBoxEntity.has<Environment>())
@@ -99,8 +94,8 @@ namespace Aegix::Graphics
 			.writeImage(0, environment.skybox->descriptorImageInfo())
 			.update(m_descriptorSets[frameInfo.frameIndex]);
 
-		auto& sceneColorTexture = resources.texture(m_sceneColor);
-		auto& depthTexture = resources.texture(m_depth);
+		auto& sceneColorTexture = pool.texture(m_sceneColor);
+		auto& depthTexture = pool.texture(m_depth);
 		auto colorAttachment = Tools::renderingAttachmentInfo(sceneColorTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
 		auto depthAttachment = Tools::renderingAttachmentInfo(depthTexture, VK_ATTACHMENT_LOAD_OP_LOAD);
 

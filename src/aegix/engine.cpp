@@ -13,7 +13,6 @@ namespace Aegix
 		s_instance = this;
 
 		m_assets.loadDefaultAssets();
-		m_renderer.compileFrameGraph();
 		m_layerStack.push<Core::EditorLayer>();
 
 		ALOG::info("Engine Initialized!");

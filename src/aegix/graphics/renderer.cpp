@@ -3,7 +3,10 @@
 
 #include "core/profiler.h"
 #include "graphics/render_passes/bloom_pass.h"
+#include "graphics/render_passes/culling_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
+#include "graphics/render_passes/gpu_driven_geometry.h"
+#include "graphics/render_passes/instance_update_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
@@ -11,15 +14,15 @@
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
 #include "graphics/render_passes/ui_pass.h"
-#include "graphics/render_systems/point_light_render_system.h"
 #include "graphics/render_systems/bindless_static_mesh_render_system.h"
+#include "graphics/render_systems/point_light_render_system.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "scene/scene.h"
 
 namespace Aegix::Graphics
 {
-	Renderer::Renderer(Core::Window& window) : 
-		m_window{ window }, 
+	Renderer::Renderer(Core::Window& window) :
+		m_window{ window },
 		m_vulkanContext{ VulkanContext::initialize(m_window) },
 		m_swapChain{ window.extent() }
 	{
@@ -50,6 +53,18 @@ namespace Aegix::Graphics
 		return m_currentFrameIndex;
 	}
 
+	void Renderer::sceneChanged(Scene::Scene& scene)
+	{
+		m_drawBatchRegistry.sceneChanged(scene);
+	}
+
+	void Renderer::sceneInitialized(Scene::Scene& scene)
+	{
+		createFrameGraph();
+		m_frameGraph.compile();
+		m_frameGraph.sceneInitialized(scene);
+	}
+
 	void Renderer::renderFrame(Scene::Scene& scene, UI::UI& ui)
 	{
 		AGX_PROFILE_FUNCTION();
@@ -61,6 +76,7 @@ namespace Aegix::Graphics
 			FrameInfo frameInfo{
 				.scene = scene,
 				.ui = ui,
+				.drawBatcher = m_drawBatchRegistry,
 				.cmd = currentCommandBuffer(),
 				.frameIndex = m_currentFrameIndex,
 				.swapChainExtent = m_swapChain.extent(),
@@ -120,10 +136,13 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& geoPass = m_frameGraph.add<GeometryPass>(m_frameGraph);
-		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+		//auto& geoPass = m_frameGraph.add<GeometryPass>();
+		//geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+		m_frameGraph.add<GPUDrivenGeometry>();
 
-		auto& transparentPass = m_frameGraph.add<TransparentPass>(m_frameGraph);
+		m_frameGraph.add<SkyBoxPass>();
+
+		auto& transparentPass = m_frameGraph.add<TransparentPass>();
 		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
 
@@ -132,13 +151,13 @@ namespace Aegix::Graphics
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
-		m_frameGraph.add<SkyBoxPass>();
+
+		m_frameGraph.add<CullingPass>(m_drawBatchRegistry);
+		m_frameGraph.add<InstanceUpdatePass>();
 
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
-
-		m_frameGraph.compile();
 	}
 
 	void Renderer::beginFrame()
@@ -176,8 +195,12 @@ namespace Aegix::Graphics
 		FrameContext& frame = m_frames[m_currentFrameIndex];
 		VK_CHECK(vkEndCommandBuffer(frame.commandBuffer));
 
-		// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
-		m_swapChain.waitForImageInFlight(frame.inFlightFence);
+		{
+			AGX_PROFILE_SCOPE("GPU Sync");
+
+			// Ensure the previous frame using this image has finished (for frameIndex != imageIndex)
+			m_swapChain.waitForImageInFlight(frame.inFlightFence);
+		}
 
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[] = { m_swapChain.presentReadySemaphore() };

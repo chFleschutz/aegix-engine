@@ -20,23 +20,23 @@ namespace Aegix::Graphics
 		float gamma = 2.2f;
 	};
 
-	class PostProcessingPass : public FrameGraphRenderPass
+	class PostProcessingPass : public FGRenderPass
 	{
 	public:
-		PostProcessingPass();
+		PostProcessingPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void createResources(FrameGraphResourcePool& resources) override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void createResources(FGResourcePool& resources) override;
+		virtual void execute(FGResourcePool& resources, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
 		auto createDescriptorSetLayout() -> DescriptorSetLayout;
 		auto createPipeline() -> Pipeline;
 
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_bloom;
-		FrameGraphResourceHandle m_final;
+		FGResourceHandle m_sceneColor;
+		FGResourceHandle m_bloom;
+		FGResourceHandle m_final;
 
 		PostProcessingSettings m_settings;
 

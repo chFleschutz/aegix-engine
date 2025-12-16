@@ -11,40 +11,28 @@
 
 namespace Aegix::Graphics
 {
-	// TODO: Look at better packing strategies (variant cost additional 8 bytes because of alignment)
-	// TODO: Maybe use a union with a type enum instead
-	using MaterialParamValue = std::variant<
-		int, 
-		float, 
-		glm::vec2, 
-		glm::vec3, 
-		glm::vec4, 
-		std::shared_ptr<Texture>
-	>;
-
-	enum class MaterialParamType
-	{
-		Int,
-		Float,
-		Vec2,
-		Vec3,
-		Vec4,
-		Texture2D
-	};
-
-	struct MaterialParameter
-	{
-		MaterialParamType type;
-		uint32_t binding = 0;
-		size_t offset = 0;
-		size_t size = 0;
-		MaterialParamValue defaultValue;
-	};
-
 	enum class MaterialType
 	{
 		Opaque,
 		Transparent
+	};
+
+	struct MaterialParameter
+	{
+		using Value = std::variant<
+			int32_t,
+			uint32_t,
+			float,
+			glm::vec2,
+			glm::vec3,
+			glm::vec4,
+			std::shared_ptr<Texture>
+		>;
+
+		uint32_t binding = 0;
+		size_t offset = 0;
+		size_t size = 0;
+		Value defaultValue;
 	};
 
 	class MaterialTemplate : public Core::Asset
@@ -53,19 +41,22 @@ namespace Aegix::Graphics
 		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
 
 		[[nodiscard]] static auto alignTo(size_t size, size_t alignment) -> size_t;
-		[[nodiscard]] static auto std140Alignment(MaterialParamType type) -> size_t;
-		[[nodiscard]] static auto std140Size(MaterialParamType type) -> size_t;
+		[[nodiscard]] static auto std430Alignment(const MaterialParameter::Value& val) -> size_t;
+		[[nodiscard]] static auto std430Size(const MaterialParameter::Value& val) -> size_t;
 
 		[[nodiscard]] auto pipeline() const -> const Pipeline& { return m_pipeline; }
 		[[nodiscard]] auto globalSetLayout() -> DescriptorSetLayout& { return m_globalSetLayout; }
 		[[nodiscard]] auto materialSetLayout() -> DescriptorSetLayout& { return m_materialSetLayout; }
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
+		[[nodiscard]] auto drawBatch() const -> uint32_t { return m_drawBatchId; }
 		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
 
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
-		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParamValue;
-		void addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue);
+		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParameter::Value;
+		void addParameter(const std::string& name, const MaterialParameter::Value& defaultValue);
+
+		void setDrawBatchId(uint32_t id) { m_drawBatchId = id; }
 
 		void bind(VkCommandBuffer cmd);
 		void bindBindlessSet(VkCommandBuffer cmd);
@@ -73,6 +64,7 @@ namespace Aegix::Graphics
 		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 		void draw(VkCommandBuffer cmd, const StaticMesh& mesh);
+		void drawInstanced(VkCommandBuffer cmd, uint32_t instanceCount);
 
 		void printInfo() const;
 
@@ -84,9 +76,9 @@ namespace Aegix::Graphics
 		DescriptorSetLayout m_materialSetLayout;	// Set 1
 
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
-		size_t m_parameterSize = 0;
-		uint32_t m_textureCount = 0;
-
-		MaterialType m_materialType = MaterialType::Opaque;
+		size_t m_parameterSize{ 0 };
+		uint32_t m_textureCount{ 0 };
+		uint32_t m_drawBatchId{ 0 };
+		MaterialType m_materialType{ MaterialType::Opaque };
 	};
 }

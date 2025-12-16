@@ -1,5 +1,7 @@
 module geometry;
 
+import modules.bindless;
+
 namespace geometry
 {
     public struct Global
@@ -13,6 +15,18 @@ namespace geometry
     {
         public float4x4 model;
         public float4x4 normal;
+    };
+
+    public struct Mesh
+    {
+        public bindless::Handle<StorageBuffer<geometry::Vertex, ScalarDataLayout>> vertex;
+        public bindless::Handle<StorageBuffer<uint>> index;
+        public bindless::Handle<StorageBuffer<geometry::Meshlet>> meshlet;
+        public bindless::Handle<StorageBuffer<uint>> meshletIndex;
+        public bindless::Handle<StorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
+        public uint vertexCount;
+        public uint indexCount;
+        public uint meshletCount;
     };
 
     public struct Vertex

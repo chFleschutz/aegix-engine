@@ -14,6 +14,7 @@ namespace Aegix::Scene
 
 		virtual void onAttach() {}
 		virtual void onDetach() {}
+		virtual void onBegin(Scene& scene) {}
 		virtual void onUpdate(float deltaSeconds, Scene& scene) {}
 	};
 

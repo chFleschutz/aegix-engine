@@ -17,32 +17,42 @@ namespace Aegix::Graphics
 		return (size + alignment - 1) & ~(alignment - 1);
 	}
 
-	auto MaterialTemplate::std140Alignment(MaterialParamType type) -> size_t
+	auto MaterialTemplate::std430Alignment(const MaterialParameter::Value& val) -> size_t
 	{
-		switch (type)
-		{
-		case MaterialParamType::Int: return 4;
-		case MaterialParamType::Float: return 4;
-		case MaterialParamType::Vec2: return 8;
-		case MaterialParamType::Vec3: return 16;
-		case MaterialParamType::Vec4: return 16;
-		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
-		default: return 16;
-		}
+		return std::visit([&](auto&& arg) -> size_t {
+			using T = std::decay_t<decltype(arg)>;
+			if constexpr (std::is_same_v<T, int32_t>)        return 4;
+			else if constexpr (std::is_same_v<T, uint32_t>)  return 4;
+			else if constexpr (std::is_same_v<T, float>)     return 4;
+			else if constexpr (std::is_same_v<T, glm::vec2>) return 8;
+			else if constexpr (std::is_same_v<T, glm::vec3>) return 16;
+			else if constexpr (std::is_same_v<T, glm::vec4>) return 16;
+			else if constexpr (std::is_same_v<T, std::shared_ptr<Texture>>) return sizeof(DescriptorHandle);
+			else
+			{
+				AGX_ASSERT_X(false, "Unknown material parameter type");
+				return 16;
+			}
+		}, val);
 	}
 
-	auto MaterialTemplate::std140Size(MaterialParamType type) -> size_t
+	auto MaterialTemplate::std430Size(const MaterialParameter::Value& val) -> size_t
 	{
-		switch (type)
-		{
-		case MaterialParamType::Int: return 4;
-		case MaterialParamType::Float: return 4;
-		case MaterialParamType::Vec2: return 8;
-		case MaterialParamType::Vec3: return 12;
-		case MaterialParamType::Vec4: return 16;
-		case MaterialParamType::Texture2D: return sizeof(DescriptorHandle);
-		default: return 16;
-		}
+		return std::visit([&](auto&& arg) -> size_t {
+			using T = std::decay_t<decltype(arg)>;
+			if constexpr (std::is_same_v<T, int32_t>)        return 4;
+			else if constexpr (std::is_same_v<T, uint32_t>)  return 4;
+			else if constexpr (std::is_same_v<T, float>)     return 4;
+			else if constexpr (std::is_same_v<T, glm::vec2>) return 8;
+			else if constexpr (std::is_same_v<T, glm::vec3>) return 12;
+			else if constexpr (std::is_same_v<T, glm::vec4>) return 16;
+			else if constexpr (std::is_same_v<T, std::shared_ptr<Texture>>) return sizeof(DescriptorHandle);
+			else
+			{
+				AGX_ASSERT_X(false, "Unknown material parameter type");
+				return 16;
+			}
+		}, val);
 	}
 
 
@@ -52,7 +62,7 @@ namespace Aegix::Graphics
 		return m_parameters.contains(name);
 	}
 
-	auto MaterialTemplate::queryDefaultParameter(const std::string& name) const -> MaterialParamValue
+	auto MaterialTemplate::queryDefaultParameter(const std::string& name) const -> MaterialParameter::Value
 	{
 		auto it = m_parameters.find(name);
 		if (it != m_parameters.end())
@@ -62,21 +72,22 @@ namespace Aegix::Graphics
 		return {};
 	}
 
-	void MaterialTemplate::addParameter(const std::string& name, MaterialParamType type, const MaterialParamValue& defaultValue)
+	void MaterialTemplate::addParameter(const std::string& name, const MaterialParameter::Value& defaultValue)
 	{
 		AGX_ASSERT_X(!m_parameters.contains(name), "Material parameter already exists");
 
 		MaterialParameter param{
-			.type = type,
-			.offset = alignTo(m_parameterSize, std140Alignment(type)),
-			.size = std140Size(type),
+			.offset = alignTo(m_parameterSize, std430Alignment(defaultValue)),
+			.size = std430Size(defaultValue),
 			.defaultValue = defaultValue,
 		};
 
-		if (type == MaterialParamType::Texture2D)
+		if (std::holds_alternative<std::shared_ptr<Texture>>(defaultValue))
 		{
 			m_textureCount++;
 			param.binding = m_textureCount;
+
+
 		}
 
 		m_parameterSize = param.offset + param.size;
@@ -125,6 +136,12 @@ namespace Aegix::Graphics
 		}
 	}
 
+	void MaterialTemplate::drawInstanced(VkCommandBuffer cmd, uint32_t instanceCount)
+	{
+		AGX_ASSERT_X(m_pipeline.hasFlag(Pipeline::Flags::MeshShader), "Instanced draw is currently only supported for mesh shader pipelines");
+		vkCmdDrawMeshTasksEXT(cmd, instanceCount, 1, 1);
+	}
+
 	void MaterialTemplate::printInfo() const
 	{
 		ALOG::info("Material Template Info:");
@@ -132,12 +149,8 @@ namespace Aegix::Graphics
 		ALOG::info("  Parameters:");
 		for (const auto& [name, param] : m_parameters)
 		{
-			ALOG::info("    Name: {}, Type: {}, Binding: {}, Offset: {}, Size: {}",
-				name,
-				static_cast<int>(param.type),
-				param.binding,
-				param.offset,
-				param.size);
+			ALOG::info("    Name: {}, Binding: {}, Offset: {}, Size: {}",
+				name, param.binding, param.offset, param.size);
 		}
 	}
 }

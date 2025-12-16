@@ -4,6 +4,7 @@
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/render_systems/render_system.h"
+#include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
 {
@@ -14,13 +15,13 @@ namespace Aegix::Graphics
 		glm::mat4 inverseView{ 1.0f };
 	};
 
-	class GeometryPass : public FrameGraphRenderPass
+	class GeometryPass : public FGRenderPass
 	{
 	public:
-		GeometryPass(FrameGraph& framegraph);
+		GeometryPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 		template<typename T, typename... Args>
 			requires std::is_base_of_v<RenderSystem, T>&& std::is_constructible_v<T, Args...>
@@ -35,12 +36,12 @@ namespace Aegix::Graphics
 
 		void updateUBO(const FrameInfo& frameInfo);
 
-		FrameGraphResourceHandle m_position;
-		FrameGraphResourceHandle m_normal;
-		FrameGraphResourceHandle m_albedo;
-		FrameGraphResourceHandle m_arm;
-		FrameGraphResourceHandle m_emissive;
-		FrameGraphResourceHandle m_depth;
+		FGResourceHandle m_position;
+		FGResourceHandle m_normal;
+		FGResourceHandle m_albedo;
+		FGResourceHandle m_arm;
+		FGResourceHandle m_emissive;
+		FGResourceHandle m_depth;
 
 		std::vector<std::unique_ptr<RenderSystem>> m_renderSystems;
 

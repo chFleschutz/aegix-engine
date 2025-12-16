@@ -18,22 +18,22 @@ namespace Aegix::Graphics
 		float power{ 2.0f };
 	};
 
-	class SSAOPass : public FrameGraphRenderPass
+	class SSAOPass : public FGRenderPass
 	{
 	public:
 		inline static constexpr uint32_t SAMPLE_COUNT = 64;
 		inline static constexpr uint32_t NOISE_SIZE = 16;
 
-		SSAOPass();
+		SSAOPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
-		FrameGraphResourceHandle m_position;
-		FrameGraphResourceHandle m_normal;
-		FrameGraphResourceHandle m_ssao;
+		FGResourceHandle m_position;
+		FGResourceHandle m_normal;
+		FGResourceHandle m_ssao;
 
 		std::unique_ptr<Pipeline> m_pipeline;
 		std::unique_ptr<DescriptorSetLayout> m_descriptorSetLayout;

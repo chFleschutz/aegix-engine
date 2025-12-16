@@ -1,25 +1,12 @@
-import "modules/geometry";
-import "modules/constants";
-import "modules/tbn";
-import "modules/bindless";
+import modules.bindless;
+import modules.constants;
+import modules.geometry;
+import modules.tbn;
+import modules.indirect_draw;
 
-static const uint NUM_THREADS = 32;
+static const uint MESH_GROUP_SIZE = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
-
-struct TaskPayload
-{
-    // Empty for now
-    uint dummy;
-};
-
-struct MSOut
-{
-    float4 position: SV_Position;
-    float3 worldPosition;
-    float3 worldNormal;
-    float2 uv;
-};
 
 struct Material
 {
@@ -33,45 +20,37 @@ struct Material
     bindless::Handle<SampledImage2D> metalRoughnessMap;
     bindless::Handle<SampledImage2D> aoMap;
     bindless::Handle<SampledImage2D> emissiveMap;
-};
+}
 
-public struct Push
+struct MSOut
 {
-    float3x4 modelRaw;
-    float3 normalRow0; 
-    bindless::Handle<UniformBuffer<geometry::Global>> global;
-    float3 normalRow1;
-    bindless::Handle<UniformBuffer<geometry::Mesh>> mesh;
-    float3 normalRow2;
-    bindless::Handle<UniformBuffer<Material>> material;
+    float4 position : SV_Position;
+    float3 worldPosition;
+    float3 worldNormal;
+    float2 uv;
+    nointerpolation bindless::Handle<UniformBuffer<Material>> material;
+}
 
-    property float4x4 modelMatrix
-    {
-        get { return float4x4(modelRaw, float4(0.0, 0.0, 0.0, 1.0)); }
-    }
-
-    property float3x3 normalMatrix
-    {
-        get { return float3x3(normalRow0, normalRow1, normalRow2); }
-    }
-};
-
-[vk::push_constant] Push push;
+struct TaskPayload
+{
+    uint instanceID;
+}
 
 // Mesh Shader --------------------
 
 [shader("mesh")]
-[numthreads(NUM_THREADS, 1, 1)]
+[numthreads(MESH_GROUP_SIZE, 1, 1)]
 [outputtopology("triangle")]
 func meshMain(
-    uint3 groupID: SV_GroupID,
+    uint3 groupID: SV_GroupID, 
     uint3 threadID: SV_GroupThreadID,
-    in payload TaskPayload taskPayload,
-    out vertices MSOut meshVertices[MAX_VERTICES],
+    in payload TaskPayload inPayload,
+    out vertices MSOut meshVertices[MAX_VERTICES], 
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    let global = push.global.get();
-    let mesh = push.mesh.get();
+    let global = indirectDraw::pc.global.get();
+    let instance = indirectDraw::getInstance(inPayload.instanceID);
+    let mesh = instance.mesh.get();
     let meshlet = mesh.meshlet.get()[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
@@ -79,20 +58,21 @@ func meshMain(
     float4x4 viewProjection = mul(global.projection, global.view);
 
     // Emit vertices
-    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += NUM_THREADS)
+    for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += MESH_GROUP_SIZE)
     {
         uint index = mesh.meshletIndex.get()[meshlet.vertexOffset + i];
         let v = mesh.vertex.get()[index];
 
-        float4 worldPos = mul(push.modelMatrix, float4(v.position, 1.0));
+        float4 worldPos = mul(instance.modelMatrix, float4(v.position, 1.0));
         meshVertices[i].position = mul(viewProjection, worldPos);
         meshVertices[i].worldPosition = worldPos.xyz;
-        meshVertices[i].worldNormal = normalize(mul(push.normalMatrix, v.normal));
+        meshVertices[i].worldNormal = normalize(mul(instance.normalMatrix, v.normal));
         meshVertices[i].uv = v.uv;
+        meshVertices[i].material = instance.material.asHandle<UniformBuffer<Material>>();
     }
 
     // Emit primitives
-    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += NUM_THREADS)
+    for (uint i = threadID.x; i < uint(meshlet.primitiveCount); i += MESH_GROUP_SIZE)
     {
         uint offset = meshlet.primitiveOffset + i * 3;
         meshPrimitives[i] = uint3(
@@ -107,7 +87,7 @@ func meshMain(
 [shader("fragment")]
 func fragmentMain(MSOut input, out geometry::GBuffer output)
 {
-    let mat = push.material.get();
+    let mat = input.material.get();
 
     float3 albedo = mat.albedoMap.get().Sample(input.uv).rgb * mat.albedo;
     float3 normal = mat.normalMap.get().Sample(input.uv).rgb * 2.0 - 1.0;

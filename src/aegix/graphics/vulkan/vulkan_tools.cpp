@@ -2,6 +2,7 @@
 #include "vulkan_tools.h"
 
 #include "graphics/globals.h"
+#include "graphics/vulkan/vulkan_context.h"
 #include "utils/file.h"
 
 namespace Aegix::Tools
@@ -278,18 +279,24 @@ namespace Aegix::Tools
 			1, &region);
 	}
 
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize)
+	void vk::cmdDispatch(VkCommandBuffer cmd, uint32_t minThreads, uint32_t groupSize)
 	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountX = (minThreads + groupSize - 1) / groupSize;
+		vkCmdDispatch(cmd, groupCountX, 1, 1);
+	}
+
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent2D minThreads, VkExtent2D groupSize)
+	{
+		uint32_t groupCountX = (minThreads.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (minThreads.height + groupSize.height - 1) / groupSize.height;
 		vkCmdDispatch(cmd, groupCountX, groupCountY, 1);
 	}
 
-	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize)
+	void vk::cmdDispatch(VkCommandBuffer cmd, VkExtent3D minThreads, VkExtent3D groupSize)
 	{
-		uint32_t groupCountX = (extent.width + groupSize.width - 1) / groupSize.width;
-		uint32_t groupCountY = (extent.height + groupSize.height - 1) / groupSize.height;
-		uint32_t groupCountZ = (extent.depth + groupSize.depth - 1) / groupSize.depth;
+		uint32_t groupCountX = (minThreads.width + groupSize.width - 1) / groupSize.width;
+		uint32_t groupCountY = (minThreads.height + groupSize.height - 1) / groupSize.height;
+		uint32_t groupCountZ = (minThreads.depth + groupSize.depth - 1) / groupSize.depth;
 		vkCmdDispatch(cmd, groupCountX, groupCountY, groupCountZ);
 	}
 
@@ -331,6 +338,20 @@ namespace Aegix::Tools
 			0, nullptr,
 			0, nullptr,
 			static_cast<uint32_t>(barriers.size()), barriers.data()
+		);
+	}
+
+	void vk::cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage, 
+		const std::vector<VkBufferMemoryBarrier>& bufferBarriers, const std::vector<VkImageMemoryBarrier>& imageBarriers)
+	{
+		if (bufferBarriers.empty() && imageBarriers.empty())
+			return;
+
+		vkCmdPipelineBarrier(commandBuffer,
+			srcStage, dstStage, 0,
+			0, nullptr,
+			static_cast<uint32_t>(bufferBarriers.size()), bufferBarriers.data(),
+			static_cast<uint32_t>(imageBarriers.size()), imageBarriers.data()
 		);
 	}
 
@@ -405,6 +426,34 @@ namespace Aegix::Tools
 		if constexpr (Graphics::ENABLE_VALIDATION)
 		{
 			vkCmdEndDebugUtilsLabelEXT(cmd);
+		}
+	}
+
+	void vk::setDebugUtilsObjectName(const Graphics::Buffer& buffer, const char* name)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsObjectNameInfoEXT nameInfo{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+				.objectType = VK_OBJECT_TYPE_BUFFER,
+				.objectHandle = reinterpret_cast<uint64_t>(buffer.buffer()),
+				.pObjectName = name,
+			};
+			vkSetDebugUtilsObjectNameEXT(Graphics::VulkanContext::device(), &nameInfo);
+		}
+	}
+
+	void vk::setDebugUtilsObjectName(const Graphics::Image& image, const char* name)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsObjectNameInfoEXT nameInfo{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+				.objectType = VK_OBJECT_TYPE_IMAGE,
+				.objectHandle = reinterpret_cast<uint64_t>(image.image()),
+				.pObjectName = name,
+			};
+			vkSetDebugUtilsObjectNameEXT(Graphics::VulkanContext::device(), &nameInfo);
 		}
 	}
 }

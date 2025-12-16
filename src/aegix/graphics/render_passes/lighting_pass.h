@@ -2,6 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
+#include "graphics/descriptors.h"
 
 namespace Aegix::Graphics
 {
@@ -43,13 +44,13 @@ namespace Aegix::Graphics
 		LightingViewMode viewMode{ LightingViewMode::SceneColor };
 	};
 
-	class LightingPass : public FrameGraphRenderPass
+	class LightingPass : public FGRenderPass
 	{
 	public:
-		LightingPass();
+		LightingPass(FGResourcePool& pool);
 
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override;
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override;
+		virtual auto info() -> FGNode::Info override;
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 		virtual void drawUI() override;
 
 	private:
@@ -57,13 +58,13 @@ namespace Aegix::Graphics
 		auto createIBLSetLayout() -> DescriptorSetLayout;
 		void updateLightingUBO(const FrameInfo& frameInfo);
 
-		FrameGraphResourceHandle m_sceneColor;
-		FrameGraphResourceHandle m_position;
-		FrameGraphResourceHandle m_normal;
-		FrameGraphResourceHandle m_albedo;
-		FrameGraphResourceHandle m_arm;
-		FrameGraphResourceHandle m_emissive;
-		FrameGraphResourceHandle m_ssao;
+		FGResourceHandle m_sceneColor;
+		FGResourceHandle m_position;
+		FGResourceHandle m_normal;
+		FGResourceHandle m_albedo;
+		FGResourceHandle m_arm;
+		FGResourceHandle m_emissive;
+		FGResourceHandle m_ssao;
 
 		LightingViewMode m_viewMode{ LightingViewMode::SceneColor };
 		float m_ambientOcclusionFactor{ 1.0f };

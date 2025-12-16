@@ -113,20 +113,6 @@ namespace Aegix::Graphics
 		Tools::vk::cmdTransitionImageLayout(cmd, m_image, m_format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, m_mipLevels, m_layerCount);
 	}
 
-	void Image::resize(VkExtent3D extent, VkImageUsageFlags usage)
-	{
-		destroy();
-
-		CreateInfo config{
-			.format = m_format,
-			.extent = extent,
-			.mipLevels = m_mipLevels,
-			.layerCount = m_layerCount,
-			.usage = usage
-		};
-		create(config);
-	}
-
 	void Image::transitionLayout(VkImageLayout newLayout)
 	{
 		if (m_layout == newLayout)

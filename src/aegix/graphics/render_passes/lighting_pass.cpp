@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "lighting_pass.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 #include "scene/components.h"
@@ -9,7 +10,7 @@
 
 namespace Aegix::Graphics
 {
-	LightingPass::LightingPass() : 
+	LightingPass::LightingPass(FGResourcePool& pool) :
 		m_ubo{ Buffer::uniformBuffer(sizeof(LightingUniforms)) },
 		m_gbufferSetLayout{ createGBufferSetLayout() },
 		m_iblSetLayout{ createIBLSetLayout() }
@@ -27,53 +28,43 @@ namespace Aegix::Graphics
 			.addDescriptorSetLayout(m_iblSetLayout)
 			.setShaderStage(SHADER_DIR "pbr/pbr_lighting.slang.spv", "computeMain")
 			.buildUnique();
+
+		m_position = pool.addReference("Position",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_normal = pool.addReference("Normal",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_albedo = pool.addReference("Albedo",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_arm = pool.addReference("ARM",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_emissive = pool.addReference("Emissive",
+			FGResource::Usage::ComputeReadStorage);
+
+		//m_ssao = pool.addReference("SSAO",
+		//	FGResource::Usage::ComputeReadStorage);
+
+		m_sceneColor = pool.addImage("SceneColor",
+			FGResource::Usage::ComputeWriteStorage,
+			FGTextureInfo{
+				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
+				.resizeMode = FGResizeMode::SwapChainRelative
+			});
 	}
 
-	auto LightingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+	auto LightingPass::info() -> FGNode::Info
 	{
-		m_position = builder.add({ "Position",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
-		m_normal = builder.add({ "Normal",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
-		m_albedo = builder.add({ "Albedo",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
-		m_arm = builder.add({ "ARM",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
-		m_emissive = builder.add({ "Emissive",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Sampled
-			});
-		//m_ssao = builder.add({ "SSAO",
-		//	FrameGraphResourceType::Reference,
-		//	FrameGraphResourceUsage::Sampled
-		//	});
-
-		m_sceneColor = builder.add({ "SceneColor",
-			FrameGraphResourceType::Texture,
-			FrameGraphResourceUsage::Compute,
-			FrameGraphResourceTextureInfo{
-				.format = VK_FORMAT_R16G16B16A16_SFLOAT,
-				.extent = { 0, 0 },
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
-			});
-
-		return FrameGraphNodeCreateInfo{
+		return FGNode::Info{
 			.name = "Lighting",
-			.inputs = { m_position, m_normal, m_albedo, m_arm, m_emissive/*, m_ssao*/ },
-			.outputs = { m_sceneColor }
+			.reads = { m_position, m_normal, m_albedo, m_arm, m_emissive/*, m_ssao*/ },
+			.writes = { m_sceneColor }
 		};
 	}
 
-	void LightingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void LightingPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		VkCommandBuffer cmd = frameInfo.cmd;
 
@@ -82,13 +73,13 @@ namespace Aegix::Graphics
 		AGX_ASSERT_X(environment.irradiance, "Environment irradiance map is not set");
 
 		DescriptorWriter{ m_gbufferSetLayout }
-			.writeImage(0, resources.texture(m_sceneColor))
-			.writeImage(1, resources.texture(m_position))
-			.writeImage(2, resources.texture(m_normal))
-			.writeImage(3, resources.texture(m_albedo))
-			.writeImage(4, resources.texture(m_arm))
-			.writeImage(5, resources.texture(m_emissive))
-			//.writeImage(6, resources.texture(m_ssao))
+			.writeImage(0, pool.texture(m_sceneColor))
+			.writeImage(1, pool.texture(m_position))
+			.writeImage(2, pool.texture(m_normal))
+			.writeImage(3, pool.texture(m_albedo))
+			.writeImage(4, pool.texture(m_arm))
+			.writeImage(5, pool.texture(m_emissive))
+			//.writeImage(6, pool.texture(m_ssao))
 			.writeBuffer(7, m_ubo, frameInfo.frameIndex)
 			.update(m_gbufferSets[frameInfo.frameIndex]);
 
@@ -122,11 +113,11 @@ namespace Aegix::Graphics
 	{
 		return DescriptorSetLayout::Builder{}
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(2, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(3, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(4, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
+			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.addBinding(7, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();

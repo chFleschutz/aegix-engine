@@ -32,11 +32,11 @@ static const float EMISSIVE_INTENSITY = 2.0;
 static const float MAX_REFLECTION_LOD = 4.0;
 
 [vk::binding(0, 0)] RWTexture2D<float4> sceneColorMap;
-[vk::binding(1, 0)] Texture2D<float4> positionMap;
-[vk::binding(2, 0)] Texture2D<float4> normalMap;
-[vk::binding(3, 0)] Texture2D<float4> albedoMap;
-[vk::binding(4, 0)] Texture2D<float4> armMap;
-[vk::binding(5, 0)] Texture2D<float4> emissiveMap;
+[vk::binding(1, 0)] RWTexture2D<float4> positionMap;
+[vk::binding(2, 0)] RWTexture2D<float4> normalMap;
+[vk::binding(3, 0)] RWTexture2D<float4> albedoMap;
+[vk::binding(4, 0)] RWTexture2D<float4> armMap;
+[vk::binding(5, 0)] RWTexture2D<float4> emissiveMap;
 //[vk::binding(6, 0)] Sampler2D ssaoMap;
 [vk::binding(7, 0)] ConstantBuffer<Lighting> lighting;
 

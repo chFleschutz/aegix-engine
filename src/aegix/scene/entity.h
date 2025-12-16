@@ -14,6 +14,9 @@ namespace Aegix::Scene
 {
 	class Scene;
 
+	template<typename T>
+	concept TagComponent = std::is_empty_v<T>;
+
 	/// @brief An entity represents any object in a scene
 	/// @note This class is ment to be passed by value since its just an id
 	class Entity
@@ -58,6 +61,14 @@ namespace Aegix::Scene
 		{
 			AGX_ASSERT_X(!has<T>(), "Cannot add Component: Entity already has the component");
 			return registry().emplace<T>(m_id, std::forward<Args>(args)...);
+		}
+
+		/// @brief Overload to add tag components (empty structs) to the entity
+		template<TagComponent T>
+		auto add()
+		{
+			AGX_ASSERT_X(!has<T>(), "Cannot add Component: Entity already has the component");
+			registry().emplace<T>(m_id);
 		}
 
 		/// @brief Overload to add a script derived from Aegix::Scripting::ScriptBase to the entity

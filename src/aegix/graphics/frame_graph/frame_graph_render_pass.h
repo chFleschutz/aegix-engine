@@ -1,34 +1,36 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph.h"
+#include "graphics/frame_graph/frame_graph_node.h"
 #include "graphics/frame_graph/frame_graph_resource_pool.h"
 #include "graphics/frame_info.h"
-#include "graphics/render_context.h"
 
 // Included here to avoid issues in child classes
 #include "scene/entity.h" 
 
 namespace Aegix::Graphics
 {
-	class FrameGraphRenderPass
+	class FGRenderPass
 	{
 	public:
-		FrameGraphRenderPass() = default;
-		FrameGraphRenderPass(const FrameGraphRenderPass&) = delete;
-		FrameGraphRenderPass(FrameGraphRenderPass&&) = delete;
-		virtual ~FrameGraphRenderPass() = default;
+		FGRenderPass() = default;
+		FGRenderPass(const FGRenderPass&) = delete;
+		FGRenderPass(FGRenderPass&&) = delete;
+		virtual ~FGRenderPass() = default;
 
-		FrameGraphRenderPass& operator=(const FrameGraphRenderPass&) = delete;
-		FrameGraphRenderPass& operator=(FrameGraphRenderPass&&) = delete;
+		auto operator=(const FGRenderPass&) -> FGRenderPass& = delete;
+		auto operator=(FGRenderPass&&) -> FGRenderPass& = delete;
 
 		/// @brief Information required to create a FrameGraphNode (primarily for defining inputs and outputs)
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo = 0;
+		virtual auto info() -> FGNode::Info = 0;
 
 		/// @brief Called when resource should be created (at startup, window resize)
-		virtual void createResources(FrameGraphResourcePool& resources) {}
+		virtual void createResources(FGResourcePool& resources) {}
+
+		/// @brief Called when the scene has been initialized (after loading)
+		virtual void sceneInitialized(FGResourcePool& resources, Scene::Scene& scene) {}
 
 		/// @brief Execute the render pass
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) = 0;
+		virtual void execute(FGResourcePool& resources, const FrameInfo& frameInfo) = 0;
 
 		/// @brief Draw the UI for the render pass in the renderer panel
 		virtual void drawUI() {}

@@ -27,7 +27,7 @@ namespace Aegix::Graphics
 		static auto storageBuffer(VkDeviceSize size, uint32_t instanceCount = 1) -> Buffer::CreateInfo;
 		static auto vertexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
 		static auto indexBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
-		static auto stagingBuffer(VkDeviceSize size) -> Buffer::CreateInfo;
+		static auto stagingBuffer(VkDeviceSize size, uint32_t instanceCount = 1, VkBufferUsageFlags otherUsage = 0) -> Buffer::CreateInfo;
 
 		Buffer() = default;
 		explicit Buffer(const CreateInfo& info);
@@ -50,10 +50,12 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto descriptorBufferInfo(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const -> VkDescriptorBufferInfo;
 		[[nodiscard]] auto descriptorBufferInfoFor(uint32_t index) const -> VkDescriptorBufferInfo;
 
-		/// @brief Map the buffer memory to allow writing to it
+		/// @brief Map the buffer memory to allow writing to it 
+		/// @note Consider using persistent mapped memory to avoid repeated map/unmap calls
 		void map();
 
 		/// @brief Unmap the buffer memory
+		/// @note Consider using persistent mapped memory to avoid repeated map/unmap calls
 		void unmap();
 
 		// TODO: Rework these write functions to have:
@@ -86,8 +88,12 @@ namespace Aegix::Graphics
 		/// @brief Uploads data to the buffer using a staging buffer (Used for device local memory)
 		void upload(const void* data, VkDeviceSize size);
 
+		/// @brief Copy data into the mapped buffer at an offset of 'index * alignmentSize'
+		void copy(const void* data, VkDeviceSize size, uint32_t index = 0);
+
 		/// @brief Copy the buffer to another buffer
 		void copyTo(Buffer& dest, VkDeviceSize size);
+		void copyTo(VkCommandBuffer cmd, Buffer& dest, uint32_t srcIndex, uint32_t destIndex) const;
 
 		template<typename T>
 		void upload(const std::vector<T>& data)
@@ -95,6 +101,23 @@ namespace Aegix::Graphics
 			AGX_ASSERT_X(!data.empty(), "Data vector is empty");
 			AGX_ASSERT_X(sizeof(T) * data.size() <= m_bufferSize, "Data size exceeds buffer size");
 			upload(data.data(), sizeof(T) * data.size());
+		}
+
+		template<typename T>
+		void copy(const std::vector<T>& src, uint32_t index = 0)
+		{
+			AGX_ASSERT_X(!src.empty(), "Source vector is empty");
+			AGX_ASSERT_X(sizeof(T) * src.size() <= m_instanceSize, "Source data size exceeds buffer size");
+			copy(src.data(), sizeof(T) * src.size(), index);
+		}
+
+		template<typename T = void>
+		auto data(uint32_t index = 0) -> T*
+		{
+			AGX_ASSERT_X(m_mapped, "Called mappedAs on buffer before map");
+			AGX_ASSERT_X(sizeof(T) <= m_instanceSize, "Mapped type size exceeds instance size");
+			AGX_ASSERT_X(index < m_instanceCount, "Mapped index exceeds instance count");
+			return reinterpret_cast<T*>(static_cast<uint8_t*>(m_mapped) + index * m_alignmentSize);
 		}
 
 	private:

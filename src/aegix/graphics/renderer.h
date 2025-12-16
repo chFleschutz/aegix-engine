@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/window.h"
+#include "draw_batch_registry.h"
 #include "graphics/bindless/bindless_descriptor_set.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
@@ -31,15 +32,18 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto window() -> Core::Window& { return m_window; }
 		[[nodiscard]] auto swapChain() -> SwapChain& { return m_swapChain; }
 		[[nodiscard]] auto bindlessDescriptorSet() -> BindlessDescriptorSet& { return m_bindlessDescriptorSet; }
+		[[nodiscard]] auto drawBatchRegistry() -> DrawBatchRegistry& { return m_drawBatchRegistry; }
 		[[nodiscard]] auto frameGraph() -> FrameGraph& { return m_frameGraph; }
 		[[nodiscard]] auto aspectRatio() const -> float { return m_swapChain.aspectRatio(); }
 		[[nodiscard]] auto isFrameStarted() const -> bool { return m_isFrameStarted; }
 		[[nodiscard]] auto currentCommandBuffer() const -> VkCommandBuffer;
 		[[nodiscard]] auto frameIndex() const -> uint32_t;
 
-		/// @brief Builds the frame graph and all required resources
-		/// @note This has to be AFTER the engine is fully initialized
-		void compileFrameGraph() { createFrameGraph(); }
+		/// @brief Called when the scene has changed and BEFORE it is initialized
+		void sceneChanged(Scene::Scene& scene);
+
+		/// @brief Called when the scene has changed and AFTER it is initialized
+		void sceneInitialized(Scene::Scene& scene);
 
 		/// @brief Renders the given scene
 		void renderFrame(Scene::Scene& scene, UI::UI& ui);
@@ -64,6 +68,7 @@ namespace Aegix::Graphics
 		bool m_isFrameStarted{ false };
 
 		BindlessDescriptorSet m_bindlessDescriptorSet;
+		DrawBatchRegistry m_drawBatchRegistry;
 		FrameGraph m_frameGraph;
 	};
 }

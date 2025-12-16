@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "post_processing_pass.h"
 
+#include "core/globals.h"
 #include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/vulkan/vulkan_context.h"
 
@@ -8,8 +9,8 @@
 
 namespace Aegix::Graphics
 {
-	PostProcessingPass::PostProcessingPass() : 
-		m_descriptorSetLayout{ createDescriptorSetLayout() }, 
+	PostProcessingPass::PostProcessingPass(FGResourcePool& pool) :
+		m_descriptorSetLayout{ createDescriptorSetLayout() },
 		m_pipeline{ createPipeline() }
 	{
 		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
@@ -17,51 +18,41 @@ namespace Aegix::Graphics
 		{
 			m_descriptorSets.emplace_back(m_descriptorSetLayout);
 		}
+
+		m_sceneColor = pool.addReference("SceneColor", 
+			FGResource::Usage::ComputeReadStorage);
+
+		m_bloom = pool.addReference("Bloom",
+			FGResource::Usage::ComputeReadStorage);
+
+		m_final = pool.addImage("Final",
+			FGResource::Usage::ComputeWriteStorage,
+			FGTextureInfo{
+				.format = VK_FORMAT_R8G8B8A8_UNORM,
+				.resizeMode = FGResizeMode::SwapChainRelative,
+			});
 	}
 
-	auto PostProcessingPass::createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo
+	auto PostProcessingPass::info() -> FGNode::Info
 	{
-		m_sceneColor = builder.add({
-			"SceneColor",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute
-			});
-
-		m_bloom = builder.add({
-			"Bloom",
-			FrameGraphResourceType::Reference,
-			FrameGraphResourceUsage::Compute,
-			});
-
-		m_final = builder.add({
-			"Final",
-			FrameGraphResourceType::Texture,
-			FrameGraphResourceUsage::Compute,
-			FrameGraphResourceTextureInfo{
-				.format = VK_FORMAT_R8G8B8A8_UNORM,
-				.extent = { 0, 0},
-				.resizePolicy = ResizePolicy::SwapchainRelative
-				}
-			});
-
-		return FrameGraphNodeCreateInfo{
+		return FGNode::Info{
 			.name = "Post Processing",
-			.inputs = { m_sceneColor, m_bloom },
-			.outputs = { m_final }
+			.reads = { m_sceneColor, m_bloom },
+			.writes = { m_final }
 		};
 	}
 
-	void PostProcessingPass::createResources(FrameGraphResourcePool& resources)
+	void PostProcessingPass::createResources(FGResourcePool& pool)
 	{
 	}
 
-	void PostProcessingPass::execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo)
+	void PostProcessingPass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
 		// TODO: Dont update descriptors every frame
 		DescriptorWriter{ m_descriptorSetLayout }
-			.writeImage(0, resources.texture(m_final))
-			.writeImage(1, resources.texture(m_sceneColor))
-			.writeImage(2, resources.texture(m_bloom))
+			.writeImage(0, pool.texture(m_final))
+			.writeImage(1, pool.texture(m_sceneColor))
+			.writeImage(2, pool.texture(m_bloom))
 			.update(m_descriptorSets[frameInfo.frameIndex]);
 
 		VkCommandBuffer cmd = frameInfo.cmd;

@@ -419,8 +419,17 @@ namespace Aegix::Graphics
 	void Texture::resize(VkExtent3D newSize, VkImageUsageFlags usage)
 	{
 		// TODO: Rework this, does not work for all textures (e.g. cube maps)
+		// TODO: This does not preserve existing data or layouts
 
-		m_image.resize(newSize, usage);
+		Image::CreateInfo imageInfo{
+			.format = m_image.format(),
+			.extent = newSize,
+			.mipLevels = m_image.mipLevels(),
+			.layerCount = m_image.layerCount(),
+			.usage = usage,
+			.imageType = VK_IMAGE_TYPE_2D,
+		};
+		m_image = Image{ imageInfo };
 
 		ImageView::CreateInfo viewInfo{
 			.baseMipLevel = 0,

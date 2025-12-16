@@ -5,22 +5,47 @@
 
 namespace Aegix::Graphics
 {
-	BindlessBuffer::BindlessBuffer(const Buffer::CreateInfo& bufferInfo) : 
-		m_buffer{ bufferInfo }
+	static auto allocateBindlessHandle(const Buffer& buffer) -> DescriptorHandle
 	{
 		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
-		if (bufferInfo.usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+		if (buffer.usage() & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
 		{
-			m_handle = bindlessSet.allocateStorageBuffer(m_buffer.descriptorBufferInfo());
+			return bindlessSet.allocateStorageBuffer(buffer.descriptorBufferInfo());
 		}
-		else if (bufferInfo.usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		else if (buffer.usage() & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
 		{
-			m_handle = bindlessSet.allocateUniformBuffer(m_buffer.descriptorBufferInfo());
+			return bindlessSet.allocateUniformBuffer(buffer.descriptorBufferInfo());
 		}
 		else
 		{
-			AGX_ASSERT_X(false, "BindlessBuffer only supports storage and uniform buffers");
+			AGX_ASSERT_X(false, "allocateBindlessHandle only supports storage and uniform buffers");
+			return DescriptorHandle{};
 		}
+	}
+
+	static auto allocateBindlessHandle(const Buffer& buffer, uint32_t index) -> DescriptorHandle
+	{
+		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+		if (buffer.usage() & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+		{
+			return bindlessSet.allocateStorageBuffer(buffer.descriptorBufferInfoFor(index));
+		}
+		else if (buffer.usage() & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+		{
+			return bindlessSet.allocateUniformBuffer(buffer.descriptorBufferInfoFor(index));
+		}
+		else
+		{
+			AGX_ASSERT_X(false, "allocateBindlessHandles only supports storage and uniform buffers");
+			return DescriptorHandle{};
+		}
+	}
+
+
+	BindlessBuffer::BindlessBuffer(const Buffer::CreateInfo& bufferInfo) : 
+		m_buffer{ bufferInfo },
+		m_handle{ allocateBindlessHandle(m_buffer) }
+	{
 	}
 
 	BindlessBuffer::BindlessBuffer(BindlessBuffer&& other) noexcept : 
@@ -47,6 +72,50 @@ namespace Aegix::Graphics
 		return *this;
 	}
 
+
+	BindlessMultiBuffer::BindlessMultiBuffer(const Buffer::CreateInfo& bufferInfo) :
+		m_buffer{ bufferInfo }
+	{
+		m_handles.resize(bufferInfo.instanceCount);
+		for (uint32_t i = 0; i < bufferInfo.instanceCount; i++)
+		{
+			m_handles[i] = allocateBindlessHandle(m_buffer, i);
+		}
+	}
+
+	BindlessMultiBuffer::BindlessMultiBuffer(BindlessMultiBuffer&& other) noexcept :
+		m_buffer{ std::move(other.m_buffer) },
+		m_handles{ std::move(other.m_handles) }
+	{
+		other.m_handles.clear();
+	}
+
+	BindlessMultiBuffer::~BindlessMultiBuffer()
+	{
+		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+		for (auto& handle : m_handles)
+		{
+			bindlessSet.freeHandle(handle);
+		}
+	}
+
+	auto BindlessMultiBuffer::operator=(BindlessMultiBuffer&& other) noexcept -> BindlessMultiBuffer&
+	{
+		if (this != &other)
+		{
+			auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
+			for (auto& handle : m_handles)
+			{
+				bindlessSet.freeHandle(handle);
+			}
+			m_buffer = std::move(other.m_buffer);
+			m_handles = std::move(other.m_handles);
+			other.m_handles.clear();
+		}
+		return *this;
+	}
+
+
 	BindlessFrameBuffer::BindlessFrameBuffer(const Buffer::CreateInfo& bufferInfo) :
 		m_buffer{ bufferInfo }
 	{
@@ -54,20 +123,9 @@ namespace Aegix::Graphics
 			"BindlessBufferArray requires instanceCount to be equal to MAX_FRAMES_IN_FLIGHT");
 
 		auto& bindlessSet = Engine::renderer().bindlessDescriptorSet();
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			if (bufferInfo.usage & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
-			{
-				m_handles[i] = bindlessSet.allocateStorageBuffer(m_buffer.descriptorBufferInfoFor(i));
-			}
-			else if (bufferInfo.usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
-			{
-				m_handles[i] = bindlessSet.allocateUniformBuffer(m_buffer.descriptorBufferInfoFor(i));
-			}
-			else
-			{
-				AGX_ASSERT_X(false, "BindlessFrameBuffer only supports storage and uniform buffers");
-			}
+			m_handles[i] = allocateBindlessHandle(m_buffer, static_cast<uint32_t>(i));
 		}
 	}
 

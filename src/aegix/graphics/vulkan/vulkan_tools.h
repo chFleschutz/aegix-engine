@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/resources/texture.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/vulkan/volk_include.h"
 
 #define VK_CHECK(f)				\
@@ -39,14 +40,18 @@ namespace Aegix::Tools
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent2D extent);
 		void cmdCopyBufferToImage(VkCommandBuffer cmd, VkBuffer buffer, VkImage image, VkExtent3D extent, uint32_t layerCount);
 
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D extent, VkExtent2D groupSize);
-		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D extent, VkExtent3D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, uint32_t minThreads, uint32_t groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent2D minThreads, VkExtent2D groupSize);
+		void cmdDispatch(VkCommandBuffer cmd, VkExtent3D minThreads, VkExtent3D groupSize);
 
 		void cmdPipelineBarrier(VkCommandBuffer cmd, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,
 			VkImageAspectFlags aspectMask);
 
 		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
 			const std::vector<VkImageMemoryBarrier>& barriers);
+
+		void cmdPipelineBarrier(VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+			const std::vector<VkBufferMemoryBarrier>& bufferBarriers, const std::vector<VkImageMemoryBarrier>& imageBarriers);
 
 		void cmdScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
 
@@ -60,5 +65,8 @@ namespace Aegix::Tools
 
 		void cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color = glm::vec4{ 1.0f });
 		void cmdEndDebugUtilsLabel(VkCommandBuffer cmd);
+
+		void setDebugUtilsObjectName(const Graphics::Buffer& buffer, const char* name);
+		void setDebugUtilsObjectName(const Graphics::Image& image, const char* name);
 	}
 }

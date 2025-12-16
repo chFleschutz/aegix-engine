@@ -53,11 +53,12 @@ namespace Aegix::Graphics
 
 		void copyFrom(VkCommandBuffer cmd, const Buffer& src);
 
-		void resize(VkExtent3D extent, VkImageUsageFlags usage);
-
 		void transitionLayout(VkImageLayout newLayout);
 		void transitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout);
 		auto transitionLayoutDeferred(VkImageLayout newLayout) -> VkImageMemoryBarrier;
+
+		/// @brief Sets the current image layout WITHOUT any doing any transitions
+		void setLayout(VkImageLayout layout) { m_layout = layout; }
 
 		void generateMipmaps(VkCommandBuffer cmd, VkImageLayout finalLayout);
 

@@ -2,6 +2,7 @@
 #include "static_mesh.h"
 
 #include "graphics/vulkan/volk_include.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
@@ -87,9 +88,13 @@ namespace Aegix::Graphics
 
 		MeshData meshData{
 			.vertexBufferHandle = m_vertexBuffer.handle(),
+			.indexBufferHandle = m_indexBuffer.handle(),
 			.meshletBufferHandle = m_meshletBuffer.handle(),
 			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle(),
-			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle()
+			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle(),
+			.vertexCount = m_vertexCount,
+			.indexCount = m_indexCount,
+			.meshletCount = m_meshletCount
 		};
 		AGX_ASSERT_X(meshData.vertexBufferHandle.isValid(), "Invalid vertex buffer handle in StaticMesh!");
 		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
@@ -106,6 +111,13 @@ namespace Aegix::Graphics
 			.writeBuffer(1, m_meshletPrimitiveBuffer)
 			.writeBuffer(2, m_vertexBuffer)
 			.update(m_attributeDescriptor);
+
+		Tools::vk::setDebugUtilsObjectName(m_vertexBuffer.buffer(), "StaticMesh Vertices");
+		Tools::vk::setDebugUtilsObjectName(m_indexBuffer.buffer(), "StaticMesh Indices");
+		Tools::vk::setDebugUtilsObjectName(m_meshletBuffer.buffer(), "StaticMesh Meshlets");
+		Tools::vk::setDebugUtilsObjectName(m_meshletIndexBuffer.buffer(), "StaticMesh Meshlet Indices");
+		Tools::vk::setDebugUtilsObjectName(m_meshletPrimitiveBuffer.buffer(), "StaticMesh Meshlet Primitives");
+		Tools::vk::setDebugUtilsObjectName(m_meshDataBuffer.buffer(), "StaticMesh Mesh Data");
 	}
 
 	void StaticMesh::draw(VkCommandBuffer cmd) const

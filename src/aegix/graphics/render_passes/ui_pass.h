@@ -5,47 +5,48 @@
 
 namespace Aegix::Graphics
 {
-	class UIPass : public FrameGraphRenderPass
+	class UIPass : public FGRenderPass
 	{
 	public:
-		virtual auto createInfo(FrameGraphResourceBuilder& builder) -> FrameGraphNodeCreateInfo override
+		UIPass(FGResourcePool& pool)
 		{
-			m_final = builder.add({
-				"Final", 
-				FrameGraphResourceType::Reference,
-				FrameGraphResourceUsage::ColorAttachment
-				});
+			m_final = pool.addReference("Final",
+				FGResource::Usage::ColorAttachment);
+		}
 
-			return FrameGraphNodeCreateInfo{
+		virtual auto info() -> FGNode::Info override
+		{
+			return FGNode::Info{
 				.name = "UI",
-				.inputs = { m_final },
-				.outputs = { m_final }
+				.reads = {},
+				.writes = { m_final }
 			};
 		}
 
-		virtual void execute(FrameGraphResourcePool& resources, const FrameInfo& frameInfo) override
+		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override
 		{
 			VkCommandBuffer cmd = frameInfo.cmd;
 
-			auto& texture = resources.texture(m_final);
+			auto& texture = pool.texture(m_final);
 			auto attachment = Tools::renderingAttachmentInfo(texture, VK_ATTACHMENT_LOAD_OP_LOAD, {});
 
 			VkExtent2D extent = frameInfo.swapChainExtent;
-			VkRenderingInfo renderingInfo{};
-			renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-			renderingInfo.renderArea = { 0, 0, extent.width, extent.height };
-			renderingInfo.layerCount = 1;
-			renderingInfo.colorAttachmentCount = 1;
-			renderingInfo.pColorAttachments = &attachment;
+			VkRenderingInfo renderingInfo{
+				.sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+				.renderArea = { 0, 0, extent.width, extent.height },
+				.layerCount = 1,
+				.colorAttachmentCount = 1,
+				.pColorAttachments = &attachment,
+			};
 
 			vkCmdBeginRendering(cmd, &renderingInfo);
-
-			frameInfo.ui.render(cmd);
-
+			{
+				frameInfo.ui.render(cmd);
+			}
 			vkCmdEndRendering(cmd);
 		}
 
 	private:
-		FrameGraphResourceHandle m_final;
+		FGResourceHandle m_final;
 	};
 }
