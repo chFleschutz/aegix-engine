@@ -51,7 +51,7 @@ public struct UniformBuffer<T, L = Std430DataLayout> : IBindlessResource
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.UniformBuffer;
 }
 
-public struct Unused : IBindlessResource
+public struct Undefined : IBindlessResource
 {
     public typedef IOpaqueDescriptor UnderlyingDescriptor;
     public static const bindless::DescriptorKind kind = bindless::DescriptorKind.Unkown;
@@ -95,7 +95,7 @@ namespace bindless
         Unkown,
     }
 
-    public struct Handle<T> where T : IBindlessResource
+    public struct Handle<T = Undefined> where T : IBindlessResource
     {
         // Packed as: | 2 bits type | 6 bits version | 24 bits index |
         uint handle;
@@ -105,23 +105,38 @@ namespace bindless
             handle = h;
         }
 
+        public property uint index
+        {
+            get { return handle & INDEX_MASK; }
+        }
+
+        public property uint version
+        {
+            get { return (handle >> INDEX_BITS) & VERSION_MASK; }
+        }
+
+        public property uint type
+        {
+            get { return (handle >> (INDEX_BITS + VERSION_BITS)) & TYPE_MASK; }
+        }
+
         public func get() -> T.UnderlyingDescriptor
         {
             if (T.kind == DescriptorKind.SampledImage)
             {
-                return g_sampledImages[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_sampledImages[NonUniformResourceIndex(index)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.StorageImage)
             {
-                return g_storageImages[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_storageImages[NonUniformResourceIndex(index)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.StorageBuffer)
             {
-                return g_storageBuffers[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_storageBuffers[NonUniformResourceIndex(index)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else if (T.kind == DescriptorKind.UniformBuffer)
             {
-                return g_uniformBuffers[NonUniformResourceIndex(index(handle))].asOpaqueDescriptor<T.UnderlyingDescriptor>();
+                return g_uniformBuffers[NonUniformResourceIndex(index)].asOpaqueDescriptor<T.UnderlyingDescriptor>();
             }
             else
             {
@@ -130,26 +145,10 @@ namespace bindless
             }
         }
 
-        // Explicit conversion to Handle<U> 
         public func asHandle<U>() -> Handle<U>
             where U : IBindlessResource
         {
             return Handle<U>(handle);
         }
     };
-
-    func index(uint handle) -> uint
-    {
-        return handle & INDEX_MASK;
-    }
-
-    func version(uint handle) -> uint
-    {
-        return (handle >> INDEX_BITS) & VERSION_MASK;
-    }
-
-    func type(uint handle) -> uint
-    {
-        return (handle >> (INDEX_BITS + VERSION_BITS)) & TYPE_MASK;
-    }
 }

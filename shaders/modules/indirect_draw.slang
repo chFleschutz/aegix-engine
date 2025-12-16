@@ -11,7 +11,7 @@ namespace indirectDraw
         public float3 normalRow0;
         public bindless::Handle<UniformBuffer<geometry::Mesh>> mesh;
         public float3 normalRow1;
-        public bindless::Handle<Unused> material;
+        public bindless::Handle material;
         public float3 normalRow2;
         public uint drawBatchID;
 
