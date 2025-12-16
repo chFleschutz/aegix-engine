@@ -267,11 +267,11 @@ namespace Aegix::Graphics
 			// Transition image layout between frames (last use frame N -> first use frame N + 1)
 			auto& node = m_pool.node(usage.producer);
 			auto interFrameBarrier = generateBarrier(node, usage.lastUse, usage.firstUse, resourceHandle);
-			
+
 			// Transition initial image layout (for correct use on the first frame)
 			auto& texInfo = std::get<FGTextureInfo>(res.info);
 			auto& texture = m_pool.texture(texInfo.handle);
-			VkImageLayout requiredLayout = interFrameBarrier 
+			VkImageLayout requiredLayout = interFrameBarrier
 				? node.imageBarriers.back().oldLayout
 				: FGResource::toAccessInfo(m_pool.resource(usage.firstUse).usage).layout;
 			texture.image().transitionLayout(cmd, requiredLayout);

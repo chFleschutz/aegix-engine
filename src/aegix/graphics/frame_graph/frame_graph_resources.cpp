@@ -8,6 +8,8 @@ namespace Aegix::Graphics
 		switch (usage)
 		{
 		default:
+			AGX_UNREACHABLE("Unknown FGResource::Usage value");
+			[[fallthrough]];
 		case Usage::None:
 			return AccessInfo{
 				.stage = 0,
@@ -67,6 +69,12 @@ namespace Aegix::Graphics
 				.stage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 				.access = 0,
 				.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			};
+		case Usage::IndirectBuffer:
+			return AccessInfo{
+				.stage = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
+				.access = VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
+				.layout = VK_IMAGE_LAYOUT_UNDEFINED
 			};
 		}
 	}

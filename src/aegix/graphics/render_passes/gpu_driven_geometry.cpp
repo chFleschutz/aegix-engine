@@ -76,7 +76,7 @@ namespace Aegix::Graphics
 	{
 		return FGNode::Info{
 			.name = "GPU Driven Geometry",
-			.reads = { m_staticInstanceData, m_dynamicInstanceData, m_visibleInstances },
+			.reads = { m_staticInstanceData, m_dynamicInstanceData, m_visibleInstances, m_indirectDrawCommands, m_indirectDrawCounts },
 			.writes = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth }
 		};
 	}

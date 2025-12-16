@@ -35,8 +35,6 @@ namespace Aegix::Graphics
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
 				.size = sizeof(VkDrawMeshTasksIndirectCommandEXT) * m_drawBatcher.instanceCount(),
-				// TODO: remove usage here
-				.usage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
 			});
 
 		m_indirectDrawCounts = pool.addBuffer("IndirectDrawCounts",
@@ -52,7 +50,7 @@ namespace Aegix::Graphics
 		return FGNode::Info{
 			.name = "Culling",
 			.reads = { m_staticInstances, m_dynamicInstances },
-			.writes = { m_visibleIndices, m_indirectDrawCounts },
+			.writes = { m_visibleIndices, m_indirectDrawCommands, m_indirectDrawCounts },
 		};
 	}
 
