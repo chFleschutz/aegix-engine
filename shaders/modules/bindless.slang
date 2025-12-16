@@ -100,6 +100,11 @@ namespace bindless
         // Packed as: | 2 bits type | 6 bits version | 24 bits index |
         uint handle;
 
+        public __init(uint h)
+        {
+            handle = h;
+        }
+
         public func get() -> T.UnderlyingDescriptor
         {
             if (T.kind == DescriptorKind.SampledImage)
@@ -123,6 +128,13 @@ namespace bindless
                 static_assert(false, "Unknown descriptor kind");
                 return T.UnderlyingDescriptor();
             }
+        }
+
+        // Explicit conversion to Handle<U> 
+        public func asHandle<U>() -> Handle<U>
+            where U : IBindlessResource
+        {
+            return Handle<U>(handle);
         }
     };
 

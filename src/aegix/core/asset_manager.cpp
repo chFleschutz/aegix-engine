@@ -93,8 +93,12 @@ namespace Aegix::Core
 			auto meshPipeline = Pipeline::GraphicsBuilder{}
 				.addDescriptorSetLayout(bindless.layout())
 				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128) 
-				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT,
+					SHADER_DIR "pbr/task_meshlet_cull.slang.spv")
+				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT,
 					SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
+				//.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+				//	SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
