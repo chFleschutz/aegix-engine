@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/resources/texture.h"
+#include "graphics/resources/buffer.h"
 #include "graphics/vulkan/volk_include.h"
 
 #define VK_CHECK(f)				\
@@ -64,5 +65,8 @@ namespace Aegix::Tools
 
 		void cmdBeginDebugUtilsLabel(VkCommandBuffer cmd, const char* label, const glm::vec4& color = glm::vec4{ 1.0f });
 		void cmdEndDebugUtilsLabel(VkCommandBuffer cmd);
+
+		void setDebugUtilsObjectName(const Graphics::Buffer& buffer, const char* name);
+		void setDebugUtilsObjectName(const Graphics::Image& image, const char* name);
 	}
 }

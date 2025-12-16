@@ -2,6 +2,7 @@
 #include "vulkan_tools.h"
 
 #include "graphics/globals.h"
+#include "graphics/vulkan/vulkan_context.h"
 #include "utils/file.h"
 
 namespace Aegix::Tools
@@ -425,6 +426,34 @@ namespace Aegix::Tools
 		if constexpr (Graphics::ENABLE_VALIDATION)
 		{
 			vkCmdEndDebugUtilsLabelEXT(cmd);
+		}
+	}
+
+	void vk::setDebugUtilsObjectName(const Graphics::Buffer& buffer, const char* name)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsObjectNameInfoEXT nameInfo{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+				.objectType = VK_OBJECT_TYPE_BUFFER,
+				.objectHandle = reinterpret_cast<uint64_t>(buffer.buffer()),
+				.pObjectName = name,
+			};
+			vkSetDebugUtilsObjectNameEXT(Graphics::VulkanContext::device(), &nameInfo);
+		}
+	}
+
+	void vk::setDebugUtilsObjectName(const Graphics::Image& image, const char* name)
+	{
+		if constexpr (Graphics::ENABLE_VALIDATION)
+		{
+			VkDebugUtilsObjectNameInfoEXT nameInfo{
+				.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+				.objectType = VK_OBJECT_TYPE_IMAGE,
+				.objectHandle = reinterpret_cast<uint64_t>(image.image()),
+				.pObjectName = name,
+			};
+			vkSetDebugUtilsObjectNameEXT(Graphics::VulkanContext::device(), &nameInfo);
 		}
 	}
 }

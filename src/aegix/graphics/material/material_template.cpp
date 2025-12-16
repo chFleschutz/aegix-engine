@@ -86,6 +86,8 @@ namespace Aegix::Graphics
 		{
 			m_textureCount++;
 			param.binding = m_textureCount;
+
+
 		}
 
 		m_parameterSize = param.offset + param.size;

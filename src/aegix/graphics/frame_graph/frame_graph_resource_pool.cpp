@@ -4,6 +4,7 @@
 #include "core/globals.h"
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan/vulkan_context.h"
+#include "graphics/vulkan/vulkan_tools.h"
 
 namespace Aegix::Graphics
 {
@@ -147,16 +148,16 @@ namespace Aegix::Graphics
 
 			if (auto bufferInfo = std::get_if<FGBufferInfo>(&res.info))
 			{
-				bufferInfo->handle = createBuffer(*bufferInfo);
+				bufferInfo->handle = createBuffer(*bufferInfo, res.name.c_str());
 			}
 			else if (auto textureInfo = std::get_if<FGTextureInfo>(&res.info))
 			{
-				textureInfo->handle = createImage(*textureInfo);
+				textureInfo->handle = createImage(*textureInfo, res.name.c_str());
 			}
 		}
 	}
 
-	auto FGResourcePool::createBuffer(FGBufferInfo& info) -> FGBufferHandle
+	auto FGResourcePool::createBuffer(FGBufferInfo& info, const char* name) -> FGBufferHandle
 	{
 		auto bufferCreateInfo = Buffer::CreateInfo{
 			.instanceSize = info.size,
@@ -166,10 +167,12 @@ namespace Aegix::Graphics
 			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
 		};
 		m_buffers.emplace_back(bufferCreateInfo);
+
+		Tools::vk::setDebugUtilsObjectName(m_buffers.back().buffer(), name);
 		return FGBufferHandle{ static_cast<uint32_t>(m_buffers.size() - 1) };
 	}
 
-	auto FGResourcePool::createImage(FGTextureInfo& info) -> FGTextureHandle
+	auto FGResourcePool::createImage(FGTextureInfo& info, const char* name) -> FGTextureHandle
 	{
 		if (info.resizeMode == FGResizeMode::SwapChainRelative)
 		{
@@ -182,7 +185,8 @@ namespace Aegix::Graphics
 		textureCreateInfo.image.usage = info.usage;
 		textureCreateInfo.image.mipLevels = info.mipLevels;
 		m_textures.emplace_back(textureCreateInfo);
-
+		
+		Tools::vk::setDebugUtilsObjectName(m_textures.back().image(), name);
 		return FGTextureHandle{ static_cast<uint32_t>(m_textures.size() - 1) };
 	}
 
