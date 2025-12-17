@@ -1,6 +1,6 @@
 import modules.constants;
 import modules.bindless;
-import modules.geometry;
+import modules.common;
 import modules.indirect_draw;
 
 static const uint TASK_GROUP_SIZE = 1;

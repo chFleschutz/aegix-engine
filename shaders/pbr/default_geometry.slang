@@ -1,6 +1,19 @@
-import "modules/geometry";
-import "modules/constants";
-import "modules/tbn";
+import modules.common;
+import modules.constants;
+import modules.tbn;
+
+struct Global
+{
+    float4x4 projection;
+    float4x4 view;
+    float4x4 viewInverse;
+}
+
+struct Push
+{
+    float4x4 model;
+    float4x4 normal;
+};
 
 struct Material
 {
@@ -19,8 +32,8 @@ struct VSOut
     [vk::location(2)] float2 uv;
 };
 
-[vk::push_constant] ConstantBuffer<geometry::Push> push;
-[vk::binding(0, 0)] ConstantBuffer<geometry::Global> global;
+[vk::push_constant] ConstantBuffer<Push> push;
+[vk::binding(0, 0)] ConstantBuffer<Global> global;
 
 [vk::binding(0, 1)] ConstantBuffer<Material> material;
 [vk::binding(1, 1)] Sampler2D albedoMap;
@@ -30,7 +43,7 @@ struct VSOut
 [vk::binding(5, 1)] Sampler2D emissiveMap;
 
 [shader("vertex")]
-func vertexMain(in geometry::VertexIn input, out VSOut output)
+func vertexMain(in common::VertexIn input, out VSOut output)
 {
     float4 worldPosition = mul(push.model, float4(input.position, 1.0));
 
@@ -41,7 +54,7 @@ func vertexMain(in geometry::VertexIn input, out VSOut output)
 }
 
 [shader("fragment")]
-func fragmentMain(in VSOut input, out geometry::GBuffer output)
+func fragmentMain(in VSOut input, out common::GBuffer output)
 {
     float3 albedo = albedoMap.Sample(input.uv).rgb * material.albedo;
     float3 normal = normalMap.Sample(input.uv).rgb * 2.0 - 1.0;
