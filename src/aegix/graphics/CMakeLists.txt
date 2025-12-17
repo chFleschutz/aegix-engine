@@ -81,6 +81,7 @@ target_sources(aegix-engine PRIVATE
 	"draw_batch_registry.h"
 	"draw_batch_registry.cpp"
 	"frame_info.h"
+	"frustum.h"
 	"globals.h"
 	"pipeline.cpp"
 	"pipeline.h"

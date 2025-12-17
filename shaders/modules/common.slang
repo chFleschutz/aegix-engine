@@ -4,11 +4,17 @@ import modules.bindless;
 
 namespace common
 {
+    public struct Frustum
+    {
+        public float4 planes[6];
+    }
+
     public struct Camera
     {
         public float4x4 view;
         public float4x4 projection;
         public float4x4 viewProjection;
+        public Frustum frustum;
         public float3 position;
     }
 

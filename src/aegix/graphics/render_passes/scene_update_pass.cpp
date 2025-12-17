@@ -183,6 +183,7 @@ namespace Aegix::Graphics
 		data->view = glm::rowMajor4(camera.viewMatrix);
 		data->projection = glm::rowMajor4(camera.projectionMatrix);
 		data->viewProjection = glm::rowMajor4(viewProjection);
+		data->frustum = Frustum::extractFrom(viewProjection);
 		data->cameraPosition = cameraTransform.location;
 	}
 }
