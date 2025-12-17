@@ -30,6 +30,12 @@ namespace common
     {
         public float3 center;
         public float radius;
+
+        public func transform(float4x4 mat) -> BoundingSphere
+        {
+            let maxScale = max(length(mat[0].xyz), max(length(mat[1].xyz), length(mat[2].xyz)));
+            return BoundingSphere(mul(mat, float4(center, 1.0)).xyz, radius * maxScale);
+        }
     };
 
     public struct Meshlet

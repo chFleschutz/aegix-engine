@@ -38,9 +38,15 @@ func getInstance(uint index) -> indirectDraw::Instance
     return pc.dynamicInstances.get()[index - pc.staticCount];
 }
 
-func isInFrustum() -> bool
+func isInFrustum(common::BoundingSphere sphere, common::Frustum frustum) -> bool
 {
-    // TODO: Implement frustum culling test
+    for (int i = 0; i < 6; i++)
+    {
+        let plane = frustum.planes[i];
+        let distance = dot(plane.xyz, sphere.center) + plane.w;
+        if (distance < -sphere.radius)
+            return false;
+    }
     return true;
 }
 
@@ -53,9 +59,16 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     let instanceID = dispatchThreadID.x;
     let instance = getInstance(instanceID);
+    let mesh = instance.mesh.get();
+    let camera = pc.camera.get();
 
-    if (!isInFrustum())
+    // Culling
+
+    let worldBounds = mesh.bounds.transform(instance.modelMatrix);
+    if (!isInFrustum(worldBounds, camera.frustum))
         return;
+
+    // Indirect Draw Command Generation
 
     uint drawID;
     InterlockedAdd(pc.indirectDrawCounts.get()[instance.drawBatchID], 1, drawID);

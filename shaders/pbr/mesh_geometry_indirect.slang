@@ -22,7 +22,7 @@ struct Material
     bindless::Handle<SampledImage2D> emissiveMap;
 }
 
-struct MSOut
+struct MSOut 
 {
     float4 position : SV_Position;
     float3 worldPosition;
