@@ -2,6 +2,7 @@ import modules.bindless;
 import modules.constants;
 import modules.common;
 import modules.indirect_draw;
+import modules.visibility;
 
 static const uint TASK_GROUP_SIZE = 32;
 
@@ -40,18 +41,6 @@ func getInstance(uint index) -> indirectDraw::Instance
     return pc.dynamicInstances.get()[index - pc.staticCount];
 }
 
-func isInFrustum(common::BoundingSphere sphere, common::Frustum frustum) -> bool
-{
-    for (int i = 0; i < 6; i++)
-    {
-        let plane = frustum.planes[i];
-        let distance = dot(plane.xyz, sphere.center) + plane.w;
-        if (distance < -sphere.radius)
-            return false;
-    }
-    return true;
-}
-
 [shader("compute")]
 [numthreads(64, 1, 1)]
 func main(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -67,7 +56,7 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
     // Culling
 
     let worldBounds = mesh.bounds.transform(instance.modelMatrix);
-    if (!isInFrustum(worldBounds, camera.frustum))
+    if (!visibility::frustumVisible(worldBounds, camera.frustum))
         return;
 
     // Indirect Draw Command Generation
