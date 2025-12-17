@@ -3,14 +3,9 @@ import modules.bindless;
 import modules.common;
 import modules.indirect_draw;
 import modules.meshlet_cull;
+import modules.visibility;
 
 groupshared TaskPayload sharedPayload;
-
-func isVisible() -> bool
-{
-    // TODO: Implement meshlet culling 
-    return true;
-}
 
 // Task Shader --------------------
 
@@ -28,12 +23,15 @@ func taskMain(
     let instanceID = indirectDraw::pc.visibility.get()[indirectDraw::pc.batchFirstID + drawID];
     let instance = indirectDraw::getInstance(instanceID);
     let mesh = instance.mesh.get();
-    let meshlet = mesh.meshlet.get()[dispatchThreadID.x];
 
     bool meshletSurvives = false;
     if (dispatchThreadID.x < mesh.meshletCount)
     {
-        meshletSurvives = isVisible();
+        let camera = indirectDraw::pc.camera.get();
+        let meshlet = mesh.meshlet.get()[dispatchThreadID.x];
+        let worldBounds = meshlet.bounds.transform(instance.modelMatrix);
+
+        meshletSurvives = visibility::frustumVisible(worldBounds, camera.frustum);
     }
 
     uint numSurvive = WaveActiveCountBits(meshletSurvives);
