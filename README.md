@@ -19,7 +19,8 @@ A small render engine developed with Vulkan in modern C++.
 - **Physically Based Bloom** - Realistic glow effect around bright areas created using convolution
 - **Screen Space Ambient Occlusion (SSAO)** - Enhanced depth perception
 - **Mesh Shaders Pipeline** - Modern geometry rendering
-
+- **GPU Driven Rendering** - Minimize CPU rendering overhead
+  
 ## Prerequisites <a name="prerequisites"></a>
 
 Before building ensure you have the following installed:
