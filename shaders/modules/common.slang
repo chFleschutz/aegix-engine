@@ -26,10 +26,15 @@ namespace common
         public float3 color;
     };
 
-    public struct Meshlet
+    public struct BoundingSphere
     {
         public float3 center;
         public float radius;
+    };
+
+    public struct Meshlet
+    {
+        public BoundingSphere bounds;
         public int8_t coneAxis[3];
         public int8_t coneCutoff;
         public uint vertexOffset;
@@ -48,6 +53,7 @@ namespace common
         public uint vertexCount;
         public uint indexCount;
         public uint meshletCount;
+        public BoundingSphere bounds;
     };
 
     public struct VertexIn

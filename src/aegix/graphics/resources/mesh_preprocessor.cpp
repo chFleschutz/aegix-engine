@@ -63,6 +63,20 @@ namespace Aegix::Graphics
 			vertices.size(),
 			sizeof(StaticMesh::Vertex));
 
+		// Bounding sphere
+
+		meshopt_Bounds bounds = meshopt_computeSphereBounds(
+			&vertices[0].position.x,
+			vertices.size(),
+			sizeof(StaticMesh::Vertex),
+			nullptr,
+			0);
+
+		StaticMesh::BoundingSphere meshBounds{
+			.center = { bounds.center[0], bounds.center[1], bounds.center[2] },
+			.radius = bounds.radius,
+		};
+
 		// Meshlet generation
 
 		size_t maxMeshlets = meshopt_buildMeshletsBound(
@@ -111,8 +125,7 @@ namespace Aegix::Graphics
 				sizeof(StaticMesh::Vertex));
 
 			meshlets.emplace_back(StaticMesh::Meshlet{
-				.center = { bounds.center[0], bounds.center[1], bounds.center[2] },
-				.radius = bounds.radius,
+				.bounds = { glm::vec3{ bounds.center[0], bounds.center[1], bounds.center[2] }, bounds.radius },
 				.coneAxis = { bounds.cone_axis_s8[0], bounds.cone_axis_s8[1], bounds.cone_axis_s8[2] },
 				.coneCutoff = bounds.cone_cutoff_s8,
 				.vertexOffset = meshlet.vertex_offset,
@@ -130,6 +143,7 @@ namespace Aegix::Graphics
 			.meshlets = std::move(meshlets),
 			.vertexIndices = std::move(meshletVertices),
 			.primitiveIndices = std::move(meshletPrimitives),
+			.bounds = meshBounds
 		};
 	}
 

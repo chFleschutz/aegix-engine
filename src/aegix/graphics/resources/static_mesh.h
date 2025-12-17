@@ -19,10 +19,15 @@ namespace Aegix::Graphics
 			glm::vec3 color;
 		};
 
-		struct Meshlet
+		struct BoundingSphere
 		{
 			glm::vec3 center;
 			float radius;
+		};
+
+		struct Meshlet
+		{
+			BoundingSphere bounds;
 			int8_t coneAxis[3];
 			int8_t coneCutoff;
 			uint32_t vertexOffset;
@@ -41,6 +46,7 @@ namespace Aegix::Graphics
 			uint32_t vertexCount;
 			uint32_t indexCount;
 			uint32_t meshletCount;
+			BoundingSphere bounds;
 		};
 
 		struct CreateInfo
@@ -50,6 +56,7 @@ namespace Aegix::Graphics
 			std::vector<Meshlet> meshlets;
 			std::vector<uint32_t> vertexIndices;
 			std::vector<uint8_t> primitiveIndices;
+			BoundingSphere bounds;
 		};
 
 		static auto bindingDescription() -> VkVertexInputBindingDescription;
