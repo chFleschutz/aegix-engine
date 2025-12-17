@@ -1,7 +1,8 @@
 #pragma once
 
-#include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/bindless/descriptor_handle.h"
+#include "graphics/frame_graph/frame_graph_render_pass.h"
+#include "graphics/frustum.h"
 
 namespace Aegix::Graphics
 {
@@ -23,20 +24,34 @@ namespace Aegix::Graphics
 		uint32_t instanceCount;
 	};
 
-	class InstanceUpdatePass : public FGRenderPass
+	struct CameraData
+	{
+		glm::mat4 view;
+		glm::mat4 projection;
+		glm::mat4 viewProjection;
+		Frustum frustum;
+		glm::vec3 cameraPosition;
+	};
+
+	class SceneUpdatePass : public FGRenderPass
 	{
 	public:
 		static constexpr size_t MAX_STATIC_INSTANCES = 10'000;
 		static constexpr size_t MAX_DYNAMIC_INSTANCES = 1'000;
 
-		InstanceUpdatePass(FGResourcePool& pool);
+		SceneUpdatePass(FGResourcePool& pool);
 		auto info() -> FGNode::Info override;
 		virtual void sceneInitialized(FGResourcePool& resources, Scene::Scene& scene) override;
 		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
+		void updateDynamicInstances(FGResourcePool& pool, const FrameInfo& frameInfo);
+		void updateDrawBatches(FGResourcePool& pool, const FrameInfo& frameInfo);
+		void updateCameraData(FGResourcePool& pool, const FrameInfo& frameInfo);
+
 		FGResourceHandle m_staticInstances;
 		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;
+		FGResourceHandle m_cameraData;
 	};
 }

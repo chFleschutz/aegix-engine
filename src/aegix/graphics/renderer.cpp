@@ -6,7 +6,7 @@
 #include "graphics/render_passes/culling_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/gpu_driven_geometry.h"
-#include "graphics/render_passes/instance_update_pass.h"
+#include "graphics/render_passes/scene_update_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
@@ -153,7 +153,7 @@ namespace Aegix::Graphics
 		m_frameGraph.add<BloomPass>();
 
 		m_frameGraph.add<CullingPass>(m_drawBatchRegistry);
-		m_frameGraph.add<InstanceUpdatePass>();
+		m_frameGraph.add<SceneUpdatePass>();
 
 		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
