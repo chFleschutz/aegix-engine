@@ -1,6 +1,6 @@
 import modules.bindless;
 import modules.constants;
-import modules.geometry;
+import modules.common;
 import modules.indirect_draw;
 
 struct DrawBatch
@@ -18,6 +18,7 @@ struct DrawMeshTasksIndirectCommand
 
 struct PushConstant
 {
+    bindless::Handle<UniformBuffer<common::Camera>> camera;
     bindless::Handle<StorageBuffer<indirectDraw::Instance>> staticInstances;
     bindless::Handle<StorageBuffer<indirectDraw::Instance>> dynamicInstances;
     bindless::Handle<StorageBuffer<DrawBatch>> drawBatches;
@@ -37,6 +38,12 @@ func getInstance(uint index) -> indirectDraw::Instance
     return pc.dynamicInstances.get()[index - pc.staticCount];
 }
 
+func isInFrustum() -> bool
+{
+    // TODO: Implement frustum culling test
+    return true;
+}
+
 [shader("compute")]
 [numthreads(64, 1, 1)]
 func main(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -47,7 +54,8 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
     let instanceID = dispatchThreadID.x;
     let instance = getInstance(instanceID);
 
-    // TODO: Do culling
+    if (!isInFrustum())
+        return;
 
     uint drawID;
     InterlockedAdd(pc.indirectDrawCounts.get()[instance.drawBatchID], 1, drawID);

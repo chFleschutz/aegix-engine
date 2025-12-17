@@ -15,6 +15,7 @@ namespace Aegix::Graphics
 
 		struct CullingPushConstants
 		{
+			DescriptorHandle cameraData;
 			DescriptorHandle staticInstances;
 			DescriptorHandle dynamicInstances;
 			DescriptorHandle drawBatches;
@@ -32,6 +33,7 @@ namespace Aegix::Graphics
 
 	private:
 		DrawBatchRegistry& m_drawBatcher;
+		FGResourceHandle m_cameraData;
 		FGResourceHandle m_staticInstances;
 		FGResourceHandle m_dynamicInstances;
 		FGResourceHandle m_drawBatchBuffer;
