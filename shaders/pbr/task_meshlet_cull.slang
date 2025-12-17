@@ -2,21 +2,25 @@ import modules.constants;
 import modules.bindless;
 import modules.common;
 import modules.indirect_draw;
-
-static const uint TASK_GROUP_SIZE = 1;
-
-struct TaskPayload
-{
-    uint instanceID;
-}
+import modules.meshlet_cull;
 
 groupshared TaskPayload sharedPayload;
+
+func isVisible() -> bool
+{
+    // TODO: Implement meshlet culling 
+    return true;
+}
 
 // Task Shader --------------------
 
 [shader("task")]
 [numthreads(TASK_GROUP_SIZE, 1, 1)]
-func taskMain(uint3 threadID: SV_GroupThreadID, uint drawID: SV_DrawIndex)
+func taskMain(
+    uint drawID: SV_DrawIndex,
+    uint3 groupID: SV_GroupID,
+    uint3 groupThreadID: SV_GroupThreadID,
+    uint3 dispatchThreadID: SV_DispatchThreadID)
 {
     if (drawID >= indirectDraw::pc.batchSize)
         return;
@@ -24,13 +28,26 @@ func taskMain(uint3 threadID: SV_GroupThreadID, uint drawID: SV_DrawIndex)
     let instanceID = indirectDraw::pc.visibility.get()[indirectDraw::pc.batchFirstID + drawID];
     let instance = indirectDraw::getInstance(instanceID);
     let mesh = instance.mesh.get();
+    let meshlet = mesh.meshlet.get()[dispatchThreadID.x];
 
-    GroupMemoryBarrierWithGroupSync();
-    if (threadID.x == 0)
+    bool meshletSurvives = false;
+    if (dispatchThreadID.x < mesh.meshletCount)
     {
-        sharedPayload.instanceID = instanceID;
-        DispatchMesh(mesh.meshletCount, 1, 1, sharedPayload);
+        meshletSurvives = isVisible();
     }
 
-    // TODO: Meshlet culling
+    uint numSurvive = WaveActiveCountBits(meshletSurvives);
+    uint idxOffset = WavePrefixCountBits(meshletSurvives);
+
+    if (meshletSurvives)
+    {
+        sharedPayload.meshletIDs[idxOffset] = uint8_t(groupThreadID.x);
+    }
+
+    if (groupThreadID.x == 0)
+    {
+        sharedPayload.groupMeshletOffset = groupID.x * TASK_GROUP_SIZE;
+        sharedPayload.instanceID = instanceID;
+        DispatchMesh(numSurvive, 1, 1, sharedPayload);
+    }
 }

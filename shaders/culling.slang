@@ -3,6 +3,8 @@ import modules.constants;
 import modules.common;
 import modules.indirect_draw;
 
+static const uint TASK_GROUP_SIZE = 32;
+
 struct DrawBatch
 {
     uint offset;
@@ -76,6 +78,6 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
     let drawBatch = pc.drawBatches.get()[instance.drawBatchID];
     pc.visibility.get()[drawBatch.offset + drawID] = instanceID;
 
-    let mesh = instance.mesh.get();
-    pc.indirectDrawCommands.get()[drawBatch.offset + drawID] = DrawMeshTasksIndirectCommand(1, 1, 1);
+    uint groupCountX = (mesh.meshletCount + TASK_GROUP_SIZE - 1) / TASK_GROUP_SIZE;
+    pc.indirectDrawCommands.get()[drawBatch.offset + drawID] = DrawMeshTasksIndirectCommand(groupCountX, 1, 1);
 }

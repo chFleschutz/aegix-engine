@@ -2,6 +2,7 @@ import modules.bindless;
 import modules.common;
 import modules.constants;
 import modules.indirect_draw;
+import modules.meshlet_cull;
 import modules.tbn;
 
 static const uint MESH_GROUP_SIZE = 32;
@@ -31,11 +32,6 @@ struct MSOut
     nointerpolation bindless::Handle<UniformBuffer<Material>> material;
 }
 
-struct TaskPayload
-{
-    uint instanceID;
-}
-
 // Mesh Shader --------------------
 
 [shader("mesh")]
@@ -51,7 +47,8 @@ func meshMain(
     let camera = indirectDraw::pc.camera.get();
     let instance = indirectDraw::getInstance(inPayload.instanceID);
     let mesh = instance.mesh.get();
-    let meshlet = mesh.meshlet.get()[groupID.x];
+    let meshletID = inPayload.groupMeshletOffset + inPayload.meshletIDs[groupID.x];
+    let meshlet = mesh.meshlet.get()[meshletID];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
 
