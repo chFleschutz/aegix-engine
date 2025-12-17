@@ -1,33 +1,16 @@
-module geometry;
+module common;
 
 import modules.bindless;
 
-namespace geometry
+namespace common
 {
-    public struct Global
+    public struct Camera
     {
-        public float4x4 projection;
         public float4x4 view;
-        public float4x4 inverseView;
-    };
-
-    public struct Push
-    {
-        public float4x4 model;
-        public float4x4 normal;
-    };
-
-    public struct Mesh
-    {
-        public bindless::Handle<StorageBuffer<geometry::Vertex, ScalarDataLayout>> vertex;
-        public bindless::Handle<StorageBuffer<uint>> index;
-        public bindless::Handle<StorageBuffer<geometry::Meshlet>> meshlet;
-        public bindless::Handle<StorageBuffer<uint>> meshletIndex;
-        public bindless::Handle<StorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
-        public uint vertexCount;
-        public uint indexCount;
-        public uint meshletCount;
-    };
+        public float4x4 projection;
+        public float4x4 viewProjection;
+        public float3 position;
+    }
 
     public struct Vertex
     {
@@ -47,6 +30,18 @@ namespace geometry
         public uint primitiveOffset;
         public uint8_t vertexCount;
         public uint8_t primitiveCount;
+    };
+
+    public struct Mesh
+    {
+        public bindless::Handle<StorageBuffer<Vertex, ScalarDataLayout>> vertex;
+        public bindless::Handle<StorageBuffer<uint>> index;
+        public bindless::Handle<StorageBuffer<Meshlet>> meshlet;
+        public bindless::Handle<StorageBuffer<uint>> meshletIndex;
+        public bindless::Handle<StorageBuffer<uint8_t, ScalarDataLayout>> meshletPrimitive;
+        public uint vertexCount;
+        public uint indexCount;
+        public uint meshletCount;
     };
 
     public struct VertexIn

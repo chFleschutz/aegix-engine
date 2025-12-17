@@ -165,4 +165,24 @@ namespace Aegix::Graphics
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
 		drawBatchBuffer.buffer().copy(drawBatchData, frameInfo.frameIndex);
 	}
+
+	void SceneUpdatePass::updateCameraData(FGResourcePool& pool, const FrameInfo& frameInfo)
+	{
+		auto mainCamera = frameInfo.scene.mainCamera();
+		AGX_ASSERT_X(mainCamera, "Scene Update Pass: No main camera set in scene");
+
+		// TODO: Don't update this here (move to renderer or similar)
+		auto& camera = mainCamera.get<Camera>();
+		camera.aspect = frameInfo.aspectRatio;
+
+		auto& cameraTransform = mainCamera.get<GlobalTransform>();
+		glm::mat4 viewProjection = camera.projectionMatrix * camera.viewMatrix;
+
+		auto& cameraBuffer = pool.buffer(m_cameraData);
+		auto data = cameraBuffer.buffer().data<CameraData>(frameInfo.frameIndex);
+		data->view = glm::rowMajor4(camera.viewMatrix);
+		data->projection = glm::rowMajor4(camera.projectionMatrix);
+		data->viewProjection = glm::rowMajor4(viewProjection);
+		data->cameraPosition = cameraTransform.location;
+	}
 }

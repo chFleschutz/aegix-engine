@@ -159,12 +159,17 @@ namespace Aegix::Graphics
 
 	auto FGResourcePool::createBuffer(FGBufferInfo& info, const char* name) -> FGBufferHandle
 	{
+		// Typically uniform alignment is larger than storage buffer alignment -> prefer that
+		auto alignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment;
+		if (info.usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
+			alignment = VulkanContext::device().properties().limits.minUniformBufferOffsetAlignment;
+
 		auto bufferCreateInfo = Buffer::CreateInfo{
 			.instanceSize = info.size,
 			.instanceCount = info.instanceCount,
 			.usage = info.usage,
 			.allocFlags = info.allocFlags,
-			.minOffsetAlignment = VulkanContext::device().properties().limits.minStorageBufferOffsetAlignment
+			.minOffsetAlignment = alignment
 		};
 		m_buffers.emplace_back(bufferCreateInfo);
 

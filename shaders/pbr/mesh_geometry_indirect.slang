@@ -1,8 +1,8 @@
 import modules.bindless;
+import modules.common;
 import modules.constants;
-import modules.geometry;
-import modules.tbn;
 import modules.indirect_draw;
+import modules.tbn;
 
 static const uint MESH_GROUP_SIZE = 32;
 static const uint MAX_VERTICES = 64;
@@ -48,14 +48,12 @@ func meshMain(
     out vertices MSOut meshVertices[MAX_VERTICES], 
     out indices uint3 meshPrimitives[MAX_PRIMITIVES])
 {
-    let global = indirectDraw::pc.global.get();
+    let camera = indirectDraw::pc.camera.get();
     let instance = indirectDraw::getInstance(inPayload.instanceID);
     let mesh = instance.mesh.get();
     let meshlet = mesh.meshlet.get()[groupID.x];
 
     SetMeshOutputCounts(meshlet.vertexCount, meshlet.primitiveCount);
-
-    float4x4 viewProjection = mul(global.projection, global.view);
 
     // Emit vertices
     for (uint i = threadID.x; i < uint(meshlet.vertexCount); i += MESH_GROUP_SIZE)
@@ -64,7 +62,7 @@ func meshMain(
         let v = mesh.vertex.get()[index];
 
         float4 worldPos = mul(instance.modelMatrix, float4(v.position, 1.0));
-        meshVertices[i].position = mul(viewProjection, worldPos);
+        meshVertices[i].position = mul(camera.viewProjection, worldPos);
         meshVertices[i].worldPosition = worldPos.xyz;
         meshVertices[i].worldNormal = normalize(mul(instance.normalMatrix, v.normal));
         meshVertices[i].uv = v.uv;
@@ -85,7 +83,7 @@ func meshMain(
 // Fragment Shader --------------------
 
 [shader("fragment")]
-func fragmentMain(MSOut input, out geometry::GBuffer output)
+func fragmentMain(MSOut input, out common::GBuffer output)
 {
     let mat = input.material.get();
 

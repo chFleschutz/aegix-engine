@@ -34,6 +34,12 @@ namespace Aegix::Graphics
 				.access = VK_ACCESS_SHADER_READ_BIT,
 				.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 			};
+		case Usage::ComputeReadUniform:
+			return AccessInfo{
+				.stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				.access = VK_ACCESS_SHADER_READ_BIT,
+				.layout = VK_IMAGE_LAYOUT_UNDEFINED
+			};
 		case Usage::ComputeReadStorage:
 			return AccessInfo{
 				.stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
@@ -90,6 +96,7 @@ namespace Aegix::Graphics
 		case Usage::FragmentReadSampled:
 			return VK_IMAGE_USAGE_SAMPLED_BIT;
 		case Usage::ComputeReadStorage:
+			return VK_IMAGE_USAGE_STORAGE_BIT;
 		case Usage::ComputeWriteStorage:
 			return VK_IMAGE_USAGE_STORAGE_BIT;
 		case Usage::ComputeReadSampled:
@@ -100,7 +107,14 @@ namespace Aegix::Graphics
 			return VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		case Usage::Present:
 			return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // Typically also a color attachment
+
+		case Usage::IndirectBuffer: [[fallthrough]];
+		case Usage::ComputeReadUniform:
+			AGX_UNREACHABLE("Buffer usage is not applicable for images");
+			return 0;
+
 		default:
+			AGX_UNREACHABLE("Unknown FGResource::Usage value");
 			return 0;
 		}
 	}
@@ -109,7 +123,10 @@ namespace Aegix::Graphics
 	{
 		switch (usage)
 		{
+		case Usage::ComputeReadUniform:
+			return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		case Usage::ComputeReadStorage:
+			return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		case Usage::ComputeWriteStorage:
 			return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		case Usage::TransferSrc:
@@ -118,7 +135,17 @@ namespace Aegix::Graphics
 			return VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		case Usage::IndirectBuffer:
 			return VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+
+		case Usage::ColorAttachment:        [[fallthrough]];
+		case Usage::DepthStencilAttachment: [[fallthrough]];
+		case Usage::FragmentReadSampled:    [[fallthrough]];
+		case Usage::ComputeReadSampled:		[[fallthrough]];
+		case Usage::Present:
+			AGX_UNREACHABLE("Image usage is not applicable for buffers");
+			return 0;
+
 		default:
+			AGX_UNREACHABLE("Unknown FGResource::Usage value");
 			return 0;
 		}
 	}

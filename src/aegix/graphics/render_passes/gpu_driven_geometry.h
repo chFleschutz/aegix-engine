@@ -9,7 +9,7 @@ namespace Aegix::Graphics
 	public:
 		struct PushConstant
 		{
-			DescriptorHandle global;
+			DescriptorHandle cameraData;
 			DescriptorHandle staticInstances;
 			DescriptorHandle dynamicInstances;
 			DescriptorHandle visibility;
@@ -19,21 +19,12 @@ namespace Aegix::Graphics
 			uint32_t dynamicCount;
 		};
 
-		struct GlobalUBO
-		{
-			glm::mat4 projection;
-			glm::mat4 view;
-			glm::mat4 inverseView;
-		};
-
 		GPUDrivenGeometry(FGResourcePool& pool);
 
 		virtual auto info() -> FGNode::Info override;
 		virtual void execute(FGResourcePool& pool, const FrameInfo& frameInfo) override;
 
 	private:
-		void updateUBO(const FrameInfo& frameInfo);
-
 		FGResourceHandle m_position;
 		FGResourceHandle m_normal;
 		FGResourceHandle m_albedo;
@@ -46,6 +37,6 @@ namespace Aegix::Graphics
 		FGResourceHandle m_drawBatches;
 		FGResourceHandle m_indirectDrawCommands;
 		FGResourceHandle m_indirectDrawCounts;
-		BindlessFrameBuffer m_global;
+		FGResourceHandle m_cameraData;
 	};
 }

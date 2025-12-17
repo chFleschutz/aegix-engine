@@ -21,6 +21,7 @@ namespace Aegix::Graphics
 	struct FGBufferHandle : FGHandle {};
 	struct FGTextureHandle : FGHandle {};
 
+	// TODO: Simplify by seperating shader stage and usage
 	enum class FGResourceUsage
 	{
 		None,
@@ -77,6 +78,7 @@ namespace Aegix::Graphics
 			ColorAttachment,
 			DepthStencilAttachment,
 			FragmentReadSampled,
+			ComputeReadUniform,
 			ComputeReadStorage,
 			ComputeWriteStorage,
 			ComputeReadSampled,
