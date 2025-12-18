@@ -24,28 +24,30 @@ func taskMain(
     let instance = indirectDraw::getInstance(instanceID);
     let mesh = instance.mesh.get();
 
-    bool meshletSurvives = false;
+    bool meshletVisible = false;
     if (dispatchThreadID.x < mesh.meshletCount)
     {
         let camera = indirectDraw::pc.camera.get();
         let meshlet = mesh.meshlet.get()[dispatchThreadID.x];
         let worldBounds = meshlet.bounds.transform(instance.modelMatrix);
+        let worldConeAxis = normalize(mul((float3x3)instance.modelMatrix, meshlet.cone.axis));
 
-        meshletSurvives = visibility::frustumVisible(worldBounds, camera.frustum);
+        meshletVisible = visibility::frustumVisible(worldBounds, camera.frustum)
+            && visibility::coneVisible(worldBounds, worldConeAxis, meshlet.cone, camera.position);
     }
 
-    uint numSurvive = WaveActiveCountBits(meshletSurvives);
-    uint idxOffset = WavePrefixCountBits(meshletSurvives);
+    uint numGroupVisible = WaveActiveCountBits(meshletVisible);
+    uint groupIdxOffset = WavePrefixCountBits(meshletVisible);
 
-    if (meshletSurvives)
+    if (meshletVisible)
     {
-        sharedPayload.meshletIDs[idxOffset] = uint8_t(groupThreadID.x);
+        sharedPayload.meshletIDs[groupIdxOffset] = uint8_t(groupThreadID.x);
     }
 
     if (groupThreadID.x == 0)
     {
         sharedPayload.groupMeshletOffset = groupID.x * TASK_GROUP_SIZE;
         sharedPayload.instanceID = instanceID;
-        DispatchMesh(numSurvive, 1, 1, sharedPayload);
+        DispatchMesh(numGroupVisible, 1, 1, sharedPayload);
     }
 }

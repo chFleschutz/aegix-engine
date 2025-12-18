@@ -38,11 +38,26 @@ namespace common
         }
     };
 
+    public struct NormalCone
+    {
+        public int8_t axis_s8[3];
+        public int8_t cutoff_s8;
+
+        public property float3 axis
+        {
+            get { return float3(axis_s8[0], axis_s8[1], axis_s8[2]) / 127.0; }
+        }
+
+        public property float cutoff
+        {
+            get { return float(cutoff_s8) / 127.0; }
+        }
+    };
+
     public struct Meshlet
     {
         public BoundingSphere bounds;
-        public int8_t coneAxis[3];
-        public int8_t coneCutoff;
+        public NormalCone cone;
         public uint vertexOffset;
         public uint primitiveOffset;
         public uint8_t vertexCount;
