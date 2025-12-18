@@ -7,7 +7,7 @@ namespace Aegix::Scene
 {
 	void CameraSystem::onUpdate(float deltaSeconds, Scene& scene)
 	{
-		auto view = scene.registry().view<Transform, Camera>();
+		auto view = scene.registry().view<GlobalTransform, Camera>();
 		for (auto&& [entity, transform, camera] : view.each())
 		{
 			calcViewMatrix(camera, transform);
@@ -15,7 +15,7 @@ namespace Aegix::Scene
 		}
 	}
 
-	void CameraSystem::calcViewMatrix(Camera& camera, Transform& transform)
+	void CameraSystem::calcViewMatrix(Camera& camera, GlobalTransform& transform)
 	{
 		// Calculate the view matrix based on the camera's transform
 		// see: https://www.3dgep.com/understanding-the-view-matrix/

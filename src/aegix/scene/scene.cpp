@@ -87,6 +87,7 @@ namespace Aegix::Scene
 		m_mainCamera = createEntity("Main Camera");
 		m_mainCamera.add<Camera>();
 		m_mainCamera.add<Scripting::KinematcMovementController>();
+		m_mainCamera.add<DynamicTag>();
 		m_mainCamera.get<Transform>() = Transform{
 			.location = { 0.0f, -15.0f, 10.0f },
 			.rotation = glm::radians(glm::vec3{ -30.0f, 0.0f, 0.0f })
