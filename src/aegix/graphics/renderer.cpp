@@ -143,8 +143,10 @@ namespace Aegix::Graphics
 		m_frameGraph.add<SkyBoxPass>();
 
 		auto& transparentPass = m_frameGraph.add<TransparentPass>();
-		transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
+		// TODO: Rework transparent rendering with GPU driven approach (need to sort transparents first)
+		// TODO: Alternatively add transparent tag component to avoid iterating all static meshes
+		//transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
