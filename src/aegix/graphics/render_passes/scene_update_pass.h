@@ -36,7 +36,7 @@ namespace Aegix::Graphics
 	class SceneUpdatePass : public FGRenderPass
 	{
 	public:
-		static constexpr size_t MAX_STATIC_INSTANCES = 10'000;
+		static constexpr size_t MAX_STATIC_INSTANCES = 100'000;
 		static constexpr size_t MAX_DYNAMIC_INSTANCES = 1'000;
 
 		SceneUpdatePass(FGResourcePool& pool);

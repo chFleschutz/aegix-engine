@@ -104,8 +104,6 @@ namespace Aegix::Graphics
 
 	void SceneUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		AGX_PROFILE_FUNCTION();
-
 		updateDynamicInstances(pool, frameInfo);
 		updateDrawBatches(pool, frameInfo);
 		updateCameraData(pool, frameInfo);
