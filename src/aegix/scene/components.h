@@ -105,6 +105,10 @@ namespace Aegix
 	struct DynamicTag
 	{
 		// Used to tag an entity as dynamic (updated every frame)
+		// IMPORTANT: This component can ONLY be added/removed during scene initialization
+		// 
+		// TODO: Add runtime moving of objects between static and dynamic instance buffers 
+		// TODO: Handle fragmentation of instance buffers when moving objects
 	};
 
 	struct AmbientLight

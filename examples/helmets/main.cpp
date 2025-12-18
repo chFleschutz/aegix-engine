@@ -8,11 +8,6 @@
 class ColorChanger : public Aegix::Scripting::ScriptBase
 {
 public:
-	void begin() override
-	{
-		entity().add<Aegix::DynamicTag>();
-	}
-
 	void update(float deltaSeconds) override
 	{
 		// Cycle through colors
@@ -98,6 +93,7 @@ public:
 		auto plane = scene.load(ASSETS_DIR "Misc/plane.obj");
 		plane.get<Transform>().scale = { 2.0f, 2.0f, 2.0f };
 		plane.add<ColorChanger>();
+		plane.add<DynamicTag>();
 	}
 };
 
