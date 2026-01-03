@@ -65,7 +65,7 @@ namespace Aegix::Tools
 		}
 	}
 
-	bool Aegix::Tools::isDepthFormat(VkFormat format)
+	auto isDepthFormat(VkFormat format) -> bool
 	{
 		switch (format)
 		{

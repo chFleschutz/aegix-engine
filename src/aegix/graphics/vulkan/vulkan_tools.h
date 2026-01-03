@@ -16,7 +16,7 @@ namespace Aegix::Tools
 	std::string_view resultString(VkResult result);
 
 	/// @brief Returns true if the format is a depth or depth-stencil format otherwise false
-	bool isDepthFormat(VkFormat format);
+	auto isDepthFormat(VkFormat format) -> bool;
 
 	auto srcAccessMask(VkImageLayout layout) -> VkAccessFlags;
 	auto dstAccessMask(VkImageLayout layout) -> VkAccessFlags;

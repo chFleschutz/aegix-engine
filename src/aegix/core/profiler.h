@@ -22,14 +22,14 @@ namespace Aegix
 		auto operator=(const Profiler&) -> Profiler& = delete;
 		auto operator=(Profiler&&) -> Profiler& = delete;
 
-		[[nodicard]] static auto instance() -> Profiler&
+		[[nodiscard]] static auto instance() -> Profiler&
 		{
 			static Profiler instance;
 			return instance;
 		}
 
 		/// @brief Retrieve the average time for a given name or 0.0 if not found
-		[[nodicard]] auto time(const std::string& name) const -> double
+		[[nodiscard]] auto time(const std::string& name) const -> double
 		{
 			auto it = m_times.find(name);
 			if (it == m_times.end())
@@ -37,7 +37,7 @@ namespace Aegix
 			return it->second.average();
 		}
 
-		[[nodicard]] auto times() const -> const std::unordered_map<std::string, RollingAverage<AVERAGE_FRAME_COUNT>>&
+		[[nodiscard]] auto times() const -> const std::unordered_map<std::string, RollingAverage<AVERAGE_FRAME_COUNT>>&
 		{
 			return m_times;
 		}

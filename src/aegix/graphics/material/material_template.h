@@ -50,7 +50,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
 		[[nodiscard]] auto drawBatch() const -> uint32_t { return m_drawBatchId; }
-		[[nodsicard]] auto type() const -> MaterialType { return m_materialType; }
+		[[nodiscard]] auto type() const -> MaterialType { return m_materialType; }
 
 		[[nodiscard]] auto hasParameter(const std::string& name) const -> bool;
 		[[nodiscard]] auto queryDefaultParameter(const std::string& name) const -> MaterialParameter::Value;

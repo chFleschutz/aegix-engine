@@ -28,13 +28,13 @@ namespace Aegix
 	void Engine::run()
 	{
 		// Main Update loop
-		auto lastFrameBegin = std::chrono::high_resolution_clock::now();
+		auto lastFrameBegin = std::chrono::steady_clock::now();
 		while (!m_window.shouldClose())
 		{
 			AGX_PROFILE_SCOPE("Frame Time");
 
 			// Calculate time
-			auto currentFrameBegin = std::chrono::high_resolution_clock::now();
+			auto currentFrameBegin = std::chrono::steady_clock::now();
 			float frameTimeSec = std::chrono::duration<float, std::chrono::seconds::period>(currentFrameBegin - lastFrameBegin).count();
 			lastFrameBegin = currentFrameBegin;
 
@@ -53,15 +53,15 @@ namespace Aegix
 		m_renderer.waitIdle();
 	}
 
-	void Engine::applyFrameBrake(std::chrono::high_resolution_clock::time_point lastFrameBegin)
+	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point lastFrameBegin)
 	{
 		AGX_PROFILE_SCOPE("Wait for FPS limit");
 
 		if constexpr (!Core::ENABLE_FPS_LIMIT)
 			return;
 
-		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
-		std::chrono::milliseconds frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameBegin);
+		auto now = std::chrono::steady_clock::now();
+		auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameBegin);
 
 		if (frameTime < Core::TARGET_FRAME_TIME)
 		{

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Scene.h"
+#include "scene.h"
 
 #include "core/profiler.h"
 #include "engine.h"

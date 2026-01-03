@@ -24,7 +24,7 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto height() const -> uint32_t { return m_extent.height; }
 		[[nodiscard]] auto aspectRatio() const -> float { return static_cast<float>(m_extent.width) / static_cast<float>(m_extent.height); }
 		[[nodiscard]] auto imageCount() const -> size_t { return m_images.size(); }
-		[[nodiscrad]] auto currentImage() const -> VkImage { return m_images[m_imageIndex]; }
+		[[nodiscard]] auto currentImage() const -> VkImage { return m_images[m_imageIndex]; }
 		[[nodiscard]] auto findDepthFormat() -> VkFormat;
 		[[nodiscard]] auto presentReadySemaphore() const -> VkSemaphore { return m_imageSync[m_imageIndex].presentReady; }
 
