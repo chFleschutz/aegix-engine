@@ -5,6 +5,7 @@
 #include "graphics/resources/texture.h"
 #include "math/math.h"
 #include "scene/entity.h"
+#include "scene/component_traits.h"
 
 namespace Aegix::Scripting
 {
@@ -148,14 +149,40 @@ namespace Aegix
 	};
 
 
-	template<typename T, typename... Ts>
-	concept IsAnyOf = (std::is_same_v<T, Ts> || ...);
+	// Specialize component traits
+	template<>
+	struct ComponentTraits<Name>
+	{
+		static constexpr bool is_required = true;
+	};
 
-	/// @brief Defines all required components for an entity (Each entity MUST have these components)
-	template<typename T>
-	concept RequiredComponent = IsAnyOf<T, Name, Transform, GlobalTransform, Parent, Siblings, Children>;
+	template<>
+	struct ComponentTraits<Transform>
+	{
+		static constexpr bool is_required = true;
+	};
 
-	/// @brief Defines all optional components for an entity (Each entity MAY have these components)
-	template<typename T>
-	concept OptionalComponent = !RequiredComponent<T>;
+	template<>
+	struct ComponentTraits<GlobalTransform>
+	{
+		static constexpr bool is_required = true;
+	};
+
+	template<>
+	struct ComponentTraits<Parent>
+	{
+		static constexpr bool is_required = true;
+	};
+
+	template<>
+	struct ComponentTraits<Siblings>
+	{
+		static constexpr bool is_required = true;
+	};
+
+	template<>
+	struct ComponentTraits<Children>
+	{
+		static constexpr bool is_required = true;
+	};
 }

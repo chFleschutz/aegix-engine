@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scene/entity.h"
+#include "scene/components.h"
 
 #include <imgui.h>
 
@@ -27,7 +28,7 @@ namespace Aegix::UI
 		static void drawAssetSlot(const char* assetName, const char* description, bool assetSet = true);
 
 		template<typename T>
-			requires OptionalComponent<T>
+			requires IsOptionalComponent<T>
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags, 
 			std::function<void(T&)> drawFunc)
 		{
@@ -46,7 +47,7 @@ namespace Aegix::UI
 		}
 
 		template<typename T>
-			requires RequiredComponent<T>
+			requires IsRequiredComponent<T>
 		void drawComponent(const char* componentName, Scene::Entity entity, ImGuiTreeNodeFlags flags,
 			std::function<void(T&)> drawFunc)
 		{

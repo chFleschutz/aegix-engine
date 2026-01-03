@@ -1,5 +1,7 @@
 #pragma once
 
+#include "scene/component_traits.h"
+
 #include <entt/entt.hpp>
 
 namespace Aegix::Scripting
@@ -91,7 +93,7 @@ namespace Aegix::Scene
 		/// @brief Removes a component of type T from the entity
 		/// @note Entity MUST have the component and it MUST be an optional component
 		template<typename T>
-			requires OptionalComponent<T>
+			requires IsOptionalComponent<T>
 		void remove()
 		{
 			AGX_ASSERT_X(has<T>(), "Cannot remove Component: Entity does not have the component");
