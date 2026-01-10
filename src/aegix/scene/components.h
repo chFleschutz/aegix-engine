@@ -106,6 +106,10 @@ namespace Aegix
 	struct DynamicTag
 	{
 		// Used to tag an entity as dynamic (updated every frame)
+		// IMPORTANT: This component can ONLY be added/removed during scene initialization
+		// 
+		// TODO: Add runtime moving of objects between static and dynamic instance buffers 
+		// TODO: Handle fragmentation of instance buffers when moving objects
 	};
 
 	struct AmbientLight
@@ -130,10 +134,10 @@ namespace Aegix
 	/// @brief Holds a camera to view the scene
 	struct Camera
 	{
-		float fov = glm::radians(45.0f);
+		float fov = glm::radians(60.0f);
 		float aspect = 1.0f;
 		float near = 0.1f;
-		float far = 100.0f;
+		float far = 1000.0f;
 
 		glm::mat4 viewMatrix = glm::mat4{ 1.0f };
 		glm::mat4 inverseViewMatrix = glm::mat4{ 1.0f };

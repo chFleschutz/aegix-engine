@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "instance_update_pass.h"
+#include "scene_update_pass.h"
 
 #include "scene/components.h"
 #include "graphics/vulkan/vulkan_tools.h"
@@ -10,7 +10,7 @@
 
 namespace Aegix::Graphics
 {
-	InstanceUpdatePass::InstanceUpdatePass(FGResourcePool& pool)
+	SceneUpdatePass::SceneUpdatePass(FGResourcePool& pool)
 	{
 		m_staticInstances = pool.addBuffer("StaticInstanceData",
 			FGResource::Usage::TransferDst,
@@ -41,18 +41,28 @@ namespace Aegix::Graphics
 				.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
 							  VMA_ALLOCATION_CREATE_MAPPED_BIT,
 			});
+
+		m_cameraData = pool.addBuffer("CameraData",
+			FGResource::Usage::TransferDst,
+			FGBufferInfo{
+				.size = sizeof(CameraData),
+				.instanceCount = MAX_FRAMES_IN_FLIGHT,
+				.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				.allocFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
+							  VMA_ALLOCATION_CREATE_MAPPED_BIT,
+			});
 	}
 
-	auto InstanceUpdatePass::info() -> FGNode::Info
+	auto SceneUpdatePass::info() -> FGNode::Info
 	{
 		return FGNode::Info{
 			.name = "Instance Update",
 			.reads = {},
-			.writes = { m_staticInstances, m_dynamicInstances, m_drawBatchBuffer },
+			.writes = { m_staticInstances, m_dynamicInstances, m_drawBatchBuffer, m_cameraData },
 		};
 	}
 
-	void InstanceUpdatePass::sceneInitialized(FGResourcePool& resources, Scene::Scene& scene)
+	void SceneUpdatePass::sceneInitialized(FGResourcePool& resources, Scene::Scene& scene)
 	{
 		std::vector<InstanceData> staticInstances;
 		staticInstances.reserve(MAX_STATIC_INSTANCES); // TODO: use draw batcher for actual count
@@ -92,11 +102,16 @@ namespace Aegix::Graphics
 		staticBuffer.buffer().copy(staticInstances, 0);
 	}
 
-	void InstanceUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
+	void SceneUpdatePass::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		AGX_PROFILE_FUNCTION();
+		updateDynamicInstances(pool, frameInfo);
+		updateDrawBatches(pool, frameInfo);
+		updateCameraData(pool, frameInfo);
+	}
 
-		// TODO: Update instance data on demand only (when scene changes)
+	void SceneUpdatePass::updateDynamicInstances(FGResourcePool& pool, const FrameInfo& frameInfo)
+	{
+		// TODO: Update static instance data on demand (when scene changes)
 
 		std::vector<InstanceData> dynamicInstances;
 		dynamicInstances.reserve(frameInfo.drawBatcher.instanceCount()); // TODO: Differentiate static/dynamic counts
@@ -135,8 +150,10 @@ namespace Aegix::Graphics
 		// Copy instance data to mapped buffer
 		auto& instanceBuffer = pool.buffer(m_dynamicInstances);
 		instanceBuffer.buffer().copy(dynamicInstances, frameInfo.frameIndex);
+	}
 
-		// Update draw batch info
+	void SceneUpdatePass::updateDrawBatches(FGResourcePool& pool, const FrameInfo& frameInfo)
+	{
 		std::vector<DrawBatchData> drawBatchData;
 		drawBatchData.reserve(frameInfo.drawBatcher.batchCount());
 		for (const auto& batch : frameInfo.drawBatcher.batches())
@@ -145,5 +162,26 @@ namespace Aegix::Graphics
 		}
 		auto& drawBatchBuffer = pool.buffer(m_drawBatchBuffer);
 		drawBatchBuffer.buffer().copy(drawBatchData, frameInfo.frameIndex);
+	}
+
+	void SceneUpdatePass::updateCameraData(FGResourcePool& pool, const FrameInfo& frameInfo)
+	{
+		auto mainCamera = frameInfo.scene.mainCamera();
+		AGX_ASSERT_X(mainCamera, "Scene Update Pass: No main camera set in scene");
+
+		// TODO: Don't update this here (move to renderer or similar)
+		auto& camera = mainCamera.get<Camera>();
+		camera.aspect = frameInfo.aspectRatio;
+
+		auto& cameraTransform = mainCamera.get<GlobalTransform>();
+		glm::mat4 viewProjection = camera.projectionMatrix * camera.viewMatrix;
+
+		auto& cameraBuffer = pool.buffer(m_cameraData);
+		auto data = cameraBuffer.buffer().data<CameraData>(frameInfo.frameIndex);
+		data->view = glm::rowMajor4(camera.viewMatrix);
+		data->projection = glm::rowMajor4(camera.projectionMatrix);
+		data->viewProjection = glm::rowMajor4(viewProjection);
+		data->frustum = Frustum::extractFrom(viewProjection);
+		data->cameraPosition = cameraTransform.location;
 	}
 }

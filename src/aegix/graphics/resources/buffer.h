@@ -106,7 +106,9 @@ namespace Aegix::Graphics
 		template<typename T>
 		void copy(const std::vector<T>& src, uint32_t index = 0)
 		{
-			AGX_ASSERT_X(!src.empty(), "Source vector is empty");
+			if (src.empty()) 
+				return;
+
 			AGX_ASSERT_X(sizeof(T) * src.size() <= m_instanceSize, "Source data size exceeds buffer size");
 			copy(src.data(), sizeof(T) * src.size(), index);
 		}

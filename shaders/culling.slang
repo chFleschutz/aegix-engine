@@ -1,7 +1,10 @@
 import modules.bindless;
 import modules.constants;
-import modules.geometry;
+import modules.common;
 import modules.indirect_draw;
+import modules.visibility;
+
+static const uint TASK_GROUP_SIZE = 32;
 
 struct DrawBatch
 {
@@ -18,6 +21,7 @@ struct DrawMeshTasksIndirectCommand
 
 struct PushConstant
 {
+    bindless::Handle<UniformBuffer<common::Camera>> camera;
     bindless::Handle<StorageBuffer<indirectDraw::Instance>> staticInstances;
     bindless::Handle<StorageBuffer<indirectDraw::Instance>> dynamicInstances;
     bindless::Handle<StorageBuffer<DrawBatch>> drawBatches;
@@ -46,8 +50,16 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     let instanceID = dispatchThreadID.x;
     let instance = getInstance(instanceID);
+    let mesh = instance.mesh.get();
+    let camera = pc.camera.get();
 
-    // TODO: Do culling
+    // Culling
+
+    let worldBounds = mesh.bounds.transform(instance.modelMatrix);
+    if (!visibility::frustumVisible(worldBounds, camera.frustum))
+        return;
+
+    // Indirect Draw Command Generation
 
     uint drawID;
     InterlockedAdd(pc.indirectDrawCounts.get()[instance.drawBatchID], 1, drawID);
@@ -55,6 +67,6 @@ func main(uint3 dispatchThreadID : SV_DispatchThreadID)
     let drawBatch = pc.drawBatches.get()[instance.drawBatchID];
     pc.visibility.get()[drawBatch.offset + drawID] = instanceID;
 
-    let mesh = instance.mesh.get();
-    pc.indirectDrawCommands.get()[drawBatch.offset + drawID] = DrawMeshTasksIndirectCommand(1, 1, 1);
+    uint groupCountX = (mesh.meshletCount + TASK_GROUP_SIZE - 1) / TASK_GROUP_SIZE;
+    pc.indirectDrawCommands.get()[drawBatch.offset + drawID] = DrawMeshTasksIndirectCommand(groupCountX, 1, 1);
 }

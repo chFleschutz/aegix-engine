@@ -1,6 +1,19 @@
-import "modules/geometry";
-import "modules/constants";
-import "modules/tbn";
+import modules.common;
+import modules.constants;
+import modules.tbn;
+
+struct Global
+{
+    float4x4 projection;
+    float4x4 view;
+    float4x4 viewInverse;
+}
+
+struct Push
+{
+    float4x4 model;
+    float4x4 normal;
+};
 
 struct Material
 {
@@ -23,8 +36,8 @@ static const uint NUM_THREADS = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
 
-[vk::push_constant] ConstantBuffer<geometry::Push> push;
-[vk::binding(0, 0)] ConstantBuffer<geometry::Global> global;
+[vk::push_constant] ConstantBuffer<Push> push;
+[vk::binding(0, 0)] ConstantBuffer<Global> global;
 
 [vk::binding(0, 1)] ConstantBuffer<Material> material;
 [vk::binding(1, 1)] Sampler2D albedoMap;
@@ -33,10 +46,10 @@ static const uint MAX_PRIMITIVES = 126;
 [vk::binding(4, 1)] Sampler2D aoMap;
 [vk::binding(5, 1)] Sampler2D emissiveMap;
 
-[vk::binding(0, 2)] StructuredBuffer<geometry::Meshlet> meshlets;
+[vk::binding(0, 2)] StructuredBuffer<common::Meshlet> meshlets;
 [vk::binding(0, 3)] StructuredBuffer<uint> vertexIndices;
 [vk::binding(1, 3)] StructuredBuffer<uint8_t, ScalarDataLayout> primitives;
-[vk::binding(2, 3)] StructuredBuffer<geometry::Vertex, ScalarDataLayout> vertices;
+[vk::binding(2, 3)] StructuredBuffer<common::Vertex, ScalarDataLayout> vertices;
 
 [shader("mesh")]
 [numthreads(NUM_THREADS, 1, 1)]
@@ -74,7 +87,7 @@ func meshMain(
 }
 
 [shader("fragment")]
-func fragmentMain(MSOut input, out geometry::GBuffer output) 
+func fragmentMain(MSOut input, out common::GBuffer output) 
 {
     float3 albedo = albedoMap.Sample(input.uv).rgb * material.albedo;
     float3 normal = normalMap.Sample(input.uv).rgb * 2.0 - 1.0;

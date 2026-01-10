@@ -8,8 +8,7 @@
 
 namespace Aegix::Graphics
 {
-	GPUDrivenGeometry::GPUDrivenGeometry(FGResourcePool& pool) :
-		m_global{ Buffer::uniformBuffer(sizeof(GlobalUBO), MAX_FRAMES_IN_FLIGHT) }
+	GPUDrivenGeometry::GPUDrivenGeometry(FGResourcePool& pool)
 	{
 		m_position = pool.addImage("Position",
 			FGResource::Usage::ColorAttachment,
@@ -70,21 +69,23 @@ namespace Aegix::Graphics
 
 		m_indirectDrawCounts = pool.addReference("IndirectDrawCounts",
 			FGResource::Usage::IndirectBuffer);
+
+		m_cameraData = pool.addReference("CameraData",
+			FGResource::Usage::ComputeReadUniform);
 	}
 
 	auto GPUDrivenGeometry::info() -> FGNode::Info
 	{
 		return FGNode::Info{
 			.name = "GPU Driven Geometry",
-			.reads = { m_staticInstanceData, m_dynamicInstanceData, m_visibleInstances, m_indirectDrawCommands, m_indirectDrawCounts },
+			.reads = { m_staticInstanceData, m_dynamicInstanceData, m_visibleInstances, 
+				m_indirectDrawCommands, m_indirectDrawCounts, m_cameraData },
 			.writes = { m_position, m_normal, m_albedo, m_arm, m_emissive, m_depth }
 		};
 	}
 
 	void GPUDrivenGeometry::execute(FGResourcePool& pool, const FrameInfo& frameInfo)
 	{
-		updateUBO(frameInfo);
-
 		VkRect2D renderArea{
 			.offset = { 0, 0 },
 			.extent = frameInfo.swapChainExtent
@@ -113,22 +114,25 @@ namespace Aegix::Graphics
 			Tools::vk::cmdViewport(frameInfo.cmd, renderArea.extent);
 			Tools::vk::cmdScissor(frameInfo.cmd, renderArea.extent);
 
+			auto& cameraData = pool.buffer(m_cameraData);
+			auto& staticInstanceData = pool.buffer(m_staticInstanceData);
+			auto& dynamicInstanceData = pool.buffer(m_dynamicInstanceData);
+			auto& visibleInstances = pool.buffer(m_visibleInstances);
 			auto& indirectDrawCommands = pool.buffer(m_indirectDrawCommands);
 			auto& indirectDrawCounts = pool.buffer(m_indirectDrawCounts);
-
 			for (const auto& batch : frameInfo.drawBatcher.batches())
 			{
 				PushConstant pushConstants{
-					.global = m_global.handle(frameInfo.frameIndex),
-					.staticInstances = pool.buffer(m_staticInstanceData).handle(),
-					.dynamicInstances = pool.buffer(m_dynamicInstanceData).handle(frameInfo.frameIndex),
-					.visibility = pool.buffer(m_visibleInstances).handle(),
+					.cameraData = cameraData.handle(frameInfo.frameIndex),
+					.staticInstances = staticInstanceData.handle(),
+					.dynamicInstances = dynamicInstanceData.handle(frameInfo.frameIndex),
+					.visibility = visibleInstances.handle(),
 					.batchFirstID = batch.firstInstance,
 					.batchSize = batch.instanceCount,
 					.staticCount = frameInfo.drawBatcher.staticInstanceCount(),
 					.dynamicCount = frameInfo.drawBatcher.dynamicInstanceCount()
 				};
-
+				AGX_ASSERT_X(pushConstants.cameraData.isValid(), "GPU Driven Geometry Pass: Invalid camera data handle in push constants");
 				batch.materialTemplate->bind(frameInfo.cmd);
 				batch.materialTemplate->bindBindlessSet(frameInfo.cmd);
 				batch.materialTemplate->pushConstants(frameInfo.cmd, &pushConstants, sizeof(PushConstant));
@@ -144,21 +148,5 @@ namespace Aegix::Graphics
 			}
 		}
 		vkCmdEndRendering(frameInfo.cmd);
-	}
-
-	void GPUDrivenGeometry::updateUBO(const FrameInfo& frameInfo)
-	{
-		Scene::Entity mainCamera = frameInfo.scene.mainCamera();
-		if (!mainCamera)
-			return;
-
-		// TODO: Don't update this here (move to renderer or similar)
-		auto& camera = mainCamera.get<Camera>();
-		camera.aspect = frameInfo.aspectRatio;
-
-		auto data = m_global.buffer().data<GlobalUBO>(frameInfo.frameIndex);
-		data->projection = glm::rowMajor4(camera.projectionMatrix);
-		data->view = glm::rowMajor4(camera.viewMatrix);
-		data->inverseView = glm::rowMajor4(camera.inverseViewMatrix);
 	}
 }

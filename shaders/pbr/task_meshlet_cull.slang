@@ -1,14 +1,9 @@
 import modules.constants;
 import modules.bindless;
-import modules.geometry;
+import modules.common;
 import modules.indirect_draw;
-
-static const uint TASK_GROUP_SIZE = 1;
-
-struct TaskPayload
-{
-    uint instanceID;
-}
+import modules.meshlet_cull;
+import modules.visibility;
 
 groupshared TaskPayload sharedPayload;
 
@@ -16,7 +11,11 @@ groupshared TaskPayload sharedPayload;
 
 [shader("task")]
 [numthreads(TASK_GROUP_SIZE, 1, 1)]
-func taskMain(uint3 threadID: SV_GroupThreadID, uint drawID: SV_DrawIndex)
+func taskMain(
+    uint drawID: SV_DrawIndex,
+    uint3 groupID: SV_GroupID,
+    uint3 groupThreadID: SV_GroupThreadID,
+    uint3 dispatchThreadID: SV_DispatchThreadID)
 {
     if (drawID >= indirectDraw::pc.batchSize)
         return;
@@ -25,12 +24,30 @@ func taskMain(uint3 threadID: SV_GroupThreadID, uint drawID: SV_DrawIndex)
     let instance = indirectDraw::getInstance(instanceID);
     let mesh = instance.mesh.get();
 
-    GroupMemoryBarrierWithGroupSync();
-    if (threadID.x == 0)
+    bool meshletVisible = false;
+    if (dispatchThreadID.x < mesh.meshletCount)
     {
-        sharedPayload.instanceID = instanceID;
-        DispatchMesh(mesh.meshletCount, 1, 1, sharedPayload);
+        let camera = indirectDraw::pc.camera.get();
+        let meshlet = mesh.meshlet.get()[dispatchThreadID.x];
+        let worldBounds = meshlet.bounds.transform(instance.modelMatrix);
+        let worldConeAxis = normalize(mul((float3x3)instance.modelMatrix, meshlet.cone.axis));
+
+        meshletVisible = visibility::frustumVisible(worldBounds, camera.frustum)
+            && visibility::coneVisible(worldBounds, worldConeAxis, meshlet.cone, camera.position);
     }
 
-    // TODO: Meshlet culling
+    uint numGroupVisible = WaveActiveCountBits(meshletVisible);
+    uint groupIdxOffset = WavePrefixCountBits(meshletVisible);
+
+    if (meshletVisible)
+    {
+        sharedPayload.meshletIDs[groupIdxOffset] = uint8_t(groupThreadID.x);
+    }
+
+    if (groupThreadID.x == 0)
+    {
+        sharedPayload.groupMeshletOffset = groupID.x * TASK_GROUP_SIZE;
+        sharedPayload.instanceID = instanceID;
+        DispatchMesh(numGroupVisible, 1, 1, sharedPayload);
+    }
 }

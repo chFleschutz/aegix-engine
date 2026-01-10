@@ -1,7 +1,7 @@
 module indirectDraw;
 
 import modules.bindless;
-import modules.geometry;
+import modules.common;
 
 namespace indirectDraw
 {
@@ -9,7 +9,7 @@ namespace indirectDraw
     {
         public float3x4 transform;
         public float3 normalRow0;
-        public bindless::Handle<UniformBuffer<geometry::Mesh>> mesh;
+        public bindless::Handle<UniformBuffer<common::Mesh>> mesh;
         public float3 normalRow1;
         public bindless::Handle material;
         public float3 normalRow2;
@@ -28,7 +28,7 @@ namespace indirectDraw
 
     public struct PushConstant
     {
-        public bindless::Handle<UniformBuffer<geometry::Global>> global;
+        public bindless::Handle<UniformBuffer<common::Camera>> camera;
         public bindless::Handle<StorageBuffer<Instance>> staticInstances;
         public bindless::Handle<StorageBuffer<Instance>> dynamicInstances;
         public bindless::Handle<StorageBuffer<uint>> visibility;

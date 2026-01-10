@@ -12,7 +12,7 @@ namespace Aegix::Scene
 		virtual void onUpdate(float deltaSeconds, Scene& scene) override;
 
 	private:
-		void calcViewMatrix(Camera& camera, Transform& transform);
+		void calcViewMatrix(Camera& camera, GlobalTransform& transform);
 		void calcPerspectiveProjection(Camera& camera);
 	};
 }

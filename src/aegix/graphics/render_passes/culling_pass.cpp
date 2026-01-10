@@ -43,13 +43,16 @@ namespace Aegix::Graphics
 				.size = sizeof(uint32_t) * m_drawBatcher.batchCount(),
 				.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT
 			});
+
+		m_cameraData = pool.addReference("CameraData",
+			FGResource::Usage::ComputeReadUniform);
 	}
 
 	auto CullingPass::info() -> FGNode::Info
 	{
 		return FGNode::Info{
 			.name = "Culling",
-			.reads = { m_staticInstances, m_dynamicInstances },
+			.reads = { m_cameraData, m_staticInstances, m_dynamicInstances },
 			.writes = { m_visibleIndices, m_indirectDrawCommands, m_indirectDrawCounts },
 		};
 	}
@@ -61,6 +64,7 @@ namespace Aegix::Graphics
 		vkCmdFillBuffer(frameInfo.cmd, indirectDrawCounts.buffer(), 0, indirectDrawCounts.buffer().bufferSize(), 0);
 		
 		CullingPushConstants push{
+			.cameraData = pool.buffer(m_cameraData).handle(frameInfo.frameIndex),
 			.staticInstances = pool.buffer(m_staticInstances).handle(),
 			.dynamicInstances = pool.buffer(m_dynamicInstances).handle(frameInfo.frameIndex),
 			.drawBatches = pool.buffer(m_drawBatchBuffer).handle(frameInfo.frameIndex),

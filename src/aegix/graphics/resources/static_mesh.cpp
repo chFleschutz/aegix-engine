@@ -94,7 +94,8 @@ namespace Aegix::Graphics
 			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle(),
 			.vertexCount = m_vertexCount,
 			.indexCount = m_indexCount,
-			.meshletCount = m_meshletCount
+			.meshletCount = m_meshletCount,
+			.bounds = info.bounds
 		};
 		AGX_ASSERT_X(meshData.vertexBufferHandle.isValid(), "Invalid vertex buffer handle in StaticMesh!");
 		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");

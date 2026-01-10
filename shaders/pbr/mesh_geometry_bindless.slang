@@ -1,11 +1,18 @@
-import "modules/geometry";
-import "modules/constants";
-import "modules/tbn";
-import "modules/bindless";
+import modules.common;
+import modules.constants;
+import modules.tbn;
+import modules.bindless;
 
 static const uint NUM_THREADS = 32;
 static const uint MAX_VERTICES = 64;
 static const uint MAX_PRIMITIVES = 126;
+
+struct Global
+{
+    float4x4 projection;
+    float4x4 view;
+    float4x4 viewInverse;
+}
 
 struct TaskPayload
 {
@@ -35,13 +42,13 @@ struct Material
     bindless::Handle<SampledImage2D> emissiveMap;
 };
 
-public struct Push
+struct Push
 {
     float3x4 modelRaw;
     float3 normalRow0; 
-    bindless::Handle<UniformBuffer<geometry::Global>> global;
+    bindless::Handle<UniformBuffer<Global>> global;
     float3 normalRow1;
-    bindless::Handle<UniformBuffer<geometry::Mesh>> mesh;
+    bindless::Handle<UniformBuffer<common::Mesh>> mesh;
     float3 normalRow2;
     bindless::Handle<UniformBuffer<Material>> material;
 
@@ -105,7 +112,7 @@ func meshMain(
 // Fragment Shader --------------------
 
 [shader("fragment")]
-func fragmentMain(MSOut input, out geometry::GBuffer output)
+func fragmentMain(MSOut input, out common::GBuffer output)
 {
     let mat = push.material.get();
 

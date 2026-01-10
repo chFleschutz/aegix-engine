@@ -8,11 +8,6 @@
 class ColorChanger : public Aegix::Scripting::ScriptBase
 {
 public:
-	void begin() override
-	{
-		entity().add<Aegix::DynamicTag>();
-	}
-
 	void update(float deltaSeconds) override
 	{
 		// Cycle through colors
@@ -77,8 +72,9 @@ public:
 		AGX_ASSERT(mesh && materialInstance);
 
 		constexpr int instanceCount = 9'000;
+		constexpr float boxSize = 100;
 
-		auto dis = std::uniform_real_distribution<float>(-50.0f, 50.0f);
+		auto dis = std::uniform_real_distribution<float>(-boxSize, boxSize);
 		for (int i = 0; i < instanceCount; i++)
 		{
 			auto instance = scene.createEntity("SciFiHelmetInstance");
@@ -98,6 +94,7 @@ public:
 		auto plane = scene.load(ASSETS_DIR "Misc/plane.obj");
 		plane.get<Transform>().scale = { 2.0f, 2.0f, 2.0f };
 		plane.add<ColorChanger>();
+		plane.add<DynamicTag>();
 	}
 };
 
