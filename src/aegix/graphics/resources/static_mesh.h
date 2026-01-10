@@ -38,11 +38,11 @@ namespace Aegix::Graphics
 
 		struct MeshData
 		{
-			DescriptorHandle vertexBufferHandle;
-			DescriptorHandle indexBufferHandle;
-			DescriptorHandle meshletBufferHandle;
-			DescriptorHandle meshletIndexBufferHandle;
-			DescriptorHandle meshletPrimitiveBufferHandle;
+			DescriptorHandle vertexBuffer;
+			DescriptorHandle indexBuffer;
+			DescriptorHandle meshletBuffer;
+			DescriptorHandle meshletVertexBuffer;
+			DescriptorHandle meshletPrimitiveBuffer;
 			uint32_t vertexCount;
 			uint32_t indexCount;
 			uint32_t meshletCount;
@@ -61,8 +61,6 @@ namespace Aegix::Graphics
 
 		static auto bindingDescription() -> VkVertexInputBindingDescription;
 		static auto attributeDescriptions() -> std::vector<VkVertexInputAttributeDescription>;
-		static auto meshletDescriptorSetLayout() -> DescriptorSetLayout&;
-		static auto attributeDescriptorSetLayout() -> DescriptorSetLayout&;
 
 		StaticMesh(const CreateInfo& info);
 		StaticMesh(const StaticMesh&) = delete;
@@ -75,30 +73,23 @@ namespace Aegix::Graphics
 		[[nodiscard]] auto vertexCount() const -> uint32_t { return m_vertexCount; }
 		[[nodiscard]] auto indexCount() const -> uint32_t { return m_indexCount; }
 		[[nodiscard]] auto meshletCount() const -> uint32_t { return m_meshletCount; }
-		[[nodiscard]] auto meshletDescriptorSet() const -> const DescriptorSet& { return m_meshletDescriptor; }
-		[[nodiscard]] auto attributeDescriptorSet() const -> const DescriptorSet& { return m_attributeDescriptor; }
 		[[nodiscard]] auto meshDataBuffer() const -> const BindlessBuffer& { return m_meshDataBuffer; }
 
 		void draw(VkCommandBuffer cmd) const;
 		void drawMeshlets(VkCommandBuffer cmd) const;
 
 	private:
-		// Vertex and index buffers for traditional rendering
+		BindlessBuffer m_meshDataBuffer;
 		BindlessBuffer m_vertexBuffer;
 		BindlessBuffer m_indexBuffer;
-
-		// Storage buffers for mesh shaders
 		BindlessBuffer m_meshletBuffer;
-		BindlessBuffer m_meshletIndexBuffer;
+		BindlessBuffer m_meshletVertexBuffer;
 		BindlessBuffer m_meshletPrimitiveBuffer;
-		BindlessBuffer m_meshDataBuffer;
-		DescriptorSet m_meshletDescriptor;
-		DescriptorSet m_attributeDescriptor;
 
-		uint32_t m_vertexCount{};
-		uint32_t m_indexCount{};
-		uint32_t m_meshletCount{};
-		uint32_t m_meshletIndexCount{};
-		uint32_t m_meshletPrimitiveCount{};
+		uint32_t m_vertexCount;
+		uint32_t m_indexCount;
+		uint32_t m_meshletCount;
+		uint32_t m_meshletIndexCount;
+		uint32_t m_meshletPrimitiveCount;
 	};
 }

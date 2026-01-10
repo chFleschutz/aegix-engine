@@ -47,33 +47,13 @@ namespace Aegix::Graphics
 		return attributeDescriptions;
 	}
 
-	auto StaticMesh::meshletDescriptorSetLayout() -> DescriptorSetLayout&
-	{
-		static DescriptorSetLayout meshletDescriptorSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet 
-			.build();
-		return meshletDescriptorSetLayout;
-	}
-
-	auto StaticMesh::attributeDescriptorSetLayout() -> DescriptorSetLayout&
-	{
-		static DescriptorSetLayout attributeDescriptorSetLayout = DescriptorSetLayout::Builder{}
-			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet Indices 
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Meshlet Primitives 
-			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_MESH_BIT_EXT) // Vertices
-			.build();
-		return attributeDescriptorSetLayout;
-	}
-
 	StaticMesh::StaticMesh(const CreateInfo& info) :
 		m_vertexBuffer{ Buffer::vertexBuffer(sizeof(Vertex) * info.vertices.size(), 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) },
 		m_indexBuffer{ Buffer::indexBuffer(sizeof(uint32_t) * info.indices.size(), 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) },
 		m_meshletBuffer{ Buffer::storageBuffer(sizeof(Meshlet) * info.meshlets.size()) },
-		m_meshletIndexBuffer{ Buffer::storageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
+		m_meshletVertexBuffer{ Buffer::storageBuffer(sizeof(uint32_t) * info.vertexIndices.size()) },
 		m_meshletPrimitiveBuffer{ Buffer::storageBuffer(sizeof(uint8_t) * info.primitiveIndices.size()) },
 		m_meshDataBuffer{ Buffer::uniformBuffer(sizeof(MeshData)) },
-		m_meshletDescriptor{ meshletDescriptorSetLayout() },
-		m_attributeDescriptor{ attributeDescriptorSetLayout() },
 		m_vertexCount{ static_cast<uint32_t>(info.vertices.size()) },
 		m_indexCount{ static_cast<uint32_t>(info.indices.size()) },
 		m_meshletCount{ static_cast<uint32_t>(info.meshlets.size()) },
@@ -83,40 +63,30 @@ namespace Aegix::Graphics
 		m_vertexBuffer.buffer().upload(info.vertices);
 		m_indexBuffer.buffer().upload(info.indices);
 		m_meshletBuffer.buffer().upload(info.meshlets);
-		m_meshletIndexBuffer.buffer().upload(info.vertexIndices);
+		m_meshletVertexBuffer.buffer().upload(info.vertexIndices);
 		m_meshletPrimitiveBuffer.buffer().upload(info.primitiveIndices);
 
 		MeshData meshData{
-			.vertexBufferHandle = m_vertexBuffer.handle(),
-			.indexBufferHandle = m_indexBuffer.handle(),
-			.meshletBufferHandle = m_meshletBuffer.handle(),
-			.meshletIndexBufferHandle = m_meshletIndexBuffer.handle(),
-			.meshletPrimitiveBufferHandle = m_meshletPrimitiveBuffer.handle(),
+			.vertexBuffer = m_vertexBuffer.handle(),
+			.indexBuffer = m_indexBuffer.handle(),
+			.meshletBuffer = m_meshletBuffer.handle(),
+			.meshletVertexBuffer = m_meshletVertexBuffer.handle(),
+			.meshletPrimitiveBuffer = m_meshletPrimitiveBuffer.handle(),
 			.vertexCount = m_vertexCount,
 			.indexCount = m_indexCount,
 			.meshletCount = m_meshletCount,
 			.bounds = info.bounds
 		};
-		AGX_ASSERT_X(meshData.vertexBufferHandle.isValid(), "Invalid vertex buffer handle in StaticMesh!");
-		AGX_ASSERT_X(meshData.meshletBufferHandle.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
-		AGX_ASSERT_X(meshData.meshletIndexBufferHandle.isValid(), "Invalid meshlet index buffer handle in StaticMesh!");
-		AGX_ASSERT_X(meshData.meshletPrimitiveBufferHandle.isValid(), "Invalid meshlet primitive buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.vertexBuffer.isValid(), "Invalid vertex buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletBuffer.isValid(), "Invalid meshlet buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletVertexBuffer.isValid(), "Invalid meshlet index buffer handle in StaticMesh!");
+		AGX_ASSERT_X(meshData.meshletPrimitiveBuffer.isValid(), "Invalid meshlet primitive buffer handle in StaticMesh!");
 		m_meshDataBuffer.buffer().singleWrite(&meshData, sizeof(MeshData), 0);
-
-		DescriptorWriter{ meshletDescriptorSetLayout() }
-			.writeBuffer(0, m_meshletBuffer)
-			.update(m_meshletDescriptor);
-
-		DescriptorWriter{ attributeDescriptorSetLayout() }
-			.writeBuffer(0, m_meshletIndexBuffer)
-			.writeBuffer(1, m_meshletPrimitiveBuffer)
-			.writeBuffer(2, m_vertexBuffer)
-			.update(m_attributeDescriptor);
 
 		Tools::vk::setDebugUtilsObjectName(m_vertexBuffer.buffer(), "StaticMesh Vertices");
 		Tools::vk::setDebugUtilsObjectName(m_indexBuffer.buffer(), "StaticMesh Indices");
 		Tools::vk::setDebugUtilsObjectName(m_meshletBuffer.buffer(), "StaticMesh Meshlets");
-		Tools::vk::setDebugUtilsObjectName(m_meshletIndexBuffer.buffer(), "StaticMesh Meshlet Indices");
+		Tools::vk::setDebugUtilsObjectName(m_meshletVertexBuffer.buffer(), "StaticMesh Meshlet Vertices");
 		Tools::vk::setDebugUtilsObjectName(m_meshletPrimitiveBuffer.buffer(), "StaticMesh Meshlet Primitives");
 		Tools::vk::setDebugUtilsObjectName(m_meshDataBuffer.buffer(), "StaticMesh Mesh Data");
 	}

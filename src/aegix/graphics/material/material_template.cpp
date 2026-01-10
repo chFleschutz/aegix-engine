@@ -125,9 +125,6 @@ namespace Aegix::Graphics
 	{
 		if (m_pipeline.hasFlag(Pipeline::Flags::MeshShader))
 		{
-			// TODO: Remove (Replaced by bindless descriptor set)
-			//m_pipeline.bindDescriptorSet(cmd, 2, mesh.meshletDescriptorSet());
-			//m_pipeline.bindDescriptorSet(cmd, 3, mesh.attributeDescriptorSet());
 			mesh.drawMeshlets(cmd);
 		}
 		else
