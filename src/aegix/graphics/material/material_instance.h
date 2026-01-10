@@ -22,10 +22,6 @@ namespace Aegix::Graphics
 
 		auto operator=(const MaterialInstance&) -> MaterialInstance& = delete;
 		auto operator=(MaterialInstance&&) noexcept -> MaterialInstance& = delete;
-	
-		[[nodiscard]] auto materialTemplate() const -> std::shared_ptr<MaterialTemplate> { return m_template; }
-		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParameter::Value;
-		[[nodiscard]] auto buffer() const -> const BindlessFrameBuffer& { return m_uniformBuffer; }
 
 		template<typename T>
 		[[nodiscard]] auto queryParameter(const std::string& name) const -> T
@@ -33,15 +29,16 @@ namespace Aegix::Graphics
 			return std::get<T>(queryParameter(name));
 		}
 
-		void setParameter(const std::string& name, const MaterialParameter::Value& value);
+		[[nodiscard]] auto materialTemplate() const -> std::shared_ptr<MaterialTemplate> { return m_template; }
+		[[nodiscard]] auto queryParameter(const std::string& name) const -> MaterialParameter::Value;
+		[[nodiscard]] auto buffer() const -> const BindlessFrameBuffer& { return m_uniformBuffer; }
 
+		void setParameter(const std::string& name, const MaterialParameter::Value& value);
 		void updateParameters(int index);
-		void bind(VkCommandBuffer cmd, int index) const;
 
 	private:
 		std::shared_ptr<MaterialTemplate> m_template;
 		std::unordered_map<std::string, MaterialParameter::Value> m_overrides;
-		std::vector<DescriptorSet> m_descriptorSets;
 		BindlessFrameBuffer m_uniformBuffer;
 		std::array<bool, MAX_FRAMES_IN_FLIGHT> m_dirtyFlags;
 	};

@@ -38,15 +38,13 @@ namespace Aegix::Graphics
 	class MaterialTemplate : public Core::Asset
 	{
 	public:
-		MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout);
+		MaterialTemplate(Pipeline pipeline);
 
 		[[nodiscard]] static auto alignTo(size_t size, size_t alignment) -> size_t;
 		[[nodiscard]] static auto std430Alignment(const MaterialParameter::Value& val) -> size_t;
 		[[nodiscard]] static auto std430Size(const MaterialParameter::Value& val) -> size_t;
 
 		[[nodiscard]] auto pipeline() const -> const Pipeline& { return m_pipeline; }
-		[[nodiscard]] auto globalSetLayout() -> DescriptorSetLayout& { return m_globalSetLayout; }
-		[[nodiscard]] auto materialSetLayout() -> DescriptorSetLayout& { return m_materialSetLayout; }
 		[[nodiscard]] auto parameterSize() const -> size_t { return m_parameterSize; }
 		[[nodiscard]] auto parameters() const -> const std::unordered_map<std::string, MaterialParameter>& { return m_parameters; }
 		[[nodiscard]] auto drawBatch() const -> uint32_t { return m_drawBatchId; }
@@ -60,8 +58,6 @@ namespace Aegix::Graphics
 
 		void bind(VkCommandBuffer cmd);
 		void bindBindlessSet(VkCommandBuffer cmd);
-		void bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
-		void bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet);
 		void pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset = 0);
 		void draw(VkCommandBuffer cmd, const StaticMesh& mesh);
 		void drawInstanced(VkCommandBuffer cmd, uint32_t instanceCount);
@@ -72,8 +68,6 @@ namespace Aegix::Graphics
 		// TODO: Store multiple pipelines for different render passes
 		// TODO: Create pipeline on demand based on render pass
 		Pipeline m_pipeline;
-		DescriptorSetLayout m_globalSetLayout;		// Set 0 
-		DescriptorSetLayout m_materialSetLayout;	// Set 1
 
 		std::unordered_map<std::string, MaterialParameter> m_parameters;
 		size_t m_parameterSize{ 0 };

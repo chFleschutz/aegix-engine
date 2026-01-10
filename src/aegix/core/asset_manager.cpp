@@ -24,23 +24,9 @@ namespace Aegix::Core
 		add("default/cubemap_white", Texture::solidColorCube(glm::vec4{ 1.0f }));
 
 		// Default PBR Material
+		if constexpr (false) // TODO: Make this work with gpu-driven rendering
 		{
-			auto globalSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT)
-				.build();
-
-			auto materialSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.build();
-
 			auto pipeline = Pipeline::GraphicsBuilder{}
-				.addDescriptorSetLayout(globalSetLayout)
-				.addDescriptorSetLayout(materialSetLayout)
 				.addPushConstantRange(VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT, 128)
 				.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/default_geometry.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
@@ -51,7 +37,7 @@ namespace Aegix::Core
 				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
 				.build();
 
-			auto pbrMatTemplate = std::make_shared<MaterialTemplate>(std::move(pipeline), std::move(globalSetLayout), std::move(materialSetLayout));
+			auto pbrMatTemplate = std::make_shared<MaterialTemplate>(std::move(pipeline));
 			pbrMatTemplate->addParameter("albedo", glm::vec3{ 1.0f, 1.0f, 1.0f });
 			pbrMatTemplate->addParameter("emissive", glm::vec3{ 0.0f, 0.0f, 0.0f });
 			pbrMatTemplate->addParameter("metallic", 0.0f);
@@ -75,30 +61,11 @@ namespace Aegix::Core
 
 		// Default PBR Mesh Shader Material
 		{
-			auto globalSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT)
-				.build();
-
-			auto materialSetLayout = DescriptorSetLayout::Builder{}
-				.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-				.build();
-
-			auto& bindless = Engine::renderer().bindlessDescriptorSet();
-
 			auto meshPipeline = Pipeline::GraphicsBuilder{}
-				.addDescriptorSetLayout(bindless.layout())
+				.addDescriptorSetLayout(Engine::renderer().bindlessDescriptorSet().layout())
 				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128) 
-				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT,
-					SHADER_DIR "pbr/task_meshlet_cull.slang.spv")
-				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT,
-					SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
-				//.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 
-				//	SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
+				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT, SHADER_DIR "pbr/task_meshlet_cull.slang.spv")
+				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
 				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
@@ -108,7 +75,7 @@ namespace Aegix::Core
 				.addFlag(Pipeline::Flags::MeshShader)
 				.build();
 
-			auto pbrMeshMatTemplate = std::make_shared<MaterialTemplate>(std::move(meshPipeline), std::move(globalSetLayout), std::move(materialSetLayout));
+			auto pbrMeshMatTemplate = std::make_shared<MaterialTemplate>(std::move(meshPipeline));
 			pbrMeshMatTemplate->addParameter("albedo", glm::vec3{ 1.0f, 1.0f, 1.0f });
 			pbrMeshMatTemplate->addParameter("emissive", glm::vec3{ 0.0f, 0.0f, 0.0f });
 			pbrMeshMatTemplate->addParameter("metallic", 0.0f);

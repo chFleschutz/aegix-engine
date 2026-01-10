@@ -5,10 +5,8 @@
 
 namespace Aegix::Graphics
 {
-	MaterialTemplate::MaterialTemplate(Pipeline pipeline, DescriptorSetLayout globalSetLayout, DescriptorSetLayout materialSetLayout)
-		: m_pipeline{ std::move(pipeline) },
-		m_globalSetLayout{ std::move(globalSetLayout) },
-		m_materialSetLayout{ std::move(materialSetLayout) }
+	MaterialTemplate::MaterialTemplate(Pipeline pipeline)
+		: m_pipeline{ std::move(pipeline) }
 	{
 	}
 
@@ -102,18 +100,6 @@ namespace Aegix::Graphics
 	void MaterialTemplate::bindBindlessSet(VkCommandBuffer cmd)
 	{
 		m_pipeline.bindDescriptorSet(cmd, 0, Engine::renderer().bindlessDescriptorSet().descriptorSet());
-	}
-
-	void MaterialTemplate::bindGlobalSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
-	{
-		// TODO: Remove (Replaced by bindless descriptor set)
-		m_pipeline.bindDescriptorSet(cmd, 0, descriptorSet);
-	}
-
-	void MaterialTemplate::bindMaterialSet(VkCommandBuffer cmd, VkDescriptorSet descriptorSet)
-	{
-		// TODO: Remove (Replaced by bindless descriptor set)
-		m_pipeline.bindDescriptorSet(cmd, 1, descriptorSet);
 	}
 
 	void MaterialTemplate::pushConstants(VkCommandBuffer cmd, const void* data, size_t size, uint32_t offset)

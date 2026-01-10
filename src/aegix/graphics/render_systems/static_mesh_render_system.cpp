@@ -34,14 +34,13 @@ namespace Aegix::Graphics
 			if (lastMatTemplate != currentMatTemplate)
 			{
 				currentMatTemplate->bind(ctx.cmd);
-				currentMatTemplate->bindGlobalSet(ctx.cmd, ctx.globalSet);
+				currentMatTemplate->bindBindlessSet(ctx.cmd);
 				lastMatTemplate = currentMatTemplate;
 			}
 
 			// Bind Descriptor Set
 			if (lastMatInstance != material.instance.get())
 			{
-				material.instance->bind(ctx.cmd, ctx.frameIndex);
 				material.instance->updateParameters(ctx.frameIndex);
 				lastMatInstance = material.instance.get();
 			}

@@ -11,15 +11,6 @@ namespace Aegix::Graphics
 	{
 		AGX_ASSERT_X(m_template, "Material template cannot be null");
 
-		m_descriptorSets.reserve(MAX_FRAMES_IN_FLIGHT);
-		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			m_descriptorSets.emplace_back(m_template->materialSetLayout());
-			DescriptorWriter{ m_template->materialSetLayout() }
-				.writeBuffer(0, m_uniformBuffer.buffer(), i)
-				.update(m_descriptorSets[i]);
-		}
-
 		m_dirtyFlags.fill(true);
 	}
 
@@ -66,33 +57,6 @@ namespace Aegix::Graphics
 			}
 		}
 		
-		// Update descriptor set (Textures may have changed)
-		DescriptorWriter writer{ m_template->materialSetLayout() };
-		writer.writeBuffer(0, m_uniformBuffer.buffer());
-		for (const auto& [name, info] : m_template->parameters())
-		{
-			if (!std::holds_alternative<std::shared_ptr<Texture>>(info.defaultValue))
-				continue;
-
-			auto it = m_overrides.find(name);
-			if (it != m_overrides.end())
-			{
-				auto& texture = std::get<std::shared_ptr<Texture>>(it->second);
-				writer.writeImage(info.binding, *texture);
-			}
-			else
-			{
-				auto& texture = std::get<std::shared_ptr<Texture>>(info.defaultValue);
-				writer.writeImage(info.binding, *texture);
-			}
-		}
-		writer.update(m_descriptorSets[index]);
-
 		m_dirtyFlags[index] = false;
-	}
-
-	void MaterialInstance::bind(VkCommandBuffer cmd, int index) const
-	{
-		m_template->bindMaterialSet(cmd, m_descriptorSets[index]);
 	}
 }
