@@ -16,7 +16,7 @@ public:
 
 auto main() -> int
 {
-	auto& engine = Aegix::Engine::instance();
+	Aegix::Engine engine;
 	engine.loadScene<TemplateScene>();
 	engine.run();
 }

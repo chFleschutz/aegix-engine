@@ -28,19 +28,19 @@ namespace Aegix::Graphics
 		m_visibleIndices = pool.addBuffer("VisibleInstances",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
-				.size = sizeof(uint32_t) * static_cast<size_t>(m_drawBatcher.instanceCount() * INSTANCE_OVERALLOCATION)
+				.size = sizeof(uint32_t) * std::max(m_drawBatcher.instanceCount(), 1u),
 			});
 
 		m_indirectDrawCommands = pool.addBuffer("IndirectDrawCommands",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
-				.size = sizeof(VkDrawMeshTasksIndirectCommandEXT) * m_drawBatcher.instanceCount(),
+				.size = sizeof(VkDrawMeshTasksIndirectCommandEXT) * std::max(m_drawBatcher.instanceCount(), 1u),
 			});
 
 		m_indirectDrawCounts = pool.addBuffer("IndirectDrawCounts",
 			FGResource::Usage::ComputeWriteStorage,
 			FGBufferInfo{
-				.size = sizeof(uint32_t) * m_drawBatcher.batchCount(),
+				.size = sizeof(uint32_t) * std::max(m_drawBatcher.batchCount(), 1u),
 				.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT
 			});
 

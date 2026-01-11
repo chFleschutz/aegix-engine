@@ -10,7 +10,6 @@ namespace Aegix::Graphics
 	class CullingPass : public FGRenderPass
 	{
 	public:
-		static constexpr float INSTANCE_OVERALLOCATION = 1.5f;
 		static constexpr uint32_t WORKGROUP_SIZE = 64;
 
 		struct CullingPushConstants

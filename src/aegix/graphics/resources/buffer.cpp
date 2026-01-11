@@ -72,6 +72,9 @@ namespace Aegix::Graphics
 		m_instanceCount{ info.instanceCount },
 		m_usage{ info.usage }
 	{
+		AGX_ASSERT_X(m_instanceSize > 0, "Cannot create buffer with instance size 0");
+		AGX_ASSERT_X(m_instanceCount > 0, "Cannot create buffer with instance count 0");
+
 		m_alignmentSize = computeAlignment(info.instanceSize, info.minOffsetAlignment);
 		m_bufferSize = m_alignmentSize * m_instanceCount;
 		VulkanContext::device().createBuffer(m_buffer, m_allocation, m_bufferSize, m_usage, info.allocFlags, VMA_MEMORY_USAGE_AUTO);
