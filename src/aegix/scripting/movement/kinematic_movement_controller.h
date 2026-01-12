@@ -9,6 +9,8 @@ namespace Aegix::Scripting
 	class KinematcMovementController : public ScriptBase
 	{
 	public:
+		static constexpr float DEFAULT_MOVE_SPEED = 5.0f;
+
 		/// @brief Default keybindings for movement and view control
 		struct KeyMappings
 		{
@@ -18,6 +20,13 @@ namespace Aegix::Scripting
 			Input::Key moveBackward = Input::S;
 			Input::Key moveUp = Input::E;
 			Input::Key moveDown = Input::Q;
+
+			// Speed modifiers
+			Input::Key increaseSpeed = Input::PageUp;
+			Input::Key decreaseSpeed = Input::PageDown;
+			Input::Key resetSpeed = Input::Home;
+			Input::Key speedupModifier = Input::LeftShift;
+			Input::Key slowdownModifier = Input::LeftControl;
 
 			Input::MouseButton mouseRotate = Input::MouseRight;
 			Input::MouseButton mousePan = Input::MouseMiddle;
@@ -47,7 +56,7 @@ namespace Aegix::Scripting
 		void toogleMousePan(bool enabled);
 
 		KeyMappings m_keys{};
-		float m_moveSpeed{ 5.0f };
+		float m_moveSpeed{ DEFAULT_MOVE_SPEED };
 		float m_lookSpeed{ 1.5f };
 		float m_mouseSensitivity{ 0.25f };
 		bool m_mouseRotateEnabled{ false };

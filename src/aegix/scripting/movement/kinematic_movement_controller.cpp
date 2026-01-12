@@ -57,6 +57,16 @@ namespace Aegix::Scripting
 		auto rightDir = transform.right();
 		auto upDir = Math::World::UP;
 
+		// Speed modifiers
+		if (Input::instance().keyPressed(m_keys.increaseSpeed)) m_moveSpeed += 100.0f * deltaSeconds;
+		if (Input::instance().keyPressed(m_keys.decreaseSpeed)) m_moveSpeed -= 100.0f * deltaSeconds;
+		if (Input::instance().keyPressed(m_keys.resetSpeed)) m_moveSpeed = DEFAULT_MOVE_SPEED;
+		m_moveSpeed = std::max(m_moveSpeed, 0.1f);
+
+		auto currentSpeed = m_moveSpeed;
+		if (Input::instance().keyPressed(m_keys.speedupModifier)) currentSpeed *= 2.0f;
+		if (Input::instance().keyPressed(m_keys.slowdownModifier)) currentSpeed *= 0.5f;
+
 		// Key input movement
 		glm::vec3 moveDir{ 0.0f };
 		if (Input::instance().keyPressed(m_keys.moveForward)) moveDir += forwardDir;
@@ -68,7 +78,7 @@ namespace Aegix::Scripting
 
 		if (glm::length(moveDir) > std::numeric_limits<float>::epsilon())
 		{
-			transform.location += m_moveSpeed * glm::normalize(moveDir) * deltaSeconds;
+			transform.location += currentSpeed * glm::normalize(moveDir) * deltaSeconds;
 		}
 
 		// Mouse pan input movement
