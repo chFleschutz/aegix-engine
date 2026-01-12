@@ -6,6 +6,8 @@ target_sources(aegix-engine PRIVATE
 	"panels/renderer_panel.h"
 	"panels/scene_panel.cpp"
 	"panels/scene_panel.h"
+	"panels/statistics_panel.cpp"
+	"panels/statistics_panel.h"
 	"ui.cpp"
 	"ui.h"
 	

@@ -6,6 +6,7 @@
 #include "ui/panels/profiler_panel.h"
 #include "ui/panels/renderer_panel.h"
 #include "ui/panels/scene_panel.h"
+#include "ui/panels/statistics_panel.h"
 
 namespace Aegix::Core
 {
@@ -23,6 +24,7 @@ namespace Aegix::Core
 		UI::MenuBarPanel m_menuBarPanel{};
 		UI::RendererPanel m_rendererPanel{};
 		UI::ScenePanel m_scenePanel{};
+		UI::StatisticsPanel m_statisticsPanel{};
 		UI::ProfilerPanel m_profilerPanel{};
 		UI::DemoPanel m_demoPanel{};
 		int m_gizmoType = -1;

@@ -12,11 +12,12 @@ namespace Aegix::UI
 	public:
 		enum MenuFlags
 		{
-			None = 1 << 0,
-			Renderer = 1 << 1,
-			Scene = 1 << 2,
-			Profiler = 1 << 3,
-			Demo = 1 << 4
+			None        = 1 << 0,
+			Renderer    = 1 << 1,
+			Scene       = 1 << 2,
+			Statistics  = 1 << 3,
+			Profiler    = 1 << 4,
+			Demo        = 1 << 5
 		};
 
 		[[nodiscard]] auto flagActive(MenuFlags flag) const -> bool { return m_flags & flag; }
@@ -33,6 +34,9 @@ namespace Aegix::UI
 
 				if (ImGui::MenuItem("Scene", nullptr, m_flags & MenuFlags::Scene))
 					m_flags ^= MenuFlags::Scene;
+
+				if (ImGui::MenuItem("Statistics", nullptr, m_flags & MenuFlags::Statistics))
+					m_flags ^= MenuFlags::Statistics;
 
 				if (ImGui::MenuItem("Profiler", nullptr, m_flags & MenuFlags::Profiler))
 					m_flags ^= MenuFlags::Profiler;

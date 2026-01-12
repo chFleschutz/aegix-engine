@@ -36,6 +36,9 @@ namespace Aegix::Core
 		if (m_menuBarPanel.flagActive(UI::MenuBarPanel::Scene))
 			m_scenePanel.draw();
 
+		if (m_menuBarPanel.flagActive(UI::MenuBarPanel::Statistics))
+			m_statisticsPanel.draw();
+
 		if (m_menuBarPanel.flagActive(UI::MenuBarPanel::Profiler))
 			m_profilerPanel.draw();
 
