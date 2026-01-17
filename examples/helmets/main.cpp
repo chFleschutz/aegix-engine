@@ -65,7 +65,8 @@ public:
 		std::shared_ptr<Graphics::MaterialInstance> materialInstance;
 		while (!meshEntity.has<Mesh, Material>())
 		{
-			meshEntity = meshEntity.get<Children>().first;
+			meshEntity = meshEntity.get<Children>().last;
+			AGX_ASSERT_X(meshEntity, "Failed to find mesh and material in SciFiHelmet scene");
 		}
 		mesh = meshEntity.get<Mesh>().staticMesh;
 		materialInstance = meshEntity.get<Material>().instance;
