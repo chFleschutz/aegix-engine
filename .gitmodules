@@ -1,6 +1,9 @@
 [submodule "external/entt"]
 	path = external/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "external/fastgltf"]
+	path = external/fastgltf
+	url = https://github.com/spnda/fastgltf.git
 [submodule "external/glm"]
 	path = external/glm
 	url = https://github.com/g-truc/glm.git
