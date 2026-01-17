@@ -17,6 +17,7 @@ target_link_libraries(aegix-engine
 		Aegix::GLTF
 		Aegix::Log
 		EnTT::EnTT
+		fastgltf::fastgltf
 		glfw
 		glm::glm
 		imgui
