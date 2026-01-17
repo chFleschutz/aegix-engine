@@ -26,10 +26,10 @@ namespace Aegix::Graphics
 	class BindlessDescriptorSet
 	{
 	public:
-		static constexpr uint32_t MAX_SAMPLED_IMAGES = 16 * 1024;	// 16K sampled images
-		static constexpr uint32_t MAX_STORAGE_IMAGES = 1 * 1024;	// 1K  storage images
-		static constexpr uint32_t MAX_STORAGE_BUFFERS = 16 * 1024;  // 16K storage buffers
-		static constexpr uint32_t MAX_UNIFORM_BUFFERS = 16 * 1024;  // 16K uniform buffers
+		static constexpr uint32_t MAX_SAMPLED_IMAGES = 1 << 18;
+		static constexpr uint32_t MAX_STORAGE_IMAGES = 1 << 14;
+		static constexpr uint32_t MAX_STORAGE_BUFFERS = 1 << 19;
+		static constexpr uint32_t MAX_UNIFORM_BUFFERS = 1 << 14;
 
 		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 0;
 		static constexpr uint32_t STORAGE_IMAGE_BINDING = 1;
