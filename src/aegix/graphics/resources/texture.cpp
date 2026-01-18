@@ -167,6 +167,27 @@ namespace Aegix::Graphics
 		return cubeMap;
 	}
 
+	auto Texture::loadFromMemory(const std::byte* data, size_t size, VkFormat format) -> std::shared_ptr<Texture>
+	{
+		int width, height, channels;
+		auto pixels = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(data), static_cast<int>(size),
+			&width, &height, &channels, STBI_rgb_alpha);
+
+		if (!pixels)
+		{
+			AGX_UNREACHABLE("Failed to load image from memory");
+			return nullptr;
+		}
+
+		VkDeviceSize imageSize = 4 * static_cast<VkDeviceSize>(width) * static_cast<VkDeviceSize>(height);
+		Texture::CreateInfo info = Texture::CreateInfo::texture2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height), format);
+		auto texture = std::make_shared<Texture>(info);
+		texture->image().upload(pixels, imageSize);
+
+		stbi_image_free(pixels);
+		return texture;
+	}
+
 	auto Texture::solidColor(glm::vec4 color) -> std::shared_ptr<Texture>
 	{
 		auto info = Texture::CreateInfo::texture2D(1, 1, VK_FORMAT_R32G32B32A32_SFLOAT);

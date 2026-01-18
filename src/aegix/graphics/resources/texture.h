@@ -27,6 +27,8 @@ namespace Aegix::Graphics
 		static auto loadTextur2D(const std::filesystem::path& file, VkFormat format) -> std::shared_ptr<Texture>;
 		static auto loadCubemap(const std::filesystem::path& file) -> std::shared_ptr<Texture>;
 
+		static auto loadFromMemory(const std::byte* data, size_t size, VkFormat format) -> std::shared_ptr<Texture>;
+
 		static auto solidColor(glm::vec4 color) -> std::shared_ptr<Texture>;
 		static auto solidColorCube(glm::vec4 color) -> std::shared_ptr<Texture>;
 

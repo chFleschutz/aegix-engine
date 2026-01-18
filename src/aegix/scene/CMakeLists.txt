@@ -1,4 +1,6 @@
 target_sources(aegix-engine PRIVATE
+	"loader/fast_gltf_loader.h"
+	"loader/fast_gltf_loader.cpp"
 	"loader/gltf_loader.cpp"
 	"loader/gltf_loader.h"
 	"loader/obj_loader.cpp"

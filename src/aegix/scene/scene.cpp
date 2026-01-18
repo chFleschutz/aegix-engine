@@ -6,6 +6,7 @@
 #include "graphics/resources/static_mesh.h"
 #include "scene/components.h"
 #include "scene/entity.h"
+#include "scene/loader/fast_gltf_loader.h"
 #include "scene/loader/gltf_loader.h"
 #include "scene/loader/obj_loader.h"
 #include "scene/systems/camera_system.h"
@@ -14,7 +15,7 @@
 
 namespace Aegix::Scene
 {
-	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::vec3& rotation,
+	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::quat& rotation,
 		const glm::vec3& scale) -> Entity
 	{
 		Entity entity = { m_registry.create(), this };
@@ -61,7 +62,8 @@ namespace Aegix::Scene
 	{
 		if (path.extension() == ".gltf" || path.extension() == ".glb")
 		{
-			GLTFLoader loader{ *this, path };
+			//GLTFLoader loader{ *this, path };
+			FastGLTFLoader loader{ *this, path };
 			return loader.rootEntity();
 		}
 		else if (path.extension() == ".obj")

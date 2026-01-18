@@ -29,7 +29,7 @@ namespace Aegix::Graphics
 		static constexpr uint32_t MAX_SAMPLED_IMAGES = 1 << 18;
 		static constexpr uint32_t MAX_STORAGE_IMAGES = 1 << 14;
 		static constexpr uint32_t MAX_STORAGE_BUFFERS = 1 << 19;
-		static constexpr uint32_t MAX_UNIFORM_BUFFERS = 1 << 14;
+		static constexpr uint32_t MAX_UNIFORM_BUFFERS = 1 << 16;
 
 		static constexpr uint32_t SAMPLED_IMAGE_BINDING = 0;
 		static constexpr uint32_t STORAGE_IMAGE_BINDING = 1;

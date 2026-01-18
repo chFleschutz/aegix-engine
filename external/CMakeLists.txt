@@ -1,6 +1,9 @@
 set(ENTT_INCLUDE_HEADERS ON)
 add_subdirectory(entt)
 
+set(FASTGLTF_COMPILE_AS_CPP20 ON)
+add_subdirectory(fastgltf)
+
 set(GLFW_BUILD_DOCS OFF)
 add_subdirectory(glfw)
 

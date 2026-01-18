@@ -11,6 +11,9 @@ namespace Aegix::Graphics
 
 	auto DescriptorHandle::pack(uint32_t index, uint32_t version, Type type) -> uint32_t
 	{
+		AGX_ASSERT_X(index <= INDEX_MASK, "Index out of bounds for DescriptorHandle");
+		AGX_ASSERT_X(version <= VERSION_MASK, "Version out of bounds for DescriptorHandle");
+
 		return (index & INDEX_MASK) |
 			((version & VERSION_MASK) << INDEX_BITS) |
 			((static_cast<uint32_t>(type) & TYPE_MASK) << (INDEX_BITS + VERSION_BITS));
