@@ -21,6 +21,8 @@ namespace Aegix::Graphics
 			VkCommandBuffer commandBuffer;
 		};
 
+		static constexpr bool ENABLE_GPU_DRIVEN_RENDERING{ true };
+
 		Renderer(Core::Window& window);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) = delete;

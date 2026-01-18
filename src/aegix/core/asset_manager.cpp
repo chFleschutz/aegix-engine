@@ -25,33 +25,33 @@ namespace Aegix::Core
 
 		// Default PBR Material
 		{
-			auto pipeline = Pipeline::GraphicsBuilder{}
-				.addDescriptorSetLayout(Engine::renderer().bindlessDescriptorSet().layout())
-				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128)
-				.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
-					SHADER_DIR "pbr/default_geometry_bindless.slang.spv")
-				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-				.build();
-
-			auto meshPipeline = Pipeline::GraphicsBuilder{}
-				.addDescriptorSetLayout(Engine::renderer().bindlessDescriptorSet().layout())
-				.addPushConstantRange(VK_SHADER_STAGE_ALL, 128)
-				.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT, SHADER_DIR "pbr/task_meshlet_cull.slang.spv")
-				.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT, 
-					SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
-				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-				.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
-				.setDepthAttachment(VK_FORMAT_D32_SFLOAT)
-				.addFlag(Pipeline::Flags::MeshShader)
-				.build();
+			auto pipeline = []() {
+				Pipeline::GraphicsBuilder builder{};
+				builder.addDescriptorSetLayout(Engine::renderer().bindlessDescriptorSet().layout())
+					.addPushConstantRange(VK_SHADER_STAGE_ALL, 128)
+					.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+					.addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT)
+					.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+					.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+					.addColorAttachment(VK_FORMAT_R8G8B8A8_UNORM)
+					.setDepthAttachment(VK_FORMAT_D32_SFLOAT);
+				if constexpr (Renderer::ENABLE_GPU_DRIVEN_RENDERING)
+				{
+					return builder
+						.addShaderStages(VK_SHADER_STAGE_TASK_BIT_EXT, SHADER_DIR "pbr/task_meshlet_cull.slang.spv")
+						.addShaderStages(VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_FRAGMENT_BIT,
+							SHADER_DIR "pbr/mesh_geometry_indirect.slang.spv")
+						.addFlag(Pipeline::Flags::MeshShader)
+						.build();
+				}
+				else
+				{
+					return builder
+						.addShaderStages(VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+							SHADER_DIR "pbr/default_geometry_bindless.slang.spv")
+						.build();
+				}
+			}();
 
 			auto pbrMatTemplate = std::make_shared<MaterialTemplate>(std::move(pipeline));
 			pbrMatTemplate->addParameter("albedo", glm::vec3{ 1.0f, 1.0f, 1.0f });

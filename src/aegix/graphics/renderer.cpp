@@ -136,14 +136,21 @@ namespace Aegix::Graphics
 
 	void Renderer::createFrameGraph()
 	{
-		auto& geoPass = m_frameGraph.add<GeometryPass>();
-		geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
-
-		//m_frameGraph.add<CullingPass>(m_drawBatchRegistry);
-		//m_frameGraph.add<SceneUpdatePass>();
-		//m_frameGraph.add<GPUDrivenGeometry>();
-
-		m_frameGraph.add<SkyBoxPass>();
+		// CPU and GPU Driven Geometry Passes are mutually exclusive 
+		// Note: They each need different shaders and pipelines (check asset_manager.cpp)
+		if constexpr (!ENABLE_GPU_DRIVEN_RENDERING)
+		{
+			// CPU Driven Rendering Passes
+			auto& geoPass = m_frameGraph.add<GeometryPass>();
+			geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+		}
+		else
+		{
+			// GPU Driven Rendering Passes 
+			m_frameGraph.add<CullingPass>(m_drawBatchRegistry);
+			m_frameGraph.add<SceneUpdatePass>();
+			m_frameGraph.add<GPUDrivenGeometry>();
+		}
 
 		auto& transparentPass = m_frameGraph.add<TransparentPass>();
 		transparentPass.addRenderSystem<PointLightRenderSystem>();
@@ -151,14 +158,14 @@ namespace Aegix::Graphics
 		// TODO: Alternatively add transparent tag component to avoid iterating all static meshes
 		//transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
 
+		m_frameGraph.add<SkyBoxPass>();
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
-
 		
-		// Disabled (gpu performance heavy + noticable blotches when to close to geometry)
+		// Disabled for now (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();
 	}
