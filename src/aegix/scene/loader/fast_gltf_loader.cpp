@@ -15,7 +15,7 @@ namespace Aegix::Scene
 			AGX_UNREACHABLE("Failed to load GLTF file data");
 			return;
 		}
-		
+
 		m_basePath = path.parent_path();
 		auto options = fastgltf::Options::LoadExternalBuffers | fastgltf::Options::DecomposeNodeMatrices;
 		auto asset = parser.loadGltf(data.get(), m_basePath, options);
@@ -35,8 +35,8 @@ namespace Aegix::Scene
 		loadMaterials(gltf);
 
 		size_t startScene = gltf.defaultScene.value_or(0);
-		m_rootEntity = scene.createEntity(gltf.scenes[startScene].name.empty() 
-			? path.stem().string() 
+		m_rootEntity = scene.createEntity(gltf.scenes[startScene].name.empty()
+			? path.stem().string()
 			: std::string(gltf.scenes[startScene].name));
 
 		// Correct coordinate system (GLTF uses Y-up, Z-forward)
@@ -143,11 +143,14 @@ namespace Aegix::Scene
 		}
 
 		// Load textures
-		m_textureCache.reserve(gltf.images.size());
-		for (size_t i = 0; i < gltf.images.size(); ++i)
+		m_textureCache.reserve(gltf.textures.size());
+		for (size_t i = 0; i < gltf.textures.size(); ++i)
 		{
-			const auto& image = gltf.images[i];
+			const auto& texture = gltf.textures[i];
+			if (!texture.imageIndex.has_value())
+				continue;
 
+			const auto& image = gltf.images[texture.imageIndex.value()];
 			std::visit(fastgltf::visitor{
 				[](auto&) { AGX_UNREACHABLE("Unsupported image data source");  },
 				[&](const fastgltf::sources::URI& uri)
