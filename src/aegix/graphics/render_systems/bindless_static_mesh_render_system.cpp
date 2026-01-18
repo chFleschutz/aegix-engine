@@ -11,7 +11,7 @@ namespace Aegix::Graphics
 	BindlessStaticMeshRenderSystem::BindlessStaticMeshRenderSystem(MaterialType type) :
 		m_type(type)
 	{
-		//static_assert(sizeof(PushConstantData) <= 128, "Vulkan only guarantees a minimum of 128 bytes of push constant");
+		static_assert(sizeof(PushConstantData) <= 128, "Vulkan only guarantees a minimum of 128 bytes of push constant");
 	}
 
 	void BindlessStaticMeshRenderSystem::render(const RenderContext& ctx)
