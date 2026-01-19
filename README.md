@@ -1,4 +1,4 @@
-# Aegix Engine
+# Aegis Engine
 
 A small render engine developed with Vulkan in modern C++. 
 
@@ -34,7 +34,7 @@ Follow these steps to get started:
 1. Clone the repository and its submodules:
 
     ```bash
-    git clone --recurse-submodules https://github.com/chFleschutz/aegix-engine.git
+    git clone --recurse-submodules https://github.com/chFleschutz/aegis-engine.git
     ```
 
 2. Open the folder in a CMake supported IDE (e.g. Visual Studio) or generate project files for your preferred platform using CMake.
@@ -44,9 +44,9 @@ Follow these steps to get started:
 ## Modules and External Libraries <a name="external-libraries"></a>
 
 This project is structured into several independent modules:
-- [aegix-assets](https://github.com/chFleschutz/aegix-assets) - Collection of sample assest
-- [aegix-gltf](https://github.com/chFleschutz/aegix-gltf) - GLTF 3D model loader
-- [aegix-log](https://github.com/chFleschutz/aegix-log) - Logging library
+- [aegis-assets](https://github.com/chFleschutz/aegis-assets) - Collection of sample assest
+- [aegis-gltf](https://github.com/chFleschutz/aegis-gltf) - GLTF 3D model loader
+- [aegis-log](https://github.com/chFleschutz/aegis-log) - Logging library
 
 The engine relies on the following external libraries:
 - [entt](https://github.com/skypjack/entt) - Entity component system (ECS)
