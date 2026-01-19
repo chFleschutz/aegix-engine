@@ -1,2 +1,2 @@
-add_subdirectory(aegix-gltf)
-add_subdirectory(aegix-log)
+add_subdirectory(aegis-gltf)
+add_subdirectory(aegis-log)
