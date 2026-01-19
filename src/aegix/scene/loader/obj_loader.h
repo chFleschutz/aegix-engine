@@ -2,7 +2,7 @@
 
 #include "scene/scene.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class OBJLoader
 	{

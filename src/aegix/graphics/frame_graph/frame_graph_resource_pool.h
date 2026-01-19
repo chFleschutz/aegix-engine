@@ -5,7 +5,7 @@
 #include "graphics/bindless/bindless_buffer.h"
 #include "graphics/resources/texture.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @brief Holds all resources and nodes for a frame graph
 	class FGResourcePool

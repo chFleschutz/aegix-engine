@@ -3,7 +3,7 @@
 
 #include "scripting/script_base.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	ScriptManager::~ScriptManager()
 	{

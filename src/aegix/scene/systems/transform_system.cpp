@@ -5,7 +5,7 @@
 #include "scene/entity.h"
 #include "scene/scene.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	void TransformSystem::onBegin(Scene& scene)
 	{

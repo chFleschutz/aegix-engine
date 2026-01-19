@@ -2,7 +2,7 @@
 
 #include "ai/knowledge.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
     class AIComponent;
 

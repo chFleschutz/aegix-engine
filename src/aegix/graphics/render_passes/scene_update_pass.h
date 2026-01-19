@@ -4,7 +4,7 @@
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/frustum.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	// TODO: Maybe use SoA for better cache use (instead of packed AoS)
 	struct alignas(16) InstanceData

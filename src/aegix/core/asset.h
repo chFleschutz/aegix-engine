@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	class Asset
 	{

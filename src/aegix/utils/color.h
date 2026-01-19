@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Aegix
+namespace Aegis
 {
 	class Color
 	{

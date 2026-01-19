@@ -3,7 +3,7 @@
 #include "ai/options/steering_behaviour/steering_behaviour.h"
 #include "utils/random.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviourWander : public SteeringBehaviour
 	{
@@ -11,16 +11,16 @@ namespace Aegix::AI
 		explicit SteeringBehaviourWander(AIComponent* aiComponent)
 			: SteeringBehaviour(aiComponent) {}
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
-			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
+			auto& transform = m_aiComponent->getComponent<Aegis::Component::Transform>();
 
-			auto centerPoint = Aegix::MathLib::forward({ 0.0f, m_currentAngle, 0.0f }) * m_distance;
-			m_currentAngle += Aegix::Random::uniformFloat(-m_jitter, m_jitter);
-			auto boderpoint = centerPoint + (Aegix::MathLib::forward({ 0.0f, m_currentAngle, 0.0f }) * m_radius);
+			auto centerPoint = Aegis::MathLib::forward({ 0.0f, m_currentAngle, 0.0f }) * m_distance;
+			m_currentAngle += Aegis::Random::uniformFloat(-m_jitter, m_jitter);
+			auto boderpoint = centerPoint + (Aegis::MathLib::forward({ 0.0f, m_currentAngle, 0.0f }) * m_radius);
 
-			Aegix::Physics::Force force;
-			force.linear = Aegix::MathLib::normalize(boderpoint) * m_limits.maxLinearForce;
+			Aegis::Physics::Force force;
+			force.linear = Aegis::MathLib::normalize(boderpoint) * m_limits.maxLinearForce;
 			return force;
 		}
 

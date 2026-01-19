@@ -4,7 +4,7 @@
 #include "math/math.h"
 
 
-namespace Aegix 
+namespace Aegis 
 {
 	class Input
 	{

@@ -5,7 +5,7 @@
 #include "graphics/descriptors.h"
 #include "scene/components.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	PointLightRenderSystem::PointLightRenderSystem()
 	{

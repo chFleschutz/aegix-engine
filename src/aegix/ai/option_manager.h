@@ -6,7 +6,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	/// @brief Manages options in a deque and updates the currently active option
 	class OptionManager

@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	/// @brief Shows the main menu bar of the application
 	class MenuBarPanel

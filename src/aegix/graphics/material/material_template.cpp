@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	MaterialTemplate::MaterialTemplate(Pipeline pipeline)
 		: m_pipeline{ std::move(pipeline) }

@@ -7,7 +7,7 @@
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	SkyBoxPass::SkyBoxPass(FGResourcePool& pool) :
 		m_descriptorSetLayout{ createDescriptorSetLayout() }

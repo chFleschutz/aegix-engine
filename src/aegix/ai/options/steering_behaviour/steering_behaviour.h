@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviour : public Option
 	{
@@ -27,13 +27,13 @@ namespace Aegix::AI
 
 		void setLimits(const Limits& limits) { m_limits = limits; }
 
-		virtual Aegix::Physics::Force computeForce() = 0;
+		virtual Aegis::Physics::Force computeForce() = 0;
 
 	protected:
 		virtual void updateOption(float deltaSeconds) override
 		{
-			assert(m_aiComponent->hasComponent<Aegix::Physics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
-			auto& dynamics = m_aiComponent->getComponent<Aegix::Physics::MotionDynamics>();
+			assert(m_aiComponent->hasComponent<Aegis::Physics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
+			auto& dynamics = m_aiComponent->getComponent<Aegis::Physics::MotionDynamics>();
 			
 			dynamics.addForce(computeForce());
 		}
@@ -62,10 +62,10 @@ namespace Aegix::AI
 	protected:
 		virtual void updateOption(float deltaSeconds) override
 		{
-			assert(m_aiComponent->hasComponent<Aegix::Physics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
-			auto& dynamics = m_aiComponent->getComponent<Aegix::Physics::MotionDynamics>();
+			assert(m_aiComponent->hasComponent<Aegis::Physics::MotionDynamics>() && "SteeringBehaviour needs MotionDynamics component");
+			auto& dynamics = m_aiComponent->getComponent<Aegis::Physics::MotionDynamics>();
 
-			Aegix::Physics::Force force{};
+			Aegis::Physics::Force force{};
 			for (auto& weightedBehaviour : m_weightedBehaviours)
 			{
 				force += weightedBehaviour.behaviour->computeForce() * weightedBehaviour.weight;

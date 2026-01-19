@@ -4,7 +4,7 @@
 #include "math/interpolation.h"
 #include "math/random.h"
 
-namespace Aegix
+namespace Aegis
 {
 	PerlinNoise1D::PerlinNoise1D(float bandwidth)
 		: m_bandwidth(bandwidth)

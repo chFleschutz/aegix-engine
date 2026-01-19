@@ -10,16 +10,16 @@
 namespace std
 {
 	template<>
-	struct hash<Aegix::Graphics::FGResourceHandle>
+	struct hash<Aegis::Graphics::FGResourceHandle>
 	{
-		auto operator()(const Aegix::Graphics::FGResourceHandle& handle) const noexcept -> size_t
+		auto operator()(const Aegis::Graphics::FGResourceHandle& handle) const noexcept -> size_t
 		{
 			return std::hash<uint32_t>()(handle.handle);
 		}
 	};
 }
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	void FrameGraph::compile()
 	{

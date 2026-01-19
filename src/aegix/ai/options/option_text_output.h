@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	/// @brief Debug option that prints to the console
 	class OptionTextOutput : public Option

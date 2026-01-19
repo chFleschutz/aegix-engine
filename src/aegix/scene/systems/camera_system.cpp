@@ -3,7 +3,7 @@
 
 #include "math/math.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	void CameraSystem::onUpdate(float deltaSeconds, Scene& scene)
 	{

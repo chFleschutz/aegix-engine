@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "descriptor_handle.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	DescriptorHandle::DescriptorHandle(uint32_t index, Type type) :
 		m_handle{ pack(index, 0, type) }

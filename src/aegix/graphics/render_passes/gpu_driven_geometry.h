@@ -2,7 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class GPUDrivenGeometry : public FGRenderPass
 	{

@@ -4,7 +4,7 @@
 #include "graphics/pipeline.h"
 #include "graphics/descriptors.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	enum class LightingViewMode : int32_t
 	{

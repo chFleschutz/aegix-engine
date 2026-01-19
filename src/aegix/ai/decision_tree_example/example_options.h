@@ -2,7 +2,7 @@
 
 #include "ai/options/option.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
     class SleepOption : public Option
     {

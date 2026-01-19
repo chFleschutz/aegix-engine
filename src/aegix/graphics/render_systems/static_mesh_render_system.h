@@ -3,7 +3,7 @@
 #include "graphics/render_systems/render_system.h"
 #include "graphics/material/material_template.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class StaticMeshRenderSystem : public RenderSystem
 	{

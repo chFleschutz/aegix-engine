@@ -2,7 +2,7 @@
 
 #include "graphics/globals.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @brief Manages the deletion of vulkan objects to ensure they are not deleted while in use
 	/// @note Deletion is deferred for SwapChain::MAX_FRAMES_IN_FLIGHT frames 

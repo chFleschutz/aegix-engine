@@ -3,10 +3,10 @@
 #include "utils/rolling_average.h"
 #include "utils/timer.h"
 
-#define AGX_PROFILE_SCOPE(name) Aegix::ScopeProfiler profiler##__LINE__(name)
+#define AGX_PROFILE_SCOPE(name) Aegis::ScopeProfiler profiler##__LINE__(name)
 #define AGX_PROFILE_FUNCTION() AGX_PROFILE_SCOPE(__FUNCTION__)
 
-namespace Aegix
+namespace Aegis
 {
 	/// @brief Utility class for profiling code execution
 	/// @note Uses a rolling average over 'AVERAGE_FRAME_COUNT' frames

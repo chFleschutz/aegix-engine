@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviourVelocityMatching : public SteeringBehaviour
 	{
@@ -14,12 +14,12 @@ namespace Aegix::AI
 		SteeringBehaviourVelocityMatching(AIComponent* aiComponent, const EntityGroupKnowledge& group)
 			: SteeringBehaviour(aiComponent), m_group(group) {}
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
 			if (m_group.entities.empty())
-				return Aegix::Physics::Force{};
+				return Aegis::Physics::Force{};
 
-			auto& thisTransform = m_aiComponent->getComponent<Aegix::Component::Transform>();
+			auto& thisTransform = m_aiComponent->getComponent<Aegis::Component::Transform>();
 
 			glm::vec3 averageVelocity{ 0.0f };
 			for (const auto& entity : m_group.entities)
@@ -27,8 +27,8 @@ namespace Aegix::AI
 				if (entity == m_aiComponent->entity())
 					continue;
 
-				auto& otherTransform = entity.getComponent<Aegix::Component::Transform>();
-				auto& dynamics = entity.getComponent<Aegix::Physics::MotionDynamics>();
+				auto& otherTransform = entity.getComponent<Aegis::Component::Transform>();
+				auto& dynamics = entity.getComponent<Aegis::Physics::MotionDynamics>();
 
 				auto direction = otherTransform.location - thisTransform.location;
 				auto distance = glm::length(direction);
@@ -37,7 +37,7 @@ namespace Aegix::AI
 					averageVelocity += dynamics.linearVelocity();
 			}
 
-			Aegix::Physics::Force force{};
+			Aegis::Physics::Force force{};
 			force.linear = averageVelocity / static_cast<float>(m_group.entities.size());
 			return force;
 		}

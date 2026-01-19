@@ -4,9 +4,9 @@
 #include "ai/option_manager.h"
 #include "scripting/script_base.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
-    class AIComponent : public Aegix::Scripting::ScriptBase
+    class AIComponent : public Aegis::Scripting::ScriptBase
     {
     public:
         AIComponent(Blackboard& blackboard) : m_blackboard(blackboard) {}

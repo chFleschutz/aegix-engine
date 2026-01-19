@@ -5,7 +5,7 @@
 #include "scene/scene.h"
 #include "ui/ui.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct RenderContext
 	{

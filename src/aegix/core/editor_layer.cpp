@@ -7,7 +7,7 @@
 
 #include <ImGuizmo.h>
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	void EditorLayer::onUpdate(float deltaSeconds)
 	{

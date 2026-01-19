@@ -10,7 +10,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	SSAOPass::SSAOPass(FGResourcePool& pool)
 		: m_uniforms{ Buffer::uniformBuffer(sizeof(SSAOUniforms)) },

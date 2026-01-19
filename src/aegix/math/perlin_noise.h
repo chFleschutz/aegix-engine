@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix
+namespace Aegis
 {
 	/// @brief 1D Perlin noise generator.
 	class PerlinNoise1D

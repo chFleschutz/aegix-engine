@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	BloomPass::BloomPass(FGResourcePool& pool) :
 		m_thresholdSetLayout{ createThresholdDescriptorSetLayout() },

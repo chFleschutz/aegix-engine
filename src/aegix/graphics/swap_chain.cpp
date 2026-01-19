@@ -4,7 +4,7 @@
 #include "graphics/vulkan/vulkan_tools.h"
 #include "graphics/vulkan/vulkan_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	SwapChain::SwapChain(VkExtent2D windowExtent)
 		: m_windowExtent{ windowExtent }

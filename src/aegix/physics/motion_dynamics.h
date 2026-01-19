@@ -3,7 +3,7 @@
 #include "scripting/script_base.h"
 #include "math/math.h"
 
-namespace Aegix::Physics
+namespace Aegis::Physics
 {
 	/// @brief Represents a directional and angular force.
 	struct Force
@@ -28,7 +28,7 @@ namespace Aegix::Physics
 
 
 	/// @brief Adds motion dynamics to an object to update its position and rotation each frame.
-	class MotionDynamics : public Aegix::Scripting::ScriptBase
+	class MotionDynamics : public Aegis::Scripting::ScriptBase
 	{
 	public:
 		struct Properties

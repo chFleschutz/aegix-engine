@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	class ScenePanel
 	{

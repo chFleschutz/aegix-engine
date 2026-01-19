@@ -5,7 +5,7 @@
 #include "graphics/resources/mesh_preprocessor.h"
 #include "scene/components.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	FastGLTFLoader::FastGLTFLoader(Scene& scene, const std::filesystem::path& path)
 	{

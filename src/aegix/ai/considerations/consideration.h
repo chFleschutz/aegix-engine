@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	///@brief Base class for all considerations
 	class Consideration

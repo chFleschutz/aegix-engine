@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @note This has to match the bindless::Handle struct on the slang side
 	/// @see shaders/modules/bindless.slang

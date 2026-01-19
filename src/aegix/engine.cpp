@@ -5,7 +5,7 @@
 #include "core/profiler.h"
 #include "core/globals.h"
 
-namespace Aegix
+namespace Aegis
 {
 	Engine::Engine()
 	{

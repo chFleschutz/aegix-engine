@@ -4,7 +4,7 @@
 #include "engine.h"
 #include "scene/components.h"
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	void StatisticsPanel::draw()
 	{

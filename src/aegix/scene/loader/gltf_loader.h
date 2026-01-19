@@ -7,7 +7,7 @@
 
 #include <gltf.h>
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class GLTFLoader
 	{

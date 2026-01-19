@@ -3,12 +3,12 @@
 #include "core/layer_stack.h"
 #include "graphics/vulkan/volk_include.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class Renderer;
 }
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	/// @brief Manages all GUI Layers for displaying ImGui elements
 	/// @note This class is a wrapper around ImGui

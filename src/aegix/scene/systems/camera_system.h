@@ -4,7 +4,7 @@
 #include "scene/scene.h"
 #include "scene/system.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class CameraSystem : public System
 	{

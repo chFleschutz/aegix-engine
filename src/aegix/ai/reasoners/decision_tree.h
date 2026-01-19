@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class TreeNode
 	{
@@ -95,14 +95,14 @@ namespace Aegix::AI
 
 	private:
 		template <typename T, typename... Args>
-		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<Aegix::AI::Option, T>, TreeNode*>
+		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<Aegis::AI::Option, T>, TreeNode*>
 		{
 			node = std::make_unique<OptionNode<T>>(std::forward<Args>(args)...);
 			return node.get();
 		}
 
 		template <typename T, typename... Args>
-		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<Aegix::AI::Consideration, T>, TreeNode*>
+		static auto addNode(std::unique_ptr<TreeNode>& node, Args&&... args) -> std::enable_if_t<std::is_base_of_v<Aegis::AI::Consideration, T>, TreeNode*>
 		{
 			node = std::make_unique<DecisionNode<T>>(std::forward<Args>(args)...);
 			return node.get();

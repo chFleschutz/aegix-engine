@@ -4,7 +4,7 @@
 #include "core/input.h"
 #include "math/math.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	void KinematcMovementController::begin()
 	{

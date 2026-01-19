@@ -7,7 +7,7 @@
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	GeometryPass::GeometryPass(FGResourcePool& pool)
 		: m_globalUbo{ Buffer::uniformBuffer(sizeof(GBufferUbo)) },

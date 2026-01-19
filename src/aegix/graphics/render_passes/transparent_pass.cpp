@@ -4,7 +4,7 @@
 #include "graphics/vulkan/vulkan_tools.h"
 #include "scene/components.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	TransparentPass::TransparentPass(FGResourcePool& pool) :
 		m_globalUbo{ Buffer::uniformBuffer(sizeof(TransparentUbo)) },

@@ -7,12 +7,12 @@
 #include "scene/entity.h"
 #include "scene/component_traits.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class ScriptBase;
 }
 
-namespace Aegix
+namespace Aegis
 {
 	/// @brief Gives a name to the entity
 	struct Name

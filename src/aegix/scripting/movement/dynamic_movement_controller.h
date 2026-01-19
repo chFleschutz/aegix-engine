@@ -3,7 +3,7 @@
 #include "core/input.h"
 #include "scripting/script_base.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class DynamicMovementController : public ScriptBase
 	{

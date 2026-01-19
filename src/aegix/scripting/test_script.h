@@ -2,7 +2,7 @@
 
 #include "scripting/script_base.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class TestScript : public ScriptBase
 	{

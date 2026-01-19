@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-namespace Aegix::Math
+namespace Aegis::Math
 {
 	namespace World
 	{

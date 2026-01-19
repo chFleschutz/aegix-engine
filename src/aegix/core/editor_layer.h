@@ -8,7 +8,7 @@
 #include "ui/panels/scene_panel.h"
 #include "ui/panels/statistics_panel.h"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	class EditorLayer : public Core::Layer
 	{

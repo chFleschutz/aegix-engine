@@ -1,21 +1,21 @@
-add_library(aegix-engine STATIC)
-add_library(Aegix::Engine ALIAS aegix-engine)
+add_library(aegis-engine STATIC)
+add_library(Aegis::Engine ALIAS aegis-engine)
 
-target_include_directories(aegix-engine 
+target_include_directories(aegis-engine 
 PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/..
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_include_directories(aegix-engine 
+target_include_directories(aegis-engine 
 PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-target_link_libraries(aegix-engine 
+target_link_libraries(aegis-engine 
 	PUBLIC 
-		Aegix::GLTF
-		Aegix::Log
+		Aegis::GLTF
+		Aegis::Log
 		EnTT::EnTT
 		fastgltf::fastgltf
 		glfw
@@ -29,7 +29,7 @@ target_link_libraries(aegix-engine
 		volk::volk_headers
 )
 
-target_precompile_headers(aegix-engine PUBLIC pch.h)
+target_precompile_headers(aegis-engine PUBLIC pch.h)
 
 add_subdirectory(core)
 add_subdirectory(graphics)
@@ -40,7 +40,7 @@ add_subdirectory(scripting)
 add_subdirectory(ui)
 add_subdirectory(utils)
 
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	engine.cpp
 	engine.h
 )

@@ -4,7 +4,7 @@
 #include "engine.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	CullingPass::CullingPass(FGResourcePool& pool, DrawBatchRegistry& batcher)
 		: m_drawBatcher{ batcher }

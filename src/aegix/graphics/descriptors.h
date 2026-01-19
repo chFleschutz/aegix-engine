@@ -3,7 +3,7 @@
 #include "graphics/globals.h"
 #include "graphics/vulkan/volk_include.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class Buffer;
 	class Texture;

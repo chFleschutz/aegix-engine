@@ -3,7 +3,7 @@
 
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	Window::Window(int width, int height, std::string title) 
 		: m_width(width), m_height(height), m_windowTitle(std::move(title))

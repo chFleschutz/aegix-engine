@@ -2,7 +2,7 @@
 
 #include "core/asset.h"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	using AssetID = uint64_t;
 

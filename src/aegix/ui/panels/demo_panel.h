@@ -2,7 +2,7 @@
 
 #include "imgui.h"
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	/// @brief A demo layer that shows the ImGui demo window
 	class DemoPanel

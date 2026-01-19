@@ -2,7 +2,7 @@
 
 #include "core/layer.h"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	class LayerStack
 	{

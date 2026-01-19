@@ -19,19 +19,19 @@
 #ifdef AGX_ASSERTS_ENABLED
 #define AGX_ASSERT(expr)					\
 	((expr) ? static_cast<void>(0) :		\
-	(Aegix::assertFailed(#expr, "", __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK()))
+	(Aegis::assertFailed(#expr, "", __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK()))
 #define AGX_ASSERT_X(expr, msg)				\
 	((expr) ? static_cast<void>(0) :		\
-	(Aegix::assertFailed(#expr, msg, __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK()))
+	(Aegis::assertFailed(#expr, msg, __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK()))
 #define AGX_UNREACHABLE(msg)					\
-	(Aegix::assertFailed("Unreachable code reached", msg, __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK())
+	(Aegis::assertFailed("Unreachable code reached", msg, __FILE__, __LINE__, __FUNCTION__), AGX_DEBUG_BREAK())
 #else
 #define AGX_ASSERT(expr) static_cast<void>(0)
 #define AGX_ASSERT_X(expr, msg) static_cast<void>(0)
 #define AGX_UNREACHABLE(msg) static_cast<void>(0)
 #endif // AGX_ASSERTS_ENABLED
 
-namespace Aegix
+namespace Aegis
 {
 	inline void assertFailed(const char* expr, const char* what, const char* file, int line, const char* function)
 	{

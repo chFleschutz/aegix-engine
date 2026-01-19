@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	"color.cpp"
 	"color.h"
 	"factory.h"

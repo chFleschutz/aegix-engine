@@ -5,7 +5,7 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto Buffer::uniformBuffer(VkDeviceSize size, uint32_t instanceCount) -> Buffer::CreateInfo
 	{

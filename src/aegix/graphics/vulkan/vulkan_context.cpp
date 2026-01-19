@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "vulkan_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto VulkanContext::initialize(Core::Window& window) -> VulkanContext&
 	{

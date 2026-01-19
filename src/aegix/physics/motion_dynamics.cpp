@@ -3,7 +3,7 @@
 
 #include "scene/components.h"
 
-namespace Aegix::Physics
+namespace Aegis::Physics
 {
 	Force& Force::operator+=(const Force& other)
 	{

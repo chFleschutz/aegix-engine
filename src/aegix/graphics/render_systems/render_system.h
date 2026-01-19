@@ -2,7 +2,7 @@
 
 #include "graphics/render_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class RenderSystem
 	{

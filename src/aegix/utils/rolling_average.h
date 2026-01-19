@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix
+namespace Aegis
 {
 	/// @brief Rolling average over N values
 	/// @tparam N Number of values to average (must be greater than zero)

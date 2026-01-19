@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	"panels/demo_panel.h"
 	"panels/menu_bar_panel.h"
 	"panels/profiler_panel.h"

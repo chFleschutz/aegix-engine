@@ -2,7 +2,7 @@
 
 #include "ai/options/steering_behaviour/steering_behaviour.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviourGrapplingHooks : public SteeringBehaviour
 	{
@@ -11,9 +11,9 @@ namespace Aegix::AI
 			: SteeringBehaviour(aiComponent),
 			m_path(path) {}
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
-			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
+			auto& transform = m_aiComponent->getComponent<Aegis::Component::Transform>();
 
 			auto targetDistance = glm::length(m_path.path[m_currentIndex] - transform.location);
 			if (targetDistance < m_distanceThreshold)
@@ -22,13 +22,13 @@ namespace Aegix::AI
 				if (m_currentIndex >= m_path.path.size())
 				{
 					stop();
-					return Aegix::Physics::Force{};
+					return Aegis::Physics::Force{};
 				}
 			}
 
-			Aegix::Physics::Force force{};
+			Aegis::Physics::Force force{};
 			const auto& direction = m_path.path[m_currentIndex] - transform.location;
-			force.linear = Aegix::MathLib::normalize(direction) * m_limits.maxLinearForce;
+			force.linear = Aegis::MathLib::normalize(direction) * m_limits.maxLinearForce;
 			return force;
 		}
 

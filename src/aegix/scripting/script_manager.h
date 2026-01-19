@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class ScriptBase;
 

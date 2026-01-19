@@ -10,7 +10,7 @@
 #include "scene/scene.h"
 #include "ui/ui.h"
 
-namespace Aegix
+namespace Aegis
 {
 	class Engine
 	{
@@ -54,7 +54,7 @@ namespace Aegix
 		Logging m_logging{};
 		Core::AssetManager m_assets{};
 		Core::LayerStack m_layerStack{};
-		Core::Window m_window{ Core::DEFAULT_WIDTH,Core::DEFAULT_HEIGHT, "Aegix" };
+		Core::Window m_window{ Core::DEFAULT_WIDTH,Core::DEFAULT_HEIGHT, "Aegis" };
 		Graphics::Renderer m_renderer{ m_window };
 		UI::UI m_ui{ m_renderer, m_layerStack};
 		Input m_input{ m_window };

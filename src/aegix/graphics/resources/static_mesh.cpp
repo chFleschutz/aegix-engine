@@ -4,7 +4,7 @@
 #include "graphics/vulkan/volk_include.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto StaticMesh::bindingDescription() -> VkVertexInputBindingDescription
 	{

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(AegixEngine)
+project(AegisEngine)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,7 +18,7 @@ add_subdirectory(external)
 add_subdirectory(modules)
 add_subdirectory(src)
 
-target_compile_definitions(aegix-engine PUBLIC
+target_compile_definitions(aegis-engine PUBLIC
     PROJECT_DIR="${CMAKE_SOURCE_DIR}"
     BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}"
 )

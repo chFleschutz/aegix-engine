@@ -1,6 +1,6 @@
 #include "option_manager.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	void OptionManager::update(float deltaSeconds)
 	{

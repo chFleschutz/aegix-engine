@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	"movement/dynamic_movement_controller.cpp"
 	"movement/dynamic_movement_controller.h"
 	"movement/kinematic_movement_controller.cpp"

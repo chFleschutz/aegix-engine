@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace Aegix
+namespace Aegis
 {
 	class Timer
 	{

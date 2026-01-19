@@ -5,7 +5,7 @@
 
 #include <sstream>
 
-namespace Aegix
+namespace Aegis
 {
 	glm::vec4 Color::random()
 	{

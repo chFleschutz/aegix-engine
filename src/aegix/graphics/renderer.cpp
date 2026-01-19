@@ -19,7 +19,7 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "scene/scene.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	Renderer::Renderer(Core::Window& window) :
 		m_window{ window },

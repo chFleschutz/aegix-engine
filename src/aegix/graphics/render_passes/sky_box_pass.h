@@ -5,7 +5,7 @@
 #include "graphics/pipeline.h"
 #include "scene/components.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct SkyBoxUniforms
 	{

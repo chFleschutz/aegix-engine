@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 #ifdef NDEBUG
 	constexpr bool ENABLE_VALIDATION = false;

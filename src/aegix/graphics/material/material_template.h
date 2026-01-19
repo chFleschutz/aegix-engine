@@ -9,7 +9,7 @@
 
 #include <variant>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	enum class MaterialType
 	{

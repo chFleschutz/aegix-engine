@@ -6,7 +6,7 @@
 #include "scene/entity.h"
 #include "scripting/script_base.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
     class TestAIComponent : public AIComponent
     {

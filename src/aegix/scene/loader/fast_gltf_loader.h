@@ -10,7 +10,7 @@
 #include <fastgltf/tools.hpp>
 #include <fastgltf/types.hpp>
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class FastGLTFLoader
 	{

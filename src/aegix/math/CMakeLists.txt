@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	interpolation.cpp
 	interpolation.h
 	math.cpp

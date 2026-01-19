@@ -4,7 +4,7 @@
 #include "scene/scene.h"
 #include "scripting/script_base.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	Entity::Entity(entt::entity entityHandle, Scene* scene)
 		: m_id(entityHandle), m_scene(scene)

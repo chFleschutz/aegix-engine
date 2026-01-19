@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::File
+namespace Aegis::File
 {
 	/// @brief Reads a binary file and returns the contents as a vector of chars
 	/// @param filePath Path to the file to read

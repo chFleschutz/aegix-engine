@@ -7,7 +7,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	PostProcessingPass::PostProcessingPass(FGResourcePool& pool) :
 		m_descriptorSetLayout{ createDescriptorSetLayout() },

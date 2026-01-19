@@ -3,7 +3,7 @@
 #include "graphics/bindless/descriptor_handle.h"
 #include "graphics/resources/buffer.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @brief Encapsulates a buffer with a single descriptor handle
 	class BindlessBuffer

@@ -6,7 +6,7 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	// DescriptorSetLayout Builder -----------------------------------------------------
 

@@ -2,7 +2,7 @@
 
 #include <random>
 
-namespace Aegix
+namespace Aegis
 {
 	class Random
 	{

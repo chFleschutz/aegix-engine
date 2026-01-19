@@ -2,7 +2,7 @@
 
 #include <concepts>
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class Scene;
 

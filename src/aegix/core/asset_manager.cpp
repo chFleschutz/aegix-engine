@@ -8,11 +8,11 @@
 #include "graphics/material/material_template.h"
 #include "engine.h"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	void AssetManager::loadDefaultAssets()
 	{
-		using namespace Aegix::Graphics;
+		using namespace Aegis::Graphics;
 
 		// Default Textures
 

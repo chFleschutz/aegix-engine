@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	static auto allocateBindlessHandle(const Buffer& buffer) -> DescriptorHandle
 	{

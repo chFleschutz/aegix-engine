@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-namespace Aegix::File
+namespace Aegis::File
 {
 	std::vector<char> readBinary(const std::filesystem::path& filePath)
 	{

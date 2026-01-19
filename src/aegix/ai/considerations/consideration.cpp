@@ -6,7 +6,7 @@
 #include <cassert>
 
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	BoolConsideration::BoolConsideration(Blackboard& blackboard, std::string key)
 		: Consideration(blackboard), 
@@ -51,8 +51,8 @@ namespace Aegix::AI
 		auto entityB = m_blackboard.get<EntityKnowledge>(m_entityKeyB);
 		assert(entityA && entityB && "Entity key does not exist in blackboard");
 
-		auto& positionA = entityA->entity.getComponent<Aegix::Component::Transform>().location;
-		auto& positionB = entityB->entity.getComponent<Aegix::Component::Transform>().location;
+		auto& positionA = entityA->entity.getComponent<Aegis::Component::Transform>().location;
+		auto& positionB = entityB->entity.getComponent<Aegis::Component::Transform>().location;
 		return glm::distance(positionA, positionB) < m_distance;
 	}
 }

@@ -4,7 +4,7 @@
 #include "math/math.h"
 #include "scripting/script_base.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class KinematcMovementController : public ScriptBase
 	{

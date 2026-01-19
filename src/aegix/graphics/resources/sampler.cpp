@@ -4,7 +4,7 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	Sampler::Sampler(const CreateInfo& config, uint32_t mipLevels)
 	{

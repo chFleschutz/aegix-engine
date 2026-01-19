@@ -2,7 +2,7 @@
 
 #include "ai/options/steering_behaviour/steering_behaviour.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviourFlee : public SteeringBehaviour
 	{
@@ -15,16 +15,16 @@ namespace Aegix::AI
 			m_target = target;
 		}
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
 			if (!m_target.has_value())
-				return Aegix::Physics::Force{};
+				return Aegis::Physics::Force{};
 
-			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
-			auto& playerTransform = m_target.value().entity.getComponent<Aegix::Component::Transform>();
+			auto& transform = m_aiComponent->getComponent<Aegis::Component::Transform>();
+			auto& playerTransform = m_target.value().entity.getComponent<Aegis::Component::Transform>();
 
-			Aegix::Physics::Force force{};
-			force.linear = Aegix::MathLib::normalize(transform.location - playerTransform.location) * m_limits.maxLinearForce;
+			Aegis::Physics::Force force{};
+			force.linear = Aegis::MathLib::normalize(transform.location - playerTransform.location) * m_limits.maxLinearForce;
 			return force;
 		}
 

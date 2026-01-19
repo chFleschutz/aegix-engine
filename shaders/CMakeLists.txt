@@ -95,4 +95,4 @@ foreach(SLANG ${SLANG_SOURCES})
 endforeach()
 
 add_custom_target(compile_shaders DEPENDS ${SPIRV_FILES})
-add_dependencies(aegix-engine compile_shaders)
+add_dependencies(aegis-engine compile_shaders)

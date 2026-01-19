@@ -2,7 +2,7 @@
 
 #include "graphics/frame_graph/frame_graph_resources.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class FGRenderPass;
 

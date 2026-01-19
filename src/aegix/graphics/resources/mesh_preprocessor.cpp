@@ -3,7 +3,7 @@
 
 #include <meshoptimizer.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto MeshPreprocessor::process(Input& input) -> StaticMesh::CreateInfo
 	{

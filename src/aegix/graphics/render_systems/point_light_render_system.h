@@ -3,7 +3,7 @@
 #include "graphics/render_systems/render_system.h"
 #include "graphics/pipeline.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class PointLightRenderSystem : public RenderSystem
 	{

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "interpolation.h"
 
-namespace Aegix::Math
+namespace Aegis::Math
 {
 	auto sigmoid01(float x) -> float
 	{

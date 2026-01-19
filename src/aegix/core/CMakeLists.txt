@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	"asset.h" 
 	"asset_manager.h" 
 	"asset_manager.cpp" 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "math.h"
 
-namespace Aegix::Math
+namespace Aegis::Math
 {
 	auto forward(const glm::vec3& rotation) -> glm::vec3
 	{

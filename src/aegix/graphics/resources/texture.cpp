@@ -10,7 +10,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto Texture::CreateInfo::texture2D(uint32_t width, uint32_t height, VkFormat format) -> CreateInfo
 	{

@@ -2,7 +2,7 @@
 
 #include "scene/system.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class TransformSystem : public System
 	{

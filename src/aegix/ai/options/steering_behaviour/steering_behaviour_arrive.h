@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class SteeringBehaviourArrive : public SteeringBehaviour
 	{
@@ -19,14 +19,14 @@ namespace Aegix::AI
 
 		void setTarget(const EntityKnowledge& target) { m_target = target; }
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
 			if (!m_target.has_value())
-				return Aegix::Physics::Force{};
+				return Aegis::Physics::Force{};
 
-			auto& transform = m_aiComponent->getComponent<Aegix::Component::Transform>();
-			auto& playerTransform = m_target.value().entity.getComponent<Aegix::Component::Transform>();
-			auto& dynamics = m_aiComponent->getComponent<Aegix::Physics::MotionDynamics>();
+			auto& transform = m_aiComponent->getComponent<Aegis::Component::Transform>();
+			auto& playerTransform = m_target.value().entity.getComponent<Aegis::Component::Transform>();
+			auto& dynamics = m_aiComponent->getComponent<Aegis::Physics::MotionDynamics>();
 
 			const auto playerDirection = playerTransform.location - transform.location;
 			const auto distance = glm::length(playerDirection);
@@ -36,7 +36,7 @@ namespace Aegix::AI
 			{
 				dynamics.haltMotion();
 				stop();
-				return Aegix::Physics::Force{};
+				return Aegis::Physics::Force{};
 			}
 
 			const auto maxSpeed = dynamics.properties().maxLinearSpeed;
@@ -48,9 +48,9 @@ namespace Aegix::AI
 				desiredSpeed *= distance / brakeDistance;
 
 			// Compute force
-			Aegix::Physics::Force force{};
-			const auto desiredVelocity = Aegix::MathLib::normalize(playerDirection) * desiredSpeed;
-			force.linear = Aegix::MathLib::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
+			Aegis::Physics::Force force{};
+			const auto desiredVelocity = Aegis::MathLib::normalize(playerDirection) * desiredSpeed;
+			force.linear = Aegis::MathLib::normalize(desiredVelocity - dynamics.linearVelocity()) * m_limits.maxLinearForce;
 
 			return force;
 		}

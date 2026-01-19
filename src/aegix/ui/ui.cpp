@@ -12,7 +12,7 @@
 
 #include <ImGuizmo.h>
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	UI::UI(Graphics::Renderer& renderer, Core::LayerStack& layerStack)
 		: m_layerStack{ layerStack }

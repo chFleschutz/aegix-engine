@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::UI 
+namespace Aegis::UI 
 {
 	class RendererPanel
 	{

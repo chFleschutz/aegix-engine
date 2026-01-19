@@ -7,12 +7,12 @@
 
 #include <entt/entt.hpp>
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class ScriptBase;
 }
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	/// @brief Scene contains all entities and systems
 	class Scene

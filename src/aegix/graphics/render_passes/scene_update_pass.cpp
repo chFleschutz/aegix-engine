@@ -8,7 +8,7 @@
 
 #include <glm/gtx/matrix_major_storage.hpp>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	SceneUpdatePass::SceneUpdatePass(FGResourcePool& pool)
 	{

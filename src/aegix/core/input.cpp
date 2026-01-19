@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "input.h"
 
-namespace Aegix
+namespace Aegis
 {
 	Input* Input::s_instance = nullptr;
 

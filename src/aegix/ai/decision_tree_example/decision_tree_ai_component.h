@@ -3,7 +3,7 @@
 #include "ai/ai_component.h"
 #include "ai/decision_tree_example/my_decision_tree.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
     class DecisionTreeAiComponent : public AIComponent
     {

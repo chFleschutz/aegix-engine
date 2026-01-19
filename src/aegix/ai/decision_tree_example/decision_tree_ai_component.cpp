@@ -5,13 +5,13 @@
 #include "core/input.h"
 
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
     DecisionTreeAiComponent::DecisionTreeAiComponent(Blackboard& blackboard)
         : AIComponent(blackboard), m_decisionTree(blackboard)
     {
-        auto& input = Aegix::Input::instance();
-        input.bind(this, &DecisionTreeAiComponent::toggleWar, Aegix::Input::One);
+        auto& input = Aegis::Input::instance();
+        input.bind(this, &DecisionTreeAiComponent::toggleWar, Aegis::Input::One);
     }
 
     void DecisionTreeAiComponent::evalutate()

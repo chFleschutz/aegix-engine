@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::Utils 
+namespace Aegis::Utils 
 {
 	// from: https://stackoverflow.com/a/57595105
 	template <typename T, typename... Rest>

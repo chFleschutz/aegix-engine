@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "random.h"
 
-namespace Aegix
+namespace Aegis
 {
 	auto Random::uniformFloat(float min, float max) -> float
 	{

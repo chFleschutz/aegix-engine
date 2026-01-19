@@ -2,7 +2,7 @@
 
 #include "graphics/resources/static_mesh.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class MeshPreprocessor
 	{

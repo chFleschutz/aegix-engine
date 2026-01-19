@@ -9,7 +9,7 @@
 #include "scene/scene.h"
 #include "vulkan/vulkan_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class Renderer
 	{

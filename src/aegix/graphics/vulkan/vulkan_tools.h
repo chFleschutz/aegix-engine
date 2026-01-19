@@ -10,7 +10,7 @@
 	AGX_ASSERT_X(vkResult == VK_SUCCESS, "Vulkan Error: '" #f "'"); \
 }
 
-namespace Aegix::Tools
+namespace Aegis::Tools
 {
 	/// @brief Returns the result as a string
 	std::string_view resultString(VkResult result);

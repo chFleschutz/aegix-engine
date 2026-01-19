@@ -8,7 +8,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	LightingPass::LightingPass(FGResourcePool& pool) :
 		m_ubo{ Buffer::uniformBuffer(sizeof(LightingUniforms)) },

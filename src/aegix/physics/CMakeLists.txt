@@ -1,4 +1,4 @@
-target_sources(aegix-engine PRIVATE
+target_sources(aegis-engine PRIVATE
 	"motion_dynamics.cpp"
 	"motion_dynamics.h"
 )

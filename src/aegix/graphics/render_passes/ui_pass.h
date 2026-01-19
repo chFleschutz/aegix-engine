@@ -3,7 +3,7 @@
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/vulkan/vulkan_tools.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class UIPass : public FGRenderPass
 	{

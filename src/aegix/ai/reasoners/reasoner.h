@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class Reasoner
 	{

@@ -4,9 +4,9 @@
 
 #define ENGINE_DIR PROJECT_DIR "/"
 #define SHADER_DIR BUILD_DIR "/shaders/"
-#define ASSETS_DIR ENGINE_DIR "modules/aegix-assets/"
+#define ASSETS_DIR ENGINE_DIR "modules/aegis-assets/"
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	constexpr uint32_t DEFAULT_WIDTH{ 1920 };
 	constexpr uint32_t DEFAULT_HEIGHT{ 1080 };

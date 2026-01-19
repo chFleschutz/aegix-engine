@@ -4,7 +4,7 @@
 #include "graphics/material/material_instance.h"
 #include "scene/components.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	StaticMeshRenderSystem::StaticMeshRenderSystem(MaterialType type)
 		: m_type(type)

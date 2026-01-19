@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Aegix
+namespace Aegis
 {
 	template<typename T>
 	struct ComponentTraits

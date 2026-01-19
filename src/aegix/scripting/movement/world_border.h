@@ -3,7 +3,7 @@
 #include "scripting/script_base.h"
 #include "utils/math_utils.h"
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	/// @brief Limits the locaton of the entity to the given limits.
 	/// @note Only clamps the location, the velocity is not affected.
@@ -18,7 +18,7 @@ namespace Aegix::Scripting
 
 		virtual void update(float delta) override
 		{
-			auto& location = getComponent<Aegix::Component::Transform>().location;
+			auto& location = getComponent<Aegis::Component::Transform>().location;
 			location.x = std::clamp(location.x, -m_limits.x, m_limits.x);
 			location.y = std::clamp(location.y, -m_limits.y, m_limits.y);
 			location.z = std::clamp(location.z, -m_limits.z, m_limits.z);

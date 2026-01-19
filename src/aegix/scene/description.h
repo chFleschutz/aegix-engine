@@ -2,7 +2,7 @@
 
 #include "scene/scene.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	/// @brief Base class for creating a scene
 	class Description

@@ -3,7 +3,7 @@
 
 #include "graphics/vulkan/vulkan_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	MaterialInstance::MaterialInstance(std::shared_ptr<MaterialTemplate> materialTemplate) : 
 		m_template(std::move(materialTemplate)), 

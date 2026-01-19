@@ -5,7 +5,7 @@
 #include "graphics/material/material_template.h"
 #include "graphics/bindless/bindless_buffer.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class MaterialInstance : public Core::Asset
 	{

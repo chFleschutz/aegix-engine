@@ -4,7 +4,7 @@
 
 #include <vk_mem_alloc.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct FGHandle
 	{

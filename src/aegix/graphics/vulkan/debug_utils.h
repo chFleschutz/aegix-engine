@@ -5,7 +5,7 @@
 
 #include <string_view>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class DebugUtilsMessenger
 	{

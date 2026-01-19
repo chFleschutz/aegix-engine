@@ -5,7 +5,7 @@
 #include "graphics/frame_info.h"
 #include "graphics/render_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @brief Manages renderpasses and resources for rendering a frame
 	class FrameGraph

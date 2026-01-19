@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace Aegix::Core
+namespace Aegis::Core
 {
 	class Window
 	{

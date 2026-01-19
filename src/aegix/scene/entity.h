@@ -4,7 +4,7 @@
 
 #include <entt/entt.hpp>
 
-namespace Aegix::Scripting
+namespace Aegis::Scripting
 {
 	class ScriptBase;
 
@@ -12,7 +12,7 @@ namespace Aegix::Scripting
 	concept Script = std::is_base_of_v<ScriptBase, T>;
 }
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	class Scene;
 
@@ -73,7 +73,7 @@ namespace Aegix::Scene
 			registry().emplace<T>(m_id);
 		}
 
-		/// @brief Overload to add a script derived from Aegix::Scripting::ScriptBase to the entity
+		/// @brief Overload to add a script derived from Aegis::Scripting::ScriptBase to the entity
 		/// @return A refrence to the new script
 		template<Scripting::Script T, typename... Args>
 		auto add(Args&&... args) -> T&

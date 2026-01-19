@@ -1,2 +1,2 @@
 
-add_subdirectory(aegix)
+add_subdirectory(aegis)

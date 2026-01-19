@@ -11,7 +11,7 @@
 
 #include <ImGuizmo.h>
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	void ScenePanel::draw()
 	{

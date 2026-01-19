@@ -4,7 +4,7 @@
 #include "graphics/render_systems/render_system.h"
 #include "graphics/descriptors.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct TransparentUbo
 	{

@@ -6,7 +6,7 @@
 #include "graphics/resources/buffer.h"
 #include "graphics/resources/texture.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct SSAOUniforms
 	{

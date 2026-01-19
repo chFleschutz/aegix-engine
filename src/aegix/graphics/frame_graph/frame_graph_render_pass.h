@@ -7,7 +7,7 @@
 // Included here to avoid issues in child classes
 #include "scene/entity.h" 
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class FGRenderPass
 	{

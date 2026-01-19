@@ -3,7 +3,7 @@
 #include "scene/components.h"
 #include "math/math.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct Frustum
 	{

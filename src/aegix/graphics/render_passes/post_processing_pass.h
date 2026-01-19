@@ -4,7 +4,7 @@
 #include "graphics/frame_graph/frame_graph_render_pass.h"
 #include "graphics/pipeline.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	enum class ToneMappingMode
 	{

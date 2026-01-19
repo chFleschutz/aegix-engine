@@ -5,7 +5,7 @@
 #include "graphics/vulkan/vulkan_context.h"
 #include "utils/file.h"
 
-namespace Aegix::Tools
+namespace Aegis::Tools
 {
 	std::string_view resultString(VkResult result)
 	{

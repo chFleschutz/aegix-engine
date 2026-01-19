@@ -11,7 +11,7 @@
 
 #include <variant>
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	GLTFLoader::GLTFLoader(Scene& scene, const std::filesystem::path& path)
 	{

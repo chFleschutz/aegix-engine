@@ -8,7 +8,7 @@
 
 #include <imgui.h>
 
-namespace Aegix::UI
+namespace Aegis::UI
 {
 	static auto toTypeString(Graphics::FGResource::Info type) -> const char*
 	{

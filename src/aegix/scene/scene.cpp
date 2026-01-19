@@ -13,7 +13,7 @@
 #include "scene/systems/transform_system.h"
 #include "scripting/movement/kinematic_movement_controller.h"
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	auto Scene::createEntity(const std::string& name, const glm::vec3& location, const glm::quat& rotation,
 		const glm::vec3& scale) -> Entity

@@ -1,15 +1,15 @@
 #pragma once
 
 #ifdef NDEBUG
-#define AEGIX_LOG_DISABLE_DEBUG
-#define AEGIX_LOG_DISABLE_TRACE
+#define AEGIS_LOG_DISABLE_DEBUG
+#define AEGIS_LOG_DISABLE_TRACE
 #endif // NDEBUG
 
-#define AEGIX_LOG_FATAL_NO_ASYNC
-#include <aegix-log/log.h>
-#include <aegix-log/sinks/console_sink.h>
+#define AEGIS_LOG_FATAL_NO_ASYNC
+#include <aegis-log/log.h>
+#include <aegis-log/sinks/console_sink.h>
 
-namespace Aegix
+namespace Aegis
 {
 	class Logging
 	{

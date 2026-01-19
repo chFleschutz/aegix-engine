@@ -2,7 +2,7 @@
 
 #include "math/math.h"
 
-namespace Aegix::Math
+namespace Aegis::Math
 {
 	template <typename T>
 	T lerp(const T& a, const T& b, float t)

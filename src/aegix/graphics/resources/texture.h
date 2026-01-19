@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class Texture : public Core::Asset
 	{

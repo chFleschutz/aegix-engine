@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	/// @brief Combines the cohesion, separation and velocity matching behaviours into the flocking steering behaviour.
 	class SteeringBehaviourFlocking : public SteeringBehaviour
@@ -29,9 +29,9 @@ namespace Aegix::AI
 			m_velocityMatchingWeight = velocityMatching;
 		}
 
-		virtual Aegix::Physics::Force computeForce() override
+		virtual Aegis::Physics::Force computeForce() override
 		{
-			Aegix::Physics::Force force{};
+			Aegis::Physics::Force force{};
 			force += m_cohesion.computeForce() * m_cohesionWeight;
 			force += m_separation.computeForce() * m_separationWeight;
 			force += m_velocityMatching.computeForce() * m_velocityMatchingWeight;

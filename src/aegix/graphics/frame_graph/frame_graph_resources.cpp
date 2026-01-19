@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "frame_graph_resources.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto FGResource::toAccessInfo(Usage usage) -> AccessInfo
 	{

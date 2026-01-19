@@ -2,7 +2,7 @@
 
 #include "graphics/vulkan/vulkan_context.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	// DescriptorHandleCache --------------------
 

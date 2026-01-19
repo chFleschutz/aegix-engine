@@ -8,7 +8,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-namespace Aegix::Scene
+namespace Aegis::Scene
 {
 	OBJLoader::OBJLoader(Scene& scene, const std::filesystem::path& path)
 	{

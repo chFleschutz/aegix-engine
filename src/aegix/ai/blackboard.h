@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 	class Blackboard
 	{

@@ -4,7 +4,7 @@
 
 #include "scene/scene.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	struct DrawBatch
 	{

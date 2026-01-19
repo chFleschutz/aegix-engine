@@ -4,7 +4,7 @@
 #include "graphics/descriptors.h"
 #include "graphics/deletion_queue.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	class VulkanContext
 	{

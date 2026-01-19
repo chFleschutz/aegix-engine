@@ -6,7 +6,7 @@
 
 #include <vk_mem_alloc.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	/// @brief Encapsulates a vulkan buffer
 	class Buffer

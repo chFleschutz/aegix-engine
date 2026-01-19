@@ -2,7 +2,7 @@
 
 #include "ai/reasoners/reasoner.h"
 
-namespace Aegix::AI
+namespace Aegis::AI
 {
 
 	class DecisionTreeReasoner : public Reasoner

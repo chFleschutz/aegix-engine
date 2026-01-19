@@ -3,7 +3,7 @@
 
 #include "scene/components.h"
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	auto DrawBatchRegistry::registerDrawBatch(std::shared_ptr<MaterialTemplate> mat) -> const DrawBatch&
 	{

@@ -9,7 +9,7 @@
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include <vk_mem_alloc.h>
 
-namespace Aegix::Graphics
+namespace Aegis::Graphics
 {
 	VulkanDevice::~VulkanDevice()
 	{
@@ -232,9 +232,9 @@ namespace Aegix::Graphics
 
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Aegix App";
+		appInfo.pApplicationName = "Aegis App";
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "Aegix Engine";
+		appInfo.pEngineName = "Aegis Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = API_VERSION;
 
