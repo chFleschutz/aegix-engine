@@ -6,8 +6,8 @@
 #endif // NDEBUG
 
 #define AEGIS_LOG_FATAL_NO_ASYNC
-#include <aegix-log/log.h>
-#include <aegix-log/sinks/console_sink.h>
+#include <aegis-log/log.h>
+#include <aegis-log/sinks/console_sink.h>
 
 namespace Aegis
 {
@@ -23,14 +23,15 @@ namespace Aegis
 		static void logo()
 		{
 			ALOG::info("\n\n\n"
-				"\t\t\t\t      ###  ########  ######   ##  ##     ##\n"
-				"\t\t\t\t     ## ## ##       ##    ##  ##   ##   ## \n"
-				"\t\t\t\t    ##  ## ##       ##        ##    ## ##  \n"
-				"\t\t\t\t   ##   ## ######   ##        ##     ###   \n"
-				"\t\t\t\t  ######## ##       ##  ####  ##    ## ##  \n"
-				"\t\t\t\t ##     ## ##       ##    ##  ##   ##   ## \n"
-				"\t\t\t\t##      ## ########  ######   ##  ##     ##\n"
+				"\t\t\t\t      ###   #######   ######   ####   ###### \n"
+				"\t\t\t\t     ## ##  ##       ##    ##   ##   ##    ##\n"
+				"\t\t\t\t    ##  ##  ##       ##         ##   ##      \n"
+				"\t\t\t\t   ##   ##  ######   ##         ##    ###### \n"
+				"\t\t\t\t  ########  ##       ##  ####   ##         ##\n"
+				"\t\t\t\t ##     ##  ##       ##    ##   ##   ##    ##\n"
+				"\t\t\t\t##      ##  #######   ######   ####   ###### \n"
 				"\n\n");
+
 		}
 	};
 }
