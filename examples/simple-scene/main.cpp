@@ -1,26 +1,26 @@
-#include <aegix/engine.h>
-#include <aegix/math/random.h>
-#include <aegix/scene/description.h>
-#include <aegix/scripting/script_base.h>
+#include <aegis/engine.h>
+#include <aegis/math/random.h>
+#include <aegis/scene/description.h>
+#include <aegis/scripting/script_base.h>
 
 /// @brief Example script to rotate the entity around the up axis
-class Rotator : public Aegix::Scripting::ScriptBase
+class Rotator : public Aegis::Scripting::ScriptBase
 {
 protected:
 	void update(float deltaSeconds) override
 	{
-		auto& transform = get<Aegix::Transform>();
-		transform.rotation *= glm::angleAxis(deltaSeconds, Aegix::Math::World::UP);
+		auto& transform = get<Aegis::Transform>();
+		transform.rotation *= glm::angleAxis(deltaSeconds, Aegis::Math::World::UP);
 	}
 };
 
 /// @brief Simple scene with a teapot, a plane and a bunch of lights
-class SimpleScene : public Aegix::Scene::Description
+class SimpleScene : public Aegis::Scene::Description
 {
 public:
-	void initialize(Aegix::Scene::Scene& scene) override
+	void initialize(Aegis::Scene::Scene& scene) override
 	{
-		using namespace Aegix;
+		using namespace Aegis;
 
 		// MODELS
 		auto teapotMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/teapot.obj");
@@ -70,7 +70,7 @@ public:
 
 auto main() -> int
 {
-	auto& engine = Aegix::Engine::instance();
+	auto& engine = Aegis::Engine::instance();
 	engine.loadScene<SimpleScene>();
 	engine.run();
 }

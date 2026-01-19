@@ -1,11 +1,11 @@
-#include <aegix/engine.h>
-#include <aegix/scene/components.h>
-#include <aegix/scene/description.h>
-#include <aegix/scripting/script_base.h>
+#include <aegis/engine.h>
+#include <aegis/scene/components.h>
+#include <aegis/scene/description.h>
+#include <aegis/scripting/script_base.h>
 
-#include <aegix/math/random.h>
+#include <aegis/math/random.h>
 
-class ColorChanger : public Aegix::Scripting::ScriptBase
+class ColorChanger : public Aegis::Scripting::ScriptBase
 {
 public:
 	void update(float deltaSeconds) override
@@ -19,19 +19,19 @@ public:
 			(sin(time + 4.0f) + 1.0f) / 2.0f
 		};
 
-		auto& material = get<Aegix::Material>().instance;
+		auto& material = get<Aegis::Material>().instance;
 		material->setParameter("albedo", color);
 	}
 };
 
 
 /// @brief Scene with two helmets
-class HelmetScene : public Aegix::Scene::Description
+class HelmetScene : public Aegis::Scene::Description
 {
 public:
-	void initialize(Aegix::Scene::Scene& scene) override
+	void initialize(Aegis::Scene::Scene& scene) override
 	{
-		using namespace Aegix;
+		using namespace Aegis;
 
 		// SKYBOX
 		auto& env = scene.environment().get<Environment>();
@@ -101,7 +101,7 @@ public:
 
 auto main() -> int
 {
-	Aegix::Engine engine;
+	Aegis::Engine engine;
 	engine.loadScene<HelmetScene>();
 	engine.run();
 }

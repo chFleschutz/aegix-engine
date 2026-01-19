@@ -1,13 +1,13 @@
-#include "aegix/engine.h"
-#include "aegix/scene/description.h"
+#include "aegis/engine.h"
+#include "aegis/scene/description.h"
 
-class TemplateScene : public Aegix::Scene::Description
+class TemplateScene : public Aegis::Scene::Description
 {
 public:
 	/// @brief All objects in a scene are created here
-	void initialize(Aegix::Scene::Scene& scene) override
+	void initialize(Aegis::Scene::Scene& scene) override
 	{
-		using namespace Aegix;
+		using namespace Aegis;
 
 		// Create your scene here 
 
@@ -16,7 +16,7 @@ public:
 
 auto main() -> int
 {
-	Aegix::Engine engine;
+	Aegis::Engine engine;
 	engine.loadScene<TemplateScene>();
 	engine.run();
 }
