@@ -2,4 +2,4 @@ project(Sponza)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Aegix::Engine)
+target_link_libraries(${PROJECT_NAME} PRIVATE Aegis::Engine)

@@ -14,8 +14,8 @@ PRIVATE
 
 target_link_libraries(aegis-engine 
 	PUBLIC 
-		Aegis::GLTF
-		Aegis::Log
+		Aegix::GLTF
+		Aegix::Log
 		EnTT::EnTT
 		fastgltf::fastgltf
 		glfw

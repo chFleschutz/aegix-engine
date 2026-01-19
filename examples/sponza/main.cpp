@@ -1,13 +1,13 @@
-#include <aegix/engine.h>
-#include <aegix/scene/description.h>
-#include <aegix/scene/components.h>
+#include <aegis/engine.h>
+#include <aegis/scene/description.h>
+#include <aegis/scene/components.h>
 
-class Sponza : public Aegix::Scene::Description
+class Sponza : public Aegis::Scene::Description
 {
 public:
-	void initialize(Aegix::Scene::Scene& scene) override
+	void initialize(Aegis::Scene::Scene& scene) override
 	{
-		using namespace Aegix;
+		using namespace Aegis;
 
 		// CAMERA
 		scene.mainCamera().get<Transform>() = Transform{
@@ -32,7 +32,7 @@ public:
 
 auto main() -> int
 {
-	auto& engine = Aegix::Engine::instance();
+	auto& engine = Aegis::Engine::instance();
 	engine.loadScene<Sponza>();
 	engine.run();
 }

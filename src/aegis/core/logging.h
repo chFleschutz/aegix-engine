@@ -6,8 +6,8 @@
 #endif // NDEBUG
 
 #define AEGIS_LOG_FATAL_NO_ASYNC
-#include <aegis-log/log.h>
-#include <aegis-log/sinks/console_sink.h>
+#include <aegix-log/log.h>
+#include <aegix-log/sinks/console_sink.h>
 
 namespace Aegis
 {
