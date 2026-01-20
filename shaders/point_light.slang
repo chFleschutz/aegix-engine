@@ -21,9 +21,9 @@ struct FSOut
     [vk::location(0)] float4 color;
 }
 
-struct Push
+struct PushConstants
 {
-    float4 position;
+    float4 worldPosition;
     float4 color;
     float radius;
 }
@@ -34,7 +34,7 @@ struct GlobalUbo
     float4x4 projection;
 }
 
-[vk::push_constant] ConstantBuffer<Push> push;
+[vk::push_constant] PushConstants pc;
 [vk::binding(0)] ConstantBuffer<GlobalUbo> ubo;
 
 // Vertex shader --------------------
@@ -43,10 +43,9 @@ struct GlobalUbo
 func vertexMain(uint vertexID: SV_VertexID, out VSOut output)
 {
     output.fragOffset = OFFSETS[vertexID];
-
-    float4 lightCameraSpace = mul(ubo.view, push.position);
-    float4 positionCameraSpace = lightCameraSpace + float4(output.fragOffset, 0.0, 0.0) * push.radius;
-    output.position = mul(ubo.projection, positionCameraSpace);
+    float4 posOffset = float4(output.fragOffset, 0.0, 0.0) * pc.radius;
+    float4 viewPosition = mul(ubo.view, pc.worldPosition);
+    output.position = mul(ubo.projection, viewPosition + posOffset);
 }
 
 // Fragment shader ------------------
@@ -58,6 +57,6 @@ func fragmentMain(VSOut input, out FSOut output)
     if (offsetDistance > 1.0)
         discard;
 
-    float cosDistance = 0.5 * (cos(offsetDistance * constants::PI) + 1.0);
-    output.color = float4(push.color.xyz + cosDistance, cosDistance);
+    float cosDistance = (cos(offsetDistance * constants::PI) + 1.0) * 0.5;
+    output.color = float4(pc.color.xyz + cosDistance, cosDistance);
 }

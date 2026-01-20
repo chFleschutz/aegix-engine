@@ -141,8 +141,8 @@ namespace Aegis::Graphics
 		if constexpr (!ENABLE_GPU_DRIVEN_RENDERING)
 		{
 			// CPU Driven Rendering Passes
-			auto& geoPass = m_frameGraph.add<GeometryPass>();
-			geoPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
+			m_frameGraph.add<GeometryPass>()
+				.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Opaque);
 		}
 		else
 		{
@@ -152,19 +152,19 @@ namespace Aegis::Graphics
 			m_frameGraph.add<GPUDrivenGeometry>();
 		}
 
-		auto& transparentPass = m_frameGraph.add<TransparentPass>();
-		transparentPass.addRenderSystem<PointLightRenderSystem>();
-		// TODO: Rework transparent rendering with GPU driven approach (need to sort transparents first)
-		// TODO: Alternatively add transparent tag component to avoid iterating all static meshes
-		//transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
-
 		m_frameGraph.add<SkyBoxPass>();
 		m_frameGraph.add<LightingPass>();
 		m_frameGraph.add<PresentPass>(m_swapChain);
 		m_frameGraph.add<UIPass>();
 		m_frameGraph.add<PostProcessingPass>();
 		m_frameGraph.add<BloomPass>();
-		
+
+		m_frameGraph.add<TransparentPass>()
+			.addRenderSystem<PointLightRenderSystem>();
+		// TODO: Rework transparent rendering with GPU driven approach (need to sort transparents first)
+		// TODO: Alternatively add transparent tag component to avoid iterating all static meshes
+		//transparentPass.addRenderSystem<BindlessStaticMeshRenderSystem>(MaterialType::Transparent);
+
 		// Disabled for now (gpu performance heavy + noticable blotches when to close to geometry)
 		// TODO: Optimize or replace with better technique (like HBAO)
 		//m_frameGraph.add<SSAOPass>();

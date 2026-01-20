@@ -4,6 +4,8 @@
 #include "graphics/vulkan/vulkan_tools.h"
 #include "scene/components.h"
 
+#include <glm/gtx/matrix_major_storage.hpp>
+
 namespace Aegis::Graphics
 {
 	TransparentPass::TransparentPass(FGResourcePool& pool) :
@@ -91,8 +93,8 @@ namespace Aegis::Graphics
 		// TODO: Check if these need to be transposed for shaders (row-major layout)
 		auto& camera = mainCamera.get<Camera>();
 		TransparentUbo ubo{
-			.view = camera.viewMatrix,
-			.projection = camera.projectionMatrix
+			.view = glm::rowMajor4(camera.viewMatrix),
+			.projection = glm::rowMajor4(camera.projectionMatrix)
 		};
 
 		m_globalUbo.writeToIndex(&ubo, frameInfo.frameIndex);
