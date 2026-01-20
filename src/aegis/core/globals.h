@@ -13,7 +13,7 @@ namespace Aegis::Core
 
 	constexpr bool ENABLE_FPS_LIMIT{ true };
 	constexpr uint32_t TARGET_FPS{ 144 };
-	constexpr std::chrono::milliseconds TARGET_FRAME_TIME{ 1000 / TARGET_FPS };
+	constexpr double TARGET_FRAME_TIME{ 1000.0 / static_cast<double>(TARGET_FPS) };
 
 	constexpr uint32_t INVALID_HANDLE{ std::numeric_limits<uint32_t>::max() };
 }

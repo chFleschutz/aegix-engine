@@ -53,19 +53,19 @@ namespace Aegis
 		m_renderer.waitIdle();
 	}
 
-	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point lastFrameBegin)
+	void Engine::applyFrameBrake(std::chrono::steady_clock::time_point frameBegin)
 	{
+		using namespace std::chrono;
+
 		AGX_PROFILE_SCOPE("Wait for FPS limit");
 
 		if constexpr (!Core::ENABLE_FPS_LIMIT)
 			return;
 
-		auto now = std::chrono::steady_clock::now();
-		auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastFrameBegin);
-
-		if (frameTime < Core::TARGET_FRAME_TIME)
+		// Note: This has to be a busy wait since sleep_for is not accurate enough (especially on Windows)
+		while (duration<double, std::milli>(steady_clock::now() - frameBegin).count() < Core::TARGET_FRAME_TIME)
 		{
-			std::this_thread::sleep_for(Core::TARGET_FRAME_TIME - frameTime);
+			// busy wait
 		}
 	}
 }
