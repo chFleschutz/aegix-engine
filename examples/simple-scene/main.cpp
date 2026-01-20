@@ -22,16 +22,11 @@ public:
 	{
 		using namespace Aegis;
 
-		// MODELS
-		auto teapotMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/teapot.obj");
-		auto planeMesh = Graphics::StaticMesh::create(ASSETS_DIR "Misc/plane.obj");
-
 		// MATERIALS
-		auto paintingTexture = Graphics::Texture::create(ASSETS_DIR "Misc/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
-		auto metalTexture = Graphics::Texture::create(ASSETS_DIR "Misc/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto paintingTexture = Graphics::Texture::loadFromFile(ASSETS_DIR "Misc/painting.png", VK_FORMAT_R8G8B8A8_SRGB);
+		auto metalTexture = Graphics::Texture::loadFromFile(ASSETS_DIR "Misc/brushed-metal.png", VK_FORMAT_R8G8B8A8_SRGB);
 		
 		auto pbrMatTemplate = Engine::assets().get<Graphics::MaterialTemplate>("default/PBR_template");
-
 		auto paintingMat = Graphics::MaterialInstance::create(pbrMatTemplate);
 		paintingMat->setParameter("albedoMap", paintingTexture);
 
@@ -40,15 +35,13 @@ public:
 		metalMat->setParameter("metallic", 1.0f);
 		
 		// ENTITIES
-		auto floorPlane = scene.createEntity("Floor Plane");
+		auto floorPlane = scene.load(ASSETS_DIR "Misc/plane.obj");
 		floorPlane.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
-		floorPlane.add<Mesh>(planeMesh);
-		floorPlane.add<Material>(paintingMat);
+		floorPlane.get<Material>().instance = paintingMat;
 
-		auto teapot = scene.createEntity("Teapot");
+		auto teapot = scene.load(ASSETS_DIR "Misc/teapot.obj");
 		teapot.get<Transform>().scale = glm::vec3{ 2.0f, 2.0f, 2.0f };
-		teapot.add<Mesh>(teapotMesh);
-		teapot.add<Material>(metalMat);
+		teapot.get<Material>().instance = metalMat;
 		teapot.add<Rotator>();
 
 		// LIGHTS
@@ -70,7 +63,7 @@ public:
 
 auto main() -> int
 {
-	auto& engine = Aegis::Engine::instance();
+	Aegis::Engine engine;
 	engine.loadScene<SimpleScene>();
 	engine.run();
 }
