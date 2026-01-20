@@ -28,10 +28,10 @@ namespace Aegis::UI
 
 			const ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_BordersOuterH;
 			const ImVec2 outer_size = ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 10);
-			if (ImGui::BeginTable("Frame Times", 3, flags, outer_size))
+			if (ImGui::BeginTable("CPU Times", 3, flags, outer_size))
 			{
 				ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
-				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("CPU Time", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableSetupColumn("Time (ms)", ImGuiTableColumnFlags_WidthFixed);
 				ImGui::TableSetupColumn("Frame Percent (%)", ImGuiTableColumnFlags_WidthFixed);
 				ImGui::TableHeadersRow();
@@ -47,6 +47,29 @@ namespace Aegis::UI
 					ImGui::Text("%7.2f", rolling.average() / frameTime * 100.0);
 				}
 
+				ImGui::EndTable();
+			}
+
+			ImGui::Spacing();
+
+			if (ImGui::BeginTable("GPU Times", 3, flags, outer_size))
+			{
+				ImGui::TableSetupScrollFreeze(0, 1); // Make top row always visible
+				ImGui::TableSetupColumn("GPU Time", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Time (ms)", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Frame Percent (%)", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableHeadersRow();
+
+				for (const auto& timing : Graphics::GPUTimerManager::instance().timings())
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("%s", timing.name.c_str());
+					ImGui::TableSetColumnIndex(1);
+					ImGui::Text("%7.3f", timing.timeMs);
+					ImGui::TableSetColumnIndex(2);
+					ImGui::Text("%7.2f", timing.timeMs / frameTime * 100.0);
+				}
 				ImGui::EndTable();
 			}
 

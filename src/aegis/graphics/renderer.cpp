@@ -6,10 +6,10 @@
 #include "graphics/render_passes/culling_pass.h"
 #include "graphics/render_passes/geometry_pass.h"
 #include "graphics/render_passes/gpu_driven_geometry.h"
-#include "graphics/render_passes/scene_update_pass.h"
 #include "graphics/render_passes/lighting_pass.h"
 #include "graphics/render_passes/post_processing_pass.h"
 #include "graphics/render_passes/present_pass.h"
+#include "graphics/render_passes/scene_update_pass.h"
 #include "graphics/render_passes/sky_box_pass.h"
 #include "graphics/render_passes/ssao_pass.h"
 #include "graphics/render_passes/transparent_pass.h"
@@ -82,6 +82,8 @@ namespace Aegis::Graphics
 				.swapChainExtent = m_swapChain.extent(),
 				.aspectRatio = m_swapChain.aspectRatio()
 			};
+
+			AGX_GPU_PROFILE_FUNCTION(frameInfo.cmd);
 
 			m_frameGraph.execute(frameInfo);
 		}
@@ -192,9 +194,10 @@ namespace Aegis::Graphics
 
 		VK_CHECK(vkResetCommandBuffer(frame.commandBuffer, 0));
 		VK_CHECK(vkBeginCommandBuffer(frame.commandBuffer, &beginInfo));
+		AGX_ASSERT_X(frame.commandBuffer != VK_NULL_HANDLE, "Failed to begin command buffer");
 		m_isFrameStarted = true;
 
-		AGX_ASSERT_X(frame.commandBuffer != VK_NULL_HANDLE, "Failed to begin command buffer");
+		m_gpuTimerManager.resolveTimings(frame.commandBuffer, m_currentFrameIndex);
 	}
 
 	void Renderer::endFrame()

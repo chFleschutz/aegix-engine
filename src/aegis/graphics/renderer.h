@@ -5,6 +5,7 @@
 #include "graphics/bindless/bindless_descriptor_set.h"
 #include "graphics/frame_graph/frame_graph.h"
 #include "graphics/globals.h"
+#include "graphics/gpu_timer.h"
 #include "graphics/swap_chain.h"
 #include "scene/scene.h"
 #include "vulkan/vulkan_context.h"
@@ -72,5 +73,7 @@ namespace Aegis::Graphics
 		BindlessDescriptorSet m_bindlessDescriptorSet;
 		DrawBatchRegistry m_drawBatchRegistry;
 		FrameGraph m_frameGraph;
+
+		GPUTimerManager m_gpuTimerManager;
 	};
 }

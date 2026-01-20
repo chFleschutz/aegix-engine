@@ -83,6 +83,7 @@ target_sources(aegis-engine PRIVATE
 	"frame_info.h"
 	"frustum.h"
 	"globals.h"
+	"gpu_timer.h"
 	"pipeline.cpp"
 	"pipeline.h"
 	"renderer.cpp"
